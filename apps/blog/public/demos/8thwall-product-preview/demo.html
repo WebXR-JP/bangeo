@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<title>商品プレビュー AR Demo — 8th Wall OSS</title>
+
+	<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+	<script src="../xr-standalone/xrextras.js"></script>
+	<script async src="../xr-standalone/xr.js"></script>
+
+	<style>
+		* { margin: 0; padding: 0; box-sizing: border-box; }
+		body { overflow: hidden; font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; background: #000; }
+
+		#overlay {
+			position: absolute; top: 0; left: 0; width: 100%; z-index: 50;
+			pointer-events: none;
+		}
+		.header {
+			display: flex; justify-content: space-between; align-items: center;
+			padding: 12px 16px;
+			background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);
+		}
+		.header-title { color: #fff; font-size: 14px; font-weight: 700; }
+		.header-badge {
+			font-size: 10px; font-weight: 600; padding: 4px 10px;
+			border-radius: 999px; background: rgba(74,222,128,0.2); color: #4ade80;
+		}
+
+		#product-ui {
+			position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%);
+			z-index: 60; pointer-events: auto;
+			display: flex; gap: 8px;
+		}
+		.color-btn {
+			width: 36px; height: 36px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.3);
+			cursor: pointer; transition: border-color 0.2s;
+		}
+		.color-btn.active { border-color: #fff; }
+
+		#price-tag {
+			position: absolute; top: 70px; right: 16px; z-index: 60;
+			background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+			border: 1px solid rgba(255,255,255,0.15); border-radius: 16px;
+			padding: 12px 16px; color: #fff; pointer-events: none;
+		}
+		#price-tag .label { font-size: 10px; color: #aaa; margin-bottom: 4px; }
+		#price-tag .price { font-size: 20px; font-weight: 700; }
+
+		#hint {
+			position: absolute; bottom: 140px; left: 50%; transform: translateX(-50%);
+			z-index: 60; color: rgba(255,255,255,0.7); font-size: 11px;
+			text-align: center; pointer-events: none;
+			animation: fadeInOut 4s ease-in-out infinite;
+		}
+		@keyframes fadeInOut {
+			0%, 100% { opacity: 0.4; } 50% { opacity: 1; }
+		}
+
+		.back-link {
+			position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+			pointer-events: auto; background: rgba(255,255,255,0.1);
+			border: 1px solid rgba(255,255,255,0.2); color: #fff;
+			padding: 10px 24px; border-radius: 999px; font-size: 11px;
+			font-weight: 700; text-decoration: none; backdrop-filter: blur(8px);
+			z-index: 100;
+		}
+		.back-link:hover { background: rgba(255,255,255,0.2); }
+
+		#error-overlay {
+			display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+			background: rgba(0,0,0,0.9); z-index: 200;
+			justify-content: center; align-items: center; text-align: center; color: #fff;
+			padding: 32px;
+		}
+		#error-overlay h2 { font-size: 20px; margin-bottom: 16px; }
+		#error-overlay p { font-size: 14px; color: #aaa; line-height: 1.8; }
+		#error-overlay a { color: #e11d48; }
+	</style>
+</head>
+<body>
+	<a-scene
+		xrweb="disableWorldTracking: true; allowedDevices: any"
+		xrextras-gesture-detector
+		xrextras-loading
+		xrextras-runtime-error
+		renderer="colorManagement: true"
+		vr-mode-ui="enabled: false"
+		device-orientation-permission-ui="enabled: false">
+
+		<a-camera position="0 2 4"></a-camera>
+
+		<a-entity
+			id="product-group"
+			position="0 0.6 0"
+			xrextras-one-finger-rotate
+			xrextras-pinch-scale>
+
+			<!-- スニーカー風の商品モデル（プリミティブで構成） -->
+			<!-- ソール -->
+			<a-box id="sole" position="0 0 0" scale="0.6 0.08 0.25"
+				material="color: #222; roughness: 0.9"></a-box>
+			<!-- アッパー -->
+			<a-box id="upper" position="0 0.12 -0.02" scale="0.55 0.16 0.22"
+				material="color: #4CC3D9; metalness: 0.1; roughness: 0.6"></a-box>
+			<!-- トゥ -->
+			<a-sphere id="toe" position="0.25 0.08 0" radius="0.12"
+				scale="1 0.7 0.9"
+				material="color: #4CC3D9; metalness: 0.1; roughness: 0.6"></a-sphere>
+			<!-- タン -->
+			<a-box id="tongue" position="-0.1 0.22 0" scale="0.2 0.12 0.16"
+				rotation="0 0 -15"
+				material="color: #3AA8B8; roughness: 0.7"></a-box>
+			<!-- ソールライン -->
+			<a-box position="0 0.04 0" scale="0.62 0.02 0.26"
+				material="color: #fff; roughness: 0.3"></a-box>
+			<!-- ロゴ（サイド） -->
+			<a-plane position="0 0.14 0.115" scale="0.2 0.08 1"
+				material="color: #fff; opacity: 0.8; transparent: true"></a-plane>
+		</a-entity>
+
+		<!-- 半透明の台座 -->
+		<a-cylinder position="0 0.02 0" radius="0.5" height="0.04"
+			material="color: #333; opacity: 0.4; transparent: true; metalness: 0.8"
+			shadow="receive: true"></a-cylinder>
+
+		<a-light type="ambient" color="#888"></a-light>
+		<a-light type="directional" position="3 5 4" intensity="1.2" castShadow="true"></a-light>
+		<a-light type="point" position="-2 3 2" intensity="0.5" color="#fff"></a-light>
+	</a-scene>
+
+	<!-- UI -->
+	<div id="overlay">
+		<div class="header">
+			<span class="header-title">商品プレビュー AR</span>
+			<span class="header-badge">OSS版</span>
+		</div>
+	</div>
+
+	<div id="price-tag">
+		<div class="label">SAMPLE PRODUCT</div>
+		<div class="price">¥12,800</div>
+	</div>
+
+	<div id="hint">指1本で回転 ・ ピンチで拡大縮小</div>
+
+	<div id="product-ui">
+		<div class="color-btn active" style="background: #4CC3D9" onclick="changeColor('#4CC3D9')"></div>
+		<div class="color-btn" style="background: #EF2D5E" onclick="changeColor('#EF2D5E')"></div>
+		<div class="color-btn" style="background: #FFC65D" onclick="changeColor('#FFC65D')"></div>
+		<div class="color-btn" style="background: #222" onclick="changeColor('#222')"></div>
+	</div>
+
+	<a href="/tech-articles/8thwall-world-effects" class="back-link">← 関連記事に戻る</a>
+
+	<!-- Error fallback -->
+	<div id="error-overlay">
+		<div>
+			<h2>8th Wall エンジンを読み込めませんでした</h2>
+			<p>
+				<a href="https://github.com/8thwall/8thwall" target="_blank">8thwall/8thwall</a>
+				からソースをビルドするか、
+				<a href="https://github.com/8thwall/engine" target="_blank">8thwall/engine</a>
+				から xr-standalone.zip をダウンロードしてください。
+			</p>
+		</div>
+	</div>
+
+	<script>
+		function changeColor(color) {
+			document.getElementById("upper").setAttribute("material", "color", color);
+			document.getElementById("toe").setAttribute("material", "color", color);
+			document.getElementById("tongue").setAttribute("material", "color",
+				color === "#222" ? "#333" : color);
+			document.querySelectorAll(".color-btn").forEach(btn => {
+				btn.classList.toggle("active", btn.style.background === color);
+			});
+		}
+
+		let engineLoaded = false;
+		const checkEngine = () => {
+			if (window.XR8 && typeof window.XR8.run === "function") engineLoaded = true;
+		};
+		window.addEventListener("xrloaded", checkEngine);
+		setTimeout(() => {
+			checkEngine();
+			if (!engineLoaded) document.getElementById("error-overlay").style.display = "flex";
+		}, 8000);
+	</script>
+</body>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Persistent Anchors</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #222; font-family: sans-serif; }
+        #info {
+            position: absolute; top: 10px; width: 100%; text-align: center; color: white;
+            pointer-events: none; z-index: 100; text-shadow: 0 1px 2px black;
+        }
+        #info a { color: #f4a83a; pointer-events: auto; }
+        .desc { font-size: 0.8em; opacity: 0.8; margin-top: 4px; padding: 0 10px; }
+        #anchorCount { font-size: 0.9em; margin-top: 6px; color: #aaffaa; }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h3>Persistent Anchors</h3>
+        <div class="desc">XRAnchorをセッション間で永続化し、復元するデモ。黄色=復元済み、緑=新規。</div>
+        <div id="anchorCount">Anchors: 0 (new: 0, restored: 0)</div>
+        <div style="margin-top: 10px;">
+            <a href="/">Back to Demos</a>
+        </div>
+    </div>
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+        import { ARButton } from 'https://unpkg.com/three@0.160.0/examples/jsm/webxr/ARButton.js';
+
+        let camera, scene, renderer;
+        let controller;
+        let reticle;
+        let hitTestSource = null;
+        let hitTestSourceRequested = false;
+
+        const STORAGE_KEY = 'persistent-anchors-uuids';
+        const anchorMeshes = new Map(); // anchor -> mesh
+        let newCount = 0;
+        let restoredCount = 0;
+
+        init();
+
+        function init() {
+            const container = document.createElement('div');
+            document.body.appendChild(container);
+
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
+
+            const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 3);
+            light.position.set(0.5, 1, 0.25);
+            scene.add(light);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.xr.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            document.body.appendChild(ARButton.createButton(renderer, {
+                requiredFeatures: ['anchors', 'hit-test']
+            }));
+
+            controller = renderer.xr.getController(0);
+            controller.addEventListener('select', onSelect);
+            scene.add(controller);
+
+            reticle = new THREE.Mesh(
+                new THREE.RingGeometry(0.15, 0.2, 32).rotateX(-Math.PI / 2),
+                new THREE.MeshBasicMaterial()
+            );
+            reticle.matrixAutoUpdate = false;
+            reticle.visible = false;
+            scene.add(reticle);
+
+            // Try to restore anchors on session start
+            renderer.xr.addEventListener('sessionstart', onSessionStart);
+            renderer.xr.addEventListener('sessionend', () => {
+                hitTestSourceRequested = false;
+                hitTestSource = null;
+            });
+
+            window.addEventListener('resize', onWindowResize);
+            renderer.setAnimationLoop(render);
+        }
+
+        function getSavedUUIDs() {
+            try {
+                return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            } catch { return []; }
+        }
+
+        function saveUUID(uuid) {
+            const uuids = getSavedUUIDs();
+            if (!uuids.includes(uuid)) {
+                uuids.push(uuid);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(uuids));
+            }
+        }
+
+        async function onSessionStart() {
+            const session = renderer.xr.getSession();
+            const uuids = getSavedUUIDs();
+
+            for (const uuid of uuids) {
+                try {
+                    if (session.restoreAnchor) {
+                        const anchor = await session.restoreAnchor(uuid);
+                        if (anchor) {
+                            createAnchorMesh(anchor, true);
+                            restoredCount++;
+                            updateInfo();
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Failed to restore anchor:', uuid, e);
+                }
+            }
+        }
+
+        function createAnchorMesh(anchor, isRestored) {
+            const color = isRestored ? 0xffdd44 : 0x44ff44;
+            const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1).translate(0, 0.05, 0);
+            const material = new THREE.MeshPhongMaterial({ color });
+            const mesh = new THREE.Mesh(geometry, material);
+            scene.add(mesh);
+            anchorMeshes.set(anchor, mesh);
+        }
+
+        function updateInfo() {
+            document.getElementById('anchorCount').textContent =
+                `Anchors: ${newCount + restoredCount} (new: ${newCount}, restored: ${restoredCount})`;
+        }
+
+        async function onSelect() {
+            if (!reticle.visible) return;
+
+            const session = renderer.xr.getSession();
+            const referenceSpace = renderer.xr.getReferenceSpace();
+
+            try {
+                // Get hit pose from reticle matrix
+                const pos = new THREE.Vector3();
+                const quat = new THREE.Quaternion();
+                const scale = new THREE.Vector3();
+                reticle.matrix.decompose(pos, quat, scale);
+
+                const rigidTransform = new XRRigidTransform(
+                    { x: pos.x, y: pos.y, z: pos.z, w: 1 },
+                    { x: quat.x, y: quat.y, z: quat.z, w: quat.w }
+                );
+
+                // Create anchor from hit test result or frame
+                const frame = renderer.xr.getFrame();
+                if (frame && frame.createAnchor) {
+                    const anchor = await frame.createAnchor(rigidTransform, referenceSpace);
+                    if (anchor) {
+                        createAnchorMesh(anchor, false);
+                        newCount++;
+                        updateInfo();
+
+                        // Save persistent UUID if available
+                        if (anchor.requestPersistentHandle) {
+                            try {
+                                const uuid = await anchor.requestPersistentHandle();
+                                saveUUID(uuid);
+                            } catch (e) {
+                                console.warn('Could not persist anchor:', e);
+                            }
+                        }
+                    }
+                } else {
+                    // Fallback: just place a mesh
+                    const geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1).translate(0, 0.05, 0);
+                    const material = new THREE.MeshPhongMaterial({ color: 0x44ff44 });
+                    const mesh = new THREE.Mesh(geometry, material);
+                    mesh.position.copy(pos);
+                    mesh.quaternion.copy(quat);
+                    scene.add(mesh);
+                    newCount++;
+                    updateInfo();
+                }
+            } catch (e) {
+                console.error('Anchor creation failed:', e);
+            }
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function render(_timestamp, frame) {
+            if (frame) {
+                const referenceSpace = renderer.xr.getReferenceSpace();
+                const session = renderer.xr.getSession();
+
+                // Hit test
+                if (!hitTestSourceRequested) {
+                    session.requestReferenceSpace('viewer').then((viewerSpace) => {
+                        session.requestHitTestSource({ space: viewerSpace }).then((source) => {
+                            hitTestSource = source;
+                        });
+                    });
+                    hitTestSourceRequested = true;
+                }
+
+                if (hitTestSource) {
+                    const results = frame.getHitTestResults(hitTestSource);
+                    if (results.length > 0) {
+                        reticle.visible = true;
+                        reticle.matrix.fromArray(results[0].getPose(referenceSpace).transform.matrix);
+                    } else {
+                        reticle.visible = false;
+                    }
+                }
+
+                // Update anchor meshes positions
+                for (const [anchor, mesh] of anchorMeshes) {
+                    if (anchor.anchorSpace) {
+                        const pose = frame.getPose(anchor.anchorSpace, referenceSpace);
+                        if (pose) {
+                            mesh.position.set(
+                                pose.transform.position.x,
+                                pose.transform.position.y,
+                                pose.transform.position.z
+                            );
+                            mesh.quaternion.set(
+                                pose.transform.orientation.x,
+                                pose.transform.orientation.y,
+                                pose.transform.orientation.z,
+                                pose.transform.orientation.w
+                            );
+                        }
+                    }
+                }
+            }
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>

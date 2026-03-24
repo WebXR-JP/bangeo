@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<title>ポスター連動 AR Demo — 8th Wall OSS</title>
+
+	<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+	<script src="../xr-standalone/xrextras.js"></script>
+	<script async src="../xr-standalone/xr.js"></script>
+
+	<style>
+		* { margin: 0; padding: 0; box-sizing: border-box; }
+		body { overflow: hidden; font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; background: #000; }
+
+		#overlay {
+			position: absolute; top: 0; left: 0; width: 100%; z-index: 50;
+			pointer-events: none;
+		}
+		.header {
+			display: flex; justify-content: space-between; align-items: center;
+			padding: 12px 16px;
+			background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);
+		}
+		.header-title { color: #fff; font-size: 14px; font-weight: 700; }
+		.header-badge {
+			font-size: 10px; font-weight: 600; padding: 4px 10px;
+			border-radius: 999px; background: rgba(74,222,128,0.2); color: #4ade80;
+		}
+
+		#scan-hint {
+			position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+			z-index: 60; pointer-events: none; text-align: center; color: #fff;
+		}
+		#scan-hint .scan-frame {
+			width: 200px; height: 200px; border: 2px solid rgba(255,255,255,0.5);
+			border-radius: 16px; margin: 0 auto 16px;
+			display: flex; align-items: center; justify-content: center;
+			animation: pulse 2s ease-in-out infinite;
+		}
+		#scan-hint .scan-icon { font-size: 48px; opacity: 0.6; }
+		#scan-hint .scan-text { font-size: 13px; color: rgba(255,255,255,0.8); line-height: 1.6; }
+		@keyframes pulse {
+			0%, 100% { border-color: rgba(255,255,255,0.3); }
+			50% { border-color: rgba(255,255,255,0.8); }
+		}
+
+		#detected-ui {
+			display: none; position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%);
+			z-index: 60; pointer-events: none;
+			background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+			border: 1px solid rgba(74,222,128,0.3); border-radius: 16px;
+			padding: 12px 20px; color: #fff; text-align: center;
+		}
+		#detected-ui .status { color: #4ade80; font-size: 11px; font-weight: 600; margin-bottom: 4px; }
+		#detected-ui .name { font-size: 14px; font-weight: 700; }
+
+		.back-link {
+			position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+			pointer-events: auto; background: rgba(255,255,255,0.1);
+			border: 1px solid rgba(255,255,255,0.2); color: #fff;
+			padding: 10px 24px; border-radius: 999px; font-size: 11px;
+			font-weight: 700; text-decoration: none; backdrop-filter: blur(8px);
+			z-index: 100;
+		}
+		.back-link:hover { background: rgba(255,255,255,0.2); }
+
+		#error-overlay {
+			display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+			background: rgba(0,0,0,0.9); z-index: 200;
+			justify-content: center; align-items: center; text-align: center; color: #fff;
+			padding: 32px;
+		}
+		#error-overlay h2 { font-size: 20px; margin-bottom: 16px; }
+		#error-overlay p { font-size: 14px; color: #aaa; line-height: 1.8; margin-bottom: 12px; }
+		#error-overlay a { color: #e11d48; }
+		#error-overlay code {
+			display: block; background: rgba(255,255,255,0.1); padding: 12px;
+			border-radius: 8px; font-size: 12px; color: #4ade80; margin: 12px 0;
+			text-align: left; white-space: pre-line;
+		}
+	</style>
+</head>
+<body>
+	<a-scene
+		xrweb="allowedDevices: any"
+		xrextras-loading
+		xrextras-runtime-error
+		renderer="colorManagement: true"
+		vr-mode-ui="enabled: false"
+		device-orientation-permission-ui="enabled: false">
+
+		<a-camera position="0 0 0"></a-camera>
+
+		<!-- Image Target: ポスターが検出されたら3Dコンテンツを表示 -->
+		<a-entity xrextras-named-image-target="name: poster-target">
+			<!-- タイトル -->
+			<a-text value="LIVE EVENT 2026"
+				position="0 0.2 0.01"
+				align="center" color="#fff"
+				width="0.6"
+				font="https://cdn.aframe.io/fonts/Roboto-msdf.json"></a-text>
+
+			<!-- アニメーション付き3Dオブジェクト -->
+			<a-box position="0 0.08 0.05" scale="0.08 0.08 0.08"
+				material="color: #e11d48; metalness: 0.7; roughness: 0.2"
+				animation="property: rotation; to: 0 360 0; dur: 3000; easing: linear; loop: true">
+			</a-box>
+
+			<!-- パーティクル風の装飾 -->
+			<a-sphere position="-0.12 0.15 0.02" radius="0.015"
+				material="color: #4CC3D9; emissive: #4CC3D9; emissiveIntensity: 0.5"
+				animation="property: position; from: -0.12 0.12 0.02; to: -0.12 0.18 0.02; dur: 1500; easing: easeInOutSine; loop: true; dir: alternate">
+			</a-sphere>
+			<a-sphere position="0.1 0.14 0.02" radius="0.012"
+				material="color: #FFC65D; emissive: #FFC65D; emissiveIntensity: 0.5"
+				animation="property: position; from: 0.1 0.11 0.02; to: 0.1 0.17 0.02; dur: 2000; easing: easeInOutSine; loop: true; dir: alternate">
+			</a-sphere>
+			<a-sphere position="0.05 0.16 0.03" radius="0.01"
+				material="color: #7BC8A4; emissive: #7BC8A4; emissiveIntensity: 0.5"
+				animation="property: position; from: 0.05 0.13 0.03; to: 0.05 0.19 0.03; dur: 1800; easing: easeInOutSine; loop: true; dir: alternate">
+			</a-sphere>
+
+			<!-- 日時情報 -->
+			<a-text value="2026.04.15 OPEN 17:00"
+				position="0 -0.02 0.01"
+				align="center" color="#aaa"
+				width="0.4"
+				font="https://cdn.aframe.io/fonts/Roboto-msdf.json"></a-text>
+		</a-entity>
+
+		<a-light type="ambient" color="#888"></a-light>
+		<a-light type="directional" position="2 4 3" intensity="1"></a-light>
+	</a-scene>
+
+	<!-- UI -->
+	<div id="overlay">
+		<div class="header">
+			<span class="header-title">ポスター連動 AR</span>
+			<span class="header-badge">OSS版</span>
+		</div>
+	</div>
+
+	<div id="scan-hint">
+		<div class="scan-frame">
+			<span class="scan-icon">&#x1F4F7;</span>
+		</div>
+		<div class="scan-text">
+			ポスターにカメラを向けてください<br>
+			Image Target が検出されると<br>
+			3Dコンテンツが表示されます
+		</div>
+	</div>
+
+	<div id="detected-ui">
+		<div class="status">&#x2713; TARGET DETECTED</div>
+		<div class="name">LIVE EVENT 2026</div>
+	</div>
+
+	<a href="/tech-articles/8thwall-world-effects" class="back-link">← 関連記事に戻る</a>
+
+	<div id="error-overlay">
+		<div>
+			<h2>8th Wall エンジンを読み込めませんでした</h2>
+			<p>
+				<a href="https://github.com/8thwall/8thwall" target="_blank">8thwall/8thwall</a>
+				からソースをビルドするか、
+				<a href="https://github.com/8thwall/engine" target="_blank">8thwall/engine</a>
+				から xr-standalone.zip をダウンロードしてください。
+			</p>
+			<p>Image Targets を使うには、ターゲット画像を事前に生成する必要があります：</p>
+			<code>cd apps/image-target-cli
+npm install
+node ./src/index.js</code>
+			<p>生成された JSON を XR8.XrController.configure() で読み込みます。</p>
+		</div>
+	</div>
+
+	<script>
+		// Image Target 検出イベントのリスナー
+		AFRAME.registerComponent("image-target-listener", {
+			init() {
+				this.el.sceneEl.addEventListener("xrimagefound", () => {
+					document.getElementById("scan-hint").style.display = "none";
+					document.getElementById("detected-ui").style.display = "block";
+				});
+				this.el.sceneEl.addEventListener("xrimagelost", () => {
+					document.getElementById("scan-hint").style.display = "block";
+					document.getElementById("detected-ui").style.display = "none";
+				});
+			}
+		});
+		document.querySelector("a-scene").setAttribute("image-target-listener", "");
+
+		let engineLoaded = false;
+		const checkEngine = () => {
+			if (window.XR8 && typeof window.XR8.run === "function") engineLoaded = true;
+		};
+		window.addEventListener("xrloaded", checkEngine);
+		setTimeout(() => {
+			checkEngine();
+			if (!engineLoaded) document.getElementById("error-overlay").style.display = "flex";
+		}, 8000);
+	</script>
+</body>
+</html>

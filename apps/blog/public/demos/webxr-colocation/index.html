@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ja">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Shared Spaces Colocation Demo</title>
+		<link rel="stylesheet" href="./style.css" />
+		<script type="importmap">
+			{
+				"imports": {
+					"three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+					"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/"
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<div class="hud">
+			<h1>Shared Spaces Colocation Demo</h1>
+			<p>
+				Questブラウザで WebXR experiments を有効化して起動してください。
+				シェアリンクを送れば離れた場所の人とも接続できます。
+			</p>
+			<div class="row">
+				<span>Mode:</span>
+				<span id="mode">共有空間</span>
+			</div>
+			<div class="row">
+				<span>Room ID:</span>
+				<span id="room-id">-</span>
+			</div>
+			<div class="row">
+				<span>Space UUID:</span>
+				<span id="space-id">-</span>
+			</div>
+			<div class="row">
+				<span>Peer ID:</span>
+				<span id="peer-id">-</span>
+			</div>
+			<div class="row">
+				<span>Peers:</span>
+				<span id="peer-count">0</span>
+			</div>
+			<div class="row">
+				<span>Status:</span>
+				<span id="status">待機中</span>
+			</div>
+			<div class="share">
+				<label for="share-link">Share link</label>
+				<div class="share-row">
+					<input id="share-link" type="text" readonly value="" />
+					<button id="copy-link" type="button">コピー</button>
+				</div>
+			</div>
+			<div class="room-controls">
+				<label for="room-input">ルームを指定</label>
+				<div class="room-row">
+					<input
+						id="room-input"
+						type="text"
+						placeholder="room-xxxx など"
+					/>
+					<button id="apply-room" type="button">適用</button>
+				</div>
+				<div class="room-actions">
+					<button id="new-room" type="button">新しいルーム</button>
+					<button id="reset-room" type="button">共有空間に戻る</button>
+				</div>
+			</div>
+			<div class="scoreboard">
+				<h2>Scoreboard</h2>
+				<ul id="scoreboard-list"></ul>
+			</div>
+		</div>
+		<script type="module" src="./app.js"></script>
+	</body>
+</html>

@@ -1,0 +1,35 @@
+{
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		"lib": ["ES2023", "DOM", "DOM.Iterable"],
+		"resolveJsonModule": true,
+		"allowJs": true,
+		"checkJs": false,
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"noEmit": true,
+		"incremental": true,
+		"isolatedModules": true,
+		"baseUrl": ".",
+		"paths": {
+			"@/*": ["./src/*"],
+			"@/content/*": ["./content/*"],
+			"@/.source": ["./.source/server"],
+			"fumadocs-mdx:collections/*": ["./.source/*"]
+		},
+		"plugins": [
+			{
+				"name": "next"
+			}
+		]
+	},
+	"include": [
+		"next-env.d.ts",
+		"**/*.ts",
+		"**/*.tsx",
+		".next/types/**/*.ts",
+		"content/**/*.mdx",
+		".next/dev/types/**/*.ts"
+	],
+	"exclude": ["node_modules", ".next", "dist"]
+}

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Depth Sensing</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #222; font-family: sans-serif; }
+        #info {
+            position: absolute; top: 10px; width: 100%; text-align: center; color: white;
+            pointer-events: none; z-index: 100; text-shadow: 0 1px 2px black;
+        }
+        #info a { color: #f4a83a; pointer-events: auto; }
+        .desc { font-size: 0.8em; opacity: 0.8; margin-top: 4px; padding: 0 10px; }
+        #depthCanvas {
+            position: absolute; bottom: 10px; right: 10px; z-index: 150;
+            border: 2px solid #f4a83a; border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h3>Depth Sensing</h3>
+        <div class="desc">XRDepthInformation APIで深度マップを取得し、ヒートマップとして可視化するデモ。近い=赤、遠い=青。</div>
+        <div style="margin-top: 10px;">
+            <a href="/">Back to Demos</a>
+        </div>
+    </div>
+    <canvas id="depthCanvas" width="160" height="120"></canvas>
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+        import { ARButton } from 'https://unpkg.com/three@0.160.0/examples/jsm/webxr/ARButton.js';
+
+        let camera, scene, renderer;
+        const depthCanvas = document.getElementById('depthCanvas');
+        const depthCtx = depthCanvas.getContext('2d');
+
+        init();
+
+        function init() {
+            const container = document.createElement('div');
+            document.body.appendChild(container);
+
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
+
+            const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 3);
+            light.position.set(0.5, 1, 0.25);
+            scene.add(light);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.xr.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            document.body.appendChild(ARButton.createButton(renderer, {
+                requiredFeatures: ['depth-sensing'],
+                depthSensing: {
+                    usagePreference: ['cpu-optimized'],
+                    dataFormatPreference: ['luminance-alpha']
+                }
+            }));
+
+            window.addEventListener('resize', onWindowResize);
+            renderer.setAnimationLoop(render);
+        }
+
+        function depthToColor(value, maxDepth) {
+            // Normalize 0..1
+            const t = Math.min(value / maxDepth, 1.0);
+            // Heatmap: red(near) -> yellow -> green -> cyan -> blue(far)
+            const r = Math.max(0, Math.min(255, (1.0 - t) * 510));
+            const g = Math.max(0, Math.min(255, t < 0.5 ? t * 510 : (1.0 - t) * 510));
+            const b = Math.max(0, Math.min(255, t * 510));
+            return [r | 0, g | 0, b | 0];
+        }
+
+        function visualizeDepth(depthInfo) {
+            const w = depthInfo.width;
+            const h = depthInfo.height;
+
+            if (depthCanvas.width !== w || depthCanvas.height !== h) {
+                depthCanvas.width = w;
+                depthCanvas.height = h;
+            }
+
+            const imageData = depthCtx.createImageData(w, h);
+            const maxDepth = 5.0; // meters
+
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    const depth = depthInfo.getDepthInMeters(x, y);
+                    const [r, g, b] = depthToColor(depth, maxDepth);
+                    const idx = (y * w + x) * 4;
+                    imageData.data[idx] = r;
+                    imageData.data[idx + 1] = g;
+                    imageData.data[idx + 2] = b;
+                    imageData.data[idx + 3] = 255;
+                }
+            }
+
+            depthCtx.putImageData(imageData, 0, 0);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function render(_timestamp, frame) {
+            if (frame) {
+                const session = renderer.xr.getSession();
+                const referenceSpace = renderer.xr.getReferenceSpace();
+                const pose = frame.getViewerPose(referenceSpace);
+
+                if (pose) {
+                    for (const view of pose.views) {
+                        const depthInfo = frame.getDepthInformation(view);
+                        if (depthInfo) {
+                            visualizeDepth(depthInfo);
+                            break; // use first view
+                        }
+                    }
+                }
+            }
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>

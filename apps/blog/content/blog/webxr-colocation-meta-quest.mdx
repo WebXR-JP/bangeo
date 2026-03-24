@@ -1,0 +1,218 @@
+---
+title: "【実践】WebXR Shared Spaces でマルチユーザーARを体験する"
+description: "Meta Quest Browser（v39以降）の実験機能「Shared Spaces」を使って、複数のQuestデバイスが同じ物理空間を自動的に共有するマルチユーザーAR体験を解説。実際に動くデモと、その仕組みを詳しく紹介します。"
+date: "2026年1月5日"
+category: "GUIDE"
+tags:
+  - "WebXR"
+  - "Colocation"
+  - "Shared Spaces"
+  - "Meta Quest"
+  - "マルチユーザー"
+  - "AR"
+  - "実験機能"
+author: "BANGEO Team"
+thumbnail: "/assets/tech/webxr-colocation-meta-quest.png"
+draft: false
+---
+
+## はじめに
+
+Meta QuestブラウザのHorizon OS v39以降で、同じ部屋にいる複数のヘッドセットが自動的に座標系を共有できる実験機能**「Shared Spaces」**が公開されました。
+
+本記事では、この機能を使ったデモの体験方法と、技術的な仕組みを解説します。
+
+## デモを体験する
+
+まずは実際に動くデモを試してみてください。
+
+デモURL：[/demos/webxr-colocation/](/demos/webxr-colocation/)
+
+> **必要な機器：**Meta Quest 2台以上（同じ物理空間に配置）
+
+### このデモでできること
+
+| 機能 | 説明 |
+| --- | --- |
+| 自動マッチング | 同じ部屋にいる人は自動的に同じUUIDを持つ → サーバーで簡単にマッチング |
+| 位置同期 | 他のプレイヤーの位置がcm単位の精度で見える |
+| 弾丸発射 | トリガーを引くと弾が飛ぶ、相手からも見える |
+
+## WebXR Shared Spaces とは？
+
+**同じ物理空間にいる複数のQuestヘッドセットが、自動的に同じ座標系を共有する機能**です。
+
+### 従来の問題
+
+複数人でARコンテンツを共有するには、従来は以下のような面倒な作業が必要でした：
+
+- QRコードやARマーカーを置く
+- 全員が同じ場所に立って原点を合わせる
+- GPSやコンパスで位置合わせ（精度が悪い）
+
+### Shared Spacesが解決すること
+
+ブラウザが自動的に：
+
+1. **物理空間を認識** - 部屋の形状をスキャン
+2. **共通座標系を確立** - 全員が同じ(0,0,0)を共有
+3. **一意のUUIDを発行** - 同じ空間にいる人だけが同じUUID
+
+## なぜUUIDが同じになるのか？
+
+UUIDは**Metaのサーバーから取得するのではなく**、各デバイスが独立して同じ値を算出します。
+
+### 仕組みの詳細
+
+Meta Questの**Spatial Anchors**（空間アンカー）技術がベースになっています：
+
+| ステップ | 処理内容 |
+| --- | --- |
+| 1. 空間スキャン | Questのカメラ・センサーが部屋の壁、床、家具などの**3D特徴点**を検出 |
+| 2. 空間ハッシュ生成 | 特徴点データから**一意のハッシュ値（=UUID）**を算出 |
+| 3. 座標系の確立 | 空間の特徴から**共通の原点(0,0,0)**を決定 |
+| 4. UUID一致 | 同じ部屋にいる全デバイスが同じ特徴を見るため、**同じUUIDが生成される** |
+
+### 重要なポイント
+
+- **部屋固有** - 同じ部屋なら同じUUID、違う部屋なら違うUUID
+- **再現性あり** - 一度スキャンした部屋は、後日アクセスしても同じUUIDになる可能性が高い
+- **サブセンチメートル精度** - 位置は1cm未満の誤差で一致
+
+![Shared Spaces UUID同期の仕組み](/images/tech-articles/shared-spaces-uuid-sync.png)
+
+### 補足：サイト分離
+
+セキュリティのため、**URLごとに別のUUID**が生成されます。同じ部屋にいても：
+
+- `example.com/game-a` と `example.com/game-b` → **別のUUID**
+- `example.com/game-a` と `another.com/game-a` → **別のUUID**
+
+これにより、異なるサイト間でユーザーが意図せずマッチングされることを防いでいます。
+
+## セットアップ手順
+
+### Step 1: WebXR実験機能を有効化
+
+1. Questブラウザで `chrome://flags` を開く
+2. 「WebXR experiments」を検索
+3. フラグを **Enabled** に変更
+4. ブラウザを再起動
+
+### Step 2: デモにアクセス
+
+1. 2台のQuestを**同じ部屋**に配置
+2. 両方で [/demos/webxr-colocation/](/demos/webxr-colocation/) にアクセス
+3. 「START AR」ボタンをタップ
+4. 数秒待つと**Space UUID**が表示される
+5. 両方のQuestで同じUUIDが表示されれば成功です。
+
+### Step 3: 遊ぶ
+
+- **コントローラーのトリガー**を引くと弾丸が発射
+- お互いの位置がリアルタイムで同期される
+
+## 技術的な仕組み - APIの使い方
+
+```javascript
+// ARセッション開始時に 'shared' を要求
+navigator.xr.requestSession('immersive-ar', {
+  requiredFeatures: ['local-floor'],
+  optionalFeatures: ['shared', 'unbounded']
+}).then(session => {
+  // 共有空間を取得
+  session.requestReferenceSpace('shared').then(space => {
+    console.log('Shared space UUID:', space.uuid);
+    // このUUIDが同じ部屋にいる全員で一致する！
+  });
+});
+```
+
+### resetイベントの重要性
+
+共有空間のUUIDは、セッション開始直後は**一時的な値**です。正しいUUIDは数秒後に`reset`イベントで確定します。
+
+```javascript
+space.addEventListener('reset', () => {
+  // ここで取得したUUIDが本物
+  const realUUID = space.uuid;
+  registerWithServer(realUUID);
+});
+```
+
+## 弾丸とヒット判定の仕組み
+
+マルチプレイヤーARでの弾丸発射とヒット判定は、以下の流れで実現しています。
+
+### 1. 弾丸の発射とアニメーション
+
+コントローラーのトリガーを引くと、弾丸オブジェクトが生成されます：
+
+```javascript
+// トリガー検出
+controller.addEventListener('selectstart', () => {
+  // 弾丸を生成
+  const bullet = new THREE.Mesh(bulletGeometry, bulletMaterial);
+  bullet.position.copy(controller.position);
+
+  // 弾丸の進行方向を計算
+  const direction = new THREE.Vector3(0, 0, -1);
+  direction.applyQuaternion(controller.quaternion);
+  bullet.userData.velocity = direction;
+
+  bullets.add(bullet);
+});
+```
+
+### 2. 位置の同期（PeerJS）
+
+自分の弾丸の位置は、PeerJSを通じて他のプレイヤーにリアルタイム送信されます：
+
+```javascript
+// 全弾丸のワールド座標を収集
+const bulletPositions = [];
+bullets.children.forEach(bullet => {
+  const pos = new THREE.Vector3();
+  bullet.getWorldPosition(pos);
+  bulletPositions.push({ x: pos.x, y: pos.y, z: pos.z });
+});
+
+// ピアに送信
+connection.send({
+  position: myPosition,
+  bullets: bulletPositions
+});
+```
+
+### 3. ヒット判定（距離計算）
+
+各プレイヤーのローカルで、受信した弾丸と自分の位置の距離を計算し、閾値以下ならヒットとして判定します：
+
+```javascript
+function detectHits() {
+  const HIT_THRESHOLD = 0.3; // 30cm以内でヒット
+
+  peers.forEach((peer, peerId) => {
+    peer.bulletGroup.children.forEach(bullet => {
+      // 弾丸と自分の距離を計算
+      const distance = bullet.position.distanceTo(myPosition);
+
+      if (distance < HIT_THRESHOLD) {
+        // ヒット！
+        reportHit(peerId);
+      }
+    });
+  });
+}
+```
+
+## 制約と注意点
+
+- **Quest専用** - 他社デバイス（Vision Proなど）では動作しません
+- **Browser v39以降** - 古いバージョンでは動作しません
+
+## 関連リンク
+
+- [cabanier/shared-spaces（公式サンプル）](https://github.com/cabanier/shared-spaces)
+- [sharedshooter.arvr.social（公式デモ）](https://sharedshooter.arvr.social)
+- [UploadVR: Quest Web Browser Experiments With Colocation](https://www.uploadvr.com/quest-web-browser-experimental-colocation-webxr/)

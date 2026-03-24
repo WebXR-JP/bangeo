@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<title>バーチャル試着 AR Demo — 8th Wall OSS</title>
+
+	<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+	<script src="../xr-standalone/xrextras.js"></script>
+	<script async src="../xr-standalone/xr.js"
+		data-preload-chunks="face"></script>
+
+	<style>
+		* { margin: 0; padding: 0; box-sizing: border-box; }
+		body { overflow: hidden; font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; background: #000; }
+
+		#overlay {
+			position: absolute; top: 0; left: 0; width: 100%; z-index: 50;
+			pointer-events: none;
+		}
+		.header {
+			display: flex; justify-content: space-between; align-items: center;
+			padding: 12px 16px;
+			background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);
+		}
+		.header-title { color: #fff; font-size: 14px; font-weight: 700; }
+		.header-badge {
+			font-size: 10px; font-weight: 600; padding: 4px 10px;
+			border-radius: 999px; background: rgba(74,222,128,0.2); color: #4ade80;
+		}
+
+		#style-selector {
+			position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%);
+			z-index: 60; pointer-events: auto;
+			display: flex; gap: 8px;
+		}
+		.style-btn {
+			background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+			color: #fff; padding: 8px 16px; border-radius: 999px; font-size: 11px;
+			font-weight: 600; cursor: pointer; transition: all 0.2s;
+		}
+		.style-btn.active { background: rgba(225,29,72,0.8); border-color: #e11d48; }
+
+		#hint {
+			position: absolute; top: 70px; left: 50%; transform: translateX(-50%);
+			z-index: 60; color: rgba(255,255,255,0.8); font-size: 12px;
+			text-align: center; pointer-events: none; background: rgba(0,0,0,0.4);
+			padding: 8px 16px; border-radius: 12px; backdrop-filter: blur(4px);
+		}
+
+		.back-link {
+			position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+			pointer-events: auto; background: rgba(255,255,255,0.1);
+			border: 1px solid rgba(255,255,255,0.2); color: #fff;
+			padding: 10px 24px; border-radius: 999px; font-size: 11px;
+			font-weight: 700; text-decoration: none; backdrop-filter: blur(8px);
+			z-index: 100;
+		}
+		.back-link:hover { background: rgba(255,255,255,0.2); }
+
+		#error-overlay {
+			display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+			background: rgba(0,0,0,0.9); z-index: 200;
+			justify-content: center; align-items: center; text-align: center; color: #fff;
+			padding: 32px;
+		}
+		#error-overlay h2 { font-size: 20px; margin-bottom: 16px; }
+		#error-overlay p { font-size: 14px; color: #aaa; line-height: 1.8; }
+		#error-overlay a { color: #e11d48; }
+	</style>
+</head>
+<body>
+	<a-scene
+		xrface
+		xrextras-loading
+		xrextras-runtime-error
+		renderer="colorManagement: true"
+		vr-mode-ui="enabled: false"
+		device-orientation-permission-ui="enabled: false">
+
+		<a-camera position="0 0 0" active="false"></a-camera>
+
+		<!-- メガネフレーム（プリミティブで構成） -->
+		<!-- 左レンズ -->
+		<a-entity xrextras-face-attachment="point: leftEye">
+			<a-ring id="lens-left" position="0 0 0.01"
+				radius-inner="0.012" radius-outer="0.016"
+				material="color: #222; side: double"></a-ring>
+			<a-circle position="0 0 0.009" radius="0.012"
+				material="color: #4488ff; opacity: 0.15; transparent: true; side: double"></a-circle>
+		</a-entity>
+
+		<!-- 右レンズ -->
+		<a-entity xrextras-face-attachment="point: rightEye">
+			<a-ring id="lens-right" position="0 0 0.01"
+				radius-inner="0.012" radius-outer="0.016"
+				material="color: #222; side: double"></a-ring>
+			<a-circle position="0 0 0.009" radius="0.012"
+				material="color: #4488ff; opacity: 0.15; transparent: true; side: double"></a-circle>
+		</a-entity>
+
+		<!-- ブリッジ（鼻の上） -->
+		<a-entity xrextras-face-attachment="point: noseTip">
+			<a-box id="bridge" position="0 0.018 0.015" scale="0.025 0.004 0.004"
+				material="color: #222"></a-box>
+		</a-entity>
+
+		<!-- 左テンプル（つる） -->
+		<a-entity xrextras-face-attachment="point: leftEar">
+			<a-box id="temple-left" position="0 0.01 0.01" scale="0.004 0.004 0.04"
+				material="color: #222"></a-box>
+		</a-entity>
+
+		<!-- 右テンプル（つる） -->
+		<a-entity xrextras-face-attachment="point: rightEar">
+			<a-box id="temple-right" position="0 0.01 0.01" scale="0.004 0.004 0.04"
+				material="color: #222"></a-box>
+		</a-entity>
+
+		<a-light type="ambient" color="#aaa"></a-light>
+		<a-light type="directional" position="0 1 1" intensity="0.6"></a-light>
+	</a-scene>
+
+	<!-- UI -->
+	<div id="overlay">
+		<div class="header">
+			<span class="header-title">バーチャル試着</span>
+			<span class="header-badge">OSS版</span>
+		</div>
+	</div>
+
+	<div id="hint">カメラに顔を向けてください</div>
+
+	<div id="style-selector">
+		<div class="style-btn active" onclick="setStyle('classic')">クラシック</div>
+		<div class="style-btn" onclick="setStyle('bold')">ボールド</div>
+		<div class="style-btn" onclick="setStyle('gold')">ゴールド</div>
+	</div>
+
+	<a href="/tech-articles/8thwall-world-effects" class="back-link">← 関連記事に戻る</a>
+
+	<div id="error-overlay">
+		<div>
+			<h2>8th Wall エンジンを読み込めませんでした</h2>
+			<p>
+				<a href="https://github.com/8thwall/8thwall" target="_blank">8thwall/8thwall</a>
+				からソースをビルドするか、
+				<a href="https://github.com/8thwall/engine" target="_blank">8thwall/engine</a>
+				から xr-standalone.zip をダウンロードしてください。
+			</p>
+		</div>
+	</div>
+
+	<script>
+		const styles = {
+			classic: { frame: "#222", lens: "#4488ff", lensOpacity: 0.15 },
+			bold: { frame: "#e11d48", lens: "#ff6688", lensOpacity: 0.2 },
+			gold: { frame: "#b8860b", lens: "#ffcc44", lensOpacity: 0.1 },
+		};
+
+		function setStyle(name) {
+			const s = styles[name];
+			["lens-left", "lens-right"].forEach(id => {
+				document.getElementById(id).setAttribute("material", "color", s.frame);
+			});
+			["bridge", "temple-left", "temple-right"].forEach(id => {
+				document.getElementById(id).setAttribute("material", "color", s.frame);
+			});
+			document.querySelectorAll(".style-btn").forEach(btn => {
+				btn.classList.toggle("active", btn.textContent ===
+					(name === "classic" ? "クラシック" : name === "bold" ? "ボールド" : "ゴールド"));
+			});
+		}
+
+		let engineLoaded = false;
+		const checkEngine = () => {
+			if (window.XR8 && typeof window.XR8.run === "function") engineLoaded = true;
+		};
+		window.addEventListener("xrloaded", checkEngine);
+		setTimeout(() => {
+			checkEngine();
+			if (!engineLoaded) document.getElementById("error-overlay").style.display = "flex";
+		}, 8000);
+	</script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<title>8th Wall OSS + A-Frame AR Demo</title>
+
+	<!-- A-Frame -->
+	<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+	<!-- 8th Wall XRExtras (A-Frame components 含む) -->
+	<script src="../xr-standalone/xrextras.js"></script>
+
+	<!-- 8th Wall Engine (OSS版) -->
+	<script async src="../xr-standalone/xr.js"></script>
+
+	<style>
+		* { margin: 0; padding: 0; box-sizing: border-box; }
+		body { overflow: hidden; font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; background: #000; }
+
+		#overlay {
+			position: absolute; top: 0; left: 0; width: 100%; z-index: 50;
+			pointer-events: none;
+		}
+		.header {
+			display: flex; justify-content: space-between; align-items: center;
+			padding: 12px 16px;
+			background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);
+		}
+		.header-title { color: #fff; font-size: 14px; font-weight: 700; }
+		.header-badge {
+			font-size: 10px; font-weight: 600; padding: 4px 10px;
+			border-radius: 999px; background: rgba(74,222,128,0.2); color: #4ade80;
+		}
+		.back-link {
+			position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+			pointer-events: auto; background: rgba(255,255,255,0.1);
+			border: 1px solid rgba(255,255,255,0.2); color: #fff;
+			padding: 10px 24px; border-radius: 999px; font-size: 11px;
+			font-weight: 700; text-decoration: none; backdrop-filter: blur(8px);
+			z-index: 100;
+		}
+		.back-link:hover { background: rgba(255,255,255,0.2); }
+
+		#error-overlay {
+			display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+			background: rgba(0,0,0,0.9); z-index: 200;
+			justify-content: center; align-items: center; text-align: center; color: #fff;
+			padding: 32px;
+		}
+		#error-overlay h2 { font-size: 20px; margin-bottom: 16px; }
+		#error-overlay p { font-size: 14px; color: #aaa; line-height: 1.8; margin-bottom: 20px; }
+		#error-overlay a { color: #e11d48; }
+		#error-overlay .alt-demos {
+			display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 16px;
+		}
+		#error-overlay .alt-demos a {
+			background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+			color: #fff; padding: 10px 20px; border-radius: 12px;
+			text-decoration: none; font-size: 13px; font-weight: 600;
+		}
+	</style>
+</head>
+<body>
+	<!-- A-Frame scene with 8th Wall -->
+	<a-scene
+		xrweb="disableWorldTracking: true; allowedDevices: any"
+		xrextras-loading
+		xrextras-runtime-error
+		renderer="colorManagement: true"
+		vr-mode-ui="enabled: false"
+		device-orientation-permission-ui="enabled: false">
+
+		<a-camera position="0 4 6"></a-camera>
+
+		<!-- 回転するキューブ -->
+		<a-box
+			position="0 1 0"
+			scale="0.8 0.8 0.8"
+			material="color: #4CC3D9; metalness: 0.6; roughness: 0.3"
+			animation="property: rotation; to: 0 360 0; dur: 4000; easing: linear; loop: true"
+			shadow>
+		</a-box>
+
+		<!-- 球体 -->
+		<a-sphere
+			position="-1.5 0.6 -0.5"
+			radius="0.4"
+			material="color: #EF2D5E; metalness: 0.4; roughness: 0.2"
+			animation="property: position; from: -1.5 0.6 -0.5; to: -1.5 1.2 -0.5; dur: 2000; easing: easeInOutSine; loop: true; dir: alternate"
+			shadow>
+		</a-sphere>
+
+		<!-- シリンダー -->
+		<a-cylinder
+			position="1.5 0.5 0.5"
+			radius="0.3"
+			height="1"
+			material="color: #FFC65D; metalness: 0.3; roughness: 0.4"
+			animation="property: rotation; to: 0 -360 0; dur: 6000; easing: linear; loop: true"
+			shadow>
+		</a-cylinder>
+
+		<!-- コーン -->
+		<a-cone
+			position="0 0.6 -2"
+			radius-bottom="0.4"
+			height="0.8"
+			material="color: #7BC8A4; metalness: 0.5; roughness: 0.3"
+			animation="property: rotation; to: 360 0 0; dur: 5000; easing: linear; loop: true"
+			shadow>
+		</a-cone>
+
+		<!-- 半透明の地面 -->
+		<a-plane
+			position="0 0 0"
+			rotation="-90 0 0"
+			width="6"
+			height="6"
+			material="color: #333; opacity: 0.3; transparent: true"
+			shadow="receive: true">
+		</a-plane>
+
+		<!-- 環境光 -->
+		<a-light type="ambient" color="#666"></a-light>
+		<a-light type="directional" position="2 4 3" intensity="1" castShadow="true"></a-light>
+	</a-scene>
+
+	<!-- UI overlay -->
+	<div id="overlay">
+		<div class="header">
+			<span class="header-title">8th Wall OSS + A-Frame</span>
+			<span class="header-badge">OSS版</span>
+		</div>
+	</div>
+	<a href="/tech-articles/8thwall-world-effects" class="back-link">← 関連記事に戻る</a>
+
+	<!-- Error fallback -->
+	<div id="error-overlay">
+		<div>
+			<h2>8th Wall エンジンを読み込めませんでした</h2>
+			<p>
+				8th Wall OSS エンジン（xr.js）のセットアップが必要です。<br>
+				<a href="https://github.com/8thwall/8thwall" target="_blank">8thwall/8thwall</a>
+				からソースをビルドするか、<br>
+				<a href="https://github.com/8thwall/engine" target="_blank">8thwall/engine</a>
+				から xr-standalone.zip をダウンロードしてください。
+			</p>
+			<p style="color:#fff; font-size: 15px; font-weight: 600;">
+				エンジン不要で動くデモはこちら：
+			</p>
+			<div class="alt-demos">
+				<a href="/demos/8thwall-face/demo.html">Face Tracking (8th Wall OSS)</a>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		// 8th Wall engine load check
+		let engineLoaded = false;
+		const checkEngine = () => {
+			if (window.XR8 && typeof window.XR8.run === "function") {
+				engineLoaded = true;
+			}
+		};
+		window.addEventListener("xrloaded", checkEngine);
+		setTimeout(() => {
+			checkEngine();
+			if (!engineLoaded) {
+				document.getElementById("error-overlay").style.display = "flex";
+			}
+		}, 8000);
+	</script>
+</body>
+</html>

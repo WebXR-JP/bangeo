@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<title>Face Tracking</title>
+	<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+	<script src="/demos/xr-standalone/xrextras.js"></script>
+	<script async src="/demos/xr-standalone/xr.js" data-preload-chunks="face"></script>
+	<style>
+		body { margin: 0; overflow: hidden; background: #000; font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; }
+		#info {
+			position: absolute; top: 10px; width: 100%; text-align: center; color: white;
+			pointer-events: none; z-index: 100; text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+		}
+		#info a { color: #f4a83a; pointer-events: auto; }
+		.desc { font-size: 0.8em; opacity: 0.8; margin-top: 4px; padding: 0 10px; }
+	</style>
+</head>
+<body>
+	<div id="info">
+		<h3>Face Tracking</h3>
+		<div class="desc">8th Wall + A-Frame によるフェイストラッキング。カメラに顔を向けると顔メッシュと特徴点マーカーが表示されます。</div>
+		<div style="margin-top: 10px;"><a href="/">← デモ一覧</a></div>
+	</div>
+
+	<a-scene
+		xrface
+		xrextras-loading
+		xrextras-runtime-error
+		renderer="colorManagement: true"
+		vr-mode-ui="enabled: false"
+		device-orientation-permission-ui="enabled: false">
+
+		<a-camera active="false" position="0 0 0"></a-camera>
+
+		<!-- 顔メッシュを半透明で表示 -->
+		<a-entity xrextras-face-mesh="opacity: 0.4; color: #4488ff"></a-entity>
+
+		<!-- 鼻先 (Nose Tip) - 赤 -->
+		<a-entity xrextras-face-attachment="point: noseTip">
+			<a-sphere radius="0.015" color="#ff4444" opacity="0.9"></a-sphere>
+		</a-entity>
+
+		<!-- 額 (Forehead) - 紫 -->
+		<a-entity xrextras-face-attachment="point: forehead">
+			<a-sphere radius="0.015" color="#aa44ff" opacity="0.9"></a-sphere>
+		</a-entity>
+
+		<!-- 左目 (Left Eye) - 青 -->
+		<a-entity xrextras-face-attachment="point: leftEye">
+			<a-sphere radius="0.012" color="#4488ff" opacity="0.9"></a-sphere>
+		</a-entity>
+
+		<!-- 右目 (Right Eye) - 緑 -->
+		<a-entity xrextras-face-attachment="point: rightEye">
+			<a-sphere radius="0.012" color="#44ff44" opacity="0.9"></a-sphere>
+		</a-entity>
+
+		<!-- 口 (Mouth) - オレンジ -->
+		<a-entity xrextras-face-attachment="point: mouth">
+			<a-sphere radius="0.012" color="#ffaa44" opacity="0.9"></a-sphere>
+		</a-entity>
+
+		<!-- 顎 (Chin) - シアン -->
+		<a-entity xrextras-face-attachment="point: chin">
+			<a-sphere radius="0.015" color="#44ffff" opacity="0.9"></a-sphere>
+		</a-entity>
+
+		<!-- 左耳 (Left Ear) - ピンク -->
+		<a-entity xrextras-face-attachment="point: leftEar">
+			<a-sphere radius="0.010" color="#ff66aa" opacity="0.9"></a-sphere>
+		</a-entity>
+
+		<!-- 右耳 (Right Ear) - 黄 -->
+		<a-entity xrextras-face-attachment="point: rightEar">
+			<a-sphere radius="0.010" color="#ffdd44" opacity="0.9"></a-sphere>
+		</a-entity>
+	</a-scene>
+</body>
+</html>

@@ -1,0 +1,158 @@
+body {
+	margin: 0;
+	font-family: "Noto Sans JP", sans-serif;
+	background: #0f1115;
+	color: #ffffff;
+	overflow: hidden;
+}
+
+canvas {
+	display: block;
+}
+
+.hud {
+	position: fixed;
+	top: 16px;
+	left: 16px;
+	background: rgba(15, 17, 21, 0.75);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 16px;
+	padding: 16px 18px;
+	width: min(320px, 90vw);
+	backdrop-filter: blur(16px);
+	z-index: 10;
+}
+
+.hud h1 {
+	font-size: 16px;
+	margin: 0 0 8px;
+}
+
+.hud p {
+	font-size: 12px;
+	margin: 0 0 12px;
+	color: #c7c7c7;
+	line-height: 1.5;
+}
+
+.row {
+	display: flex;
+	justify-content: space-between;
+	font-size: 12px;
+	margin-bottom: 6px;
+}
+
+.share {
+	margin-top: 12px;
+}
+
+.share label {
+	display: block;
+	font-size: 12px;
+	color: #f8f8f8;
+	margin-bottom: 6px;
+}
+
+.share-row {
+	display: flex;
+	gap: 6px;
+}
+
+.share-row input {
+	flex: 1;
+	font-size: 11px;
+	padding: 6px 8px;
+	border-radius: 8px;
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	background: rgba(0, 0, 0, 0.3);
+	color: #eaeaea;
+}
+
+.share-row button {
+	border: none;
+	border-radius: 8px;
+	padding: 6px 10px;
+	font-size: 11px;
+	background: #f4a83a;
+	color: #2a1c00;
+	cursor: pointer;
+}
+
+.share-row button:hover {
+	filter: brightness(0.95);
+}
+
+.room-controls {
+	margin-top: 12px;
+}
+
+.room-controls label {
+	display: block;
+	font-size: 12px;
+	color: #f8f8f8;
+	margin-bottom: 6px;
+}
+
+.room-row {
+	display: flex;
+	gap: 6px;
+	margin-bottom: 8px;
+}
+
+.room-row input {
+	flex: 1;
+	font-size: 11px;
+	padding: 6px 8px;
+	border-radius: 8px;
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	background: rgba(0, 0, 0, 0.3);
+	color: #eaeaea;
+}
+
+.room-row button,
+.room-actions button {
+	border: none;
+	border-radius: 8px;
+	padding: 6px 10px;
+	font-size: 11px;
+	background: #2f6fed;
+	color: #f2f5ff;
+	cursor: pointer;
+}
+
+.room-actions {
+	display: flex;
+	gap: 6px;
+}
+
+.room-actions button:last-child {
+	background: #3b3f47;
+	color: #e6e6e6;
+}
+
+.room-row button:hover,
+.room-actions button:hover {
+	filter: brightness(0.95);
+}
+
+.scoreboard {
+	margin-top: 12px;
+}
+
+.scoreboard h2 {
+	font-size: 12px;
+	margin: 0 0 6px;
+	color: #f8f8f8;
+}
+
+#scoreboard-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	font-size: 12px;
+	color: #d7d7d7;
+}
+
+#scoreboard-list li {
+	margin-bottom: 4px;
+}

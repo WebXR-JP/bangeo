@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hand Mesh Visualization</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #222; font-family: sans-serif; }
+        #info {
+            position: absolute; top: 10px; width: 100%; text-align: center; color: white;
+            pointer-events: none; z-index: 100; text-shadow: 0 1px 2px black;
+        }
+        #info a { color: #f4a83a; pointer-events: auto; }
+        .desc { font-size: 0.8em; opacity: 0.8; margin-top: 4px; padding: 0 10px; }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h3>Hand Mesh Visualization</h3>
+        <div class="desc">手の関節をスフィアで描画し、隣接関節をラインで接続してスケルトンメッシュとして可視化するデモ。</div>
+        <div style="margin-top: 10px;">
+            <a href="/">Back to Demos</a>
+        </div>
+    </div>
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+        import { VRButton } from 'https://unpkg.com/three@0.160.0/examples/jsm/webxr/VRButton.js';
+
+        let camera, scene, renderer;
+        let hand1, hand2;
+
+        // Joint connections: wrist(0) to each finger chain
+        const fingerChains = [
+            [0, 1, 2, 3, 4],       // thumb (wrist -> tip)
+            [0, 5, 6, 7, 8, 9],    // index
+            [0, 10, 11, 12, 13, 14], // middle
+            [0, 15, 16, 17, 18, 19], // ring
+            [0, 20, 21, 22, 23, 24], // pinky
+        ];
+
+        const leftJointSpheres = [];
+        const rightJointSpheres = [];
+        let leftLines, rightLines;
+
+        init();
+
+        function init() {
+            const container = document.createElement('div');
+            document.body.appendChild(container);
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x333333);
+
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 10);
+            camera.position.set(0, 1.6, 3);
+
+            // Floor
+            const floor = new THREE.Mesh(
+                new THREE.PlaneGeometry(6, 6),
+                new THREE.MeshStandardMaterial({ color: 0x222222 })
+            );
+            floor.rotation.x = -Math.PI / 2;
+            scene.add(floor);
+
+            // Lights
+            scene.add(new THREE.HemisphereLight(0x808080, 0x606060));
+            const light = new THREE.DirectionalLight(0xffffff);
+            light.position.set(0, 6, 0);
+            scene.add(light);
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.xr.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            document.body.appendChild(VRButton.createButton(renderer, {
+                requiredFeatures: ['hand-tracking']
+            }));
+
+            // Create joint spheres for both hands
+            const leftMat = new THREE.MeshStandardMaterial({ color: 0x4488ff });
+            const rightMat = new THREE.MeshStandardMaterial({ color: 0xff4444 });
+            const sphereGeo = new THREE.SphereGeometry(0.008, 8, 8);
+
+            for (let i = 0; i < 25; i++) {
+                const lSphere = new THREE.Mesh(sphereGeo, leftMat);
+                lSphere.visible = false;
+                scene.add(lSphere);
+                leftJointSpheres.push(lSphere);
+
+                const rSphere = new THREE.Mesh(sphereGeo, rightMat);
+                rSphere.visible = false;
+                scene.add(rSphere);
+                rightJointSpheres.push(rSphere);
+            }
+
+            // Create line segments for skeleton
+            const totalSegments = fingerChains.reduce((s, c) => s + c.length - 1, 0);
+
+            const leftLineGeo = new THREE.BufferGeometry();
+            leftLineGeo.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(totalSegments * 6), 3));
+            leftLines = new THREE.LineSegments(leftLineGeo, new THREE.LineBasicMaterial({ color: 0x6699ff }));
+            leftLines.visible = false;
+            scene.add(leftLines);
+
+            const rightLineGeo = new THREE.BufferGeometry();
+            rightLineGeo.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(totalSegments * 6), 3));
+            rightLines = new THREE.LineSegments(rightLineGeo, new THREE.LineBasicMaterial({ color: 0xff6666 }));
+            rightLines.visible = false;
+            scene.add(rightLines);
+
+            // Hands
+            hand1 = renderer.xr.getHand(0);
+            scene.add(hand1);
+            hand2 = renderer.xr.getHand(1);
+            scene.add(hand2);
+
+            window.addEventListener('resize', onWindowResize);
+            renderer.setAnimationLoop(render);
+        }
+
+        function updateHandVisuals(hand, spheres, lines) {
+            const joints = hand.joints;
+            if (!joints || Object.keys(joints).length === 0) {
+                spheres.forEach(s => s.visible = false);
+                lines.visible = false;
+                return;
+            }
+
+            const jointNames = [
+                'wrist',
+                'thumb-metacarpal', 'thumb-phalanx-proximal', 'thumb-phalanx-distal', 'thumb-tip',
+                'index-finger-metacarpal', 'index-finger-phalanx-proximal', 'index-finger-phalanx-intermediate', 'index-finger-phalanx-distal', 'index-finger-tip',
+                'middle-finger-metacarpal', 'middle-finger-phalanx-proximal', 'middle-finger-phalanx-intermediate', 'middle-finger-phalanx-distal', 'middle-finger-tip',
+                'ring-finger-metacarpal', 'ring-finger-phalanx-proximal', 'ring-finger-phalanx-intermediate', 'ring-finger-phalanx-distal', 'ring-finger-tip',
+                'pinky-finger-metacarpal', 'pinky-finger-phalanx-proximal', 'pinky-finger-phalanx-intermediate', 'pinky-finger-phalanx-distal', 'pinky-finger-tip',
+            ];
+
+            const positions = [];
+            let hasData = false;
+
+            for (let i = 0; i < 25; i++) {
+                const joint = joints[jointNames[i]];
+                if (joint && joint.visible !== false) {
+                    spheres[i].position.copy(joint.position);
+                    spheres[i].visible = true;
+                    positions[i] = joint.position;
+                    hasData = true;
+                } else {
+                    spheres[i].visible = false;
+                    positions[i] = null;
+                }
+            }
+
+            if (!hasData) {
+                lines.visible = false;
+                return;
+            }
+
+            // Update line positions
+            const posAttr = lines.geometry.getAttribute('position');
+            let idx = 0;
+            for (const chain of fingerChains) {
+                for (let i = 0; i < chain.length - 1; i++) {
+                    const a = positions[chain[i]];
+                    const b = positions[chain[i + 1]];
+                    if (a && b) {
+                        posAttr.setXYZ(idx * 2, a.x, a.y, a.z);
+                        posAttr.setXYZ(idx * 2 + 1, b.x, b.y, b.z);
+                    } else {
+                        posAttr.setXYZ(idx * 2, 0, 0, 0);
+                        posAttr.setXYZ(idx * 2 + 1, 0, 0, 0);
+                    }
+                    idx++;
+                }
+            }
+            posAttr.needsUpdate = true;
+            lines.visible = true;
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function render() {
+            updateHandVisuals(hand1, leftJointSpheres, leftLines);
+            updateHandVisuals(hand2, rightJointSpheres, rightLines);
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>

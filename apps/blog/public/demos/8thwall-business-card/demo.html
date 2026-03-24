@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<title>名刺 AR Demo — 8th Wall OSS</title>
+
+	<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+	<script src="../xr-standalone/xrextras.js"></script>
+	<script async src="../xr-standalone/xr.js"></script>
+
+	<style>
+		* { margin: 0; padding: 0; box-sizing: border-box; }
+		body { overflow: hidden; font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; background: #000; }
+
+		#overlay {
+			position: absolute; top: 0; left: 0; width: 100%; z-index: 50;
+			pointer-events: none;
+		}
+		.header {
+			display: flex; justify-content: space-between; align-items: center;
+			padding: 12px 16px;
+			background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);
+		}
+		.header-title { color: #fff; font-size: 14px; font-weight: 700; }
+		.header-badge {
+			font-size: 10px; font-weight: 600; padding: 4px 10px;
+			border-radius: 999px; background: rgba(74,222,128,0.2); color: #4ade80;
+		}
+
+		#scan-hint {
+			position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+			z-index: 60; pointer-events: none; text-align: center; color: #fff;
+		}
+		#scan-hint .card-frame {
+			width: 240px; height: 140px; border: 2px solid rgba(255,255,255,0.5);
+			border-radius: 12px; margin: 0 auto 16px;
+			display: flex; flex-direction: column; align-items: center; justify-content: center;
+			animation: pulse 2s ease-in-out infinite;
+			gap: 4px;
+		}
+		#scan-hint .card-icon { font-size: 32px; opacity: 0.5; }
+		#scan-hint .card-label { font-size: 10px; opacity: 0.6; }
+		#scan-hint .scan-text { font-size: 13px; color: rgba(255,255,255,0.8); line-height: 1.6; }
+		@keyframes pulse {
+			0%, 100% { border-color: rgba(255,255,255,0.3); }
+			50% { border-color: rgba(255,255,255,0.8); }
+		}
+
+		#profile-card {
+			display: none; position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%);
+			z-index: 60; pointer-events: auto;
+			background: rgba(0,0,0,0.7); backdrop-filter: blur(12px);
+			border: 1px solid rgba(255,255,255,0.15); border-radius: 20px;
+			padding: 20px; color: #fff; width: 280px;
+		}
+		#profile-card .name { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+		#profile-card .title { font-size: 12px; color: #aaa; margin-bottom: 12px; }
+		#profile-card .links {
+			display: flex; gap: 8px; flex-wrap: wrap;
+		}
+		#profile-card .link-btn {
+			background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+			color: #fff; padding: 6px 12px; border-radius: 8px; font-size: 11px;
+			text-decoration: none; font-weight: 600;
+		}
+		#profile-card .link-btn:hover { background: rgba(255,255,255,0.2); }
+
+		.back-link {
+			position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+			pointer-events: auto; background: rgba(255,255,255,0.1);
+			border: 1px solid rgba(255,255,255,0.2); color: #fff;
+			padding: 10px 24px; border-radius: 999px; font-size: 11px;
+			font-weight: 700; text-decoration: none; backdrop-filter: blur(8px);
+			z-index: 100;
+		}
+		.back-link:hover { background: rgba(255,255,255,0.2); }
+
+		#error-overlay {
+			display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+			background: rgba(0,0,0,0.9); z-index: 200;
+			justify-content: center; align-items: center; text-align: center; color: #fff;
+			padding: 32px;
+		}
+		#error-overlay h2 { font-size: 20px; margin-bottom: 16px; }
+		#error-overlay p { font-size: 14px; color: #aaa; line-height: 1.8; margin-bottom: 12px; }
+		#error-overlay a { color: #e11d48; }
+		#error-overlay code {
+			display: block; background: rgba(255,255,255,0.1); padding: 12px;
+			border-radius: 8px; font-size: 12px; color: #4ade80; margin: 12px 0;
+			text-align: left; white-space: pre-line;
+		}
+	</style>
+</head>
+<body>
+	<a-scene
+		xrweb="allowedDevices: any"
+		xrextras-loading
+		xrextras-runtime-error
+		renderer="colorManagement: true"
+		vr-mode-ui="enabled: false"
+		device-orientation-permission-ui="enabled: false">
+
+		<a-camera position="0 0 0"></a-camera>
+
+		<!-- 名刺 Image Target -->
+		<a-entity xrextras-named-image-target="name: business-card">
+			<!-- 3Dアバター（プリミティブで構成） -->
+			<!-- 頭 -->
+			<a-sphere position="0 0.18 0.02" radius="0.035"
+				material="color: #FFC3A0; roughness: 0.8"></a-sphere>
+			<!-- 体 -->
+			<a-cylinder position="0 0.1 0.02" radius="0.025" height="0.1"
+				material="color: #4CC3D9; roughness: 0.5"></a-cylinder>
+
+			<!-- プロフィールカード（3D） -->
+			<a-plane position="0.12 0.12 0.01" scale="0.15 0.08 1"
+				material="color: #1a1a2e; opacity: 0.9; transparent: true; side: double">
+			</a-plane>
+			<a-text value="Taro Yamada" position="0.12 0.14 0.015"
+				align="center" color="#fff" width="0.15"
+				font="https://cdn.aframe.io/fonts/Roboto-msdf.json"></a-text>
+			<a-text value="WebAR Developer" position="0.12 0.11 0.015"
+				align="center" color="#4CC3D9" width="0.12"
+				font="https://cdn.aframe.io/fonts/Roboto-msdf.json"></a-text>
+
+			<!-- SNSアイコン風 -->
+			<a-sphere position="-0.06 0.06 0.02" radius="0.012"
+				material="color: #1DA1F2; emissive: #1DA1F2; emissiveIntensity: 0.3"
+				animation="property: rotation; to: 0 360 0; dur: 6000; easing: linear; loop: true">
+			</a-sphere>
+			<a-sphere position="0 0.06 0.02" radius="0.012"
+				material="color: #333; emissive: #666; emissiveIntensity: 0.3"
+				animation="property: rotation; to: 0 -360 0; dur: 8000; easing: linear; loop: true">
+			</a-sphere>
+			<a-sphere position="0.06 0.06 0.02" radius="0.012"
+				material="color: #0077B5; emissive: #0077B5; emissiveIntensity: 0.3"
+				animation="property: rotation; to: 0 360 0; dur: 7000; easing: linear; loop: true">
+			</a-sphere>
+		</a-entity>
+
+		<a-light type="ambient" color="#888"></a-light>
+		<a-light type="directional" position="1 3 2" intensity="0.8"></a-light>
+	</a-scene>
+
+	<!-- UI -->
+	<div id="overlay">
+		<div class="header">
+			<span class="header-title">名刺 AR</span>
+			<span class="header-badge">OSS版</span>
+		</div>
+	</div>
+
+	<div id="scan-hint">
+		<div class="card-frame">
+			<span class="card-icon">&#x1F4C7;</span>
+			<span class="card-label">BUSINESS CARD</span>
+		</div>
+		<div class="scan-text">
+			名刺にカメラを向けてください<br>
+			3Dポートフォリオが表示されます
+		</div>
+	</div>
+
+	<div id="profile-card">
+		<div class="name">山田 太郎</div>
+		<div class="title">WebAR Developer / 8th Wall Engineer</div>
+		<div class="links">
+			<span class="link-btn">GitHub</span>
+			<span class="link-btn">Portfolio</span>
+			<span class="link-btn">X/Twitter</span>
+			<span class="link-btn">LinkedIn</span>
+		</div>
+	</div>
+
+	<a href="/tech-articles/8thwall-world-effects" class="back-link">← 関連記事に戻る</a>
+
+	<div id="error-overlay">
+		<div>
+			<h2>8th Wall エンジンを読み込めませんでした</h2>
+			<p>
+				<a href="https://github.com/8thwall/8thwall" target="_blank">8thwall/8thwall</a>
+				からソースをビルドするか、
+				<a href="https://github.com/8thwall/engine" target="_blank">8thwall/engine</a>
+				から xr-standalone.zip をダウンロードしてください。
+			</p>
+			<p>Image Targets を使うには、名刺画像からターゲットを生成します：</p>
+			<code>cd apps/image-target-cli
+npm install
+node ./src/index.js</code>
+		</div>
+	</div>
+
+	<script>
+		AFRAME.registerComponent("card-listener", {
+			init() {
+				this.el.sceneEl.addEventListener("xrimagefound", () => {
+					document.getElementById("scan-hint").style.display = "none";
+					document.getElementById("profile-card").style.display = "block";
+				});
+				this.el.sceneEl.addEventListener("xrimagelost", () => {
+					document.getElementById("scan-hint").style.display = "block";
+					document.getElementById("profile-card").style.display = "none";
+				});
+			}
+		});
+		document.querySelector("a-scene").setAttribute("card-listener", "");
+
+		let engineLoaded = false;
+		const checkEngine = () => {
+			if (window.XR8 && typeof window.XR8.run === "function") engineLoaded = true;
+		};
+		window.addEventListener("xrloaded", checkEngine);
+		setTimeout(() => {
+			checkEngine();
+			if (!engineLoaded) document.getElementById("error-overlay").style.display = "flex";
+		}, 8000);
+	</script>
+</body>
+</html>

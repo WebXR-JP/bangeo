@@ -1,0 +1,4 @@
+{
+	"framework": "nextjs",
+	"installCommand": "pnpm install --filter @bangeo/blog..."
+}

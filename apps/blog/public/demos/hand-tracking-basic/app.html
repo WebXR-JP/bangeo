@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hand Tracking Basic</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #222; font-family: sans-serif; }
+        #info {
+            position: absolute; top: 10px; width: 100%; text-align: center; color: white;
+            pointer-events: none; z-index: 100; text-shadow: 0 1px 2px black;
+        }
+        #info a { color: #f4a83a; pointer-events: auto; }
+        .desc { font-size: 0.8em; opacity: 0.8; margin-top: 4px; padding: 0 10px; }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h3>Hand Tracking Basic</h3>
+        <div class="desc">WebXR Hand Input APIで手指の関節ポーズを取得し、シンプルな可視化を行う基本パス。</div>
+        <div style="margin-top: 10px;">
+            <a href="/">Back to Demos</a>
+        </div>
+    </div>
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+        import { VRButton } from 'https://unpkg.com/three@0.160.0/examples/jsm/webxr/VRButton.js';
+
+        // --- Demo Implementation ---
+        
+        let camera, scene, renderer;
+        let hand1, hand2;
+        let controller1, controller2;
+        let controllerGrip1, controllerGrip2;
+
+        import { XRHandModelFactory } from 'https://unpkg.com/three@0.160.0/examples/jsm/webxr/XRHandModelFactory.js';
+
+        init();
+        animate();
+
+        function init() {
+            const container = document.createElement('div');
+            document.body.appendChild(container);
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x444444);
+
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 10);
+            camera.position.set(0, 1.6, 3);
+
+            const floorGeometry = new THREE.PlaneGeometry(4, 4);
+            const floorMaterial = new THREE.MeshStandardMaterial({ color: 0x222222 });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+
+            scene.add(new THREE.HemisphereLight(0x808080, 0x606060));
+            const light = new THREE.DirectionalLight(0xffffff);
+            light.position.set(0, 6, 0);
+            light.castShadow = true;
+            scene.add(light);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.xr.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            document.body.appendChild(VRButton.createButton(renderer));
+
+            // Hand Tracking Setup
+            const handModelFactory = new XRHandModelFactory();
+
+            // Hand 1
+            controller1 = renderer.xr.getController(0);
+            scene.add(controller1);
+            controllerGrip1 = renderer.xr.getControllerGrip(0);
+            scene.add(controllerGrip1);
+            hand1 = renderer.xr.getHand(0);
+            hand1.add(handModelFactory.createHandModel(hand1, "mesh")); // mesh or spheres
+            scene.add(hand1);
+
+            // Hand 2
+            controller2 = renderer.xr.getController(1);
+            scene.add(controller2);
+            controllerGrip2 = renderer.xr.getControllerGrip(1);
+            scene.add(controllerGrip2);
+            hand2 = renderer.xr.getHand(1);
+            hand2.add(handModelFactory.createHandModel(hand2, "mesh"));
+            scene.add(hand2);
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            renderer.setAnimationLoop(render);
+        }
+
+        function render() {
+            renderer.render(scene, camera);
+        }
+    
+    </script>
+</body>
+</html>

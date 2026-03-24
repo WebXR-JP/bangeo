@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plane Detection</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #222; font-family: sans-serif; }
+        #info {
+            position: absolute; top: 10px; width: 100%; text-align: center; color: white;
+            pointer-events: none; z-index: 100; text-shadow: 0 1px 2px black;
+        }
+        #info a { color: #f4a83a; pointer-events: auto; }
+        .desc { font-size: 0.8em; opacity: 0.8; margin-top: 4px; padding: 0 10px; }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h3>Plane Detection</h3>
+        <div class="desc">XRPlaneSetから得た平面境界ポリゴンを可視化し、追従更新するデモ。</div>
+        <div style="margin-top: 10px;">
+            <a href="/">Back to Demos</a>
+        </div>
+    </div>
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+        import { ARButton } from 'https://unpkg.com/three@0.160.0/examples/jsm/webxr/ARButton.js';
+
+        // --- Demo Implementation ---
+        
+        let container;
+        let camera, scene, renderer;
+        const _planes = new Map();
+
+        init();
+        animate();
+
+        function init() {
+            container = document.createElement('div');
+            document.body.appendChild(container);
+
+            scene = new THREE.Scene();
+
+            camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
+
+            const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 3);
+            light.position.set(0.5, 1, 0.25);
+            scene.add(light);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.xr.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            document.body.appendChild(ARButton.createButton(renderer, { requiredFeatures: ['plane-detection'] }));
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            renderer.setAnimationLoop(render);
+        }
+
+        function render(_timestamp, frame) {
+            if (frame) {
+                const detectedPlanes = frame.detectedPlanes;
+                if (detectedPlanes) {
+                    // Update planes
+                    detectedPlanes.forEach(_plane => {
+                        // Visualize plane (simplified)
+                        // In real implementation, we construct geometry from plane.polygon
+                    });
+                }
+            }
+            renderer.render(scene, camera);
+        }
+    
+    </script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Lifecycle</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #222; font-family: sans-serif; }
+        #info {
+            position: absolute; top: 10px; width: 100%; text-align: center; color: white;
+            pointer-events: none; z-index: 100; text-shadow: 0 1px 2px black;
+        }
+        #info a { color: #f4a83a; pointer-events: auto; }
+        .desc { font-size: 0.8em; opacity: 0.8; margin-top: 4px; padding: 0 10px; }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h3>Session Lifecycle</h3>
+        <div class="desc">XRSession開始/終了、requestReferenceSpace、フレームループと後始末までのライフサイクル全体デモ。</div>
+        <div style="margin-top: 10px;">
+            <a href="/">Back to Demos</a>
+        </div>
+    </div>
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+        import { VRButton } from 'https://unpkg.com/three@0.160.0/examples/jsm/webxr/VRButton.js';
+
+        // --- Demo Implementation ---
+        
+        let camera, scene, renderer;
+        let logPlane;
+        const logs = [];
+
+        init();
+        animate();
+
+        function addLog(msg) {
+            const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
+            logs.unshift(`[${timestamp}] ${msg}`);
+            if (logs.length > 10) logs.pop();
+            updateLogTexture();
+        }
+
+        function updateLogTexture() {
+            const _canvas = logPlane.userData.canvas;
+            const ctx = logPlane.userData.ctx;
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0,0,512,512);
+            ctx.fillStyle = '#fff';
+            ctx.font = '24px monospace';
+            logs.forEach((log, i) => {
+                ctx.fillText(log, 10, 40 + i * 40);
+            });
+            logPlane.material.map.needsUpdate = true;
+        }
+
+        function init() {
+            const container = document.createElement('div');
+            document.body.appendChild(container);
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x222222);
+
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 10);
+            camera.position.set(0, 1.6, 3);
+
+            // Log Display
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            const texture = new THREE.CanvasTexture(canvas);
+            const planeGeo = new THREE.PlaneGeometry(1, 1);
+            const planeMat = new THREE.MeshBasicMaterial({ map: texture });
+            logPlane = new THREE.Mesh(planeGeo, planeMat);
+            logPlane.position.set(0, 1.6, -2);
+            logPlane.userData = { canvas, ctx };
+            scene.add(logPlane);
+            
+            addLog("Ready.");
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.xr.enabled = true;
+            
+            renderer.xr.addEventListener('sessionstart', () => addLog("Session Started"));
+            renderer.xr.addEventListener('sessionend', () => addLog("Session Ended"));
+            
+            container.appendChild(renderer.domElement);
+
+            document.body.appendChild(VRButton.createButton(renderer));
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            renderer.setAnimationLoop(render);
+        }
+
+        function render() {
+            renderer.render(scene, camera);
+        }
+    
+    </script>
+</body>
+</html>

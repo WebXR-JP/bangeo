@@ -1,0 +1,128 @@
+---
+title: "PC + VRヘッドセットでWebXRを体験するガイド"
+description: "PCのブラウザからVRヘッドセットにWebXRコンテンツを表示する仕組みを技術的背景から解説。SteamVR、Oculus Link、OpenXRランタイムの役割と、セットアップ方法をステップごとに詳しく説明します。"
+date: "2025年12月25日"
+category: "GUIDE"
+tags:
+  - "PCVR"
+  - "SteamVR"
+  - "Oculus Link"
+  - "OpenXR"
+  - "入門"
+author: "BANGEO Team"
+thumbnail: "/assets/tech/pcvr-webxr-guide.png"
+draft: false
+---
+
+## はじめに
+
+PCに接続したVRヘッドセット（PCVR）でWebXRを体験するためのガイドです。ブラウザ側の設定、OpenXRランタイム、SteamVR/Oculus PC Appの役割、推奨PCスペック、接続方式（有線/無線/Air Link/Virtual Desktop）、トラブルシューティングをまとめました。
+
+スタンドアロンでの体験やiOS向けの回避策については、[iPhoneでWebXRを動かす方法](/tech-articles/ios-webxr-app-clip-guide)も併せて参照してください。
+
+> **この記事でゴールにすること**：ChromeまたはEdgeから「Enter VR」を押し、VRヘッドセットでWebXRサンプルが安定して動く状態を作る。
+
+## 必要なもの
+
+- Windows 10/11 PC（GPU必須、最新ドライバー）
+- VRヘッドセット（Meta Quest 3/Quest 2/Valve Index/HTC Viveなど）
+- 接続方法：有線（Linkケーブル/DisplayPort）または無線（Air Link/Virtual Desktop）
+- ブラウザ：Chrome または Microsoft Edge（最新バージョン）
+- OpenXRランタイム：SteamVR もしくは Oculus PC App（Meta Questの場合）
+
+### 推奨PCスペックの目安
+
+| 項目 | 目安 |
+| --- | --- |
+| CPU | Intel Core i5/Ryzen 5 以上 |
+| GPU | GeForce RTX 2060 / Radeon RX 5700 以上 |
+| メモリ | 16GB以上推奨 |
+| ネットワーク | 無線接続時はWi-Fi 6以上、ルーターとPCは有線LAN |
+
+## 接続方式と選び方
+
+- **有線（Linkケーブル/DisplayPort）**：最も安定。遅延とパケットロスを最小化。長時間利用や高解像度レンダリングに適する。
+- **Air Link（Meta Quest）**：公式無線ソリューション。Wi-Fi 6/6E環境で低遅延。PCとルーターを有線LANで接続することが必須。
+- **Virtual Desktop**：有料アプリ。H.264/H.265/AV1のストリーミング設定を細かく調整でき、ルーター設定が整っていればAir Linkに近い体験。
+
+無線運用では、PCをルーターに有線接続し、ヘッドセットは5GHz/6GHz帯で「同じルーターの近距離」で使用すると安定しやすくなります。
+
+## PCVRでWebXRが動く仕組み
+
+1. **ブラウザ**がWebXR APIでVRセッションを開始。
+2. **OpenXRランタイム**（SteamVR/Oculus PC App）がリクエストを受ける。
+3. ランタイムがヘッドセットへ描画・トラッキング情報を転送。
+4. ブラウザがフレームごとにヘッドセットのポーズを取得し、ステレオレンダリングした結果を送信。
+
+OpenXRランタイムをどれにするかが最重要ポイントです。Meta QuestならOculus PC App、Valve Index/HTC Vive/Quest Air LinkならSteamVRが基本です。
+
+## セットアップ手順
+
+### 1. ヘッドセットをPCにつなぐ
+
+- **Meta Quest（有線）**：Meta公式のLinkケーブルまたはUSB 3ケーブルでPCと接続し、ヘッドセット側で「Linkを有効化」を選択。
+- **Meta Quest（無線 Air Link）**：PCと同じネットワーク（5GHz/6GHz推奨）で、ヘッドセットの設定 → システム → Quest Link → Air Linkをオン。PC側のOculus PC Appでペアリング。
+- **SteamVR系ヘッドセット（Index/Vive）**：DisplayPort/USBを接続し、SteamVRを起動。
+
+### 2. OpenXRランタイムを確認
+
+- **SteamVRを使う場合**：SteamVRの設定 → 開発者 → 「SteamVRをOpenXRとして設定」をクリック。メニューに「現在のOpenXRランタイム：SteamVR」と表示されればOK。
+- **Oculus PC Appを使う場合**：設定 → 全般 → 「OpenXRランタイム」でMeta Quest Link/Oculusが既定になっているか確認。必要に応じて「設定にする」を押す。
+
+### 3. ブラウザを準備
+
+- Chrome/Edgeを最新にアップデート。
+- **ハードウェアアクセラレーションを有効化**：`chrome://settings/system` で「利用可能な場合ハードウェアアクセラレーションを使用する」をオン。
+- 可能ならブラウザを一度再起動。
+
+### 4. Meta QuestでAir Linkを設定する
+
+1. PCをルーターへ有線LAN接続。
+2. ヘッドセットをWi-Fi 6/6Eの5GHz/6GHz帯に接続し、電波の強い場所に移動。
+3. ヘッドセット：設定 → システム → Quest Link → Air Linkをオン。
+4. PC：Oculus PC Appを起動し、デバイスの「Quest Link」タブでペアリング。
+5. ヘッドセット内の「PCVR」メニューからPCを選択し、接続を許可。
+6. SteamVRを併用する場合は、接続後にSteamVRを起動してOpenXRランタイムを確認。
+
+Air Linkで遅延を感じる場合は、Oculus PC Appのデバイス設定で「ビットレート自動」をオフにして固定値にするか、解像度を1段階下げると安定しやすくなります。
+
+### 5. Virtual Desktopを使う場合
+
+1. ヘッドセットにVirtual Desktopアプリをインストールし、PCにVirtual Desktop Streamerを導入。
+2. PCとヘッドセットを同じネットワークに接続（PCは有線LAN推奨）。
+3. ヘッドセットでVirtual Desktopを起動し、Streamerに表示されるPCへ接続。
+4. メニューから「SteamVRを開始」を選択してからブラウザを起動。
+5. Codecは「H.264/H.265」、ビットレートは40-120Mbpsで環境に合わせて調整。
+
+Air LinkとVirtual Desktopを併用する場合は、同時起動を避け、片方に決めてから接続してください。
+
+### 6. WebXRコンテンツで動作確認
+
+1. ヘッドセットをPCVRモードにしたまま、以下のテストURLをChrome/Edgeで開く。
+2. ページ内の「Enter VR」または「START VR」をクリック。
+3. ヘッドセット内でVR表示に切り替わり、コントローラーが反応すれば成功。
+
+- [Immersive Web Samples - VR Session](https://immersive-web.github.io/webxr-samples/immersive-vr-session.html)
+- [Three.js WebXR VR Cubes](https://threejs.org/examples/?q=webxr#webxr_vr_cubes)
+- [Immersive Web対応表](https://immersive-web.dev/#supporttable)（対応状況の確認用）
+
+## よくあるつまずきと対処法
+
+- **「VRを開始できません」**：OpenXRランタイムが未設定の可能性。SteamVR/Oculus PC Appで「OpenXRとして設定」を再確認。
+- **コントローラーが効かない**：SteamVRならデバイス → コントローラー設定でバインドを確認。Meta Quest LinkではOculus PC Appを再起動。
+- **カクつき・遅延**：無線の場合はルーターをPCに有線接続し、ヘッドセットは5GHz/6GHzの近距離で使用。有線LinkならUSB 3ケーブルに変更。
+- **画面が真っ黒**：ブラウザのハードウェアアクセラレーションを再確認し、GPUドライバーを最新に更新。
+- **複数ランタイムが競合**：SteamVRとOculus PC Appを両方起動していると競合する場合があります。使わない方を終了してから再試行。
+- **Air Linkが安定しない**：ルーターの5GHz/6GHzチャネルを固定（36/149/161など）、ルーターをメッシュ中継器経由にせず単体で運用、Air Linkのエンコードビットレートを50-150Mbpsで調整。
+- **Virtual Desktopで遅延する**：CodecをH.264に戻す、フレームレートを72/80Hzに落とす、PC側でバックグラウンドアプリを停止。
+
+## WebXR開発を始めるときのヒント
+
+- **Three.js**：公式サンプルを基に `WebGLRenderer` の `xr` オプションを有効化。
+- **Babylon.js**：`WebXRDefaultExperience.CreateAsync(scene)` で最短起動。
+- **デバッグ**：Chrome DevToolsの「Application」→「WebXR」パネルでランタイム検出状況を確認。
+- **他の記事との組み合わせ**：マルチユーザーARを試したい場合は[Shared Spacesガイド](/tech-articles/webxr-colocation-meta-quest)、モバイル向けは[iOSガイド](/tech-articles/ios-webxr-app-clip-guide)を参照。
+
+## まとめ
+
+WebXRのVR体験は「ブラウザ」「OpenXRランタイム」「ヘッドセット」の3点がそろえば動きます。この記事の手順でPCVR環境を整え、まずはサンプルで安定動作を確認してから自作コンテンツに挑戦しましょう。

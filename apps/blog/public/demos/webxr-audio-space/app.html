@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebXR Audio Space</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #222; font-family: sans-serif; }
+        #info {
+            position: absolute; top: 10px; width: 100%; text-align: center; color: white;
+            pointer-events: none; z-index: 100; text-shadow: 0 1px 2px black;
+        }
+        #info a { color: #f4a83a; pointer-events: auto; }
+        .desc { font-size: 0.8em; opacity: 0.8; margin-top: 4px; padding: 0 10px; }
+        #startAudio {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            padding: 12px 24px; font-size: 16px; cursor: pointer; z-index: 200;
+            background: #f4a83a; border: none; border-radius: 8px; color: #222; font-weight: bold;
+        }
+        #startAudio:hover { background: #ffba55; }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h3>WebXR Audio Space</h3>
+        <div class="desc">VR空間内に音源オブジェクトを配置し、Web Audio API (PannerNode) で3D空間音響を実現するデモ。</div>
+        <div style="margin-top: 10px;">
+            <a href="/">Back to Demos</a>
+        </div>
+    </div>
+    <button id="startAudio">Start Audio</button>
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+        import { VRButton } from 'https://unpkg.com/three@0.160.0/examples/jsm/webxr/VRButton.js';
+
+        let camera, scene, renderer;
+        let audioCtx, listener;
+        const audioSources = [];
+        let audioStarted = false;
+
+        const sourceConfigs = [
+            { color: 0xff4444, pos: [-2, 1.2, -2], freq: 220 },
+            { color: 0x44ff44, pos: [2, 1.5, -1], freq: 330 },
+            { color: 0x4488ff, pos: [0, 0.8, -3], freq: 440 },
+            { color: 0xff44ff, pos: [1.5, 2, 1], freq: 550 },
+        ];
+
+        init();
+
+        function init() {
+            const container = document.createElement('div');
+            document.body.appendChild(container);
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a2e);
+
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 50);
+            camera.position.set(0, 1.6, 3);
+
+            // Floor
+            const floor = new THREE.Mesh(
+                new THREE.PlaneGeometry(10, 10),
+                new THREE.MeshStandardMaterial({ color: 0x1a1a2e })
+            );
+            floor.rotation.x = -Math.PI / 2;
+            scene.add(floor);
+
+            // Lights
+            scene.add(new THREE.HemisphereLight(0x606080, 0x404060));
+            const light = new THREE.DirectionalLight(0xffffff, 0.8);
+            light.position.set(2, 6, 2);
+            scene.add(light);
+
+            // Audio source spheres
+            const sphereGeo = new THREE.SphereGeometry(0.15, 16, 16);
+            for (const cfg of sourceConfigs) {
+                const mat = new THREE.MeshStandardMaterial({ color: cfg.color, emissive: cfg.color, emissiveIntensity: 0.3 });
+                const mesh = new THREE.Mesh(sphereGeo, mat);
+                mesh.position.set(...cfg.pos);
+                scene.add(mesh);
+
+                // Pulsing ring indicator
+                const ring = new THREE.Mesh(
+                    new THREE.RingGeometry(0.2, 0.25, 32),
+                    new THREE.MeshBasicMaterial({ color: cfg.color, side: THREE.DoubleSide, transparent: true, opacity: 0.5 })
+                );
+                ring.position.copy(mesh.position);
+                scene.add(ring);
+
+                audioSources.push({ mesh, ring, freq: cfg.freq, panner: null, osc: null });
+            }
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.xr.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            document.body.appendChild(VRButton.createButton(renderer));
+
+            // Start Audio button
+            document.getElementById('startAudio').addEventListener('click', startAudio);
+
+            window.addEventListener('resize', onWindowResize);
+            renderer.setAnimationLoop(render);
+        }
+
+        function startAudio() {
+            if (audioStarted) return;
+            audioStarted = true;
+            document.getElementById('startAudio').style.display = 'none';
+
+            audioCtx = new AudioContext();
+            listener = audioCtx.listener;
+
+            for (const src of audioSources) {
+                const osc = audioCtx.createOscillator();
+                osc.type = 'sine';
+                osc.frequency.value = src.freq;
+
+                const gain = audioCtx.createGain();
+                gain.gain.value = 0.15;
+
+                const panner = audioCtx.createPanner();
+                panner.panningModel = 'HRTF';
+                panner.distanceModel = 'inverse';
+                panner.refDistance = 0.5;
+                panner.maxDistance = 20;
+                panner.rolloffFactor = 1.5;
+                panner.setPosition(src.mesh.position.x, src.mesh.position.y, src.mesh.position.z);
+
+                osc.connect(gain).connect(panner).connect(audioCtx.destination);
+                osc.start();
+
+                src.panner = panner;
+                src.osc = osc;
+            }
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function render(_timestamp, frame) {
+            // Sync audio listener to camera
+            if (audioCtx && listener) {
+                const cam = renderer.xr.getCamera();
+                const p = cam.position;
+                const q = cam.quaternion;
+                const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(q);
+                const up = new THREE.Vector3(0, 1, 0).applyQuaternion(q);
+
+                if (listener.positionX) {
+                    listener.positionX.value = p.x;
+                    listener.positionY.value = p.y;
+                    listener.positionZ.value = p.z;
+                    listener.forwardX.value = forward.x;
+                    listener.forwardY.value = forward.y;
+                    listener.forwardZ.value = forward.z;
+                    listener.upX.value = up.x;
+                    listener.upY.value = up.y;
+                    listener.upZ.value = up.z;
+                } else {
+                    listener.setPosition(p.x, p.y, p.z);
+                    listener.setOrientation(forward.x, forward.y, forward.z, up.x, up.y, up.z);
+                }
+            }
+
+            // Animate rings
+            const t = performance.now() * 0.001;
+            for (const src of audioSources) {
+                src.ring.lookAt(camera.position);
+                const s = 1.0 + 0.2 * Math.sin(t * 2 + src.freq * 0.01);
+                src.ring.scale.setScalar(s);
+            }
+
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+---
+title: "UnityでWebXRコンテンツをビルドする"
+description: "Unityプロジェクトの作成からWebXR Exportパッケージの導入、VR/ARコンテンツのWebGLビルドとPC・スマホ・VRヘッドセットでのテスト方法まで、一連の手順を解説します。"
+date: "2026年1月19日"
+category: "GUIDE"
+tags:
+  - "Unity"
+  - "WebXR"
+  - "URP"
+  - "WebGL"
+  - "VR"
+  - "AR"
+  - "Meta Quest"
+author: "BANGEO Team"
+thumbnail: "/assets/tech/unity-webxr-build-guide.png"
+draft: false
+---
+
+## はじめに
+
+UnityでWebXRコンテンツを作成し、ブラウザから直接VR/AR体験を提供する方法を解説します。
+
+デモURL：[https://yushimatenjin.github.io/unity-webxr-sample/](https://yushimatenjin.github.io/unity-webxr-sample/)
+
+![Unity WebXR Sampleのデモ画面 - VR/ARモードで動作するWebXRコンテンツ](/images/tech-articles/unity-webxr/unity-webxr-sample-demo.png)
+
+### 作成環境
+
+| 項目 | バージョン |
+| --- | --- |
+| Unity | 6000.3.4f1 |
+| レンダリング | Universal Render Pipeline (URP) |
+| プラットフォーム | WebGL Build Support |
+
+## セットアップ手順
+
+### Step 1: プロジェクト作成
+
+Unity Hubを起動し、新規プロジェクトを作成します。テンプレートは **3D (URP)** を選択してください。
+
+### Step 2: WebXR Exportパッケージの導入
+
+WebXR Exportパッケージのインストールには2つの方法があります。
+
+#### 方法A: OpenUPM経由（推奨）
+
+1. **Edit > Project Settings > Package Manager** を開く
+2. **Scoped Registries** に以下を追加：
+   - Name: `OpenUPM`
+   - URL: `https://package.openupm.com`
+   - Scope: `com.de-panther`
+3. **Window > Package Manager** を開く
+4. **My Registries** から「WebXR Export」と「WebXR Interactions」をインストール
+
+![Unity Project Settings - Package Managerの設定画面でOpenUPMのスコープを追加](/images/tech-articles/unity-webxr/project-settings-package-manager.png)
+
+![Unity Package Manager - OpenUPMからWebXR ExportとWebXR Interactionsをインストール](/images/tech-articles/unity-webxr/package-manager-openupm.png)
+
+#### 方法B: Git URL経由
+
+**Window > Package Manager > Add package from git URL** で以下を順番にインストール：
+
+```
+https://github.com/nicovr/unity-webxr-export.git?path=/Packages/webxr
+https://github.com/nicovr/unity-webxr-export.git?path=/Packages/webxr-interactions
+```
+
+### Step 3: WebGLテンプレートのコピー
+
+1. **Window > WebXR > Copy WebGLTemplates** を実行
+2. Unityを再起動
+
+![Unity Window メニュー - WebXR > Copy WebGLTemplatesを実行](/images/tech-articles/unity-webxr/window-webxr-copy-webgl-templates.png)
+
+> WebGLテンプレートのコピーを忘れると、ビルド時にWebXR用のHTMLテンプレートが見つからずエラーになります。
+
+### Step 4: XR Plug-in Managementの設定
+
+1. **Edit > Project Settings > XR Plug-in Management** を開く
+2. **WebGL** タブを選択
+3. **WebXR Export** にチェックを入れる
+
+### Step 5: シーンの設定
+
+1. デフォルトの **Main Camera** を削除（または無効化）
+2. **Packages/WebXR Interactions** から `WebXRCameraSet.prefab` をシーンにドラッグ
+3. 必要なオブジェクト（Plane、Cubeなど）を追加
+
+![Unity Hierarchy - WebXRCameraSetプレハブとCubeを配置したシーン構成](/images/tech-articles/unity-webxr/hierarchy-webxr-cameraset-cube.png)
+
+### Step 6: ビルドと実行
+
+1. **File > Build Settings** を開く
+2. **WebGL** プラットフォームを選択し、Switch Platform
+3. **Player Settings > Resolution and Presentation** で WebGL Template を **WebXR2020** に設定
+4. **Build And Run** を実行
+
+## テスト方法
+
+### PCでのテスト
+
+1. Chrome または Edge をインストール
+2. [WebXR API Emulator](https://chrome.google.com/webstore/detail/webxr-api-emulator/) 拡張機能をインストール
+3. ビルドしたHTMLをローカルサーバーで開く
+4. F12でDevToolsを開き、WebXR Emulatorタブで仮想デバイスを操作
+
+### スマートフォンARでのテスト
+
+1. Android端末でChromeを開く
+2. HTTPS経由でビルドURLにアクセス
+3. 「START AR」ボタンをタップ
+
+> iOSのSafariはWebXRをサポートしていません。iOSでのテストにはApp Clipソリューション（EyeJackなど）が必要です。
+
+### VRヘッドセットでのテスト
+
+1. Meta Quest Browserを開く
+2. ビルドURLにアクセス
+3. 「ENTER VR」ボタンをタップ
+
+## トラブルシューティング
+
+| 問題 | 原因 | 対処法 |
+| --- | --- | --- |
+| VR/ARボタンが非活性 | WebXR Exportが有効になっていない | XR Plug-in Managementの設定を確認 |
+| テンプレートが見つからない | WebGLテンプレートがコピーされていない | Copy WebGLTemplatesを実行し、Unityを再起動 |
+| ビルドエラーが発生 | WebGLモジュールが未インストール | Unity HubからWebGL Build Supportをインストール |
+| ビルドが表示されない | HTTPS非対応 | ローカルサーバーにHTTPSを設定、または GitHub Pages等にデプロイ |
+
+## 関連リンク
+
+- [unity-webxr-export（GitHub）](https://github.com/nicovr/unity-webxr-export)
+- [de-panther デモページ](https://de-panther.github.io/unity-webxr-export/Build/)
+- [W3C WebXR Device API 仕様](https://www.w3.org/TR/webxr/)

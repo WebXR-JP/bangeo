@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reference Space</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #222; font-family: sans-serif; }
+        #info {
+            position: absolute; top: 10px; width: 100%; text-align: center; color: white;
+            pointer-events: none; z-index: 100; text-shadow: 0 1px 2px black;
+        }
+        #info a { color: #f4a83a; pointer-events: auto; }
+        .desc { font-size: 0.8em; opacity: 0.8; margin-top: 4px; padding: 0 10px; }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h3>Reference Space</h3>
+        <div class="desc">local/local-floor/bounded-floor/stage/unboundedのリファレンススペース差異を比較するデモ。</div>
+        <div style="margin-top: 10px;">
+            <a href="/">Back to Demos</a>
+        </div>
+    </div>
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+        import { VRButton } from 'https://unpkg.com/three@0.160.0/examples/jsm/webxr/VRButton.js';
+
+        // --- Demo Implementation ---
+        
+        let camera, scene, renderer;
+        let localGroup, _boundedGroup, _viewerGroup;
+
+        init();
+        animate();
+
+        function init() {
+            const container = document.createElement('div');
+            document.body.appendChild(container);
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x202040);
+
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 10);
+            camera.position.set(0, 1.6, 3);
+
+            // Objects attached to different spaces concept (visualized in same world for now)
+            
+            // "Local Floor" reference (Green Grid)
+            localGroup = new THREE.Group();
+            const grid = new THREE.GridHelper(10, 10, 0x00ff00, 0x004400);
+            localGroup.add(grid);
+            scene.add(localGroup);
+
+            // Objects
+            const geo = new THREE.ConeGeometry(0.2, 0.5, 16);
+            const mat = new THREE.MeshNormalMaterial();
+            const cone = new THREE.Mesh(geo, mat);
+            cone.position.set(0, 1, -2);
+            localGroup.add(cone);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.xr.enabled = true;
+            // We request multiple reference spaces support in optionalFeatures
+            container.appendChild(renderer.domElement);
+
+            document.body.appendChild(VRButton.createButton(renderer, {
+                requiredFeatures: ['local-floor'],
+                optionalFeatures: ['bounded-floor', 'unbounded']
+            }));
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            renderer.setAnimationLoop(render);
+        }
+
+        function render() {
+            renderer.render(scene, camera);
+        }
+    
+    </script>
+</body>
+</html>

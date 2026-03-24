@@ -1,0 +1,37 @@
+{
+	"name": "@bangeo/blog",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "next dev",
+		"build": "next build",
+		"start": "next start",
+		"lint": "biome lint .",
+		"format": "biome format --write .",
+		"check": "biome check --write .",
+		"check:ci": "biome check .",
+		"preview": "next build && next start"
+	},
+	"dependencies": {
+		"@shikijs/rehype": "^3.23.0",
+		"@shikijs/transformers": "^3.23.0",
+		"fumadocs-core": "^16.7.5",
+		"fumadocs-mdx": "^14.2.11",
+		"fumadocs-ui": "^16.7.5",
+		"next": "^16.2.1",
+		"react": "^19.2.4",
+		"react-dom": "^19.2.4",
+		"tailwindcss": "^4.2.2",
+		"zod": "^4.3.6"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.4.8",
+		"@tailwindcss/postcss": "^4.2.2",
+		"@types/mdx": "^2.0.13",
+		"@types/node": "^22.19.15",
+		"@types/react": "^19.2.14",
+		"@types/react-dom": "^19.2.3",
+		"typescript": "^5.9.3"
+	}
+}

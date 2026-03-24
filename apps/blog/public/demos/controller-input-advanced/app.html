@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controller Input Advanced</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #222; font-family: sans-serif; }
+        #info {
+            position: absolute; top: 10px; width: 100%; text-align: center; color: white;
+            pointer-events: none; z-index: 100; text-shadow: 0 1px 2px black;
+        }
+        #info a { color: #f4a83a; pointer-events: auto; }
+        .desc { font-size: 0.8em; opacity: 0.8; margin-top: 4px; padding: 0 10px; }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h3>Controller Input Advanced</h3>
+        <div class="desc">Gamepad API経由でトリガー圧・スティック軸・バイブレーションを扱う高度なコントローラー入力処理。</div>
+        <div style="margin-top: 10px;">
+            <a href="/">Back to Demos</a>
+        </div>
+    </div>
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+        import { VRButton } from 'https://unpkg.com/three@0.160.0/examples/jsm/webxr/VRButton.js';
+        import { XRControllerModelFactory } from 'https://unpkg.com/three@0.160.0/examples/jsm/webxr/XRControllerModelFactory.js';
+
+        // --- Demo Implementation ---
+        
+        let camera, scene, renderer;
+        let controller1, controller2;
+        let infoPanel;
+
+        init();
+        animate();
+
+        function init() {
+            const container = document.createElement('div');
+            document.body.appendChild(container);
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x333333);
+
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 10);
+            camera.position.set(0, 1.6, 3);
+
+            scene.add(new THREE.HemisphereLight(0x808080, 0x606060));
+
+            // UI Panel for logs
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, 512, 256);
+            ctx.fillStyle = '#000000';
+            ctx.font = '24px sans-serif';
+            ctx.fillText('Press buttons to test haptics', 20, 50);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            const plane = new THREE.Mesh(
+                new THREE.PlaneGeometry(1, 0.5),
+                new THREE.MeshBasicMaterial({ map: texture })
+            );
+            plane.position.set(0, 1.5, -1);
+            scene.add(plane);
+            infoPanel = { canvas, ctx, texture, plane };
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.xr.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            document.body.appendChild(VRButton.createButton(renderer));
+
+            function onSelectStart(event) {
+                const gamepad = event.target.gamepad;
+                if (gamepad?.hapticActuators && gamepad.hapticActuators.length > 0) {
+                    // Strong pulse
+                    gamepad.hapticActuators[0].pulse(1.0, 200);
+                    updateLog("Pulse: Strong (1.0, 200ms)");
+                } else {
+                    updateLog("No Haptics found");
+                }
+            }
+            
+            function onSqueezeStart(event) {
+                const gamepad = event.target.gamepad;
+                if (gamepad?.hapticActuators && gamepad.hapticActuators.length > 0) {
+                    // Weak pulse
+                    gamepad.hapticActuators[0].pulse(0.3, 50);
+                    updateLog("Pulse: Weak (0.3, 50ms)");
+                }
+            }
+
+            controller1 = renderer.xr.getController(0);
+            controller1.addEventListener('selectstart', onSelectStart);
+            controller1.addEventListener('squeezestart', onSqueezeStart);
+            scene.add(controller1);
+
+            controller2 = renderer.xr.getController(1);
+            controller2.addEventListener('selectstart', onSelectStart);
+            controller2.addEventListener('squeezestart', onSqueezeStart);
+            scene.add(controller2);
+
+            const controllerModelFactory = new XRControllerModelFactory();
+            const grip1 = renderer.xr.getControllerGrip(0);
+            grip1.add(controllerModelFactory.createControllerModel(grip1));
+            scene.add(grip1);
+            
+            const grip2 = renderer.xr.getControllerGrip(1);
+            grip2.add(controllerModelFactory.createControllerModel(grip2));
+            scene.add(grip2);
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function updateLog(text) {
+            const { ctx, texture } = infoPanel;
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, 512, 256);
+            ctx.fillStyle = '#000000';
+            ctx.fillText(text, 20, 120);
+            texture.needsUpdate = true;
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            renderer.setAnimationLoop(render);
+        }
+
+        function render() {
+            // Poll gamepad data if needed (e.g. axes)
+            renderer.render(scene, camera);
+        }
+    
+    </script>
+</body>
+</html>

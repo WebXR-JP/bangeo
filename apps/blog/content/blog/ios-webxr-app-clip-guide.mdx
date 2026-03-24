@@ -1,0 +1,131 @@
+---
+title: "iPhoneでWebXRを動かす方法 - App Clipの仕組みと活用ガイド"
+description: "iOSのSafariはWebXRを直接サポートしていませんが、App Clipという仕組みを使えばiPhoneでもWebXR ARを体験できます。EyeJack、Variant Launchなどのソリューションと、その技術的な仕組み、さらには自作への挑戦方法まで詳しく解説します。"
+date: "2025年12月28日"
+category: "GUIDE"
+tags:
+  - "iOS"
+  - "iPhone"
+  - "App Clip"
+  - "ARKit"
+  - "入門"
+  - "Safari"
+  - "ポリフィル"
+author: "BANGEO Team"
+thumbnail: "/images/tech-articles/eyejack-ios-webxr.png"
+draft: false
+---
+
+## はじめに - iOSとWebXRの現状
+
+WebXR Device APIは、ウェブブラウザ上でVR/AR体験を提供するための標準技術です。しかし、iOSのSafariブラウザはWebXR（特に`immersive-ar`モード）を**直接サポートしていません**。
+
+これはAppleがARKitというネイティブフレームワークを推進しているためと考えられていますが、Web開発者にとっては大きな課題でした。しかし、**App Clip**という仕組みを活用することで、この制約を回避できることが判明しています。
+
+## App Clipとは？
+
+App Clipは、Appleが提供する**「インストール不要のミニアプリ」**機能です。
+
+- App Storeからフルインストール不要
+- QRコードやNFCタグ、ウェブリンクをタップするだけで素早く起動
+- 容量は15MB以下に制限されているため、ほぼ「一瞬」で利用開始可能
+- ネイティブアプリの一部として動作するため、ARKitなどのDevice APIにアクセス可能
+
+この特性を利用して、App ClipをWebXRの**「シム（Shim）」「ポリフィル（Polyfill）」**として活用する手法が生まれました。
+
+## なぜApp ClipでWebXRが動くのか - 技術的な仕組み
+
+App Clipを使ったWebXR実現の基本的なアーキテクチャは以下の通りです：
+
+![App ClipによるWebXRアーキテクチャ](/images/tech-articles/app-clip-architecture.png)
+
+1. **ARKit（ネイティブAR機能）が背景で動作** - カメラ映像の取得、平面検出、ヒットテストなどを担当
+2. **その上に透明なWKWebView（ブラウザ画面）を重ねる** - WebXRコンテンツを表示
+3. **`window.xr`にポリフィルを注入** - カメラ画像、ヒットテスト結果、デバイスの位置情報などをJavaScriptから利用可能に
+
+つまり、App Clip自体は非常に軽量なままで、実質的にWebXRコンテンツをARKit上で動かすことができます。
+
+> 「後ろにSwiftのARKit、前にSafari WebViewを表示しているだけのiOSアプリ」というシンプルな構成です。
+
+## 実際に試してみた
+
+実際にiPhoneで[EyeJack](https://play.eyejack.xyz/)を使ってWebXRを体験してみました。
+
+### Step 1: EyeJackのリンクにアクセス
+
+iPhoneのSafariで以下のURLにアクセスします：
+
+デモURL：[https://play.eyejack.xyz/link/?url=https://threejs.org/examples/webxr_ar_hittest.html](https://play.eyejack.xyz/link/?url=https://threejs.org/examples/webxr_ar_hittest.html)
+
+![QRコード - EyeJack Three.js Hit-Testデモ](/images/tech-articles/qr-eyejack-threejs-hittest.png)
+
+![EyeJack App Clipの起動バナー](/images/tech-articles/screenshot-eyejack-appclip-banner.png)
+
+リンクをタップすると、App Clipのバナーが表示される。「開く」をタップする。
+
+### Step 2: App Clipが起動・カメラ権限を許可
+
+「開く」をタップすると、App Clipが自動的にダウンロードされ、数秒で起動します。
+
+![EyeJack App Clip起動中](/images/tech-articles/screenshot-eyejack-loading.png)
+
+App Clipが起動中。インストール不要で数秒で立ち上がる。
+
+カメラ権限を許可すると、ARモードが開始されます。
+
+### Step 3: Three.js Hit-Testデモを体験
+
+カメラ権限を許可すると、Three.jsのHit-Testデモが起動します。「START AR」ボタンをタップしてARモードを開始します。
+
+![Three.js Hit-Testデモ起動画面](/images/tech-articles/screenshot-threejs-hittest-start.png)
+
+画面をタップすると、検出された平面上にオブジェクトが配置されます。**問題なく動作しました。**
+
+![Three.js Hit-Test動作中](/images/tech-articles/screenshot-threejs-hittest-working.png)
+
+### 試した感想
+
+- App Clipは本当に一瞬で起動する（インストール不要の恩恵）
+
+## 利用可能なソリューション
+
+[EyeJack](https://play.eyejack.xyz/)以外にも、iOSでWebXRを動かすためのソリューションがいくつかあります。
+
+### 1. EyeJack（Play AR）- 無料で試せる
+
+[EyeJack](https://play.eyejack.xyz/)は、上で試したApp Clipを利用してWebXRをiOSで起動させるためのサービスです。
+
+- **無料**で利用可能
+- URLを渡すだけでiOSでAR体験を提供
+- 例：[Three.js AR Hit-Testデモ](https://play.eyejack.xyz/link/?url=https://threejs.org/examples/webxr_ar_hittest.html)
+
+Three.jsのhit-testデモや、[XR Dinosaurs](https://xrdinosaurs.com/)（GLBモデルとアニメーション）など、様々なWebXRコンテンツが動作確認されています。
+
+*※ ロゴとアイコン（目のマーク）が少し不気味という声もありますが、機能面では問題なく動作します。*
+
+### 2. Variant Launch - 商用向け
+
+[Variant Launch](https://launch.variant3d.com/)は、商用向けのApp Clipソリューションです。
+
+- [PlayCanvas](https://playcanvas.com/)などの開発環境との連携が可能
+- 企業向けのサポートとカスタマイズ
+- ブランドに合わせたApp Clipのカスタマイズ
+
+## まとめ
+
+iOSでWebXRを動かすためのApp Clip技術のポイントをまとめます：
+
+- **Safari単体ではWebXR ARは動かない** - Appleの方針
+- **App Clipがポリフィルとして機能** - ARKit + WebViewの組み合わせ
+- **[EyeJack](https://play.eyejack.xyz/)で今すぐ無料体験可能** - 商用には[Variant Launch](https://launch.variant3d.com/)なども
+- **自作も技術的には可能** - ただしApp Store登録が必要
+
+WebXR開発者にとって、iOSは長らく課題でしたが、App Clipの活用により選択肢が増えています。
+
+## 関連リンク
+
+- [EyeJack Play AR](https://play.eyejack.xyz/)
+- [Variant Launch](https://launch.variant3d.com/)
+- [XR Dinosaurs](https://xrdinosaurs.com/)
+- [Immersive Web Support Table](https://immersiveweb.dev/#supporttable)
+- [Reddit - WebXR on iOS via App Clip](https://www.reddit.com/r/WebXR/comments/1kc5oao/just_a_reminder_that_webxr_is_able_to_work_albeit/)

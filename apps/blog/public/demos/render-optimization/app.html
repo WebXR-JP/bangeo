@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Render Optimization</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #222; font-family: sans-serif; }
+        #info {
+            position: absolute; top: 10px; width: 100%; text-align: center; color: white;
+            pointer-events: none; z-index: 100; text-shadow: 0 1px 2px black;
+        }
+        #info a { color: #f4a83a; pointer-events: auto; }
+        .desc { font-size: 0.8em; opacity: 0.8; margin-top: 4px; padding: 0 10px; }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h3>Render Optimization</h3>
+        <div class="desc">レンダリング負荷を計測し、解像度スケール/LOD/バッチ削減で最適化する実験。</div>
+        <div style="margin-top: 10px;">
+            <a href="/">Back to Demos</a>
+        </div>
+    </div>
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+        import { VRButton } from 'https://unpkg.com/three@0.160.0/examples/jsm/webxr/VRButton.js';
+
+        // --- Demo Implementation ---
+        
+        // Slider to change object count / resolution scale
+        // For VR, UI must be in-world. 
+        
+        let camera, scene, renderer;
+        let cubes;
+        let count = 1000;
+        let countText;
+
+        init();
+        animate();
+
+        function init() {
+            const container = document.createElement('div');
+            document.body.appendChild(container);
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x220000);
+
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 10);
+            camera.position.set(0, 1.6, 3);
+            scene.add(new THREE.GridHelper(10, 10));
+
+            // Instanced Mesh
+            const geo = new THREE.BoxGeometry(0.05, 0.05, 0.05);
+            const mat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+            cubes = new THREE.InstancedMesh(geo, mat, 10000);
+            scene.add(cubes);
+            updateCubes(count);
+
+            // Controls
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+            const tex = new THREE.CanvasTexture(canvas);
+            const panel = new THREE.Mesh(new THREE.PlaneGeometry(1, 0.5), new THREE.MeshBasicMaterial({ map: tex }));
+            panel.position.set(0, 1.5, -1);
+            countText = { ctx, tex, canvas };
+            scene.add(panel);
+            
+            // Buttons
+            const btnUp = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.02), new THREE.MeshBasicMaterial({ color: 0x00ff00 }));
+            btnUp.position.set(0.3, 1.5, -0.9);
+            btnUp.userData = { action: 'up' };
+            scene.add(btnUp);
+            
+            const btnDown = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.02), new THREE.MeshBasicMaterial({ color: 0xff0000 }));
+            btnDown.position.set(-0.3, 1.5, -0.9);
+            btnDown.userData = { action: 'down' };
+            scene.add(btnDown);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.xr.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            document.body.appendChild(VRButton.createButton(renderer));
+            
+            // Interaction
+            const controller = renderer.xr.getController(0);
+            controller.addEventListener('selectstart', onSelect);
+            scene.add(controller);
+            const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,-5)]));
+            controller.add(line);
+
+            window.addEventListener('resize', onWindowResize);
+            updateUI();
+        }
+        
+        function updateCubes(n) {
+            const matrix = new THREE.Matrix4();
+            for(let i=0; i<10000; i++) {
+                if(i < n) {
+                    matrix.setPosition(
+                        Math.random() * 10 - 5,
+                        Math.random() * 5,
+                        Math.random() * 10 - 5
+                    );
+                    cubes.setMatrixAt(i, matrix);
+                } else {
+                    matrix.setPosition(0, -100, 0); // Hide
+                    cubes.setMatrixAt(i, matrix);
+                }
+            }
+            cubes.instanceMatrix.needsUpdate = true;
+            cubes.count = n;
+        }
+        
+        function updateUI() {
+            const { ctx, tex } = countText;
+            ctx.fillStyle = '#222';
+            ctx.fillRect(0,0,512,256);
+            ctx.fillStyle = '#fff';
+            ctx.font = '50px sans-serif';
+            ctx.fillText(`Count: ${count}`, 50, 150);
+            tex.needsUpdate = true;
+        }
+        
+        function onSelect(e) {
+            // Simple raycast check manually for buttons
+            const controller = e.target;
+            const tempMatrix = new THREE.Matrix4();
+            tempMatrix.identity().extractRotation(controller.matrixWorld);
+            const raycaster = new THREE.Raycaster();
+            raycaster.ray.origin.setFromMatrixPosition(controller.matrixWorld);
+            raycaster.ray.direction.set(0, 0, -1).applyMatrix4(tempMatrix);
+            
+            const intersects = raycaster.intersectObjects(scene.children);
+            if (intersects.length > 0) {
+                const act = intersects[0].object.userData.action;
+                if (act === 'up') {
+                    count = Math.min(10000, count + 1000);
+                    updateCubes(count);
+                    updateUI();
+                } else if (act === 'down') {
+                    count = Math.max(0, count - 1000);
+                    updateCubes(count);
+                    updateUI();
+                }
+            }
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() { renderer.setAnimationLoop(render); }
+        function render() { renderer.render(scene, camera); }
+    
+    </script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AudioContext in XR</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #222; font-family: sans-serif; }
+        #info {
+            position: absolute; top: 10px; width: 100%; text-align: center; color: white;
+            pointer-events: none; z-index: 100; text-shadow: 0 1px 2px black;
+        }
+        #info a { color: #f4a83a; pointer-events: auto; }
+        .desc { font-size: 0.8em; opacity: 0.8; margin-top: 4px; padding: 0 10px; }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h3>AudioContext in XR</h3>
+        <div class="desc">immersiveセッション中のAudioContextライフサイクル／サスペンド・再開挙動を確認するテスト。</div>
+        <div style="margin-top: 10px;">
+            <a href="/">Back to Demos</a>
+        </div>
+    </div>
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+        import { VRButton } from 'https://unpkg.com/three@0.160.0/examples/jsm/webxr/VRButton.js';
+
+        // --- Demo Implementation ---
+        
+        let camera, scene, renderer;
+        let ctxInfo;
+        const listener = new THREE.AudioListener();
+
+        init();
+        animate();
+
+        function init() {
+            const container = document.createElement('div');
+            document.body.appendChild(container);
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x000000);
+
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 10);
+            camera.position.set(0, 1.6, 3);
+            camera.add(listener);
+
+            // Text Panel
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 256;
+            ctxInfo = canvas.getContext('2d');
+            const texture = new THREE.CanvasTexture(canvas);
+            const plane = new THREE.Mesh(new THREE.PlaneGeometry(2, 1), new THREE.MeshBasicMaterial({ map: texture }));
+            plane.position.set(0, 1.6, -2);
+            scene.add(plane);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.xr.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            document.body.appendChild(VRButton.createButton(renderer));
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function updateText() {
+            const ctx = listener.context;
+            ctxInfo.fillStyle = '#222';
+            ctxInfo.fillRect(0,0,512,256);
+            ctxInfo.fillStyle = '#fff';
+            ctxInfo.font = '30px monospace';
+            ctxInfo.fillText(`State: ${ctx.state}`, 20, 50);
+            ctxInfo.fillText(`Time: ${ctx.currentTime.toFixed(2)}`, 20, 100);
+            ctxInfo.fillText(`SampleRate: ${ctx.sampleRate}`, 20, 150);
+            ctxInfo.canvas.parentNode = null; // hack to update texture
+            const map = scene.children.find(c => c.type === 'Mesh').material.map;
+            map.needsUpdate = true;
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            renderer.setAnimationLoop(render);
+        }
+
+        function render() {
+            updateText();
+            renderer.render(scene, camera);
+        }
+    
+    </script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spatial Audio Advanced</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #222; font-family: sans-serif; }
+        #info {
+            position: absolute; top: 10px; width: 100%; text-align: center; color: white;
+            pointer-events: none; z-index: 100; text-shadow: 0 1px 2px black;
+        }
+        #info a { color: #f4a83a; pointer-events: auto; }
+        .desc { font-size: 0.8em; opacity: 0.8; margin-top: 4px; padding: 0 10px; }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h3>Spatial Audio Advanced</h3>
+        <div class="desc">距離減衰モデル、方向性、ドップラー効果をパラメータ調整しながら試せる空間オーディオ検証。</div>
+        <div style="margin-top: 10px;">
+            <a href="/">Back to Demos</a>
+        </div>
+    </div>
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+        import { VRButton } from 'https://unpkg.com/three@0.160.0/examples/jsm/webxr/VRButton.js';
+
+        // --- Demo Implementation ---
+        
+        let camera, scene, renderer;
+        let mesh;
+        const listener = new THREE.AudioListener();
+        const sound = new THREE.PositionalAudio(listener);
+
+        init();
+        animate();
+
+        function init() {
+            const container = document.createElement('div');
+            document.body.appendChild(container);
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x333333);
+
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 10);
+            camera.position.set(0, 1.6, 3);
+            camera.add(listener);
+
+            const grid = new THREE.GridHelper(10, 10);
+            scene.add(grid);
+
+            // Source
+            const geometry = new THREE.BoxGeometry(0.5, 0.5, 0.5);
+            const material = new THREE.MeshNormalMaterial();
+            mesh = new THREE.Mesh(geometry, material);
+            mesh.position.set(0, 1, -3);
+            scene.add(mesh);
+
+            mesh.add(sound);
+
+            // Create synthetic noise
+            const ctx = listener.context;
+            const bufferSize = ctx.sampleRate * 3; // 3 sec
+            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for(let i=0; i<bufferSize; i++) {
+                data[i] = (Math.random() - 0.5) * 0.5;
+            }
+            sound.setBuffer(buffer);
+            sound.setRefDistance(2); // Distance where volume starts dropping
+            sound.setRolloffFactor(1); // How fast it drops
+            sound.setLoop(true);
+            sound.play();
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.xr.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            document.body.appendChild(VRButton.createButton(renderer));
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            renderer.setAnimationLoop(render);
+        }
+
+        function render(time) {
+            const t = time / 1000;
+            mesh.rotation.x = t;
+            mesh.rotation.y = t * 0.5;
+            
+            // Move back and forth to test distance attenuation
+            mesh.position.z = -3 + Math.sin(t * 0.5) * 4;
+            
+            renderer.render(scene, camera);
+        }
+    
+    </script>
+</body>
+</html>

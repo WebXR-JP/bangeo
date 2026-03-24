@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<title>空の演出 AR Demo — 8th Wall OSS</title>
+
+	<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+	<script src="../xr-standalone/xrextras.js"></script>
+	<script async src="../xr-standalone/xr.js"
+		data-preload-chunks="sky"></script>
+
+	<style>
+		* { margin: 0; padding: 0; box-sizing: border-box; }
+		body { overflow: hidden; font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; background: #000; }
+
+		#overlay {
+			position: absolute; top: 0; left: 0; width: 100%; z-index: 50;
+			pointer-events: none;
+		}
+		.header {
+			display: flex; justify-content: space-between; align-items: center;
+			padding: 12px 16px;
+			background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);
+		}
+		.header-title { color: #fff; font-size: 14px; font-weight: 700; }
+		.header-badge {
+			font-size: 10px; font-weight: 600; padding: 4px 10px;
+			border-radius: 999px; background: rgba(74,222,128,0.2); color: #4ade80;
+		}
+
+		#sky-selector {
+			position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%);
+			z-index: 60; pointer-events: auto;
+			display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+			max-width: 320px;
+		}
+		.sky-btn {
+			background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+			color: #fff; padding: 8px 14px; border-radius: 999px; font-size: 11px;
+			font-weight: 600; cursor: pointer; transition: all 0.2s;
+			display: flex; align-items: center; gap: 6px;
+		}
+		.sky-btn.active { background: rgba(225,29,72,0.8); border-color: #e11d48; }
+		.sky-dot {
+			width: 12px; height: 12px; border-radius: 50%;
+		}
+
+		#hint {
+			position: absolute; top: 70px; left: 50%; transform: translateX(-50%);
+			z-index: 60; color: rgba(255,255,255,0.8); font-size: 12px;
+			text-align: center; pointer-events: none; background: rgba(0,0,0,0.4);
+			padding: 8px 16px; border-radius: 12px; backdrop-filter: blur(4px);
+		}
+
+		.back-link {
+			position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+			pointer-events: auto; background: rgba(255,255,255,0.1);
+			border: 1px solid rgba(255,255,255,0.2); color: #fff;
+			padding: 10px 24px; border-radius: 999px; font-size: 11px;
+			font-weight: 700; text-decoration: none; backdrop-filter: blur(8px);
+			z-index: 100;
+		}
+		.back-link:hover { background: rgba(255,255,255,0.2); }
+
+		#error-overlay {
+			display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+			background: rgba(0,0,0,0.9); z-index: 200;
+			justify-content: center; align-items: center; text-align: center; color: #fff;
+			padding: 32px;
+		}
+		#error-overlay h2 { font-size: 20px; margin-bottom: 16px; }
+		#error-overlay p { font-size: 14px; color: #aaa; line-height: 1.8; }
+		#error-overlay a { color: #e11d48; }
+	</style>
+</head>
+<body>
+	<a-scene
+		xrweb="disableWorldTracking: true; allowedDevices: any"
+		xrextras-loading
+		xrextras-runtime-error
+		renderer="colorManagement: true"
+		vr-mode-ui="enabled: false"
+		device-orientation-permission-ui="enabled: false">
+
+		<a-camera position="0 1.6 0"></a-camera>
+
+		<!-- 空に浮かぶ装飾オブジェクト -->
+		<!-- 星 -->
+		<a-sphere id="star1" position="-2 6 -8" radius="0.15"
+			material="color: #FFD700; emissive: #FFD700; emissiveIntensity: 0.8"
+			animation="property: position; from: -2 5.5 -8; to: -2 6.5 -8; dur: 3000; easing: easeInOutSine; loop: true; dir: alternate">
+		</a-sphere>
+		<a-sphere id="star2" position="3 7 -10" radius="0.1"
+			material="color: #FF69B4; emissive: #FF69B4; emissiveIntensity: 0.8"
+			animation="property: position; from: 3 6.5 -10; to: 3 7.5 -10; dur: 2500; easing: easeInOutSine; loop: true; dir: alternate">
+		</a-sphere>
+		<a-sphere id="star3" position="1 8 -12" radius="0.12"
+			material="color: #00CED1; emissive: #00CED1; emissiveIntensity: 0.8"
+			animation="property: position; from: 1 7.5 -12; to: 1 8.5 -12; dur: 2800; easing: easeInOutSine; loop: true; dir: alternate">
+		</a-sphere>
+
+		<!-- オーロラ風のプレーン -->
+		<a-plane id="aurora1" position="0 10 -15" rotation="-20 0 10" scale="12 4 1"
+			material="color: #00ff88; opacity: 0.15; transparent: true; side: double"
+			animation="property: material.opacity; from: 0.1; to: 0.25; dur: 4000; easing: easeInOutSine; loop: true; dir: alternate">
+		</a-plane>
+		<a-plane id="aurora2" position="3 11 -14" rotation="-25 15 -5" scale="10 3 1"
+			material="color: #8844ff; opacity: 0.12; transparent: true; side: double"
+			animation="property: material.opacity; from: 0.08; to: 0.2; dur: 5000; easing: easeInOutSine; loop: true; dir: alternate">
+		</a-plane>
+		<a-plane id="aurora3" position="-2 9 -13" rotation="-15 -10 5" scale="8 3 1"
+			material="color: #ff44aa; opacity: 0.1; transparent: true; side: double"
+			animation="property: material.opacity; from: 0.06; to: 0.18; dur: 3500; easing: easeInOutSine; loop: true; dir: alternate">
+		</a-plane>
+
+		<!-- 花火風のオブジェクト -->
+		<a-entity id="firework1" position="-1 8 -10" visible="false">
+			<a-sphere radius="0.08" material="color: #ff3333; emissive: #ff3333; emissiveIntensity: 1"></a-sphere>
+			<a-sphere position="0.3 0.2 0" radius="0.05" material="color: #ffaa33; emissive: #ffaa33; emissiveIntensity: 1"
+				animation="property: position; from: 0 0 0; to: 0.3 0.2 0; dur: 1000; easing: easeOutQuad; loop: true"></a-sphere>
+			<a-sphere position="-0.25 0.15 0.1" radius="0.05" material="color: #33ff33; emissive: #33ff33; emissiveIntensity: 1"
+				animation="property: position; from: 0 0 0; to: -0.25 0.15 0.1; dur: 1000; easing: easeOutQuad; loop: true"></a-sphere>
+			<a-sphere position="0.1 -0.3 0.05" radius="0.05" material="color: #3333ff; emissive: #3333ff; emissiveIntensity: 1"
+				animation="property: position; from: 0 0 0; to: 0.1 -0.3 0.05; dur: 1000; easing: easeOutQuad; loop: true"></a-sphere>
+			<a-sphere position="-0.15 -0.2 -0.1" radius="0.04" material="color: #ff33ff; emissive: #ff33ff; emissiveIntensity: 1"
+				animation="property: position; from: 0 0 0; to: -0.15 -0.2 -0.1; dur: 1000; easing: easeOutQuad; loop: true"></a-sphere>
+		</a-entity>
+
+		<a-entity id="firework2" position="2 9 -11" visible="false">
+			<a-sphere radius="0.08" material="color: #ffdd00; emissive: #ffdd00; emissiveIntensity: 1"></a-sphere>
+			<a-sphere position="0.2 0.3 0" radius="0.04" material="color: #ff6600; emissive: #ff6600; emissiveIntensity: 1"
+				animation="property: position; from: 0 0 0; to: 0.2 0.3 0; dur: 800; easing: easeOutQuad; loop: true"></a-sphere>
+			<a-sphere position="-0.3 0.1 0" radius="0.04" material="color: #ff0066; emissive: #ff0066; emissiveIntensity: 1"
+				animation="property: position; from: 0 0 0; to: -0.3 0.1 0; dur: 800; easing: easeOutQuad; loop: true"></a-sphere>
+			<a-sphere position="0 -0.25 0.15" radius="0.04" material="color: #00ffcc; emissive: #00ffcc; emissiveIntensity: 1"
+				animation="property: position; from: 0 0 0; to: 0 -0.25 0.15; dur: 800; easing: easeOutQuad; loop: true"></a-sphere>
+		</a-entity>
+
+		<a-light type="ambient" color="#444"></a-light>
+		<a-light type="directional" position="1 4 2" intensity="0.6"></a-light>
+	</a-scene>
+
+	<!-- UI -->
+	<div id="overlay">
+		<div class="header">
+			<span class="header-title">空の演出 AR</span>
+			<span class="header-badge">OSS版</span>
+		</div>
+	</div>
+
+	<div id="hint">空にカメラを向けてください — Sky Effectsで空を演出します</div>
+
+	<div id="sky-selector">
+		<div class="sky-btn active" onclick="setSkyMode('aurora')">
+			<span class="sky-dot" style="background: linear-gradient(135deg, #00ff88, #8844ff)"></span>
+			オーロラ
+		</div>
+		<div class="sky-btn" onclick="setSkyMode('fireworks')">
+			<span class="sky-dot" style="background: linear-gradient(135deg, #ff3333, #ffaa33)"></span>
+			花火
+		</div>
+		<div class="sky-btn" onclick="setSkyMode('stars')">
+			<span class="sky-dot" style="background: linear-gradient(135deg, #FFD700, #00CED1)"></span>
+			星空
+		</div>
+	</div>
+
+	<a href="/tech-articles/8thwall-world-effects" class="back-link">← 関連記事に戻る</a>
+
+	<div id="error-overlay">
+		<div>
+			<h2>8th Wall エンジンを読み込めませんでした</h2>
+			<p>
+				<a href="https://github.com/8thwall/8thwall" target="_blank">8thwall/8thwall</a>
+				からソースをビルドするか、
+				<a href="https://github.com/8thwall/engine" target="_blank">8thwall/engine</a>
+				から xr-standalone.zip をダウンロードしてください。
+			</p>
+		</div>
+	</div>
+
+	<script>
+		function setSkyMode(mode) {
+			const aurora = ["aurora1", "aurora2", "aurora3"];
+			const fireworks = ["firework1", "firework2"];
+			const stars = ["star1", "star2", "star3"];
+
+			aurora.forEach(id => document.getElementById(id).setAttribute("visible", mode === "aurora"));
+			fireworks.forEach(id => document.getElementById(id).setAttribute("visible", mode === "fireworks"));
+			stars.forEach(id => {
+				const el = document.getElementById(id);
+				if (mode === "stars") {
+					el.setAttribute("visible", true);
+					el.setAttribute("scale", "2 2 2");
+				} else {
+					el.setAttribute("visible", mode === "aurora");
+					el.setAttribute("scale", "1 1 1");
+				}
+			});
+
+			document.querySelectorAll(".sky-btn").forEach(btn => {
+				const label = mode === "aurora" ? "オーロラ" : mode === "fireworks" ? "花火" : "星空";
+				btn.classList.toggle("active", btn.textContent.trim() === label);
+			});
+		}
+
+		let engineLoaded = false;
+		const checkEngine = () => {
+			if (window.XR8 && typeof window.XR8.run === "function") engineLoaded = true;
+		};
+		window.addEventListener("xrloaded", checkEngine);
+		setTimeout(() => {
+			checkEngine();
+			if (!engineLoaded) document.getElementById("error-overlay").style.display = "flex";
+		}, 8000);
+	</script>
+</body>
+</html>

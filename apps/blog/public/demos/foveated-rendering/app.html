@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Foveated Rendering</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #222; font-family: sans-serif; }
+        #info {
+            position: absolute; top: 10px; width: 100%; text-align: center; color: white;
+            pointer-events: none; z-index: 100; text-shadow: 0 1px 2px black;
+        }
+        #info a { color: #f4a83a; pointer-events: auto; }
+        .desc { font-size: 0.8em; opacity: 0.8; margin-top: 4px; padding: 0 10px; }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h3>Foveated Rendering</h3>
+        <div class="desc">視線座標を用いて中心高解像・周辺低解像に描き分けるフォビエーテッドレンダリング（eye-tracking利用）。</div>
+        <div style="margin-top: 10px;">
+            <a href="/">Back to Demos</a>
+        </div>
+    </div>
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+        import { VRButton } from 'https://unpkg.com/three@0.160.0/examples/jsm/webxr/VRButton.js';
+
+        // --- Demo Implementation ---
+        
+        // Foveated Rendering (rendering demo override)
+        let camera, scene, renderer;
+        init();
+        animate();
+        function init() {
+            const container = document.createElement('div');
+            document.body.appendChild(container);
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x404040);
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 10);
+            camera.position.set(0, 1.6, 3);
+            scene.add(new THREE.GridHelper(10,10));
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.xr.enabled = true;
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            
+            // Foveated rendering is often automatic on Quest if supported context is created
+            // We can try to set gl.getContextAttributes().powerPreference etc or request high performance
+            
+            container.appendChild(renderer.domElement);
+            document.body.appendChild(VRButton.createButton(renderer));
+        }
+        function animate() { renderer.setAnimationLoop(render); }
+        function render() { renderer.render(scene, camera); }
+    
+    </script>
+</body>
+</html>

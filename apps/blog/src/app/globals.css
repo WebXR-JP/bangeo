@@ -1,0 +1,563 @@
+@import "tailwindcss";
+
+@source "../../node_modules/fumadocs-ui/dist/**/*.js";
+
+@theme {
+	--font-sans:
+		var(--font-noto-sans-jp), system-ui, -apple-system, BlinkMacSystemFont,
+		"Segoe UI", Roboto, sans-serif;
+	--color-primary-50: #fff1f2;
+	--color-primary-100: #ffe4e6;
+	--color-primary-200: #fecdd3;
+	--color-primary-300: #fda4af;
+	--color-primary-400: #fb7185;
+	--color-primary-500: #f43f5e;
+	--color-primary-600: #e11d48;
+	--color-primary-700: #be123c;
+	--color-primary-800: #9f1239;
+	--color-primary-900: #881337;
+	--color-primary-950: #4c0519;
+	--radius-2xl: 1rem;
+}
+
+:root {
+	--background: 0 0% 100%;
+	--foreground: 222.2 84% 4.9%;
+	--card: 0 0% 100%;
+	--card-foreground: 222.2 84% 4.9%;
+	--popover: 0 0% 100%;
+	--popover-foreground: 222.2 84% 4.9%;
+	--primary: 347 77% 50%;
+	--primary-foreground: 0 0% 100%;
+	--secondary: 350 30% 96%;
+	--secondary-foreground: 347 60% 30%;
+	--muted: 350 20% 96%;
+	--muted-foreground: 215.4 16.3% 46.9%;
+	--accent: 350 30% 96%;
+	--accent-foreground: 347 60% 30%;
+	--destructive: 0 84.2% 60.2%;
+	--destructive-foreground: 0 0% 100%;
+	--border: 220 13% 91%;
+	--input: 220 13% 91%;
+	--ring: 347 77% 50%;
+	--radius: 1rem;
+}
+
+* {
+	border-color: hsl(var(--border));
+}
+
+body {
+	background: hsl(var(--background));
+	color: hsl(var(--foreground));
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+	background: #e11d48;
+	color: white;
+}
+
+*:focus-visible {
+	outline: 3px solid #e11d48;
+	outline-offset: 2px;
+}
+
+@utility glass {
+	background: rgba(255, 255, 255, 0.75);
+	backdrop-filter: blur(20px);
+	-webkit-backdrop-filter: blur(20px);
+}
+
+@utility mesh-bg {
+	position: fixed;
+	inset: 0;
+	z-index: -1;
+	background:
+		radial-gradient(
+			ellipse 80% 60% at 10% 20%,
+			rgba(225, 29, 72, 0.04),
+			transparent
+		),
+		radial-gradient(
+			ellipse 60% 40% at 90% 80%,
+			rgba(59, 130, 246, 0.03),
+			transparent
+		);
+	pointer-events: none;
+}
+
+@utility dot-pattern {
+	background-image: radial-gradient(
+		circle,
+		rgba(0, 0, 0, 0.03) 0.5px,
+		transparent 0.5px
+	);
+	background-size: 24px 24px;
+}
+
+@utility page-title {
+	font-size: clamp(2.75rem, 4vw + 1rem, 5.5rem);
+	font-weight: 900;
+	line-height: 1.05;
+	letter-spacing: -0.04em;
+}
+
+@keyframes float-orb {
+	0% {
+		transform: translateY(0) translateX(0);
+	}
+	50% {
+		transform: translateY(-30px) translateX(15px);
+	}
+	100% {
+		transform: translateY(10px) translateX(-10px);
+	}
+}
+
+@utility orb {
+	position: absolute;
+	border-radius: 50%;
+	filter: blur(80px);
+	animation: float-orb 20s ease-in-out infinite alternate;
+	pointer-events: none;
+}
+
+@keyframes reveal {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@utility reveal {
+	animation: reveal 0.6s ease-out both;
+}
+
+@keyframes float {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-10px);
+	}
+}
+
+@utility animate-float {
+	animation: float 6s ease-in-out infinite;
+}
+
+.nav-link {
+	position: relative;
+}
+
+.nav-link::after {
+	content: "";
+	position: absolute;
+	bottom: -2px;
+	left: 0;
+	width: 0;
+	height: 2px;
+	background: #e11d48;
+	transition: width 0.2s ease;
+}
+
+.nav-link:hover::after {
+	width: 100%;
+}
+
+/* Tech article content styling - matches original TechArticleDetailPage */
+/* Self-sufficient: does NOT depend on Tailwind Typography (prose) */
+.tech-article-content {
+	font-size: 0.9375rem;
+	line-height: 2;
+	color: #374151;
+	letter-spacing: 0.02em;
+	word-break: break-word;
+	overflow-wrap: anywhere;
+}
+.tech-article-content h2 {
+	font-size: 1.5rem;
+	font-weight: 900;
+	margin-top: 3.5rem;
+	margin-bottom: 1rem;
+	padding-bottom: 0.6rem;
+	color: #111827;
+	letter-spacing: -0.02em;
+	border-bottom: 1px solid #f3f4f6;
+	word-break: break-word;
+}
+.tech-article-content h3 {
+	font-size: 1.25rem;
+	font-weight: 800;
+	margin-top: 2.5rem;
+	margin-bottom: 0.75rem;
+	color: #111827;
+	letter-spacing: -0.01em;
+	word-break: break-word;
+}
+.tech-article-content h4 {
+	font-size: 1.0625rem;
+	font-weight: 700;
+	margin-top: 2rem;
+	margin-bottom: 0.5rem;
+	color: #1f2937;
+	word-break: break-word;
+}
+.tech-article-content p {
+	line-height: 2;
+	margin-bottom: 1.25rem;
+	color: #374151;
+	word-break: break-word;
+	overflow-wrap: anywhere;
+}
+/* Links */
+.tech-article-content a {
+	color: #e11d48;
+	text-decoration: none;
+	font-weight: 500;
+	transition: color 0.2s ease;
+}
+.tech-article-content a:hover {
+	text-decoration: underline;
+}
+/* Strong / emphasis */
+.tech-article-content strong {
+	font-weight: 700;
+	color: #111827;
+}
+.tech-article-content em {
+	font-style: italic;
+}
+/* Images */
+.tech-article-content img {
+	max-width: 100%;
+	height: auto;
+	border-radius: 0.75rem;
+	margin: 2rem 0;
+}
+/* Horizontal rules */
+.tech-article-content hr {
+	margin: 2.5rem 0;
+	border: none;
+	border-top: 1px solid #e5e7eb;
+}
+/* ========================================
+   Code blocks - Shiki powered
+   ======================================== */
+
+/* Inline code */
+.tech-article-content code {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+	font-size: 0.85em;
+	background: #fff1f2;
+	color: #9f1239;
+	padding: 0.15rem 0.4rem;
+	border-radius: 0.25rem;
+	border: none;
+}
+
+/* ========================================
+   Code blocks — Rose Pine Moon palette
+   Base: #232136  Surface: #2a273f
+   Muted: #6e6a86  Subtle: #908caa
+   Text: #e0def4  Love: #eb6f92
+   Gold: #f6c177  Iris: #c4a7e7
+   ======================================== */
+
+/* Figure wrapper for code blocks */
+.code-block-figure {
+	margin: 1.5rem 0;
+	border-radius: 0.875rem;
+	overflow: hidden;
+	border: 1px solid rgba(110, 106, 134, 0.15);
+	box-shadow:
+		0 4px 24px rgba(35, 33, 54, 0.18),
+		0 1px 3px rgba(35, 33, 54, 0.1);
+}
+
+/* Header with language or title */
+.code-block-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0.5rem 1.25rem;
+	background: #2a273f;
+	border-bottom: 1px solid rgba(110, 106, 134, 0.12);
+}
+.code-block-title {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: #908caa;
+	letter-spacing: 0.02em;
+}
+.code-block-lang {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+	font-size: 0.65rem;
+	font-weight: 700;
+	color: #6e6a86;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+}
+
+/* Body: pre + copy button container */
+.code-block-body {
+	position: relative;
+}
+
+/* The pre element (Shiki output) */
+.code-block-figure pre,
+.tech-article-content pre {
+	margin: 0;
+	padding: 1.25rem 1.5rem;
+	overflow-x: auto;
+	font-size: 0.8125rem;
+	line-height: 1.75;
+	border: none;
+	border-radius: 0;
+	tab-size: 2;
+}
+.tech-article-content figure + *,
+.tech-article-content .code-block-figure + * {
+	margin-top: 1.5rem;
+}
+
+/* Let Shiki handle colors, but set base font */
+.code-block-figure pre code,
+.tech-article-content pre code {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+	font-size: inherit;
+	background: transparent;
+	padding: 0;
+	border-radius: 0;
+	border: none;
+}
+
+/* Shiki spans: respect inline colors from Shiki */
+.tech-article-content pre code span {
+	background: transparent;
+	border: none;
+	padding: 0;
+}
+
+/* Copy button — Rose Pine Muted tones */
+.code-copy-btn {
+	position: absolute;
+	top: 0.75rem;
+	right: 0.75rem;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 2rem;
+	height: 2rem;
+	background: rgba(110, 106, 134, 0.1);
+	border: 1px solid rgba(110, 106, 134, 0.15);
+	border-radius: 0.375rem;
+	color: #6e6a86;
+	cursor: pointer;
+	opacity: 0;
+	transition: all 0.15s ease;
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	z-index: 10;
+}
+.code-block-body:hover .code-copy-btn,
+.code-copy-btn:focus-visible {
+	opacity: 1;
+}
+.code-copy-btn:hover {
+	background: rgba(196, 167, 231, 0.15);
+	color: #e0def4;
+	border-color: rgba(196, 167, 231, 0.25);
+}
+.code-copy-btn:active {
+	transform: scale(0.92);
+}
+
+/* ========================================
+   Shiki transformer styles
+   ======================================== */
+
+/* Line highlighting: // [!code highlight] — Gold accent */
+.tech-article-content pre .line.highlighted,
+.code-block-figure pre .line.highlighted {
+	background: rgba(246, 193, 119, 0.1);
+	border-left: 3px solid #f6c177;
+	margin-left: -1.5rem;
+	padding-left: calc(1.5rem - 3px);
+	margin-right: -1.5rem;
+	padding-right: 1.5rem;
+}
+
+/* Diff: // [!code ++] and // [!code --] */
+.tech-article-content pre .line.diff.add,
+.code-block-figure pre .line.diff.add {
+	background: rgba(62, 143, 176, 0.1);
+	border-left: 3px solid #3e8fb0;
+	margin-left: -1.5rem;
+	padding-left: calc(1.5rem - 3px);
+	margin-right: -1.5rem;
+	padding-right: 1.5rem;
+}
+.tech-article-content pre .line.diff.remove,
+.code-block-figure pre .line.diff.remove {
+	background: rgba(235, 111, 146, 0.1);
+	border-left: 3px solid #eb6f92;
+	margin-left: -1.5rem;
+	padding-left: calc(1.5rem - 3px);
+	margin-right: -1.5rem;
+	padding-right: 1.5rem;
+	opacity: 0.7;
+}
+
+/* Focus: // [!code focus] */
+.tech-article-content pre.has-focused .line:not(.focused),
+.code-block-figure pre.has-focused .line:not(.focused) {
+	opacity: 0.4;
+	filter: blur(0.5px);
+	transition: all 0.25s ease;
+}
+.tech-article-content pre.has-focused:hover .line:not(.focused),
+.code-block-figure pre.has-focused:hover .line:not(.focused) {
+	opacity: 1;
+	filter: none;
+}
+
+/* Word highlight: // [!code word:xxx] — Iris accent */
+.tech-article-content pre .highlighted-word,
+.code-block-figure pre .highlighted-word {
+	background: rgba(196, 167, 231, 0.18);
+	border-radius: 0.2rem;
+	padding: 0.1rem 0.2rem;
+	margin: -0.1rem -0.2rem;
+}
+
+/* Standalone pre (no figure wrapper - fallback) */
+.tech-article-content > pre {
+	border-radius: 0.875rem;
+	margin: 1.5rem 0;
+	box-shadow:
+		0 4px 24px rgba(35, 33, 54, 0.18),
+		0 1px 3px rgba(35, 33, 54, 0.1);
+	border: 1px solid rgba(110, 106, 134, 0.15);
+}
+/* Lists */
+.tech-article-content ul {
+	margin: 1.25rem 0;
+	padding-left: 1.5rem;
+	list-style-type: disc;
+}
+.tech-article-content ol {
+	margin: 1.25rem 0;
+	padding-left: 1.5rem;
+	list-style-type: decimal;
+}
+.tech-article-content li {
+	margin-bottom: 0.6rem;
+	color: #374151;
+	line-height: 1.9;
+	word-break: break-word;
+	overflow-wrap: anywhere;
+}
+.tech-article-content li > ul,
+.tech-article-content li > ol {
+	margin-top: 0.35rem;
+	margin-bottom: 0.35rem;
+}
+/* Tables */
+.tech-article-content table {
+	width: 100%;
+	border-collapse: separate;
+	border-spacing: 0;
+	margin: 1.5rem 0;
+	font-size: 0.9rem;
+	border-radius: 1rem;
+	overflow: hidden;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+	border: 1px solid #e5e7eb;
+}
+.tech-article-content th,
+.tech-article-content td {
+	padding: 1rem 1.25rem;
+	text-align: left;
+	border-bottom: 1px solid #e5e7eb;
+}
+.tech-article-content th {
+	background: linear-gradient(to bottom, #f9fafb, #f3f4f6);
+	font-weight: 900;
+	color: #1a1a1a;
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+.tech-article-content td {
+	color: #4b5563;
+	background: #fff;
+}
+.tech-article-content tr:last-child td {
+	border-bottom: none;
+}
+.tech-article-content tbody tr:hover td {
+	background: #fef2f2;
+}
+.tech-article-content td:first-child {
+	font-weight: 700;
+	color: #e11d48;
+	white-space: nowrap;
+}
+@media (max-width: 640px) {
+	.tech-article-content table {
+		display: block;
+		overflow-x: auto;
+	}
+	.tech-article-content th,
+	.tech-article-content td {
+		padding: 0.75rem 1rem;
+		font-size: 0.85rem;
+	}
+}
+/* Blockquotes */
+.tech-article-content blockquote {
+	position: relative;
+	margin: 2.5rem 0;
+	padding: 1.25rem 1.5rem 1.25rem 3.5rem;
+	background: #f8fafc;
+	border: 1px solid #e2e8f0;
+	border-radius: 0.75rem;
+	color: #475569;
+	font-style: normal;
+}
+.tech-article-content blockquote::before {
+	content: "!";
+	position: absolute;
+	left: 1.25rem;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 1.5rem;
+	height: 1.5rem;
+	background: #64748b;
+	color: #fff;
+	border-radius: 50%;
+	font-size: 0.875rem;
+	font-weight: 700;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	line-height: 1;
+}
+.tech-article-content blockquote p {
+	margin: 0;
+	color: #475569;
+	font-size: 0.9rem;
+	line-height: 1.6;
+}
+.tech-article-content blockquote strong {
+	color: #1e293b;
+}

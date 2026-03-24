@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<title>World Effects - Tap to Place</title>
+	<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+	<script src="/demos/xr-standalone/xrextras.js"></script>
+	<script async src="/demos/xr-standalone/xr.js" data-preload-chunks="slam"></script>
+	<style>
+		body { margin: 0; overflow: hidden; background: #000; font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; }
+		.over {
+			z-index: 10;
+			pointer-events: none;
+			position: absolute;
+			top: 0; left: 0; bottom: 0; right: 0;
+			text-align: center;
+			color: white;
+			font-family: 'Nunito', sans-serif;
+			text-shadow: 0px 0px 5px black;
+		}
+		#promptText {
+			font-size: 2em;
+			bottom: 12vh;
+			position: absolute;
+			left: 50%;
+			transform: translate(-50%, 0);
+		}
+	</style>
+	<script>
+		AFRAME.registerComponent("tap-place", {
+			schema: {
+				min: { default: 6 },
+				max: { default: 10 },
+			},
+			init() {
+				const ground = document.getElementById("ground");
+				this.prompt = document.getElementById("promptText");
+
+				ground.addEventListener("click", (event) => {
+					this.prompt.style.display = "none";
+
+					const newElement = document.createElement("a-entity");
+					const touchPoint = event.detail.intersection.point;
+					newElement.setAttribute("position", touchPoint);
+
+					const randomYRotation = Math.random() * 360;
+					newElement.setAttribute("rotation", "0 " + randomYRotation + " 0");
+
+					const randomScale = Math.floor(
+						Math.random() * (Math.floor(this.data.max) - Math.ceil(this.data.min)) + Math.ceil(this.data.min)
+					);
+
+					newElement.setAttribute("visible", "false");
+					newElement.setAttribute("scale", "0.0001 0.0001 0.0001");
+					newElement.setAttribute("shadow", { receive: false });
+					newElement.setAttribute("gltf-model", "#cactusModel");
+					this.el.sceneEl.appendChild(newElement);
+
+					newElement.addEventListener("model-loaded", () => {
+						newElement.setAttribute("visible", "true");
+						newElement.setAttribute("animation", {
+							property: "scale",
+							to: randomScale + " " + randomScale + " " + randomScale,
+							easing: "easeOutElastic",
+							dur: 800,
+						});
+					});
+				});
+			},
+		});
+	</script>
+</head>
+<body>
+	<div class="over">
+		<span id="promptText">Tap To Place Model</span>
+	</div>
+
+	<a-scene
+		tap-place
+		xrextras-loading
+		xrextras-runtime-error
+		renderer="colorManagement:true"
+		xrweb="
+			allowedDevices: any;
+			defaultEnvironmentFogIntensity: 0.5;
+			defaultEnvironmentFloorTexture: #groundTex;
+			defaultEnvironmentFloorColor: #FFF;
+			defaultEnvironmentSkyBottomColor: #B4C4CC;
+			defaultEnvironmentSkyTopColor: #5ac8fa;
+			defaultEnvironmentSkyGradientStrength: 0.5;">
+
+		<a-assets>
+			<img id="groundTex" src="assets/sand.jpg">
+			<a-asset-item id="cactusModel" src="assets/cactus.glb"></a-asset-item>
+		</a-assets>
+
+		<a-camera
+			id="camera"
+			position="0 8 8"
+			raycaster="objects: .cantap"
+			cursor="fuse: false; rayOrigin: mouse;">
+		</a-camera>
+
+		<a-entity
+			light="
+				type: directional;
+				intensity: 0.8;
+				castShadow: true;
+				shadowMapHeight: 2048;
+				shadowMapWidth: 2048;
+				shadowCameraTop: 40;
+				shadowCameraBottom: -40;
+				shadowCameraRight: 40;
+				shadowCameraLeft: -40;
+				target: #camera"
+			xrextras-attach="target: camera; offset: 8 15 4"
+			position="1 4.3 2.5"
+			shadow>
+		</a-entity>
+
+		<a-light type="ambient" intensity="0.5"></a-light>
+
+		<a-box
+			id="ground"
+			class="cantap"
+			scale="1000 2 1000"
+			position="0 -0.99 0"
+			material="shader: shadow; transparent: true; opacity: 0.4"
+			shadow>
+		</a-box>
+	</a-scene>
+</body>
+</html>
