@@ -1,0 +1,34 @@
+{
+	"name": "bangeo",
+	"version": "1.0.0",
+	"description": "Bangeo - WebXR Japanese resource site",
+	"private": true,
+	"packageManager": "pnpm@10.29.3",
+	"engines": {
+		"node": ">=20.9.0"
+	},
+	"type": "module",
+	"scripts": {
+		"dev": "pnpm -C apps/blog dev",
+		"dev:blog": "pnpm -C apps/blog dev",
+		"build": "pnpm run build:blog",
+		"build:blog": "pnpm -C apps/blog build",
+		"preview:blog": "pnpm -C apps/blog preview",
+		"lint": "biome lint .",
+		"format": "biome format --write .",
+		"check": "biome check --write .",
+		"check:ci": "biome check .",
+		"ci": "pnpm run check:ci && pnpm run build",
+		"prepare": "husky"
+	},
+	"lint-staged": {
+		"*.{js,ts,jsx,tsx,mjs,cjs,json,css}": [
+			"biome check --write --no-errors-on-unmatched --files-ignore-unknown=true"
+		]
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.4.8",
+		"husky": "^9.1.7",
+		"lint-staged": "^16.4.0"
+	}
+}

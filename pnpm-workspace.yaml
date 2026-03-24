@@ -1,0 +1,7 @@
+packages:
+  - 'apps/blog'
+
+onlyBuiltDependencies:
+  - "@biomejs/biome"
+  - "esbuild"
+  - "sharp"

@@ -1,0 +1,38 @@
+# Dependencies
+node_modules
+.pnpm-store
+
+# Production
+dist
+build
+worker
+
+# Next.js / Fumadocs
+.next
+out
+.source
+*.tsbuildinfo
+next-env.d.ts
+.vercel
+coverage
+
+# Environment variables
+.env
+.env*.local
+
+# MCP configuration (contains API keys)
+.mcp.json
+
+# Local agent / assistant settings
+.agent/
+.claude/
+.husky/_/
+
+# Cloudflare
+.DS_Store
+Thumbs.db
+.serena/
+
+# Log files
+*.log
+.playwright-mcp/
