@@ -18,9 +18,11 @@ export const metadata: Metadata = {
 
 export default function TechArticlesIndexPage() {
 	const posts = getDocs(blog).sort((a, b) => {
-		const dateA = new Date(String(a.date || ""));
-		const dateB = new Date(String(b.date || ""));
-		return dateB.getTime() - dateA.getTime();
+		const parseDate = (d: string) => {
+			const m = d.match(/(\d+)年(\d+)月(\d+)日/);
+			return m ? new Date(+m[1], +m[2] - 1, +m[3]).getTime() : 0;
+		};
+		return parseDate(String(b.date || "")) - parseDate(String(a.date || ""));
 	});
 
 	return (
