@@ -1,7 +1,16 @@
 packages:
   - 'apps/blog'
 
+# Security: Only allow specific dependencies to run lifecycle scripts (v10 default)
 onlyBuiltDependencies:
   - "@biomejs/biome"
   - "esbuild"
   - "sharp"
+
+# Security: Prevent installation of versions released less than 7 days ago (v10.18+)
+# This mitigates immediate supply chain attacks by allowing time for the community to react.
+minimumReleaseAge: 10080
+
+# Security: Prevent downgrading the trust level of a package (v10.21+)
+# Blocks updates if a package was previously published with Trusted Publishing (OIDC) but is no longer.
+trustPolicy: no-downgrade
