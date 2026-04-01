@@ -70,15 +70,13 @@ export default async function TechArticlePage({ params }: PageProps) {
 				{/* Header */}
 				<header className="mb-12">
 					<div className="flex flex-col md:flex-row gap-6 md:gap-10 items-start">
-						{doc.thumbnail && (
-							<div className="w-full md:w-56 md:min-w-56 aspect-video overflow-hidden rounded-xl bg-gray-100 shrink-0">
-								<img
-									src={String(doc.thumbnail)}
-									alt={doc.title}
-									className="w-full h-full object-cover"
-								/>
-							</div>
-						)}
+						<div className="w-full md:w-56 md:min-w-56 aspect-video overflow-hidden rounded-xl bg-gray-100 shrink-0">
+							<img
+								src={doc.thumbnail ? String(doc.thumbnail) : "/no-image.png"}
+								alt={doc.title}
+								className="w-full h-full object-cover"
+							/>
+						</div>
 						<div className="flex-1 min-w-0">
 							<div className="mb-4 flex flex-wrap items-center gap-3">
 								{doc.category && (

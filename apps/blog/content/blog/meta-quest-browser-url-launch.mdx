@@ -1,0 +1,116 @@
+---
+title: "PCやスマホからMeta Questのブラウザに直接URLを送る「Web Launch」の使い方"
+description: "Meta Quest の「Web Launch」機能を使えば、PCやスマホのブラウザから oculus.com/open_url にアクセスするだけで、Quest のブラウザに任意のURLを直接開かせることができます。USB接続も開発者モードも不要です。"
+date: "2026年4月1日"
+category: "GUIDE"
+tags:
+  - "Meta Quest"
+  - "WebXR"
+  - "Web Launch"
+  - "Tips"
+author: "BANGEO Team"
+thumbnail: "/assets/tech/meta-web-launch.png"
+draft: true
+---
+
+## はじめに
+
+Meta Questのブラウザで特定のURLを開きたいとき、ヘッドセットを被ってバーチャルキーボードで長いURLを入力するのは面倒です。
+
+Metaが提供する「**Web Launch**」という機能を使えば、PCやスマホのブラウザからワンクリックでQuestにURLを送ることができます。USB接続も開発者モードも不要で、同じMetaアカウントでログインしていれば誰でも使えます。
+
+## Web Launchとは？
+
+Web Launchは、Metaが提供するURL転送機能です。以下のURLにアクセスするだけで、Questのブラウザに任意のWebページを開かせることができます。
+
+```
+https://www.oculus.com/open_url/?url=<送りたいURL>
+```
+
+| 項目 | 内容 |
+| --- | --- |
+| USB接続 | 不要 |
+| 開発者モード | 不要 |
+| 必要なもの | 同じMetaアカウントでログイン済みのPC/スマホとQuest |
+| 対応URL | HTTPSのみ |
+
+## 使い方
+
+### Step 1: Metaアカウントにログインする
+
+PCやスマホのブラウザで [meta.com](https://www.meta.com/quest/) にアクセスし、Questと同じMetaアカウントでログインしておきます。
+
+{/* <!-- 📸 スクリーンショット: PCブラウザで meta.com にログインしている画面 --> */}
+{/* ![meta.com にMetaアカウントでログイン](/images/tech-articles/meta-quest-url-launch/oculus-login.png) */}
+
+### Step 2: Web LaunchのURLにアクセスする
+
+ブラウザのアドレスバーに以下のURLを入力します。`bangeo.net` の部分を送りたいURLに置き換えてください。
+
+```
+https://www.oculus.com/open_url/?url=https%3A%2F%2Fbangeo.net
+```
+
+### Step 3: 「SAVE TO MR」をクリックする
+
+アクセスすると以下のような画面が表示されます。送りたいURLが表示されていることを確認し、「**SAVE TO MR**」ボタンをクリックします。
+
+![Web Launchの「Visit an experience in MR」画面 - SAVE TO MRボタンでQuestにURLを送信できる](/images/tech-articles/meta-quest-url-launch/web-launch-save-to-mr.png)
+
+### Step 4: 保存完了
+
+「**Saved**」ダイアログが表示されれば送信完了です。OKを押して閉じます。
+
+![Web Launchの保存完了ダイアログ - Questから後でアクセスできる](/images/tech-articles/meta-quest-url-launch/web-launch-saved.png)
+
+保存されたリンクはQuestのヘッドセットやMeta Horizonモバイルアプリの保存済みアイテムに表示されます。Questを被ってそこから開くだけでOKです。
+
+## Webサイトに「Questで開く」ボタンを設置する
+
+Web Launchは自分で使うだけでなく、Webサイトにリンクとして埋め込むこともできます。WebXRコンテンツを公開する際、ユーザーがPCやスマホでサイトを見つけた後、スムーズにQuestで体験してもらうのに便利です。
+
+```html
+<a href="https://www.oculus.com/open_url/?url=https%3A%2F%2Fbangeo.net">
+  Meta Questで開く
+</a>
+```
+
+{/* <!-- 📸 スクリーンショット: Webサイト上に「Meta Questで開く」ボタンが設置されている例 --> */}
+{/* ![Webサイトに設置された「Meta Questで開く」ボタン](/images/tech-articles/meta-quest-url-launch/website-quest-button-example.png) */}
+
+> Metaの公式ガイドラインでは、ボタンやリンクに Meta Questのブランディングを使用することが推奨されています。
+
+## 注意点
+
+### HTTPSが必須
+
+Web Launchで送れるURLは **HTTPS のみ** です。`http://` で始まるURLやローカルネットワークのURL（`192.168.x.x` など）は送ることができません。
+
+> ローカル開発サーバーのURLを送りたい場合は、[ngrok](https://ngrok.com/) などのトンネリングツールでHTTPSの公開URLを作成する方法があります。
+
+### 同じMetaアカウントが必要
+
+PC/スマホのブラウザとQuest側で **同じMetaアカウント** にログインしている必要があります。
+
+### URLエンコードが必要
+
+送信先URLに `:` `/` `?` `=` `&` などの特殊文字が含まれる場合、URLエンコードが必要です。
+
+| 元のURL | エンコード後 |
+| --- | --- |
+| `https://bangeo.net` | `https%3A%2F%2Fbangeo.net` |
+| `https://bangeo.net/path?q=test` | `https%3A%2F%2Fbangeo.net%2Fpath%3Fq%3Dtest` |
+
+## まとめ
+
+Meta Questの「**Web Launch**」機能は、`oculus.com/open_url/` にアクセスするだけでQuestにURLを送れるシンプルで便利な仕組みです。
+
+- USB接続や開発者モードが不要で誰でも使える
+- Webサイトに組み込んでユーザーをQuestに誘導できる
+- WebXRコンテンツの共有・配布に最適
+
+## 関連リンク
+
+- [Web Launch 公式ドキュメント](https://developers.meta.com/horizon/documentation/web/web-launch/)
+- [UnityでWebXRコンテンツをビルドする](/blog/unity-webxr-sample)
+- [WebXR Shared Spaces でマルチユーザーARを体験する](/blog/webxr-colocation-meta-quest)

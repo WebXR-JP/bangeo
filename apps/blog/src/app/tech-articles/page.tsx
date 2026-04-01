@@ -5,10 +5,12 @@ import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
 
 export const metadata: Metadata = {
 	title: "ブログ",
-	description: "WebXR に関する技術記事、ニュース、イベント情報をまとめています。",
+	description:
+		"WebXR に関する技術記事、ニュース、イベント情報をまとめています。",
 	openGraph: {
 		title: "ブログ",
-		description: "WebXR に関する技術記事、ニュース、イベント情報をまとめています。",
+		description:
+			"WebXR に関する技術記事、ニュース、イベント情報をまとめています。",
 		type: "website",
 	},
 	alternates: { canonical: "/tech-articles" },
@@ -42,15 +44,15 @@ export default function TechArticlesIndexPage() {
 							href={`/tech-articles/${slug}`}
 							className="group block bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-2xl hover:shadow-gray-200/50 hover:border-transparent hover:-translate-y-1 transition-all duration-300"
 						>
-							{post.thumbnail && (
-								<div className="aspect-video bg-gray-100 overflow-hidden">
-									<img
-										src={String(post.thumbnail)}
-										alt={post.title}
-										className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-									/>
-								</div>
-							)}
+							<div className="aspect-video bg-gray-100 overflow-hidden">
+								<img
+									src={
+										post.thumbnail ? String(post.thumbnail) : "/no-image.png"
+									}
+									alt={post.title}
+									className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+								/>
+							</div>
 							<div className="p-6">
 								<div className="flex items-center gap-2 mb-4">
 									{post.category && (
