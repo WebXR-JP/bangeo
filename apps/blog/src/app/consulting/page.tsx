@@ -34,7 +34,8 @@ export default function ConsultingPage() {
 					開発参加・技術相談<span className="text-[#e11d48]">。</span>
 				</h1>
 				<p className="text-xl text-gray-500 font-medium leading-relaxed">
-					BANGEO は OSS として公開しており、個別の受託窓口ではなく GitHub とコミュニティを中心に改善を進めています。実装相談、要望、不具合報告は、できるだけ公開の場に集約し、知見を共有できる形で扱います。
+					BANGEO は OSS として公開しており、個別の受託窓口ではなく GitHub
+					とコミュニティを中心に改善を進めています。実装相談、要望、不具合報告は、できるだけ公開の場に集約し、知見を共有できる形で扱います。
 				</p>
 				<p className="text-base md:text-lg text-gray-500 font-medium leading-relaxed">
 					公開リポジトリ:{" "}

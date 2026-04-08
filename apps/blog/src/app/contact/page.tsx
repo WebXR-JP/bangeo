@@ -106,7 +106,8 @@ export default function ContactPage() {
 					お問い合わせ
 				</h1>
 				<p className="text-xl text-gray-500 font-medium leading-relaxed">
-					BANGEO は OSS として公開しています。質問、改善提案、不具合報告は GitHub とコミュニティから受け付けています。
+					BANGEO は OSS として公開しています。質問、改善提案、不具合報告は
+					GitHub とコミュニティから受け付けています。
 				</p>
 				<p className="text-base md:text-lg text-gray-500 font-medium leading-relaxed">
 					公開リポジトリ:{" "}
@@ -174,7 +175,8 @@ export default function ContactPage() {
 			{/* Note */}
 			<div className="text-center">
 				<p className="text-lg text-gray-500 font-medium">
-					実装前の相談は Discord、確定した課題や修正提案は GitHub Issues / Pull Request が向いています。
+					実装前の相談は Discord、確定した課題や修正提案は GitHub Issues / Pull
+					Request が向いています。
 				</p>
 			</div>
 		</div>

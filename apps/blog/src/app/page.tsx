@@ -66,7 +66,8 @@ export default function HomePage() {
 								<span className="text-white"> を作ろう</span>
 							</h1>
 							<p className="text-lg md:text-xl text-gray-400 leading-relaxed max-w-xl">
-								ブラウザで動く WebXR の情報を、デモ・技術解説・標準化状況の切り口で
+								ブラウザで動く WebXR
+								の情報を、デモ・技術解説・標準化状況の切り口で
 								<span className="text-white font-semibold">日本語</span>
 								で整理しています。
 							</p>

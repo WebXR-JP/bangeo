@@ -323,7 +323,7 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 		},
 		description:
 			"非公式の提案草案（2024-09-08）。全身の関節情報を取得し、アバターの動きなどに反映することを想定した提案です。",
-		specUrl: "https://immersive-web.github.io/webxr-body-tracking/",
+		specUrl: "https://immersive-web.github.io/body-tracking/",
 	},
 	{
 		name: "Face Tracking",

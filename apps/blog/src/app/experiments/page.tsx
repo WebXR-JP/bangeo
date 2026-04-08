@@ -109,7 +109,8 @@ export default function ExperimentsIndexPage() {
 						公開中のデモはまだありません
 					</h2>
 					<p className="mt-4 max-w-2xl mx-auto text-base leading-relaxed text-gray-500">
-						このセクションは一度整理し直しています。内容が固まったデモだけを 1 件ずつ追加し、準備が整ったものから順次公開しています。
+						このセクションは一度整理し直しています。内容が固まったデモだけを 1
+						件ずつ追加し、準備が整ったものから順次公開しています。
 					</p>
 				</section>
 			)}
