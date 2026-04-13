@@ -7,7 +7,12 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**", "!**/xr-standalone", "!apps/blog/public/demos"]
+		"includes": [
+			"**",
+			"!**/xr-standalone",
+			"!apps/blog/public/demos",
+			"!apps/blog/public/demo"
+		]
 	},
 	"formatter": {
 		"enabled": true,
