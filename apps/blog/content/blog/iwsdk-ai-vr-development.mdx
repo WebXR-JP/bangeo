@@ -1,0 +1,252 @@
+---
+title: "Immersive Web SDK（IWSDK）で始めるAI駆動のVR開発"
+description: "MetaのオープンソースフレームワークIWSDKを使えば、コマンド1つでVR開発環境が立ち上がり、Claude CodeやCodexといったAIツールがコードの生成からテスト・修正までを自律的に行ってくれます。実際にBANGEOの記事ギャラリーをVR空間に作り、VR内で記事を読めるところまでを紹介します。"
+date: "2026年4月13日"
+category: "TECH"
+tags:
+  - "WebXR"
+  - "IWSDK"
+  - "AI"
+  - "Meta Quest"
+  - "Three.js"
+  - "MCP"
+  - "Claude Code"
+author: "BANGEO Team"
+thumbnail: "/assets/tech/iwsdk-vr-scene.png"
+draft: true
+---
+
+## はじめに
+
+Metaが公開した **Immersive Web SDK（IWSDK）** は、WebXRのVR体験を手早く構築するためのオープンソースフレームワークです。
+
+物理演算・ハンドトラッキング・グラブ操作・移動・空間UIといったVR開発に必要な機能がすでに組み込まれていて、`npm create @iwsdk` の1コマンドでプロジェクトが立ち上がります。さらに、Claude CodeやCodexなどのAIコーディングツールとの連携が最初から設計されており、プロンプトだけでVR体験を作り上げることもできます。
+
+この記事では、実際にIWSDKをセットアップし、BANGEOの過去記事をVR空間内で閲覧できるギャラリーを作るところまでの流れを紹介します。
+
+## セットアップしてみる
+
+まずは動かしてみましょう。必要なものは以下の3つだけです。
+
+- **Node.js** 20以上
+- **Chrome** または **Edge** ブラウザ
+- **AIコーディングツール**：Claude Code または Codex
+
+VRヘッドセットがあればデバイスでも確認できますが、なくてもブラウザ上のエミュレーターで開発できます。
+
+### Step 1: プロジェクトを作成する
+
+ターミナルで以下を実行します。
+
+```bash
+npm create @iwsdk
+```
+
+IWSDKのCLIが起動し、プロジェクト名やAIツールの選択を聞かれます。選択が終わると依存関係のインストールまで自動で行われます。
+
+```
+▄▄▄▄▄▄  ▄▄      ▄▄   ▄▄▄▄    ▄▄▄▄▄     ▄▄   ▄▄▄
+▀▀██▀▀  ██      ██ ▄█▀▀▀▀█   ██▀▀▀██   ██  ██▀
+  ██    ▀█▄ ██ ▄█▀ ██▄       ██    ██  ██▄██
+  ██     ██ ██ ██   ▀████▄   ██    ██  █████
+  ██     ███▀▀███       ▀██  ██    ██  ██  ██▄
+▄▄██▄▄   ███  ███  █▄▄▄▄▄█▀  ██▄▄▄██   ██   ██▄
+===============================================
+IWSDK Create CLI v0.3.1
+
+✔ Project files created
+✔ Dependencies installed
+```
+
+### Step 2: 開発サーバーを起動する
+
+```bash
+cd iwsdk-app
+npm run dev
+```
+
+Viteの開発サーバーが `https://localhost:8081` で起動します。初回起動時にはヘッドレスブラウザのダウンロードやRAG用の埋め込みモデルのロードが行われるため、少し時間がかかります。
+
+起動が完了すると、ブラウザにデスクとロボットが配置されたデモシーンが表示されます。右上の「Enter XR」ボタンからVRモードに入ることもできます。
+
+![IWSDKのデフォルトVRシーン - デスク、ロボット、WebXRロゴが配置されたオフィス空間](/assets/tech/iwsdk-vr-scene.png)
+
+### Step 3: AIツールでプロジェクトを開く
+
+別のターミナルで、Claude Codeを起動します。
+
+```bash
+cd iwsdk-app
+claude
+```
+
+プロジェクトには `CLAUDE.md` と `AGENTS.md` が含まれており、Claude CodeがIWSDKのパターンやAPIを理解した状態で作業を開始できます。MCPサーバーの設定も自動で行われるため、追加のセットアップは不要です。
+
+### Step 4: プロンプトでVR体験を作る
+
+Claude Codeにアイデアを伝えるだけで、コードの生成からテストまでを自動で行います。今回はBANGEOの過去記事をVR空間で閲覧できるギャラリーを作ってみました。
+
+```
+BANGEOの技術ブログ記事を閲覧できるVRギャラリーを作ってほしい。
+記事のサムネイル画像を半円形に配置して、タイトルとカテゴリバッジも表示して。
+カードをクリックしたらVR空間内で記事の内容を読めるようにして。
+```
+
+AIはコードを書いた後、MCPツール経由でVRシーンのスクリーンショットを撮り、オブジェクトの配置を確認し、エミュレーターでコントローラー操作をシミュレートしてインタラクションが正しく動作するかをテストします。問題があれば自分で修正して再テスト、というサイクルを自律的に繰り返します。
+
+結果がこちらです。ダークブルーの空間に柱と浮遊パーティクルが配置され、5枚の記事カードが半円形に並んでいます。各カードにはサムネイル画像、記事タイトル、カテゴリバッジ（GUIDE / TECH / NEWS）、そして「詳しく見る」ボタンが付いています。
+
+![BANGEO WebXR Article Gallery - 記事サムネイルが半円形に配置されたVRギャラリー](/assets/tech/iwsdk-gallery-result.png)
+
+「Enter XR」ボタンを押すと、IWERエミュレーターによるVR視点に切り替わります。Meta Quest 3のコントローラーが表示され、ヘッドセットで見渡すように記事を閲覧できます。
+
+![VRモードで表示したArticle Gallery - コントローラーで記事カードを操作できる](/assets/tech/iwsdk-gallery-xr.png)
+
+カードをクリックすると、ギャラリーの横に記事の詳細パネルが表示されます。ブラウザに遷移することなく、VR空間内で記事のカテゴリ、タイトル、説明文、本文の概要を確認できます。上部にはサムネイル画像も表示され、「閉じる」ボタンでギャラリーに戻れます。
+
+![VR空間内に表示された記事詳細パネル - ギャラリーの横に記事内容が表示されている](/assets/tech/iwsdk-gallery-detail.png)
+
+XRモードでも同様に、コントローラーで記事カードを選択すると横に詳細パネルが現れます。
+
+![XRモードで表示された記事詳細パネル - コントローラーで操作可能](/assets/tech/iwsdk-gallery-detail-xr.png)
+
+### Step 5: フィードバックで調整する
+
+表示を微調整したい場合も、自然言語で指示するだけです。
+
+```
+詳細パネルをもっとユーザーの近くに表示して、記事カードの横に配置して
+```
+
+AIが該当するオブジェクトを特定し、パラメータを調整して見た目を確認するところまで自動で行います。今回の記事詳細パネルの位置も、最初は画面中央に表示されていたものを「横に表示して」と伝えるだけでギャラリーカードの横に移動させることができました。
+
+## 生成されるプロジェクトの中身
+
+`npm create @iwsdk` で生成されるプロジェクトの構成は以下のようになっています。
+
+```
+iwsdk-app/
+├── src/
+│   ├── index.ts          # エントリーポイント（World.create）
+│   ├── systems/          # ECSシステム
+│   └── components/       # ECSコンポーネント
+├── public/
+│   ├── gltf/             # 3Dモデル（.gltf/.glb）
+│   ├── audio/            # サウンドファイル
+│   └── ui/               # コンパイル済みUI
+├── ui/
+│   └── *.uikitml         # 空間UIのマークアップ
+├── CLAUDE.md             # Claude Code用のプロジェクト設定
+├── AGENTS.md             # AIエージェント向けのコンテキスト
+└── vite.config.ts        # Vite + IWSDK プラグイン設定
+```
+
+エントリーポイントの `src/index.ts` では、`World.create()` でVRワールドを初期化し、3Dモデルの配置やインタラクションの設定を行います。
+
+```typescript
+import { World, SessionMode, AssetManager } from '@iwsdk/core';
+
+World.create(document.getElementById('scene-container'), {
+  assets: { /* 3Dモデルやテクスチャの定義 */ },
+  xr: {
+    sessionMode: SessionMode.ImmersiveVR,
+    features: { handTracking: true, layers: true },
+  },
+  features: {
+    locomotion: { useWorker: true },
+    grabbing: true,
+  },
+}).then((world) => {
+  // シーンの構築
+  const { scene: envMesh } = AssetManager.getGLTF('environmentDesk');
+  world.createTransformEntity(envMesh);
+});
+```
+
+## IWSDKのアーキテクチャ
+
+IWSDKは複数の技術レイヤーで構成されています。
+
+| レイヤー | 技術 | 役割 |
+| --- | --- | --- |
+| レンダリング | Three.js | 3D描画とWebXRセッション管理 |
+| ゲームロジック | ELICS（ECS） | Entity Component Systemでオブジェクトの振る舞いを管理 |
+| 物理演算 | Havok（WASM） | 剛体シミュレーション、衝突判定 |
+| ビルド | Vite | HMRによる即時リロード |
+| XRエミュレーション | IWER | ヘッドセットなしでのXRセッション再現 |
+| 空間UI | UIKitML | VR空間内のパネルUI構築 |
+
+### ECS（Entity Component System）パターン
+
+IWSDKでは、ゲームオブジェクトの振る舞いを**コンポーネント**（データ）と**システム**（ロジック）に分離して管理します。VRは72〜90FPSが求められるため、1フレームあたり11〜14msしか使えません。ECSパターンはこのパフォーマンス要件を満たすために設計されています。
+
+```typescript
+// コンポーネント（データの定義）
+const Spinner = createComponent('Spinner', {
+  speed: { type: Types.Float32, default: 1.0 },
+});
+
+// システム（ロジック）
+class SpinSystem extends createSystem({ spinners: { required: [Spinner, Transform] } }) {
+  update(delta) {
+    for (const entity of this.queries.spinners.entities) {
+      const speed = entity.getValue(Spinner, 'speed');
+      entity.object3D.rotateY(speed * delta);
+    }
+  }
+}
+```
+
+### IWER - ヘッドセットなしでの開発
+
+**IWER**（Immersive Web Emulation Runtime）はIWSDKに組み込まれたXRエミュレーターです。ヘッドセットの位置・回転、コントローラーのボタン入力、ハンドトラッキングのジェスチャーをすべてプログラムから操作できます。
+
+開発中はブラウザ上でVRセッションをエミュレートし、AIツールもこのエミュレーターを通じてVRシーンを操作・テストします。
+
+## AIがVRシーンを理解する仕組み
+
+IWSDKのAI統合で核となるのが**MCPサーバー**です。Vite開発サーバー内で動作し、WebSocket経由でブラウザと通信します。
+
+Claude CodeやCodexは、このMCPサーバーを通じて40以上のツールにアクセスできます。
+
+### シーンの確認
+
+AIはVRシーンのスクリーンショットを撮影し、Three.jsのシーン階層をクエリして、各オブジェクトの位置やコンポーネントを把握します。
+
+### XR入力のシミュレート
+
+エミュレーター経由で、ヘッドセットの移動やコントローラーのボタン操作、ピンチジェスチャーなどをプログラム的に実行します。AIがオブジェクトを掴んだりボタンを押したりして、インタラクションの動作を確認します。
+
+### ECSのデバッグ
+
+シミュレーションの一時停止、フレームごとのステップ実行、コンポーネント値のライブ編集、状態スナップショットの比較など、ECSレベルでの細かいデバッグが可能です。
+
+### コードのセマンティック検索
+
+ローカルで動作するRAGサーバーが、IWSDKのコードベースから3,000以上のチャンクをインデックス化しています。AIはこの検索を使って正確なAPIシグネチャやパターンを参照するため、存在しないAPIを使ってしまうようなミスを防ぎます。
+
+## エージェンティックループ
+
+これらのツールを組み合わせることで実現するのが「エージェンティックループ」です。従来のAIコード生成が「プロンプト→生成→手動確認」の繰り返しだったのに対し、IWSDKでは **コード生成→シーン確認→テスト→修正** のサイクルをAIが自律的に回します。
+
+自然言語でのフィードバックにも対応します。「パネルの位置を横に移動して」「カードをもう少し大きくして」と伝えれば、AIが該当するオブジェクトとパラメータを特定し、値を調整してから見た目を確認するところまで自動で行います。
+
+## まとめ
+
+IWSDKは、VR開発の面倒な部分をフレームワークに任せ、AIとの連携でアイデアを素早く形にできる環境です。
+
+- `npm create @iwsdk` の1コマンドですぐに始められる
+- Claude CodeやCodexがコード生成からテストまでを自律的に実行
+- IWERエミュレーターでヘッドセットなしでも開発可能
+- プロンプトからVRギャラリーや空間UIが形になる
+- VR空間内で記事を閲覧できるインタラクティブなUIもAIが作れる
+
+今回は実際にBANGEOの記事ギャラリーをVR空間に作り、カードをクリックするとVR内で記事の内容を閲覧できるところまで実装しました。プロンプトを投げ、フィードバックで調整していくだけでVRシーンが出来上がる体験は新鮮でした。WebXRに興味がある方は、ぜひ `npm create @iwsdk` で試してみてください。
+
+## 関連リンク
+
+- [IWSDK 公式サイト](https://iwsdk.dev/)
+- [IWSDK GitHub リポジトリ](https://github.com/meta-quest/immersive-web-sdk)
+- [Meta 公式ブログ記事](https://developers.meta.com/horizon/blog/accelerate-vr-development-with-ai-and-immersive-web-sdk/)
+- [AI-Assisted Development: Technical Deep Dive](https://developers.meta.com/horizon/documentation/web/iwsdk-ai-assisted-development/)
+- [PC + VRヘッドセットでWebXRを体験するガイド](/blog/pcvr-webxr-guide)
