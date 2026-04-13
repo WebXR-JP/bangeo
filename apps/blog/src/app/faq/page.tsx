@@ -166,7 +166,8 @@ export default function FaqPage() {
 					お探しの情報が見つかりませんでしたか？
 				</h2>
 				<p className="text-gray-600 leading-relaxed">
-					解決しない場合は、お問い合わせページや Discord コミュニティをご利用ください。
+					解決しない場合は、お問い合わせページや Discord
+					コミュニティをご利用ください。
 				</p>
 				<div className="flex flex-col sm:flex-row gap-4 justify-center">
 					<Link

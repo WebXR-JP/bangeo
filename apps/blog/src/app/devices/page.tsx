@@ -117,7 +117,8 @@ export default function DevicesPage() {
 						対応デバイス一覧
 					</h1>
 					<p className="text-xl md:text-2xl text-gray-500 font-medium leading-relaxed">
-						WebXR に対応する VR ヘッドセットやスマートフォンを、ブラウザ、接続方式、特徴とあわせて確認できます。
+						WebXR に対応する VR
+						ヘッドセットやスマートフォンを、ブラウザ、接続方式、特徴とあわせて確認できます。
 					</p>
 					<Link
 						href="/devices/submit"
@@ -138,7 +139,6 @@ export default function DevicesPage() {
 							/>
 						</svg>
 						お使いのデバイスのWebXR対応状況を確認
-						
 					</Link>
 				</header>
 
@@ -154,8 +154,10 @@ export default function DevicesPage() {
 					</div>
 					<div className="max-w-4xl text-sm text-gray-500 leading-relaxed">
 						<p>
-							現時点では、Quest 系、HTC Vive 系、Pico 系、Valve Index、Windows MR
-							などの主要 HMD では、WebXR を利用できる環境が用意されています。一方で、PlayStation VR/VR2 や HTC Vive Flow
+							現時点では、Quest 系、HTC Vive 系、Pico 系、Valve Index、Windows
+							MR などの主要 HMD では、WebXR
+							を利用できる環境が用意されています。一方で、PlayStation VR/VR2 や
+							HTC Vive Flow
 							のように、ブラウザ経由での利用が難しい機種もあります。
 						</p>
 					</div>
@@ -167,8 +169,9 @@ export default function DevicesPage() {
 						スマートフォン/ARデバイスのWebXR対応
 					</h2>
 					<p className="text-sm text-gray-500 leading-relaxed max-w-4xl">
-						スマートフォンでの WebXR AR は、端末とブラウザの組み合わせによって利用条件が大きく変わります。特に iOS
-						では、ブラウザ以外の手段を検討する必要があるケースもあります。
+						スマートフォンでの WebXR AR
+						は、端末とブラウザの組み合わせによって利用条件が大きく変わります。特に
+						iOS では、ブラウザ以外の手段を検討する必要があるケースもあります。
 					</p>
 					<div className="space-y-6">
 						{AR_DEVICES.map((device) => (
