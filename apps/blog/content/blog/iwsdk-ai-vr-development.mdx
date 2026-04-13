@@ -18,7 +18,7 @@ draft: true
 
 ## はじめに
 
-Metaが公開した **Immersive Web SDK（IWSDK）** は、WebXRのVR体験を手早く構築するためのオープンソースフレームワークです。
+Metaが公開した **Immersive Web SDK（IWSDK）** は、WebXRのVR体験を手早く構築するためのオープンソースフレームワークです。Meta Connect 2025で発表され、[GitHub](https://github.com/facebook/immersive-web-sdk)でMITライセンスとして公開されています。Metaによると、2026年2月時点でWebXRエコシステム全体の月間アクティブユーザーは100万人に達しています。
 
 物理演算・ハンドトラッキング・グラブ操作・移動・空間UIといったVR開発に必要な機能がすでに組み込まれていて、`npm create @iwsdk` の1コマンドでプロジェクトが立ち上がります。さらに、Claude CodeやCodexなどのAIコーディングツールとの連携が最初から設計されており、プロンプトだけでVR体験を作り上げることもできます。
 
@@ -178,7 +178,7 @@ IWSDKは複数の技術レイヤーで構成されています。
 
 ### ECS（Entity Component System）パターン
 
-IWSDKでは、ゲームオブジェクトの振る舞いを**コンポーネント**（データ）と**システム**（ロジック）に分離して管理します。VRは72〜90FPSが求められるため、1フレームあたり11〜14msしか使えません。ECSパターンはこのパフォーマンス要件を満たすために設計されています。
+IWSDKでは、ゲームオブジェクトの振る舞いを**コンポーネント**（データ）と**システム**（ロジック）に分離して管理します。VRは72〜90FPSが求められるため、1フレームあたり11〜14msしか使えません。ECSランタイムの **ELICS** は、コンポーネントのフィールドをカラム型配列に格納するため、CPUキャッシュに優しいメモリレイアウトで大量のエンティティを高速に処理できます。
 
 ```typescript
 // コンポーネント（データの定義）
@@ -207,7 +207,28 @@ class SpinSystem extends createSystem({ spinners: { required: [Spinner, Transfor
 
 IWSDKのAI統合で核となるのが**MCPサーバー**です。Vite開発サーバー内で動作し、WebSocket経由でブラウザと通信します。
 
-Claude CodeやCodexは、このMCPサーバーを通じて40以上のツールにアクセスできます。
+Claude CodeやCodexは、このMCPサーバーを通じて**32のMCPツール**にアクセスできます。ツールは6つのカテゴリに分かれています。
+
+| カテゴリ | 主な機能 |
+| --- | --- |
+| Session | XRセッションの開始・監視・終了 |
+| Transforms | ヘッドセット・コントローラー・ハンドの位置と回転 |
+| Input | セレクト操作、ゲームパッドのボタン・軸の操作 |
+| Browser | スクリーンショット撮影、コンソールログ取得、リロード |
+| Scene | Three.jsシーン階層の検査、オブジェクト変換の取得 |
+| ECS | シミュレーションの一時停止・ステップ実行、エンティティ検索、状態差分 |
+
+### 3つの動作モード
+
+IWSDKのAI統合には、ワークフローに応じた3つのモードが用意されています。
+
+| モード | 説明 | Playwright | 開発者のブラウザ |
+| --- | --- | --- | --- |
+| Agent | AIがバックグラウンドで自律的に作業 | ヘッドレス | 通常のブラウザで開発 |
+| Oversight | AIの作業をリアルタイムで確認 | 可視化 | Playwrightが兼用 |
+| Collaborate | 開発者とAIが同じセッションを共有 | 可視化＋DevUI | Playwrightが兼用 |
+
+デフォルトはAgentモードで、AIがヘッドレスブラウザで作業している間、開発者は通常のブラウザで手動テストができます。
 
 ### シーンの確認
 
@@ -247,7 +268,9 @@ IWSDKは、VR開発の面倒な部分をフレームワークに任せ、AIと�
 
 - [この記事のデモ（VRギャラリー）](/demo/iwsdk-gallery/)
 - [IWSDK 公式サイト](https://iwsdk.dev/)
-- [IWSDK GitHub リポジトリ](https://github.com/meta-quest/immersive-web-sdk)
-- [Meta 公式ブログ記事](https://developers.meta.com/horizon/blog/accelerate-vr-development-with-ai-and-immersive-web-sdk/)
+- [IWSDK GitHub リポジトリ](https://github.com/facebook/immersive-web-sdk)
 - [AI-Assisted Development（IWSDK公式ドキュメント）](https://iwsdk.dev/ai/)
-- [PC + VRヘッドセットでWebXRを体験するガイド](/blog/pcvr-webxr-guide)
+- [Meet Immersive Web SDK（Meta公式ブログ）](https://developers.meta.com/horizon/blog/immersive-web-sdk-new-era-spatial-web-development/)
+- [AI-Assisted Development Tooling（Meta開発者ドキュメント）](https://developers.meta.com/horizon/documentation/web/iwsdk-ai-assisted-dev-tooling/)
+- [IWER - Immersive Web Emulation Runtime（GitHub）](https://github.com/meta-quest/immersive-web-emulation-runtime)
+- [PC + VRヘッドセットでWebXRを体験するガイド](/tech-articles/pcvr-webxr-guide)
