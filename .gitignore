@@ -25,6 +25,7 @@ coverage
 
 # Local agent / assistant settings
 .agent/
+.agents/
 .claude/
 .husky/_/
 
