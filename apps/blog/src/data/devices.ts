@@ -31,8 +31,9 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 		],
 		connectionType:
 			"スタンドアロン。Meta Quest Link/Air LinkでPC接続すればPCVRとしても利用可。",
-		priceRange: "74,800円（128GB）〜81,400円（512GB）",
-		availability: "販売中（2023年10月発売）。",
+		priceRange: "102,300円（512GB、税込／2026年4月19日改定）",
+		availability:
+			"販売中（2023年10月発売）。2026年4月19日より日本国内価格を改定。",
 		notes: [
 			"現行スタンドアロン機の中でも高い処理性能を備えたモデル。",
 			"カラーのパススルーカメラでMR体験に対応。",
@@ -54,8 +55,10 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 			"WolvicなどサードパーティVRブラウザ",
 		],
 		connectionType: "スタンドアロン。PC接続（Link/Air Link）対応。",
-		priceRange: "48,400円（128GB）、64,900円（256GB）",
-		availability: "販売中（2024年9月発売のQuest 3シリーズ）。",
+		priceRange:
+			"59,400円（128GB）、77,000円（256GB）（税込／2026年4月19日改定）",
+		availability:
+			"販売中（2024年9月発売のQuest 3シリーズ）。2026年4月19日より日本国内価格を改定。",
 		notes: [
 			"Quest 3の性能を踏襲しつつ価格を抑えたモデル。",
 			"解像度/レンズはQuest 2と同等の仕様。",
