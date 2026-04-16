@@ -215,8 +215,9 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 		},
 		browsers: ["Pico Browser（Chromium系）"],
 		connectionType: "スタンドアロン。PC接続（SteamVR）対応。",
-		priceRange: "89,800円（256GBモデルのみ）",
-		availability: "販売中（2024年9月発売）。",
+		priceRange: "104,900円（256GBモデルのみ、税込／2026年5月1日改定）",
+		availability:
+			"販売中（2024年9月発売）。2026年5月1日より日本国内価格を改定。",
 		notes: [
 			"Pico 4の上位モデルでカラーMR対応カメラ搭載。",
 			"Snapdragon XR2 Gen2により高い処理能力。",
