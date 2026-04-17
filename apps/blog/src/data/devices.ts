@@ -105,13 +105,14 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 			"PC接続時はPCブラウザ",
 		],
 		connectionType: "スタンドアロン。PC接続（Link）対応。",
-		priceRange: "159,500円（税込、発売当初226,800円から値下げ）",
-		availability: "販売中（2022年10月発売）。価格改定後は量販店でも取扱い。",
+		priceRange: "販売終了（終売時価格 159,500円）",
+		availability:
+			"2024年9月に公式販売終了。後継モデルは未発表、中古・在庫限りで流通。",
 		notes: [
 			"企業向けを意識した高性能モデル。",
 			"高解像度パススルーセンサー搭載でMR対応。",
 			"視線追跡・表情トラッキングを標準装備。",
-			"高価格・重量のため、業務用途で特に活用されるモデル。",
+			"2024年9月に販売終了。現行ラインはQuest 3 / Quest 3Sに一本化されている。",
 		],
 	},
 	{
@@ -225,6 +226,28 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 			"モーショントラッカー対応など独自の強み。",
 		],
 	},
+	{
+		id: "samsung-galaxy-xr",
+		name: "Samsung Galaxy XR",
+		type: "VR/MR",
+		manufacturer: "Samsung",
+		webxrSupport: {
+			status: "対応",
+			detail:
+				"Android XR上のChromeがWebXRを完全サポート（Hand Input / Depth Sensing含む）。",
+		},
+		browsers: ["Chrome for Android XR", "Samsung Internet（Android XR向け）"],
+		connectionType: "スタンドアロン（Android XR）。",
+		priceRange: "米国希望小売価格 $1,799.99（日本国内価格は未発表）",
+		availability:
+			"米国・韓国で2025年10月22日発売。日本では現時点で発売日・国内価格は未発表。",
+		notes: [
+			"GoogleのAndroid XR OSを初めて搭載したフラッグシップ機。",
+			"Snapdragon XR2+ Gen 2、片目4K Micro-OLEDを採用。",
+			"コントローラー／ハンドトラッキング／視線＋ピンチ操作の3方式に対応。",
+			"Gemini統合により音声アシスタント体験を強化。",
+		],
+	},
 ];
 
 export const AR_DEVICES: DeviceWebxrSummary[] = [
@@ -273,7 +296,7 @@ export const AR_DEVICES: DeviceWebxrSummary[] = [
 	},
 	{
 		id: "apple-vision-pro",
-		name: "Apple Vision Pro",
+		name: "Apple Vision Pro（M5）",
 		type: "MR",
 		manufacturer: "Apple",
 		webxrSupport: {
@@ -282,11 +305,14 @@ export const AR_DEVICES: DeviceWebxrSummary[] = [
 		},
 		browsers: ["Safari on visionOS"],
 		connectionType: "スタンドアロン（visionOS）",
-		priceRange: "公式価格を参照",
-		availability: "販売中（地域により異なる）",
+		priceRange:
+			"599,800円（256GB）、634,800円（512GB）、669,800円（1TB）（税込）",
+		availability: "販売中（2025年10月22日にM5チップ搭載モデルが発売）。",
 		notes: [
 			"視線・ジェスチャー中心の操作体験。",
 			"WebXRのimmersive-vr/immersive-arに対応。",
+			"M5チップ搭載で最大120Hzリフレッシュレートに対応（2025年10月発売）。",
+			"新設計のデュアルニットバンドで装着感を改善。",
 		],
 	},
 ];
