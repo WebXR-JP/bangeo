@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+	<title>サングラスを重ねるAR — 8th Wall Face Effects</title>
+
+	<!-- A-Frame -->
+	<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+	<!-- 8th Wall XRExtras (CDN / npm @8thwall/xrextras) -->
+	<script src="https://cdn.jsdelivr.net/npm/@8thwall/xrextras@1/dist/xrextras.js"></script>
+
+	<!-- 8th Wall Engine (xr.js は 8thwall/engine の xr-standalone.zip から取得) -->
+	<script async src="../xr-standalone/xr.js" data-preload-chunks="face"></script>
+
+	<style>
+		* { margin: 0; padding: 0; box-sizing: border-box; }
+		body { overflow: hidden; font-family: "Hiragino Sans", "Noto Sans JP", sans-serif; background: #000; }
+
+		#overlay {
+			position: absolute; top: 0; left: 0; width: 100%; z-index: 50;
+			pointer-events: none;
+		}
+		.header {
+			display: flex; justify-content: space-between; align-items: center;
+			padding: 12px 16px;
+			background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);
+		}
+		.header-title { color: #fff; font-size: 14px; font-weight: 700; }
+		.header-badge {
+			font-size: 10px; font-weight: 600; padding: 4px 10px;
+			border-radius: 999px; background: rgba(74,222,128,0.2); color: #4ade80;
+		}
+
+		#color-toggle {
+			position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%);
+			z-index: 60; pointer-events: auto;
+			display: flex; gap: 8px;
+		}
+		.color-btn {
+			width: 36px; height: 36px; border-radius: 50%;
+			border: 2px solid rgba(255,255,255,0.4);
+			cursor: pointer; transition: all 0.2s;
+			box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+		}
+		.color-btn.active { border-color: #fff; transform: scale(1.15); }
+		.color-btn:hover { border-color: rgba(255,255,255,0.8); }
+
+		.back-link {
+			position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+			pointer-events: auto; background: rgba(255,255,255,0.1);
+			border: 1px solid rgba(255,255,255,0.2); color: #fff;
+			padding: 10px 24px; border-radius: 999px; font-size: 11px;
+			font-weight: 700; text-decoration: none; backdrop-filter: blur(8px);
+			z-index: 100;
+		}
+		.back-link:hover { background: rgba(255,255,255,0.2); }
+
+		#error-overlay {
+			display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+			background: rgba(0,0,0,0.9); z-index: 200;
+			justify-content: center; align-items: center; text-align: center; color: #fff;
+			padding: 32px;
+		}
+		#error-overlay h2 { font-size: 20px; margin-bottom: 16px; }
+		#error-overlay p { font-size: 14px; color: #aaa; line-height: 1.8; margin-bottom: 20px; }
+		#error-overlay a { color: #e11d48; }
+	</style>
+</head>
+<body>
+	<!-- A-Frame scene with 8th Wall Face Tracking -->
+	<a-scene
+		xrface
+		xrextras-loading
+		xrextras-runtime-error
+		renderer="colorManagement: true"
+		vr-mode-ui="enabled: false"
+		device-orientation-permission-ui="enabled: false">
+
+		<a-camera position="0 0 0" active="false"></a-camera>
+
+		<!-- サングラス: forehead にアタッチしてフレーム全体を少し下にオフセット -->
+		<a-entity xrextras-face-attachment="point: forehead">
+			<a-entity position="0 -0.055 0.015">
+				<!-- 左レンズ -->
+				<a-box
+					class="lens"
+					position="-0.04 0 0"
+					width="0.055" height="0.03" depth="0.004"
+					color="#1a1a1a" opacity="0.85" transparent="true"></a-box>
+				<!-- 右レンズ -->
+				<a-box
+					class="lens"
+					position="0.04 0 0"
+					width="0.055" height="0.03" depth="0.004"
+					color="#1a1a1a" opacity="0.85" transparent="true"></a-box>
+				<!-- ブリッジ -->
+				<a-box
+					class="frame"
+					position="0 0.005 0"
+					width="0.02" height="0.004" depth="0.005"
+					color="#2a2a2a"></a-box>
+				<!-- 左テンプル（つる） -->
+				<a-box
+					class="frame"
+					position="-0.075 0 -0.04"
+					width="0.015" height="0.004" depth="0.08"
+					rotation="0 -18 0"
+					color="#2a2a2a"></a-box>
+				<!-- 右テンプル -->
+				<a-box
+					class="frame"
+					position="0.075 0 -0.04"
+					width="0.015" height="0.004" depth="0.08"
+					rotation="0 18 0"
+					color="#2a2a2a"></a-box>
+			</a-entity>
+		</a-entity>
+
+		<!-- 環境光 -->
+		<a-light type="ambient" color="#888"></a-light>
+		<a-light type="directional" position="0 1 1" intensity="0.8"></a-light>
+	</a-scene>
+
+	<!-- UI overlay -->
+	<div id="overlay">
+		<div class="header">
+			<span class="header-title">Face Effects — サングラス</span>
+			<span class="header-badge">8th Wall OSS</span>
+		</div>
+	</div>
+
+	<!-- 色切替ボタン -->
+	<div id="color-toggle">
+		<button class="color-btn active" data-color="#1a1a1a" style="background: #1a1a1a;" aria-label="ブラック"></button>
+		<button class="color-btn" data-color="#a81e1e" style="background: #a81e1e;" aria-label="レッド"></button>
+		<button class="color-btn" data-color="#1e4aa8" style="background: #1e4aa8;" aria-label="ブルー"></button>
+	</div>
+
+	<a href="/demos/8thwall-face/demo.html" class="back-link">← Face Trackingデモ</a>
+
+	<!-- Error fallback -->
+	<div id="error-overlay">
+		<div>
+			<h2>8th Wall エンジンを読み込めませんでした</h2>
+			<p>
+				`public/demos/xr-standalone/xr.js` が配置されていません。<br>
+				<a href="https://github.com/8thwall/engine" target="_blank">8thwall/engine</a>
+				から `xr-standalone.zip` をダウンロードし、<br>
+				`apps/blog/public/demos/xr-standalone/` に展開してください。
+			</p>
+		</div>
+	</div>
+
+	<script>
+		// レンズ色切替
+		const colorButtons = document.querySelectorAll('.color-btn');
+		const lenses = () => document.querySelectorAll('.lens');
+
+		colorButtons.forEach((btn) => {
+			btn.addEventListener('click', () => {
+				const color = btn.dataset.color;
+				lenses().forEach((lens) => {
+					lens.setAttribute('color', color);
+				});
+				colorButtons.forEach((b) => b.classList.remove('active'));
+				btn.classList.add('active');
+			});
+		});
+
+		// 8th Wall engine load check
+		let engineLoaded = false;
+		const checkEngine = () => {
+			if (window.XR8 && typeof window.XR8.run === "function") {
+				engineLoaded = true;
+			}
+		};
+		window.addEventListener("xrloaded", checkEngine);
+		setTimeout(() => {
+			checkEngine();
+			if (!engineLoaded) {
+				document.getElementById("error-overlay").style.display = "flex";
+			}
+		}, 8000);
+	</script>
+</body>
+</html>

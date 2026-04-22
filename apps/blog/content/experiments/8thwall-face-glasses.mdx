@@ -1,0 +1,27 @@
+---
+title: "顔にサングラスを重ねるAR — 8th Wall Face Effects"
+description: "カメラに映った顔の目の位置に3Dサングラスを自動追従で重ねるARデモです。8th Wall OSSとCDN版xrextrasで構成し、iPhone SafariやAndroid Chrome、PCでも動作します。"
+date: "2026-04-22"
+category: "AR"
+tags:
+  - "WebAR"
+  - "8th Wall"
+  - "A-Frame"
+  - "Face Effects"
+frameworks:
+  - "8th Wall"
+  - "A-Frame"
+devices:
+  - "iPhone"
+  - "Android"
+  - "デスクトップ"
+difficulty: "beginner"
+link: "/demos/8thwall-face-glasses/demo.html"
+thumbnail: "/no-image.png"
+---
+
+8th Wall の Face Effects を使い、カメラに映った顔に3Dサングラスをリアルタイムで重ねるWebARデモです。
+
+`xrextras-face-attachment` で額の位置を基準にサングラスのフレームを配置し、顔の動きに合わせてリアルタイムで追従します。画面下部のボタンで黒・赤・青の3色を切り替えられます。
+
+スクリプトは `@8thwall/xrextras` のCDN版と、ローカルに配置した `xr-standalone/xr.js` の組み合わせで構成しています。iOS Safari も WebXR 非対応のまま `getUserMedia` ベースで動くため、iPhone・Android・デスクトップの主要ブラウザで利用できます。
