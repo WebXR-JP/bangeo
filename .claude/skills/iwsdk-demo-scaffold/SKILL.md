@@ -1,11 +1,12 @@
 ---
-name: iwsdk-demo-scaffold
+
+## name: iwsdk-demo-scaffold
+
 description: BANGEOブログの `/demo/<name>/` で公開するWebXRデモを、IWSDK（Meta Immersive Web SDK）ベースでスキャフォールドする。IWSDKプロジェクトを `apps/<demo-name>/` に作成し、ビルド成果物を `apps/blog/public/demo/<demo-name>/` に配置し、`apps/blog/content/experiments/<demo-name>.mdx` を登録するまでを一気通貫で行う。「新しいデモ」「WebXRデモ作って」「IWSDKデモ」「hit-testデモ」「anchorsデモ」「add demo」「scaffold demo」「create webxr demo」といった指示で発動する。
 metadata:
   author: bangeo-team
   version: "1.1.0"
-  argument-hint: "<demo-name> [--title <title>] [--category GUIDE|TECH|VR|AR]"
----
+  argument-hint: " [--title ] [--category GUIDE|TECH|VR|AR]"
 
 # IWSDK WebXR デモ スキャフォールド
 
@@ -60,7 +61,7 @@ export default defineConfig({
 JS/TS コードで `'/gltf/model.glb'` のような絶対パス文字列を書くと、相対パス化されないため壊れる。以下いずれかで書く:
 
 - 相対パスで書く: `'gltf/model.glb'`
-- `import.meta.env.BASE_URL` を前置: `` `${import.meta.env.BASE_URL}gltf/model.glb` ``
+- `import.meta.env.BASE_URL` を前置: `${import.meta.env.BASE_URL}gltf/model.glb`
 - ESM import で渡す: `import modelUrl from './gltf/model.glb?url';`
 
 ## 手順
@@ -79,11 +80,13 @@ JS/TS コードで `'/gltf/model.glb'` のような絶対パス文字列を書�
 
 コンセプトから以下のどれに当てはまるかを判定する。
 
-| モード | 典型用途 | 主要ターゲット | 主な非対応環境 |
-| --- | --- | --- | --- |
-| VR のみ | 没入シーン、空間UI、ハンドトラッキング、グラブ | Meta Quest、Pico、PC VR | iOS Safari（WebXR未対応） |
+
+| モード   | 典型用途                        | 主要ターゲット                                 | 主な非対応環境                                 |
+| ----- | --------------------------- | --------------------------------------- | --------------------------------------- |
+| VR のみ | 没入シーン、空間UI、ハンドトラッキング、グラブ    | Meta Quest、Pico、PC VR                   | iOS Safari（WebXR未対応）                    |
 | AR のみ | hit-test、anchors、実空間配置、平面検出 | Android Chrome（ARCore）、Meta Quest 3 のMR | Desktop Chrome（AR Module未対応）、iOS Safari |
-| 両対応 | 3D閲覧、基本的なシーン探索 | Quest + Android + デスクトップ | iOS Safari |
+| 両対応   | 3D閲覧、基本的なシーン探索              | Quest + Android + デスクトップ                | iOS Safari                              |
+
 
 ARか VR かで使える WebXR モジュール、ターゲットデバイス、ブラウザが大きく変わる。この判定を最初にやる。
 
@@ -126,23 +129,28 @@ hit-test／anchors／hand-input／depth-sensing／lighting-estimation／layers�
 > 1〜2文で何を体験するデモか。
 >
 > **シーン構成**
+>
 > - 環境：どんな空間か（暗い室内／明るい屋外／スタジオなど）
 > - 配置オブジェクト：テーブル、カード、パーティクルなど何が置かれるか
 > - ライティング：基本光源、追加演出があれば
 >
 > **ユーザー操作**
+>
 > - 入力：コントローラー／ハンド／視線／タップのどれを使うか
 > - アクション：選択、掴む、移動、配置など主なインタラクション
 > - フィードバック：選択時の視覚・音・ハプティクスの反応
 >
 > **WebXR モジュールの使い方**
+>
 > - 使うモジュールと、どこでどう呼ぶか（例: hit-test で画面中央の線を出し、タップで配置）
 >
 > **完成イメージ**
+>
 > - 起動直後に何が見えるか
 > - 操作後に何が起きるか
 >
 > **スコープ外（今回やらないこと）**
+>
 > - マルチプレイヤー、永続化、音声認識など機能拡張の除外項目
 >
 > この内容で進めて良ければ「Go」で返してください。変更したい点があれば教えてください。
@@ -232,22 +240,24 @@ pnpm dev
 
 ### 9. コミット前チェック
 
-- [ ] `apps/<demo-name>/vite.config.ts` に `base: './'` がある
-- [ ] `apps/blog/public/demo/<demo-name>/index.html` が相対パスで書かれている（`./assets/...`）
-- [ ] `/demo/<demo-name>/` でアセットが全てロードされる（DevToolsのNetworkタブで404ゼロ）
-- [ ] `/experiments` 一覧にサムネイル付きで表示される
-- [ ] `/experiments/<demo-name>` の個別ページが開く
+- `apps/<demo-name>/vite.config.ts` に `base: './'` がある
+- `apps/blog/public/demo/<demo-name>/index.html` が相対パスで書かれている（`./assets/...`）
+- `/demo/<demo-name>/` でアセットが全てロードされる（DevToolsのNetworkタブで404ゼロ）
+- `/experiments` 一覧にサムネイル付きで表示される
+- `/experiments/<demo-name>` の個別ページが開く
 
 ## よくあるハマりどころ
 
-| 症状 | 原因 | 対応 |
-| --- | --- | --- |
-| `/demo/xxx/` が真っ白 | `vite.config.ts` に `base: './'` が無い | `base: './'` を追加して再ビルド |
-| `/assets/index-xxx.js` が404 | ビルド済みHTMLが `/assets/...` 絶対パスを参照している | 同上 |
-| 画像・モデルが読めない | JS/TS内で `/foo.glb` のような絶対パスを書いている | 相対パス、または `import.meta.env.BASE_URL` を使う |
-| サムネイルが出ない | `thumbnail` のパスが `public/` に存在しない | `apps/blog/public/assets/tech/` に画像を配置 |
-| `/experiments` 一覧に出ない | `_meta.json` で除外されている／frontmatter の不備 | `date` / `link` / `thumbnail` を確認 |
-| WebXR APIが未定義エラー | ブラウザがそのモジュールに未対応、またはフラグが必要 | reference.md の「WebXR 仕様リンク集」でブラウザ対応状況を確認 |
+
+| 症状                          | 原因                                    | 対応                                       |
+| --------------------------- | ------------------------------------- | ---------------------------------------- |
+| `/demo/xxx/` が真っ白           | `vite.config.ts` に `base: './'` が無い   | `base: './'` を追加して再ビルド                   |
+| `/assets/index-xxx.js` が404 | ビルド済みHTMLが `/assets/...` 絶対パスを参照している  | 同上                                       |
+| 画像・モデルが読めない                 | JS/TS内で `/foo.glb` のような絶対パスを書いている     | 相対パス、または `import.meta.env.BASE_URL` を使う  |
+| サムネイルが出ない                   | `thumbnail` のパスが `public/` に存在しない     | `apps/blog/public/assets/tech/` に画像を配置   |
+| `/experiments` 一覧に出ない       | `_meta.json` で除外されている／frontmatter の不備 | `date` / `link` / `thumbnail` を確認        |
+| WebXR APIが未定義エラー            | ブラウザがそのモジュールに未対応、またはフラグが必要            | reference.md の「WebXR 仕様リンク集」でブラウザ対応状況を確認 |
+
 
 ## 関連ファイル
 
@@ -255,3 +265,4 @@ pnpm dev
 - `apps/blog/content/experiments/iwsdk-gallery.mdx` — 登録MDXの参考例
 - `apps/blog/public/demo/iwsdk-gallery/` — 配置済みデモの参考例
 - `apps/blog/content/blog/iwsdk-ai-vr-development.mdx` — IWSDK全体の解説記事
+
