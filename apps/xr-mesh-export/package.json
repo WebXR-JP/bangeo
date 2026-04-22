@@ -1,0 +1,21 @@
+{
+	"name": "xr-mesh-export",
+	"private": true,
+	"version": "0.0.1",
+	"type": "module",
+	"scripts": {
+		"dev": "vite",
+		"build": "tsc && vite build",
+		"preview": "vite preview"
+	},
+	"dependencies": {
+		"@iwsdk/core": "^0.3.1",
+		"three": "0.181.0"
+	},
+	"devDependencies": {
+		"@iwsdk/vite-plugin-dev": "^0.3.1",
+		"@types/three": "0.184.0",
+		"typescript": "^5.5.3",
+		"vite": "^7.0.0"
+	}
+}

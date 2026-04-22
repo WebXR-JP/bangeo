@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>WebXR ルームスキャン &amp; GLB 書き出し | BANGEO</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: #000;
+        overflow: hidden;
+      }
+      #scene-container {
+        width: 100vw;
+        height: 100vh;
+      }
+      #overlay-root {
+        display: none;
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        font-family: system-ui, -apple-system, sans-serif;
+      }
+      #overlay-root.active {
+        display: flex;
+      }
+      #status-panel {
+        position: absolute;
+        bottom: 24px;
+        left: 24px;
+        background: rgba(0, 0, 0, 0.6);
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        line-height: 1.6;
+        pointer-events: none;
+      }
+      #button-panel {
+        position: absolute;
+        bottom: 24px;
+        right: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        pointer-events: all;
+      }
+      .xr-btn {
+        background: rgba(0, 0, 0, 0.6);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 8px;
+        padding: 12px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        cursor: pointer;
+        min-width: 140px;
+        text-align: center;
+      }
+      .xr-btn:active {
+        background: rgba(255, 255, 255, 0.15);
+      }
+      #toast {
+        position: absolute;
+        top: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.75);
+        color: #fff;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 14px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+        white-space: nowrap;
+      }
+      #toast.visible {
+        opacity: 1;
+      }
+    </style>
+    <script type="module" crossorigin src="./assets/index-nhtjid16.js"></script>
+  </head>
+  <body>
+    <div id="scene-container"></div>
+
+    <div id="overlay-root">
+      <div id="status-panel">
+        <div id="status-meshes">Meshes: 0</div>
+        <div id="status-planes">Planes: 0</div>
+        <div id="status-state">Status: Waiting</div>
+      </div>
+      <div id="button-panel">
+        <button class="xr-btn" id="btn-reset">SCAN RESET</button>
+        <button class="xr-btn" id="btn-export">EXPORT GLB</button>
+      </div>
+      <div id="toast"></div>
+    </div>
+
+  </body>
+</html>

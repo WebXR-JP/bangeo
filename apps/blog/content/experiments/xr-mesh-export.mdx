@@ -1,0 +1,31 @@
+---
+title: "WebXR ルームスキャン & GLB 書き出し"
+description: "Meta Quest 3 / 3S / Pro のシーンメッシュを WebXR Mesh Detection で取得し、部屋の形状を GLB ファイルとしてその場でダウンロードできるデモ。IWSDK と Three.js GLTFExporter で実装。"
+date: "2026-04-22"
+category: "AR"
+tags:
+  - "WebXR"
+  - "IWSDK"
+  - "Three.js"
+  - "Mesh Detection"
+  - "Meta Quest"
+  - "GLB"
+frameworks:
+  - "IWSDK"
+  - "Three.js"
+devices:
+  - "Meta Quest 3"
+  - "Meta Quest 3S"
+  - "Meta Quest Pro"
+difficulty: "advanced"
+link: "/demo/xr-mesh-export"
+thumbnail: "/assets/tech/xr-mesh-export-placeholder.png"
+---
+
+Meta Quest 3 / 3S / Pro のシーンメッシュ機能を WebXR から扱うデモです。パススルー越しに部屋のメッシュがワイヤーフレームで可視化され、セマンティックラベル（床・壁・天井・家具）ごとに色分け表示されます。
+
+`EXPORT GLB` ボタンを押すと、その瞬間のメッシュと平面を `.glb` ファイルとして Quest のダウンロードフォルダに保存します。保存された GLB は Blender や Three.js ビューワで開けるため、個人の部屋スキャン用途にも使えます。
+
+使用する WebXR 機能: `mesh-detection`（Quest 独自拡張）、`plane-detection`、`anchors`、`dom-overlay`。Android Chrome や iOS Safari は Mesh Detection 未対応のため非対応です。
+
+{/* サムネイル画像は /apps/blog/public/assets/tech/xr-mesh-export-placeholder.png に配置してください */}
