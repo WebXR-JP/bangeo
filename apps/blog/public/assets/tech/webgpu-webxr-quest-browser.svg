@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">WebGPU in WebXR on Quest Browser</title>
+  <desc id="desc">A technical article thumbnail for Quest Browser, WebXR, and WebGPU.</desc>
+  <rect width="1200" height="675" fill="#101820"/>
+  <rect x="70" y="70" width="1060" height="535" rx="32" fill="#f8fafc"/>
+  <rect x="110" y="112" width="980" height="451" rx="22" fill="#18212f"/>
+  <rect x="154" y="154" width="310" height="52" rx="12" fill="#38bdf8"/>
+  <text x="180" y="188" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#0f172a">Quest Browser 146.0</text>
+  <text x="154" y="303" font-family="Arial, Helvetica, sans-serif" font-size="84" font-weight="800" fill="#ffffff">WebGPU</text>
+  <text x="154" y="372" font-family="Arial, Helvetica, sans-serif" font-size="60" font-weight="800" fill="#ffffff">in WebXR</text>
+  <text x="154" y="514" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="700" fill="#cbd5e1">Experimental support via chrome://flags</text>
+  <g transform="translate(704 250)">
+    <path d="M0 112C42 37 104 0 186 0c64 0 109 23 151 67 42-44 87-67 151-67 82 0 144 37 186 112-33 61-87 92-163 92-70 0-121-25-174-74-53 49-104 74-174 74-76 0-130-31-163-92Z" fill="#ffffff" opacity=".96"/>
+    <circle cx="184" cy="111" r="54" fill="#101820"/>
+    <circle cx="490" cy="111" r="54" fill="#101820"/>
+    <circle cx="184" cy="111" r="23" fill="#38bdf8"/>
+    <circle cx="490" cy="111" r="23" fill="#f43f5e"/>
+  </g>
+  <g transform="translate(862 162)">
+    <rect width="185" height="185" rx="28" fill="#0f172a" stroke="#38bdf8" stroke-width="5"/>
+    <path d="M42 123h101M42 92h101M42 61h101" stroke="#f8fafc" stroke-width="14" stroke-linecap="round"/>
+    <path d="M92 36v112" stroke="#f43f5e" stroke-width="14" stroke-linecap="round"/>
+  </g>
+</svg>

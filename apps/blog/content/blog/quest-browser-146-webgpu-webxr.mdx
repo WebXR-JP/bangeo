@@ -1,0 +1,104 @@
+---
+title: "Quest Browser 146.0でWebGPU in WebXRが実験的に利用可能に"
+description: "Meta Quest Browser 146.0で、WebXRからWebGPUを使う実験的サポートが追加されました。WebXR experimental featuresの有効化方法、開発者にとっての意味、HTML-in-Canvasとの関係を整理します。"
+date: "2026年4月28日"
+category: "NEWS"
+tags:
+  - "WebXR"
+  - "WebGPU"
+  - "Meta Quest"
+  - "Quest Browser"
+  - "HTML-in-Canvas"
+author: "BANGEO Team"
+thumbnail: "/assets/tech/webgpu-webxr-quest-browser.png"
+draft: false
+---
+
+MetaのRik Cabanier氏が、**Quest Browser 146.0でWebXRにおけるWebGPUの実験的サポートが利用可能になった**ことを投稿しました。
+
+<blockquote className="twitter-tweet">
+  <p lang="en" dir="ltr">Quest Browser 146.0 now ships with experimental support for WebGPU in WebXR. Turn on "webXR experimental features" in "chrome://flags" and the API will be available. Feedback welcome!</p>
+  <a href="https://x.com/rcabanier/status/2047408843244912810?s=46">Rik Cabanier氏の投稿</a>
+</blockquote>
+<script async src="https://platform.twitter.com/widgets.js" charSet="utf-8"></script>
+
+今回のポイントは、Quest Browser上のWebXRで、WebGLだけでなくWebGPUを使う道が開き始めたことです。現時点では実験機能なので、通常のWebXRコンテンツが自動的にWebGPUへ切り替わるわけではありません。Quest Browserで `chrome://flags` を開き、`webXR experimental features` を有効にするとAPIが利用可能になります。
+
+## WebXRでWebGPUが使える意味
+
+WebXRは、ブラウザからVRやARのセッションを開始し、ヘッドセットの姿勢、コントローラー、ハンドトラッキング、空間認識などを扱うためのWeb APIです。これまでWebXRの描画はWebGLを前提にした実装が中心でした。
+
+一方でWebGPUは、Vulkan、Metal、Direct3D 12のような現代的なGPU APIに近い設計のWeb標準です。低レベルなGPU制御、計算処理、複雑なレンダリングパイプラインを扱いやすくするためのAPIで、WebXRと組み合わせることで、ブラウザ上のXR表現をさらに高性能化できる可能性があります。
+
+たとえば、以下のような領域で恩恵が期待できます。
+
+- GPU負荷の高いXRレンダリング
+- 大量のオブジェクトやパーティクルを扱うシーン
+- コンピュートシェーダーを使ったシミュレーション
+- WebGPU前提で作られた3DエンジンやレンダラーのWebXR対応
+
+ただし、今回の機能はまだ実験段階です。プロダクション環境で前提にするというより、開発者が早い段階で試し、挙動や制約を確認してフィードバックするためのものと見るのがよさそうです。
+
+## 有効化方法
+
+Quest Browser 146.0で試す場合は、次の手順になります。
+
+1. Quest Browserで `chrome://flags` を開く
+2. `webXR experimental features` を検索する
+3. フラグを有効化する
+4. ブラウザを再起動する
+5. WebGPU in WebXRに対応したサンプルや実装を開く
+
+WebGPUそのものの対応状況や、WebXRとのバインディングの有無はブラウザやバージョンによって変わります。開発時は `navigator.gpu`、`navigator.xr`、`XRGPUBinding` などの存在を確認しながら、未対応環境向けのフォールバックを用意しておくのが現実的です。
+
+```javascript
+const supportsWebGpu = "gpu" in navigator;
+const supportsWebXr = "xr" in navigator;
+const supportsXrGpuBinding = "XRGPUBinding" in window;
+
+console.log({
+  supportsWebGpu,
+  supportsWebXr,
+  supportsXrGpuBinding,
+});
+```
+
+## HTMLをテクスチャとして描画する流れにも言及
+
+この投稿へのリプライでは、Richard Anaya氏が「HTML rendering to texture」の実験的な取り組みをQuest Browserでもサポートする予定があるか質問しています。
+
+> **Richard Anaya氏:** HTML rendering to texture experimentもサポートされる予定ですか？
+
+それに対してCabanier氏は、Googleが進めている **HTML-in-Canvas** がChromeとQuest Browserで実験的に動作していると説明しています。HTMLを直接テクスチャへ描画できるようになる一方、WebXRでのヒットテストには追加対応が必要で、そこは後から対応していくとしています。
+
+> **Rik Cabanier氏:** GoogleがHTML-in-Canvasに取り組んでおり、ChromeとQuest Browserで実験的に動作しています。HTMLを直接テクスチャへ描画できるようになります。WebXRでのヒットテストには追加サポートが必要ですが、後で対応する予定です。
+
+[WICGのHTML-in-Canvas提案](https://github.com/WICG/html-in-canvas)では、Canvas内でHTMLコンテンツを描画するためのAPIが説明されています。Chromiumでは `chrome://flags/#canvas-draw-element` から有効化できる実験的APIとして紹介されており、WebGL/WebGPU向けにはHTML要素をテクスチャへコピーする方向も含まれています。
+
+これはWebXRにとってかなり重要です。XR空間内のUIは、3DメッシュやCanvasで独自実装することが多く、通常のHTML/CSS UIをそのまま3D空間のパネルに貼ることは簡単ではありませんでした。HTML-in-Canvasが進むと、HTMLで作った設定パネル、メニュー、カード、フォームなどを、WebGPUやWebGLのテクスチャとしてXR空間へ配置しやすくなります。
+
+## まだ「標準で安定」ではない
+
+今回のアップデートは、WebXR開発者にとって大きな前進ですが、いくつか注意点があります。
+
+- Quest Browser 146.0時点では実験機能として提供されている
+- `chrome://flags` での有効化が必要
+- API仕様や実装挙動は今後変わる可能性がある
+- WebXR内でのHTML UIのヒットテストなど、周辺機能には未対応部分が残る
+
+そのため、今すぐ一般ユーザー向け機能の必須要件にするより、検証環境やデモ、将来のレンダリング基盤の調査として触り始めるのがよい段階です。
+
+## WebXRは次の段階へ進んでいる
+
+Quest BrowserでWebGPU in WebXRが動き始めたことは、WebXRが「WebGLでVR/ARを表示する」段階から、より現代的なGPUパイプラインを取り込む段階へ進んでいることを示しています。
+
+さらにHTML-in-Canvasのような取り組みが組み合わさると、Webの強みであるHTML/CSSのUI表現と、XR空間での高性能レンダリングが近づいていきます。
+
+インストール不要でアクセスできるWebXRアプリは、今後さらにリッチな表現を扱えるようになるはずです。Quest Browser 146.0の実験的サポートは、そのための重要な一歩といえます。
+
+## 関連リンク
+
+- [Rik Cabanier氏の投稿](https://x.com/rcabanier/status/2047408843244912810?s=46)
+- [WICG: HTML-in-Canvas](https://github.com/WICG/html-in-canvas)
+- [Experimenting with WebGPU in WebXR](https://toji.dev/2025/03/03/experimenting-with-webgpu-in-webxr.html)
+- [WebXR WebGPU samples](https://immersive-web.github.io/webxr-samples/webgpu/)
