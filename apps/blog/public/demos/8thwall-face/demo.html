@@ -57,7 +57,8 @@
 <body>
 	<!-- A-Frame scene with 8th Wall Face Tracking -->
 	<a-scene
-		xrface
+		xrconfig="cameraDirection: front; mirroredDisplay: true; allowedDevices: any"
+		xrface="enableEars: true"
 		xrextras-loading
 		xrextras-runtime-error
 		renderer="colorManagement: true"
