@@ -4,6 +4,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 	<title>8th Wall OSS + A-Frame AR Demo</title>
+	<link rel="icon" type="image/png" href="/favicon.png">
 
 	<!-- A-Frame -->
 	<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
@@ -12,7 +13,7 @@
 	<script src="../xr-standalone/xrextras.js"></script>
 
 	<!-- 8th Wall Engine (OSS版) -->
-	<script async src="../xr-standalone/xr.js"></script>
+	<script src="../xr-standalone/xr.js" data-preload-chunks="slam"></script>
 
 	<style>
 		* { margin: 0; padding: 0; box-sizing: border-box; }

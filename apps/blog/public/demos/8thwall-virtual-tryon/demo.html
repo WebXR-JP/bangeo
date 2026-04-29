@@ -4,10 +4,11 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 	<title>バーチャル試着 AR Demo — 8th Wall OSS</title>
+	<link rel="icon" type="image/png" href="/favicon.png">
 
 	<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 	<script src="../xr-standalone/xrextras.js"></script>
-	<script async src="../xr-standalone/xr.js"
+	<script src="../xr-standalone/xr.js"
 		data-preload-chunks="face"></script>
 
 	<style>
@@ -71,8 +72,7 @@
 </head>
 <body>
 	<a-scene
-		xrconfig="cameraDirection: front; mirroredDisplay: true; allowedDevices: any"
-		xrface="enableEars: true"
+		xrface="cameraDirection: front; mirroredDisplay: true; allowedDevices: any; enableEars: true"
 		xrextras-loading
 		xrextras-runtime-error
 		renderer="colorManagement: true"

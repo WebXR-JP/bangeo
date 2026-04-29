@@ -4,15 +4,16 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 	<title>サングラスを重ねるAR — 8th Wall Face Effects</title>
+	<link rel="icon" type="image/png" href="/favicon.png">
 
 	<!-- A-Frame -->
 	<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 
+	<!-- 8th Wall XRExtras (A-Frame components 含む) -->
+	<script src="../xr-standalone/xrextras.js"></script>
+
 	<!-- 8th Wall Engine -->
 	<script id="xr-engine-script" src="../xr-standalone/xr.js" data-preload-chunks="face"></script>
-
-	<!-- 8th Wall XRExtras (XR8 初期化後に読む) -->
-	<script src="../xr-standalone/xrextras.js"></script>
 
 	<style>
 		* { margin: 0; padding: 0; box-sizing: border-box; }
@@ -77,8 +78,7 @@
 <body>
 	<!-- A-Frame scene with 8th Wall Face Tracking -->
 	<a-scene
-		xrconfig="cameraDirection: front; mirroredDisplay: true; allowedDevices: any"
-		xrface="enableEars: true"
+		xrface="cameraDirection: front; mirroredDisplay: true; allowedDevices: any; enableEars: true"
 		xrextras-loading
 		xrextras-runtime-error
 		renderer="colorManagement: true"
@@ -87,63 +87,89 @@
 
 		<a-camera position="0 0 0" active="false"></a-camera>
 
-		<!-- サングラス: 目・鼻・耳の特徴点に分けて追従させ、顔の上下ズレを抑える -->
-		<a-entity xrextras-face-attachment="point: leftEye">
-			<a-circle
-				class="lens"
-				position="0 0 0.012"
-				radius="0.024"
-				scale="1.35 0.8 1"
-				material="color: #1a1a1a; opacity: 0.82; transparent: true; side: double"></a-circle>
-			<a-ring
-				class="frame"
-				position="0 0 0.014"
-				radius-inner="0.024"
-				radius-outer="0.029"
-				scale="1.35 0.8 1"
-				material="color: #050505; side: double"></a-ring>
-		</a-entity>
+		<!-- サングラス: 顔全体のトランスフォームに追従する、分かりやすいARオーバーレイ -->
+		<a-entity xrextras-faceanchor>
+			<a-entity id="sunglasses-overlay" position="0 0.055 0.085" scale="2 2 2">
+				<a-circle
+					class="lens"
+					position="-0.052 0 0"
+					radius="0.043"
+					scale="1.45 0.85 1"
+					material="color: #111827; opacity: 0.82; transparent: true; side: double; depthTest: false"></a-circle>
+				<a-circle
+					class="lens"
+					position="0.052 0 0"
+					radius="0.043"
+					scale="1.45 0.85 1"
+					material="color: #111827; opacity: 0.82; transparent: true; side: double; depthTest: false"></a-circle>
 
-		<a-entity xrextras-face-attachment="point: rightEye">
-			<a-circle
-				class="lens"
-				position="0 0 0.012"
-				radius="0.024"
-				scale="1.35 0.8 1"
-				material="color: #1a1a1a; opacity: 0.82; transparent: true; side: double"></a-circle>
-			<a-ring
-				class="frame"
-				position="0 0 0.014"
-				radius-inner="0.024"
-				radius-outer="0.029"
-				scale="1.35 0.8 1"
-				material="color: #050505; side: double"></a-ring>
-		</a-entity>
+				<a-ring
+					class="frame"
+					position="-0.052 0 0.004"
+					radius-inner="0.042"
+					radius-outer="0.052"
+					scale="1.45 0.85 1"
+					material="color: #f8fafc; side: double; depthTest: false"></a-ring>
+				<a-ring
+					class="frame"
+					position="0.052 0 0.004"
+					radius-inner="0.042"
+					radius-outer="0.052"
+					scale="1.45 0.85 1"
+					material="color: #f8fafc; side: double; depthTest: false"></a-ring>
 
-		<a-entity xrextras-face-attachment="point: noseTip">
-			<a-box
-				class="frame"
-				position="0 0.026 0.018"
-				scale="0.035 0.005 0.005"
-				material="color: #050505"></a-box>
-		</a-entity>
+				<a-ring
+					position="-0.052 0 0.007"
+					radius-inner="0.053"
+					radius-outer="0.058"
+					scale="1.45 0.85 1"
+					material="color: #22d3ee; opacity: 0.86; transparent: true; side: double; depthTest: false"></a-ring>
+				<a-ring
+					position="0.052 0 0.007"
+					radius-inner="0.053"
+					radius-outer="0.058"
+					scale="1.45 0.85 1"
+					material="color: #22d3ee; opacity: 0.86; transparent: true; side: double; depthTest: false"></a-ring>
 
-		<a-entity xrextras-face-attachment="point: leftEar">
-			<a-box
-				class="frame"
-				position="0 0.018 0.006"
-				scale="0.006 0.006 0.07"
-				rotation="0 -10 0"
-				material="color: #050505"></a-box>
-		</a-entity>
+				<a-box
+					class="frame"
+					position="0 0.008 0.011"
+					scale="0.055 0.008 0.008"
+					material="color: #f8fafc; depthTest: false"></a-box>
+				<a-box
+					class="frame"
+					position="0 0.043 0.01"
+					scale="0.2 0.008 0.008"
+					material="color: #f8fafc; depthTest: false"></a-box>
+				<a-box
+					position="0 0.053 0.012"
+					scale="0.17 0.004 0.006"
+					material="color: #22d3ee; depthTest: false"></a-box>
 
-		<a-entity xrextras-face-attachment="point: rightEar">
-			<a-box
-				class="frame"
-				position="0 0.018 0.006"
-				scale="0.006 0.006 0.07"
-				rotation="0 10 0"
-				material="color: #050505"></a-box>
+				<a-plane
+					position="-0.072 0.018 0.014"
+					scale="0.028 0.007 1"
+					rotation="0 0 -20"
+					material="color: #ffffff; opacity: 0.72; transparent: true; side: double; depthTest: false"></a-plane>
+				<a-plane
+					position="0.032 0.018 0.014"
+					scale="0.028 0.007 1"
+					rotation="0 0 -20"
+					material="color: #ffffff; opacity: 0.72; transparent: true; side: double; depthTest: false"></a-plane>
+
+				<a-box
+					class="frame"
+					position="-0.14 0.005 -0.018"
+					scale="0.085 0.008 0.008"
+					rotation="0 22 0"
+					material="color: #f8fafc; depthTest: false"></a-box>
+				<a-box
+					class="frame"
+					position="0.14 0.005 -0.018"
+					scale="0.085 0.008 0.008"
+					rotation="0 -22 0"
+					material="color: #f8fafc; depthTest: false"></a-box>
+			</a-entity>
 		</a-entity>
 
 		<!-- 環境光 -->
