@@ -12,7 +12,7 @@
 	<script src="../xr-standalone/xrextras.js"></script>
 
 	<!-- 8th Wall Engine (xr.js は 8thwall/engine の xr-standalone.zip から取得) -->
-	<script async src="../xr-standalone/xr.js" data-preload-chunks="face"></script>
+	<script id="xr-engine-script" async src="../xr-standalone/xr.js" data-preload-chunks="face"></script>
 
 	<style>
 		* { margin: 0; padding: 0; box-sizing: border-box; }
@@ -66,6 +66,12 @@
 		#error-overlay h2 { font-size: 20px; margin-bottom: 16px; }
 		#error-overlay p { font-size: 14px; color: #aaa; line-height: 1.8; margin-bottom: 20px; }
 		#error-overlay a { color: #e11d48; }
+		#error-debug {
+			margin-top: 12px; padding: 10px; border-radius: 8px;
+			background: rgba(255,255,255,0.08); color: #cbd5e1;
+			font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+			font-size: 11px; text-align: left; white-space: pre-wrap; word-break: break-word;
+		}
 	</style>
 </head>
 <body>
@@ -172,6 +178,7 @@
 				から `xr-standalone.zip` をダウンロードし、<br>
 				`apps/blog/public/demos/xr-standalone/` に展開してください。
 			</p>
+			<div id="error-debug">diagnostics: waiting...</div>
 		</div>
 	</div>
 
@@ -191,17 +198,43 @@
 			});
 		});
 
-		// 8th Wall engine load check
+		// 8th Wall engine load check + diagnostics
 		let engineLoaded = false;
-		const checkEngine = () => {
-			if (window.XR8 && typeof window.XR8.run === "function") {
-				engineLoaded = true;
-			}
+		const debugLines = [];
+		const pushDebug = (message) => {
+			const time = new Date().toISOString().slice(11, 19);
+			debugLines.push(`[${time}] ${message}`);
+			const debugEl = document.getElementById("error-debug");
+			if (debugEl) debugEl.textContent = debugLines.join("\n");
 		};
-		window.addEventListener("xrloaded", checkEngine);
+
+		const checkEngine = (trigger = "check") => {
+			const hasXR8 = !!window.XR8;
+			const hasRun = !!(window.XR8 && typeof window.XR8.run === "function");
+			pushDebug(`${trigger}: XR8=${hasXR8} XR8.run=${hasRun}`);
+			if (hasRun) engineLoaded = true;
+		};
+
+		window.addEventListener("error", (event) => {
+			pushDebug(`window.error: ${event.message || "unknown error"}`);
+		});
+		window.addEventListener("unhandledrejection", (event) => {
+			pushDebug(`promise rejection: ${event.reason || "unknown rejection"}`);
+		});
+		window.addEventListener("xrloaded", () => checkEngine("xrloaded event"));
+
+		const xrScript = document.getElementById("xr-engine-script");
+		if (xrScript) {
+			xrScript.addEventListener("load", () => checkEngine("xr.js loaded"));
+			xrScript.addEventListener("error", () => {
+				pushDebug("xr.js script load failed (network/path/CSP)");
+			});
+		}
+
 		setTimeout(() => {
-			checkEngine();
+			checkEngine("8s timeout");
 			if (!engineLoaded) {
+				pushDebug(`location=${location.pathname}`);
 				document.getElementById("error-overlay").style.display = "flex";
 			}
 		}, 8000);
