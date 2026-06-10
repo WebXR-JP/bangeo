@@ -38,7 +38,7 @@ export const WEBXR_BROWSER_COLUMNS: Array<{ key: BrowserKey; label: string }> =
 	];
 
 export const WEBXR_STATUS_META = {
-	lastChecked: "2026年1月8日",
+	lastChecked: "2026年6月11日",
 	sources: {
 		standards: "https://www.w3.org/TR/?filter-tr-name=webxr",
 		docTypes: "https://www.w3.org/TR/tr/",
@@ -111,7 +111,7 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 			safari: "未対応",
 		},
 		description:
-			"W3C の勧告候補草案（2025-10-01）。VR/AR デバイスのセンサーやヘッドマウントディスプレイへのアクセス方法を定める中核仕様です。",
+			"W3C の勧告候補草案（2026-06-09）。VR/AR デバイスのセンサーやヘッドマウントディスプレイへのアクセス方法を定める中核仕様です。inline-stereo などの feature descriptor も含みます。",
 		specUrl: "https://www.w3.org/TR/webxr/",
 	},
 	{
@@ -181,7 +181,7 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 			safari: "未対応",
 		},
 		description:
-			"W3C のワーキングドラフト（2025-12-11）。コンポジターが管理するレイヤーを使い、描画効率や視認性、遅延の改善を目指す仕様です。",
+			"W3C のワーキングドラフト（2026-06-01）。コンポジターが管理するレイヤーを使い、描画効率や視認性、遅延の改善を目指す仕様です。Space Warp（space-warp）の記述も更新されています。",
 		specUrl: "https://www.w3.org/TR/webxrlayers-1/",
 	},
 	{
