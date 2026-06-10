@@ -12,6 +12,7 @@
 | コミュニティグループ | Community Group / CG | |
 | W3C勧告 | Recommendation / REC | 「レコメンデーション」でも可。文脈で使い分け |
 | 勧告候補 | Candidate Recommendation / CR | |
+| 勧告候補草案 | Candidate Recommendation Draft / CRD | CR に向けて変更を取り込む作業中の草案 |
 | ワーキングドラフト | Working Draft / WD | 「作業草案」より自然 |
 | エディターズドラフト | Editor's Draft / ED | 「編集者草案」より自然 |
 | CGドラフト | CG Draft | コミュニティグループのドラフト |

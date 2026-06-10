@@ -20,6 +20,29 @@ export interface WebXRFeature {
 	specUrl?: string;
 }
 
+export interface WebXRSpecUpdate {
+	specName: string;
+	publishedAt: string;
+	docType: string;
+	specUrl: string;
+	summary: string;
+	changes: string[];
+}
+
+export type WebXRWgDiscussionStatus = "議論中" | "追跡中";
+
+export interface WebXRWgDiscussion {
+	title: string;
+	publishedAt: string;
+	status: WebXRWgDiscussionStatus;
+	sourceUrl: string;
+	issueUrl?: string;
+	summary: string;
+	topics: string[];
+	relatedFeatures: string[];
+	articleCandidate: boolean;
+}
+
 export interface StageInfo {
 	id: Stage;
 	name: string;
@@ -36,6 +59,86 @@ export const WEBXR_BROWSER_COLUMNS: Array<{ key: BrowserKey; label: string }> =
 		{ key: "quest", label: "Quest Browser" },
 		{ key: "safari", label: "Safari（iOS/macOS）" },
 	];
+
+export const WEBXR_SPEC_UPDATES: WebXRSpecUpdate[] = [
+	{
+		specName: "WebXR Device API",
+		publishedAt: "2026-06-09",
+		docType: "勧告候補草案（CRD）",
+		specUrl: "https://www.w3.org/TR/2026/CRD-webxr-20260609/",
+		summary:
+			"WebXR Device API は W3C Recommendation を目指している段階の Candidate Recommendation Draft です。実装状況を確認しながら利用する必要があります。",
+		changes: [
+			"inline-stereo session features の追加",
+			"XRSession の granted features（enabledFeatures）の公開",
+			"isSystemKeyboardSupported による system keyboard 対応の確認",
+			"visible-blurred 時の getPose() 挙動の整理",
+			"transient intent / transient-pointer 入力の追加",
+			"XRInputSource の visible elsewhere プロパティ（初稿）",
+			"RGB / sRGB の色空間に関する記述の明確化",
+		],
+	},
+];
+
+export const WEBXR_WG_DISCUSSIONS: WebXRWgDiscussion[] = [
+	{
+		title: "WebXR integration with HTML-in-canvas",
+		publishedAt: "2026-05-19",
+		status: "議論中",
+		sourceUrl: "https://www.w3.org/2026/05/19-immersive-web-minutes.html",
+		issueUrl: "https://github.com/immersive-web/webxr/issues/1414",
+		summary:
+			"Immersive Web F2F Day 1 では、HTML-in-canvas を WebXR の空間UIに応用できるかが議論されました。DOMをそのままXR空間に置くというより、canvas・texture・layer・入力イベントをどう接続するかが焦点です。",
+		topics: [
+			"HTML-in-canvas の canvas 子要素配置と 3D CSS transform による DOM 表示",
+			"WebXR 固有の入力（target ray、teleportation、ユーザーエージェント提供のカーソル）",
+			"2D quad layer への raycast と x/y 座標マッピング（「html on a ball」は当面対象外）",
+			"layers を使わず CSS transform で quad を表現する案との比較",
+			"HTML-in-canvas 側との追加ミーティング（action item）",
+		],
+		relatedFeatures: ["WebXR DOM Overlays Module", "WebXR Layers API Level 1"],
+		articleCandidate: true,
+	},
+	{
+		title: "How can we expose foveation?",
+		publishedAt: "2026-05-19",
+		status: "追跡中",
+		sourceUrl: "https://www.w3.org/2026/05/19-immersive-web-minutes.html",
+		issueUrl: "https://github.com/immersive-web/webxr/issues/32",
+		summary:
+			"WebXR の foveation 議論では、WebGPU や variable-rate shading との関係に加え、視線情報を扱うことによるプライバシー面が重要な論点になっています。当面は fixed foveated rendering のような形から検討される可能性があります。",
+		topics: [
+			"WebGPU / variable-rate shading（gpuweb/gpuweb#450）との連携",
+			"foveation map texture の expose と readback 制限",
+			"eye-tracked foveation の privacy リスク（視線データ漏洩の懸念）",
+			"まず fixed foveated rendering を優先し、eye-tracked は別 extension の可能性",
+			"onFoveationChange など将来の dynamic foveation 向けフック",
+		],
+		relatedFeatures: [
+			"WebXR Device API",
+			"WebXR/WebGPU Binding Module - Level 1",
+		],
+		articleCandidate: false,
+	},
+	{
+		title: "Add attribute/setter for opacity",
+		publishedAt: "2026-05-20",
+		status: "議論中",
+		sourceUrl: "https://www.w3.org/2026/05/20-immersive-web-minutes.html",
+		issueUrl: "https://github.com/immersive-web/webxr-ar-module/issues/93",
+		summary:
+			"ARグラスでは、現実背景をどの程度暗く見せるかをWebXR側から制御したい場面があります。Immersive Webでは、opacity / dimming のような制御をどこまでWebに許すかが議論されています。",
+		topics: [
+			"additive display（Android XR AR グラス等）向けの dimming 需要",
+			"feature detect（非対応デバイスでは無効）",
+			"updateRenderState 経由の opacity getter/setter 案",
+			"UA による clamp / ignore（要求値と実際の見え方の差）",
+			"数値 range の future-proof 化（デバイス間で同じ値が同程度の効果）",
+		],
+		relatedFeatures: ["WebXR Augmented Reality Module - Level 1"],
+		articleCandidate: false,
+	},
+];
 
 export const WEBXR_STATUS_META = {
 	lastChecked: "2026年6月11日",
@@ -111,8 +214,8 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 			safari: "未対応",
 		},
 		description:
-			"W3C の勧告候補草案（2026-06-09）。VR/AR デバイスのセンサーやヘッドマウントディスプレイへのアクセス方法を定める中核仕様です。inline-stereo などの feature descriptor も含みます。",
-		specUrl: "https://www.w3.org/TR/webxr/",
+			"W3C の勧告候補草案（CRD、2026-06-09）。VR/AR デバイスのセンサーやヘッドマウントディスプレイへのアクセス方法を定める中核仕様です。W3C Recommendation ではなく、実装とテストを通じて勧告に向けた確認段階にあります。",
+		specUrl: "https://www.w3.org/TR/2026/CRD-webxr-20260609/",
 	},
 	{
 		name: "WebXR Augmented Reality Module - Level 1",
@@ -125,7 +228,7 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 			safari: "未対応",
 		},
 		description:
-			"W3C の勧告候補草案（2025-04-25）。WebXR Device API に AR 向けの機能を追加する拡張仕様です。",
+			"W3C の勧告候補草案（2025-04-25）。WebXR Device API に AR 向けの機能を追加する拡張仕様です。WG では additive display 向けの opacity / dimming 制御も議論中です（仕様未確定）。",
 		specUrl: "https://www.w3.org/TR/webxr-ar-module-1/",
 	},
 	{
@@ -167,7 +270,7 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 			safari: "未対応",
 		},
 		description:
-			"W3C のワーキングドラフト（2024-09-24）。没入型セッション中に単一の DOM 要素を 2D オーバーレイとして重ねて表示する仕組みを定める仕様です。",
+			"W3C のワーキングドラフト（2024-09-24）。没入型セッション中に単一の DOM 要素を 2D オーバーレイとして重ねて表示する仕組みを定める仕様です。WG では HTML-in-canvas との統合も議論中です（仕様未確定）。",
 		specUrl: "https://www.w3.org/TR/webxr-dom-overlays-1/",
 	},
 	{

@@ -125,8 +125,10 @@ export default function WebXRExplainerPage() {
 					<div className="space-y-4">
 						<p className="text-gray-700 text-lg leading-relaxed">
 							<strong>WebXR Device API</strong>
-							は、VR（仮想現実）やAR（拡張現実）デバイスへのアクセスを提供するWeb標準APIです。
-							ブラウザ上でVR/AR体験を開発・配信することを可能にします。
+							は、VR（仮想現実）やAR（拡張現実）デバイスへのアクセスを提供するWeb
+							APIです。W3C の勧告候補草案（Candidate Recommendation
+							Draft）として策定が進んでおり、W3C Recommendation
+							としてはまだ確定していません。ブラウザ上でVR/AR体験を開発・配信することを可能にします。
 						</p>
 						<p className="text-gray-700 text-lg leading-relaxed">
 							従来、VR/AR体験を提供するにはネイティブアプリの開発が必要でしたが、
@@ -318,7 +320,7 @@ export default function WebXRExplainerPage() {
 						</div>
 						<div className="p-6 bg-white border border-gray-200 rounded-2xl">
 							<h3 className="text-xl font-black text-gray-900 mb-2">
-								WebXR (標準)
+								WebXR（W3C勧告候補草案）
 							</h3>
 							<p className="text-gray-700 text-sm font-medium">
 								VR + AR 全てに対応し、セキュリティと拡張性を重視。

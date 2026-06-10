@@ -4,9 +4,12 @@ import {
 	type Stage,
 	WEBXR_BROWSER_COLUMNS,
 	WEBXR_FEATURES,
+	WEBXR_SPEC_UPDATES,
 	WEBXR_STAGE_BY_ID,
 	WEBXR_STAGES,
 	WEBXR_STATUS_META,
+	WEBXR_WG_DISCUSSIONS,
+	type WebXRWgDiscussionStatus,
 } from "@/data/webxr-status";
 
 export const metadata: Metadata = {
@@ -60,6 +63,31 @@ function BrowserCell({ value }: { value: string }) {
 	);
 }
 
+function WgDiscussionStatusBadge({
+	status,
+}: {
+	status: WebXRWgDiscussionStatus;
+}) {
+	switch (status) {
+		case "議論中":
+			return (
+				<span className="inline-flex items-center rounded-full bg-amber-100 px-2 py-1 text-[10px] font-black text-amber-900">
+					{status}
+				</span>
+			);
+		case "追跡中":
+			return (
+				<span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-1 text-[10px] font-black text-slate-700">
+					{status}
+				</span>
+			);
+		default: {
+			const exhaustiveCheck: never = status;
+			return exhaustiveCheck;
+		}
+	}
+}
+
 export default function WebXRStatusPage() {
 	const sortedFeatures = [...WEBXR_FEATURES].sort((a, b) => b.stage - a.stage);
 
@@ -73,7 +101,9 @@ export default function WebXRStatusPage() {
 					</h1>
 					<p className="text-lg text-gray-700 font-medium max-w-2xl mx-auto">
 						WebXR
-						関連仕様の標準化状況と、主要ブラウザ・デバイスの対応状況を一覧で確認できます。どの機能がどこまで進み、どの環境で利用できるかをすばやく把握できます。
+						関連仕様の標準化状況と、主要ブラウザ・デバイスの対応状況を一覧で確認できます。中核の
+						WebXR Device API は W3C Recommendation
+						ではなく、勧告候補草案（CRD）段階です。
 					</p>
 				</div>
 
@@ -121,6 +151,11 @@ export default function WebXRStatusPage() {
 								ワーキングドラフト。ワーキンググループが公開している検討中の草案です。
 							</li>
 							<li>
+								CRD（Candidate Recommendation Draft）:
+								勧告候補草案。勧告候補（CR）に向けて変更を取り込む作業中の草案です。WebXR
+								Device API の現行版はこの段階です。
+							</li>
+							<li>
 								CR（Candidate Recommendation）:
 								勧告候補。実装やレビューを通じて、勧告に向けた最終確認を進める段階です。
 							</li>
@@ -143,6 +178,117 @@ export default function WebXRStatusPage() {
 						</p>
 					</div>
 				</div>
+
+				{/* Spec Updates */}
+				<section className="space-y-6">
+					<h2 className="text-2xl font-black text-gray-950">仕様差分メモ</h2>
+					<p className="text-sm text-gray-600 font-medium">
+						W3C TR の Changes
+						セクションをもとに、直近の仕様更新を短く整理しています。
+					</p>
+					<div className="space-y-4">
+						{WEBXR_SPEC_UPDATES.map((update) => (
+							<div
+								key={`${update.specName}-${update.publishedAt}`}
+								className="rounded-[2rem] border border-gray-100 bg-white/80 p-6 shadow-xs"
+							>
+								<div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+									<h3 className="text-lg font-black text-gray-900">
+										<a
+											href={update.specUrl}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="hover:text-red-600 transition-colors"
+										>
+											{update.specName}
+										</a>
+									</h3>
+									<p className="text-xs font-bold text-gray-500">
+										{update.docType} / {update.publishedAt}
+									</p>
+								</div>
+								<p className="mt-3 text-sm text-gray-700 leading-relaxed">
+									{update.summary}
+								</p>
+								<ul className="mt-4 list-disc space-y-1 pl-5 text-sm text-gray-700">
+									{update.changes.map((change) => (
+										<li key={change}>{change}</li>
+									))}
+								</ul>
+							</div>
+						))}
+					</div>
+				</section>
+
+				{/* WG Discussions */}
+				<section className="space-y-6">
+					<h2 className="text-2xl font-black text-gray-950">
+						WG議論・記事候補
+					</h2>
+					<p className="text-sm text-gray-600 font-medium">
+						Immersive Web WG の議事録で議論されているが、W3C TR
+						としては未確定のトピックです。策定状況一覧には含めず、議論中・追跡中として記録しています。
+					</p>
+					<div className="space-y-4">
+						{WEBXR_WG_DISCUSSIONS.map((discussion) => (
+							<div
+								key={`${discussion.title}-${discussion.publishedAt}`}
+								className="rounded-[2rem] border border-amber-100 bg-amber-50/60 p-6 shadow-xs"
+							>
+								<div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+									<h3 className="text-lg font-black text-gray-900">
+										{discussion.issueUrl ? (
+											<a
+												href={discussion.issueUrl}
+												target="_blank"
+												rel="noopener noreferrer"
+												className="hover:text-red-600 transition-colors"
+											>
+												{discussion.title}
+											</a>
+										) : (
+											discussion.title
+										)}
+									</h3>
+									<div className="flex flex-wrap items-center gap-2">
+										<WgDiscussionStatusBadge status={discussion.status} />
+										{discussion.articleCandidate ? (
+											<span className="inline-flex items-center rounded-full bg-white px-2 py-1 text-[10px] font-black text-gray-600">
+												記事候補
+											</span>
+										) : null}
+										<p className="text-xs font-bold text-gray-500">
+											{discussion.publishedAt}
+										</p>
+									</div>
+								</div>
+								<p className="mt-3 text-sm text-gray-700 leading-relaxed">
+									{discussion.summary}
+								</p>
+								<ul className="mt-4 list-disc space-y-1 pl-5 text-sm text-gray-700">
+									{discussion.topics.map((topic) => (
+										<li key={topic}>{topic}</li>
+									))}
+								</ul>
+								{discussion.relatedFeatures.length > 0 ? (
+									<p className="mt-4 text-xs text-gray-600">
+										関連機能: {discussion.relatedFeatures.join(" / ")}
+									</p>
+								) : null}
+								<p className="mt-3 text-xs">
+									<a
+										href={discussion.sourceUrl}
+										target="_blank"
+										rel="noopener noreferrer"
+										className="font-bold text-gray-900 underline decoration-gray-200 underline-offset-4 hover:decoration-gray-900 transition-all"
+									>
+										Immersive Web 議事録（{discussion.publishedAt}）
+									</a>
+								</p>
+							</div>
+						))}
+					</div>
+				</section>
 
 				{/* Main Table Section */}
 				<section className="space-y-8">
