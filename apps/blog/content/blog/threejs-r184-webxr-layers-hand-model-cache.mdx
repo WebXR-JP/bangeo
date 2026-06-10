@@ -1,0 +1,101 @@
+---
+title: "three.js r184のWebXR更新を整理──WebXR LayersとXRHandModelFactoryの改善"
+description: "three.js r184で確認されたWebXR関連の変更を整理。WebXR sampling array-texture修正、WebXR Layersのフレームバッファキャッシュ簡素化、XRHandModelFactoryのモデルキャッシュ追加を解説します。"
+date: "2026年6月11日"
+category: "NEWS"
+tags:
+  - "WebXR"
+  - "three.js"
+  - "WebXR Layers"
+  - "WebGPU"
+  - "XRHandModelFactory"
+  - "Hand Tracking"
+author: "BANGEO Team"
+thumbnail: "/assets/tech/threejs-r184-webxr-layers.webp"
+draft: false
+---
+
+three.js r184で、WebXRに関係する更新がいくつか入りました。
+
+[three.js r184](https://github.com/mrdoob/three.js/releases/tag/r184)は2026年4月16日に公開されたリリースです。リリースノートでは、WebXR関連として、WebXR sampling array-textureの修正、WebXR Layers向けフレームバッファキャッシュの簡素化、`XRHandModelFactory` へのモデルキャッシュ追加などが確認できます。
+
+three.jsでWebXRコンテンツを作っている場合、これは派手な新機能というより、レンダリング経路とハンドトラッキング表示の安定性に関わる更新として見ておきたい内容です。
+
+## WebXR sampling array-textureの修正
+
+r184のリリースノートでは、WebGPU Renderer関連の項目として「Fix WebXR sampling array-texture」が記載されています。
+
+array textureは、複数のtexture layerをまとめて扱う仕組みです。WebXRでは左右のview、projection layer、multiview、WebGPU経由のレンダリングなどで、通常の2D描画よりも複雑なtexture処理が発生します。
+
+この修正は、WebXRとWebGPU Rendererを組み合わせている実装で特に確認したいポイントです。[Quest BrowserでWebGPU in WebXRを試す](/tech-articles/quest-browser-146-webgpu-webxr)ような構成では、更新後の見え方を実機で確認しておくと安全です。すべてのWebXRコンテンツに目に見える変化が出るとは限りませんが、左右のview、layer、array textureを使う描画では差が出る可能性があります。
+
+## WebXR Layersのフレームバッファキャッシュが簡素化
+
+r184では、「Simplification of the frame buffer cache for WebXR layers」も記載されています。
+
+WebXR Layersは、通常のcanvas描画だけでなく、projection layerやquad layerなどを使ってXR Compositorに複数のlayerを渡すための仕組みです。layerを使うと、描画の柔軟性は上がりますが、そのぶんframe bufferやrender targetの管理は複雑になります。
+
+今回の変更は、ユーザー向けAPIが大きく変わるというより、内部処理の整理に近い更新です。ただし、こうした内部処理はフレーム安定性、メモリ使用量、初回描画、セッション開始・終了時の挙動に影響することがあります。
+
+WebXR Layersを使っているプロジェクトでは、r184へ更新したあと、次の点を確認しておきたいところです。
+
+- セッション開始直後に描画崩れがないか
+- layerを切り替えたときに古い描画が残らないか
+- フレーム時間が大きく変化していないか
+- セッション終了後にメモリが増え続けないか
+- Quest Browserなど実機ブラウザで片目だけ描画が乱れないか
+
+特にWebXRの描画不具合は、デスクトップの通常canvasでは再現せず、ヘッドセット実機だけで出ることがあります。three.jsの更新後は、ブラウザ上で動いたかどうかだけでなく、XRセッション内での見え方まで確認するのが大切です。
+
+## XRHandModelFactoryにモデルキャッシュが追加
+
+r184では、WebXR項目として `XRHandModelFactory` にmodel cachingが追加されたことも記載されています。
+
+`XRHandModelFactory` は、three.jsでWebXRのハンドトラッキング表示を扱うときに使われるクラスです。ユーザーの手のjoint情報に合わせて、手のモデルを表示する場面で使われます。
+
+モデルキャッシュが入ることで、手モデルの生成や再利用が効率化される可能性があります。WebXRセッションの開始・終了を繰り返すデモ、ハンドトラッキングをオン・オフする体験、左右の手モデルを頻繁に扱う実装では、初期化負荷やメモリの動きが変わるかもしれません。
+
+一方で、キャッシュが入る更新では、既存実装との相性も確認しておく必要があります。
+
+たとえば、以前の実装で手モデルを毎回破棄・再生成する前提にしていた場合、キャッシュによって「状態が残っているように見える」「更新後に古いモデルが再利用される」といった挙動に見える可能性があります。通常は改善として働くはずですが、独自の破棄処理やモデル差し替えをしている場合は注意が必要です。
+
+## WebXRControllerの更新も確認
+
+r184のリリースノートには、`WebXRController` について「grip update event if enabled」を追加した項目もあります。
+
+WebXRでは、controllerのtarget rayだけでなく、grip poseやhand poseを使ってオブジェクトを掴む、道具を持つ、手の位置にUIを追従させるといった実装を行います。
+
+grip更新イベントに関係する変更がある場合、コントローラーや手の追従処理を使っているプロジェクトでは、更新後に入力イベントの発火タイミングやモデル追従が想定どおりかを見ておくとよさそうです。
+
+## three.js r184へ更新したら確認したいこと
+
+three.js r184でWebXRを使っている場合、次の3つを確認しておくのがおすすめです。
+
+まず、WebXR Layersを使うシーンです。layerやframe bufferまわりの更新が入っているため、見た目が同じでもフレーム時間やメモリ使用量を軽く見ておきたいところです。
+
+次に、WebGPU RendererとWebXRを組み合わせているシーンです。array textureのサンプリング修正が入っているため、projection layerや左右viewを使う構成で差が出る可能性があります。
+
+最後に、ハンドトラッキング表示です。`XRHandModelFactory` のモデルキャッシュ追加によって、手モデルの生成、再利用、セッション再開時の表示が変わる可能性があります。
+
+```javascript
+// 更新後に確認したい観点
+// - WebXR Layers使用時の初回描画
+// - セッション開始・終了後のメモリ
+// - XRHandModelFactoryの手モデル再利用
+// - grip pose / hand poseの追従
+// - WebGPU Renderer + WebXRの左右view描画
+```
+
+## ライブラリ更新は実機確認までセットで見る
+
+three.js r184のWebXR更新は、記事タイトルになるほど派手な新機能ではありません。しかし、WebXRコンテンツを運用している開発者にとっては、レンダリングの安定性やハンド表示の品質に関わる重要な更新です。
+
+WebXRは、ブラウザ、デバイス、レンダラー、ライブラリの組み合わせで挙動が変わります。three.jsを更新したら、通常のWebGL/WebGPU表示だけでなく、実際のWebXRセッションで動かして確認するのが安全です。
+
+特に、WebXR Layers、WebGPU Renderer、ハンドトラッキングを使っているプロジェクトでは、r184の更新内容と関係しやすいので、アップデート後の回帰確認リストに入れておくとよさそうです。
+
+## 関連リンク
+
+- [three.js r184 release notes](https://github.com/mrdoob/three.js/releases/tag/r184)
+- [BANGEO：標準化・対応状況（WebXR Layers API）](/webxr-status)
+- [Quest Browser 146.0でWebGPU in WebXRが実験的に利用可能に](/tech-articles/quest-browser-146-webgpu-webxr)

@@ -1,0 +1,135 @@
+---
+title: "WebXR仕様が更新──inline-stereoとSpace Warpの実装ポイントを整理"
+description: "WebXR Device APIのinline-stereo追加と、WebXR Layers APIにおけるSpace Warp記述の更新を整理。inlineセッションのview数、Space Warpのmotion vector / depth data、実装時の確認ポイントを解説します。"
+date: "2026年6月11日"
+category: "NEWS"
+tags:
+  - "WebXR"
+  - "WebXR Device API"
+  - "WebXR Layers API"
+  - "inline-stereo"
+  - "Space Warp"
+  - "Immersive Web"
+author: "BANGEO Team"
+thumbnail: "/assets/tech/webxr-inline-stereo-space-warp.webp"
+draft: false
+---
+
+WebXRの標準仕様まわりで、開発者が確認しておきたい更新が出ています。
+
+今回注目したいのは、[WebXR Device API](https://www.w3.org/TR/webxr/)の `inline-stereo` と、[WebXR Layers API Level 1](https://www.w3.org/TR/webxrlayers-1/)の `space-warp` です。WebXR Device APIは2026年6月9日付けの[勧告候補草案（CRD）](https://www.w3.org/TR/webxr/)として公開されており、WebXR Layers API Level 1は2026年6月1日付けの[ワーキングドラフト（WD）](https://www.w3.org/TR/webxrlayers-1/)として公開されています。
+
+どちらも「いますぐ全ブラウザで使える新機能」というより、WebXRを実装する側が今後の互換性や検証項目を見直すための重要な仕様更新です。BANGEOの[標準化・対応状況ページ](/webxr-status)でも、これらの仕様は随時追跡しています。
+
+## inline-stereoとは何か
+
+WebXRには、ヘッドセット全体を使う `immersive-vr` や `immersive-ar` とは別に、HTML文書内にXRコンテンツを表示する `inline` セッションがあります。
+
+通常の `inline` セッションでは、表示に使われるviewは1つで、`eye` は `"none"` になります。一方、今回仕様に入っている `inline-stereo` は、`inline` セッションでも対応環境では左右2つのprimary viewを扱えるようにするためのfeature descriptorです。仕様では、`inline-stereo` が有効な `inline` セッションでは、view listに `"left"` と `"right"` の2つのprimary viewが含まれると説明されています。
+
+つまり、今後のWebXR実装では、`inline` セッションだからといって `pose.views.length === 1` と決め打ちしないほうが安全です。
+
+```javascript
+const session = await navigator.xr.requestSession("inline", {
+  optionalFeatures: ["inline-stereo"],
+});
+
+const referenceSpace = await session.requestReferenceSpace("viewer");
+
+session.requestAnimationFrame((time, frame) => {
+  const pose = frame.getViewerPose(referenceSpace);
+  if (!pose) return;
+
+  for (const view of pose.views) {
+    console.log(view.eye);
+
+    // 通常のinlineでは "none"
+    // inline-stereo対応環境では "left" / "right" の可能性がある
+  }
+});
+```
+
+重要なのは、`inline-stereo` が `immersive-vr` の代わりではないことです。仕様では、`inline-stereo` は `"inline"` セッションにのみ適用され、immersive sessionには付与されないとされています。
+
+そのため、ヘッドセットで本格的なVR体験を作る場合は、これまでどおり `immersive-vr` を使います。`inline-stereo` は、Webページ内の3Dプレビューや埋め込み型XRビューを、対応環境でステレオ表示したい場合に関係する機能です。
+
+## 実装で確認したいinline-stereoのポイント
+
+既存のWebXRコンテンツでは、次のような実装になっていることがあります。
+
+```javascript
+const view = pose.views[0];
+const viewport = glLayer.getViewport(view);
+```
+
+通常の `inline` 表示だけを想定している場合、この書き方でも動くことがあります。しかし、`inline-stereo` を考えるなら、viewは必ずループで処理したほうが安全です。
+
+```javascript
+for (const view of pose.views) {
+  const viewport = glLayer.getViewport(view);
+
+  gl.viewport(
+    viewport.x,
+    viewport.y,
+    viewport.width,
+    viewport.height
+  );
+
+  // view.eyeごとに描画
+}
+```
+
+WebXRは、ブラウザやデバイスによって対応機能が変わりやすいAPIです。`inline-stereo` を使う場合も、必須機能として決め打ちするより、まずは `optionalFeatures` として要求し、使える環境ではステレオ表示、使えない環境では従来の単眼inline表示に戻す設計が現実的です。
+
+## WebXR Layers APIではSpace Warpの記述も更新
+
+もうひとつ注目したいのが、WebXR Layers APIに含まれる `space-warp` です。
+
+WebXR Layers API Level 1は、WebXRセッションで使われる複数のlayer typeを扱うための仕様です。2026年6月1日付けのワーキングドラフトとして公開されています。
+
+仕様内では、Space WarpはXR Compositorのreprojectionを改善する技術として説明されています。アプリが `motionVectorTexture` と `depthStencilTexture` を提出することで、XR Compositorがフレーム外挿や再投影を行い、ユーザーエージェント側が低いフレームレートで動作しながらも滑らかな体験を提供できる、とされています。
+
+[Meta for Developers](https://developers.meta.com/horizon/documentation/web/webxr-space-warp/)のドキュメントでも、WebXR Space WarpはWebXR Layers仕様へのドラフト追加であり、アプリが提供するmotion vectorとdepth dataを使ってXR Compositorがフレーム補間・再投影を行う仕組みとして説明されています。Quest Browserで[WebGPU in WebXRを試す](/tech-articles/quest-browser-146-webgpu-webxr)際にも、Layers関連の実験機能とあわせて検証対象になりやすい領域です。
+
+## motion vectorとdepth dataが重要になる
+
+Space Warpを使う場合、アプリ側はただ描画するだけではなく、前フレームから現在フレームへの動きを表すmotion vectorと、シーンのdepth情報を用意する必要があります。
+
+仕様では、`space-warp` feature descriptorを有効にした場合、XR Compositorはdepth値を使う必要があり、`ignoreDepthValues` は `false`、`usesDepthValues` は `true` になると説明されています。また、`motionVectorTexture` または `depthStencilTexture` が提出されなかった場合、そのフレームはSpace Warpが有効でないものとして処理される、と明記されています。
+
+これは実装上かなり重要です。Space Warpを有効化したつもりでも、motion vectorやdepth dataの提出が欠けていると、そのフレームでは期待した補間が働かない可能性があります。
+
+```javascript
+const session = await navigator.xr.requestSession("immersive-vr", {
+  requiredFeatures: ["layers"],
+  optionalFeatures: ["space-warp"],
+});
+```
+
+実際の描画では、color textureだけでなく、motion vector textureとdepth stencil textureの扱いを確認する必要があります。特に、フレームごとに正しく更新されているか、透明オブジェクトや高速移動するオブジェクトで破綻しないかは、実機検証で見たいポイントです。
+
+## Space Warpはまだ実験的な機能として扱う
+
+Space Warpは魅力的な最適化手段ですが、現時点では安定版の前提機能として扱うより、検証対象として見るのが安全です。
+
+Metaのドキュメントでは、WebXR Space Warpはexperimental featureであり、Browserでは `chrome://flags` から有効化する必要があると説明されています。また、実装時には `EXT_color_buffer_half_float`、`layers`、`space-warp`、`texture-array` などの条件も挙げられています。
+
+そのため、BANGEOとしては、Space Warpを「すぐ本番導入すべき機能」としてではなく、「高負荷WebXR表現の将来に向けて検証しておきたい機能」として扱うのがよさそうです。
+
+## 既存WebXR実装で見直したいこと
+
+今回の仕様更新を受けて、WebXRコンテンツ側で見直したいポイントは大きく2つです。
+
+まず、`inline` セッションのview数を固定しないこと。`inline-stereo` が有効な環境では、`inline` でも左右2つのviewを扱う可能性があります。
+
+次に、Space Warpを検証する場合は、motion vectorとdepth dataの提出条件を明確に確認すること。Space Warpが有効になっているかだけでなく、各フレームで必要なtextureが提出されているかを見る必要があります。
+
+WebXRは「ブラウザでVR/ARを表示する」段階から、より細かいrendering path、layer、feature descriptorを前提にした段階へ進んでいます。仕様の変化を追いながら、実装側でもview数、layer構成、fallback、実機検証項目を更新していくことが重要です。
+
+## 関連リンク
+
+- [WebXR Device API（勧告候補草案、2026-06-09）](https://www.w3.org/TR/webxr/)
+- [WebXR Layers API Level 1（ワーキングドラフト、2026-06-01）](https://www.w3.org/TR/webxrlayers-1/)
+- [WebXR Space Warp | Meta Horizon OS Developers](https://developers.meta.com/horizon/documentation/web/webxr-space-warp/)
+- [BANGEO：標準化・対応状況](/webxr-status)
+- [Quest Browser 146.0でWebGPU in WebXRが実験的に利用可能に](/tech-articles/quest-browser-146-webgpu-webxr)

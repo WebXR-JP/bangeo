@@ -1,0 +1,151 @@
+---
+title: "Safari 27 betaでvisionOS向けImmersive Webが前進──WebXR viewport修正も確認"
+description: "WebKit公式ブログで公開されたSafari 27 beta情報を整理。visionOS 27のimmersive website environments、HTML model要素、requestImmersive、WebXR viewport初期化修正について解説します。"
+date: "2026年6月11日"
+category: "NEWS"
+tags:
+  - "WebXR"
+  - "Safari"
+  - "WebKit"
+  - "visionOS"
+  - "Immersive Web"
+  - "Spatial Web"
+  - "HTML model"
+author: "BANGEO Team"
+thumbnail: "/assets/tech/safari-27-visionos-immersive-web.webp"
+draft: false
+---
+
+[WebKit公式ブログ](https://webkit.org/blog/17967/news-from-wwdc26-webkit-in-safari-27-beta/)で公開された「News from WWDC26: WebKit in Safari 27 beta」に、visionOS向けのImmersive Webに関係する重要な更新が含まれています。
+
+Safari 27 beta in visionOS 27では、immersive website environmentsがサポートされます。WebKitの記事では、開発者が `<model>` 要素と1つのJavaScript API呼び出しで没入型体験を提供できるようになると説明されています。さらに、同じ記事の修正項目では、WebXR viewportが `getViewport()` を呼ぶまで初期値を持たない問題の修正も確認できます。
+
+これは、[Apple Vision Pro](/devices)でWebベースの空間体験を作りたい開発者にとって、かなり大きな動きです。
+
+## immersive website environmentsとは何か
+
+immersive website environmentsは、Webページから没入型の空間体験に入るための仕組みです。
+
+WebKit公式ブログでは、Safari 27 beta in visionOS 27でimmersive website environmentsが追加され、`<model>` 要素とJavaScript API呼び出しによって、ブラウザ内から没入型体験を提供できると説明されています。例として、チケット販売サイトで購入前に座席からの眺めを確認したり、ホテルの部屋を歩いて体験したりする用途が挙げられています。
+
+[Apple DeveloperのWWDC26セッション「Explore immersive website environments in visionOS」](https://developer.apple.com/videos/play/wwdc2026/320/)でも、Webページから劇場の座席視点に入る例や、visionOS向けゲームのプロモーションページから没入型環境に入る例が紹介されています。
+
+BANGEO的に見ると、これは「WebXR Device APIそのものの新機能」というより、Safari/visionOSがWeb上の空間体験をよりネイティブに扱おうとしている流れとして見るのがよさそうです。
+
+## requestImmersiveはFullscreen APIに近い考え方
+
+WWDC26のセッションでは、immersive APIはFullscreen APIに近いパターンだと説明されています。動画を `requestFullscreen()` でフルスクリーンにするように、model要素に対して `requestImmersive()` を呼ぶことで、没入型表示に入る流れです。
+
+イメージとしては、次のような使い方です。
+
+```html
+<model id="venue" src="/assets/venue.usdz"></model>
+
+<button id="enter">
+  没入表示で見る
+</button>
+```
+
+```javascript
+const model = document.querySelector("#venue");
+const button = document.querySelector("#enter");
+
+button.addEventListener("click", async () => {
+  if ("requestImmersive" in model) {
+    await model.requestImmersive();
+  }
+});
+```
+
+実際のAPI名や利用条件は、Safari 27 beta/visionOS 27の実装と公式資料を確認しながら扱う必要があります。ただ、考え方としては、Webページ内にある3Dモデルや環境を、ユーザー操作をきっかけに没入空間へ移すものです。
+
+セッションでは、没入型表示に入るだけでなく、feature availabilityの確認、現在immersive状態にある要素の確認、変更イベントやエラーイベントの監視、CSS pseudo-classによるスタイル調整にも触れられています。
+
+## HTML model要素の対応範囲も広がる
+
+Safari 27 betaでは、`<model>` HTML要素もAppleプラットフォーム上で広がっています。
+
+WebKitの記事では、`<model>` 要素がiOS、iPadOS、macOSのSafariでも利用可能になり、visionOSでの既存対応に加えて、Appleプラットフォーム横断で標準HTMLによるインタラクティブな3Dコンテンツ埋め込みができるようになると説明されています。
+
+これは、WebXRとは別軸ですが、Web上の3D/Spatial Web体験としてはかなり重要です。
+
+従来、Web上で3Dを扱う場合は、three.js、Babylon.js、model-viewer、独自WebGL実装などを使うことが多くありました。`<model>` 要素がSafariで広がることで、HTMLだけで3Dコンテンツを埋め込み、必要に応じて没入型表示へつなげる流れが作りやすくなります。
+
+## WebXR viewportの初期化修正も重要
+
+Safari 27 betaのWebKit記事では、Spatial Web関連のbug fixとして、WebXR viewportが `getViewport()` を呼ぶまで初期値を持たない問題を修正したことも明記されています。
+
+WebXRの描画では、各 `XRView` に対してviewportを取得し、その領域に描画します。
+
+```javascript
+const pose = frame.getViewerPose(referenceSpace);
+
+if (pose) {
+  for (const view of pose.views) {
+    const viewport = glLayer.getViewport(view);
+
+    gl.viewport(
+      viewport.x,
+      viewport.y,
+      viewport.width,
+      viewport.height
+    );
+
+    // view.projectionMatrixやview transformを使って描画
+  }
+}
+```
+
+viewportの初期値が正しく入っていないと、セッション開始直後のフレームで描画領域がずれたり、初回だけ片目の描画が崩れたり、環境によっては何も表示されないように見える可能性があります。
+
+今回の修正は、見た目には小さなbug fixですが、WebXR実装者にとってはかなり実務的です。特に、visionOS SafariでWebXRコンテンツを検証している場合は、起動直後の描画処理を改めて確認しておく価値があります。
+
+なお、iOS/macOSのSafariは引き続きWebXR未対応です。[iOSでWebXRを体験する方法](/tech-articles/ios-webxr-app-clip-guide)のように、App Clipや専用ビューア経由の導線が必要なケースは変わりません。
+
+## 既存WebXR実装で確認したいこと
+
+Safari 27 betaやvisionOS 27を前提に検証する場合、次の点を確認しておきたいところです。
+
+まず、WebXRセッション開始直後の1フレーム目で、viewportの値が想定どおりかを確認します。
+
+```javascript
+const viewport = glLayer.getViewport(view);
+
+console.log({
+  eye: view.eye,
+  x: viewport.x,
+  y: viewport.y,
+  width: viewport.width,
+  height: viewport.height,
+});
+```
+
+次に、`getViewport()` の呼び出し前提でアプリ側が独自に回避処理を入れている場合、その回避処理がSafari 27 beta以降でも必要かを見直します。
+
+また、`<model>` 要素やimmersive website environmentsを試す場合は、通常のWebXR実装とは別に、USDZアセット、環境マップ、モデルのスケール、パフォーマンス、ユーザー操作の導線も確認が必要です。WebKitの記事でも、`<model>` 要素のサイズが想定の100倍で表示される問題など、Spatial Web関連の修正が複数挙げられています。
+
+## SafariのSpatial WebはWebXRとは少し違う流れで進んでいる
+
+今回の更新で大事なのは、Safari/visionOSのSpatial Webが、WebXR Device APIだけで進んでいるわけではないという点です。
+
+WebXR viewportの修正はWebXR実装者に直接関係します。一方で、immersive website environmentsや `<model>` 要素は、Appleプラットフォーム上でWebの3D/空間体験を作るための別の導線です。
+
+つまり、今後Apple Vision Pro向けにWeb体験を作る場合は、WebXRだけを見るのではなく、`<model>` 要素、immersive API、Safari 27 betaのSpatial Web機能もセットで見ていく必要があります。
+
+BANGEOでは、WebXRを中心にしつつも、visionOS Safariで広がるSpatial Webの動きとして、これらの機能を追っていく価値がありそうです。
+
+## まだbetaなので本番前提にはしない
+
+今回の内容はSafari 27 betaとvisionOS 27に関するものです。すべてのユーザー環境で今すぐ使える安定機能として扱うのは早い段階です。
+
+ただし、AppleがSafari上でimmersive website environmentsを打ち出し、`<model>` 要素をAppleプラットフォーム横断に広げ、さらにWebXR viewportの初期化問題を修正していることは、Webベースの空間体験にとってかなり前向きな流れです。
+
+WebXR開発者としては、Safari 27 beta/visionOS 27での挙動を試しつつ、WebXRとSpatial Webの両方の導線を整理しておくとよさそうです。
+
+## 関連リンク
+
+- [News from WWDC26: WebKit in Safari 27 beta](https://webkit.org/blog/17967/news-from-wwdc26-webkit-in-safari-27-beta/)
+- [What's new in WebKit for Safari 27（WWDC26）](https://developer.apple.com/videos/play/wwdc2026/204/)
+- [Explore immersive website environments in visionOS（WWDC26）](https://developer.apple.com/videos/play/wwdc2026/320/)
+- [BANGEO：標準化・対応状況](/webxr-status)
+- [iOSでWebXRを体験する──App Clipガイド](/tech-articles/ios-webxr-app-clip-guide)
