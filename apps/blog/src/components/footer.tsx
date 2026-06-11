@@ -14,7 +14,7 @@ export function Footer() {
 							className="inline-flex items-center gap-3 rounded-full border border-rose-100/80 bg-white/90 px-4 py-3 shadow-sm shadow-rose-100/40"
 						>
 							<OptimizedImage
-								src="/favicon.svg"
+								src="/favicon.png"
 								alt=""
 								aria-hidden="true"
 								width={32}

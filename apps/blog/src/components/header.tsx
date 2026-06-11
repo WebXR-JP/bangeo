@@ -44,7 +44,7 @@ export function Header() {
 						className="flex items-center gap-2.5 md:gap-3 group shrink-0"
 					>
 						<OptimizedImage
-							src="/favicon.svg"
+							src="/favicon.png"
 							alt="BANGEOマスコット"
 							width={36}
 							height={36}

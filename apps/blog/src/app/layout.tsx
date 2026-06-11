@@ -33,10 +33,7 @@ export const metadata: Metadata = {
 		"ブラウザだけで動くWebXR（VR/AR）の日本語リソース。デモ、技術解説、標準化状況を日本語でまとめた情報サイト。",
 	metadataBase: new URL(SITE_URL),
 	icons: {
-		icon: [
-			{ url: "/favicon.svg", type: "image/svg+xml" },
-			{ url: "/favicon.png", type: "image/png", sizes: "192x192" },
-		],
+		icon: "/favicon.png",
 	},
 	manifest: "/site.webmanifest",
 	openGraph: {

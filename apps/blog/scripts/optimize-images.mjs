@@ -59,13 +59,6 @@ async function optimizeFile(filePath) {
 	const ext = path.extname(filePath).toLowerCase();
 
 	if (relative === "favicon.png") {
-		await writeOptimized(
-			filePath,
-			sharp(filePath)
-				.resize(FAVICON_SIZE, FAVICON_SIZE, { fit: "cover" })
-				.png({ compressionLevel: 9, palette: true }),
-		);
-		console.log(`optimized favicon: ${relative}`);
 		return;
 	}
 
