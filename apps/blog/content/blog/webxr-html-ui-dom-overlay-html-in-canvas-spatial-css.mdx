@@ -1,0 +1,146 @@
+---
+title: "WebXRでHTML UIを扱う未来──DOM Overlay、HTML-in-Canvas、Spatial CSS"
+description: "WebXRでHTML UIを扱う方法は、DOM Overlay、HTML-in-Canvas、Spatial CSSへ広がりつつあります。それぞれの役割、使いどころ、現時点での注意点を整理します。"
+date: "2026年6月11日"
+category: "TECH"
+tags:
+  - "WebXR"
+  - "DOM Overlay"
+  - "HTML-in-Canvas"
+  - "Spatial CSS"
+  - "Immersive Web"
+  - "WebGPU"
+  - "WebGL"
+author: "BANGEO Team"
+thumbnail: "/assets/tech/webxr-html-ui-spatial.webp"
+draft: false
+---
+
+WebXRでUIを作るとき、多くの開発者が最初にぶつかるのは「ボタン、テキスト、フォーム、メニューをどう作るか」という問題です。
+
+three.jsやBabylon.js、PlayCanvasなどで3D空間を作る場合、UIもメッシュ、テクスチャ、レイキャスト、独自イベント処理で実装できます。これは今でも有効な方法です。VR空間内のボタン、3Dメニュー、手やコントローラーで触るパネルなどは、この方法で作られることが多いです。
+
+ただし、HTML/CSSがもともと得意なことをWebGL側で再実装するのは大変です。複数行テキスト、フォーム入力、アクセシビリティ、翻訳、コピー＆ペースト、右クリック、フォーカス管理、スクリーンリーダー対応などを、3Dエンジン側だけで自然に扱うのは簡単ではありません。
+
+そのため最近のImmersive Web周辺では、WebXRのUIを「全部3Dで作る」のではなく、**HTML/CSSの強みをXR空間にどう持ち込むか**という方向の議論が増えています。代表的な流れが、DOM Overlay、HTML-in-Canvas、Spatial CSSです。
+
+## まず現実的に使われているのはDOM Overlay
+
+[WebXR DOM Overlays Module](https://www.w3.org/TR/webxr-dom-overlays-1/)は、没入型WebXRセッション中にインタラクティブな2D DOMコンテンツを表示するための仕組みです。W3Cの説明では、有効化された場合、ユーザーエージェントが単一のDOM要素の内容を透明背景の2D矩形として表示するとされています。なお、この仕様はワーキングドラフトであり、APIはまだ変更される可能性があると明記されています。
+
+DOM Overlayの使いどころは、AR画面の上に説明テキストやメニュー、設定パネル、購入ボタンなどを重ねたい場合です。通常のHTML/CSSでUIを書けるため、Web開発者にとって導入しやすいのが大きな利点です。
+
+たとえば、WebXRセッション開始時に `dom-overlay` をoptional featureとして要求し、overlay rootとなるDOM要素を指定します。UI側ではCSSで通常どおりボタンやパネルを作れます。
+
+```javascript
+const session = await navigator.xr.requestSession("immersive-ar", {
+  optionalFeatures: ["dom-overlay"],
+  domOverlay: { root: document.getElementById("xr-ui") },
+});
+```
+
+DOM Overlayでは、ユーザーがDOM UIを操作したときにWebXR側の `select` イベントと重複しないよう、`beforexrselect` を使ってXR入力イベントを抑制できます。仕様では、DOM overlay上の特定領域で `preventDefault()` することで、対応するWebXRの `selectstart` / `selectend` / `select` を抑制できると説明されています。
+
+```javascript
+document
+  .getElementById("menu")
+  .addEventListener("beforexrselect", (event) => {
+    event.preventDefault();
+  });
+```
+
+ただしDOM Overlayは、基本的には「WebXR体験の上に2D UIを重ねる」ための仕組みです。3D空間内の任意の位置にHTMLパネルを置く、球面にHTMLを貼る、3Dオブジェクトの一部としてDOMを自然に扱う、といった用途にはそのままでは向きません。
+
+[BANGEOの標準化・対応状況](/webxr-status)でも、DOM Overlays Moduleはワーキングドラフト段階の機能として追跡しています。
+
+## HTML-in-Canvasは「DOMをテクスチャとして3D空間に置く」方向
+
+次に注目されているのがHTML-in-Canvasです。これは、HTMLコンテンツを2D canvas、WebGL、WebGPUの描画先に取り込むための提案です。[WICGのexplainer](https://github.com/WICG/html-in-canvas)では、`layoutsubtree` 属性、DOM要素をcanvasへ描画するメソッド、更新を扱う `paint` イベントという3つの主要プリミティブが説明されています。
+
+[Chrome for Developersの記事](https://developer.chrome.com/blog/html-in-canvas-origin-trial)では、HTML-in-Canvas APIはChrome 148〜150のOrigin Trialで提供され、Chrome Canary 149以降では `chrome://flags/#canvas-draw-element` を有効化して試せると説明されています。また、DOMコンテンツを2D canvasやWebGL/WebGPUテクスチャに描画しつつ、インタラクションやアクセシビリティを保つことを狙っています。
+
+HTML-in-Canvasの重要な点は、単に「HTMLを画像化する」だけではないことです。ブラウザがHTML要素のレイアウト、ヒットテスト、アクセシビリティツリーを把握したまま、描画だけをcanvasやテクスチャ側に渡すことを目指しています。
+
+```html
+<canvas id="scene" layoutsubtree>
+  <div id="panel">
+    <button>Buy</button>
+  </div>
+</canvas>
+```
+
+2D canvasなら `drawElementImage()`、WebGLなら `texElementImage2D()`、WebGPUなら `copyElementImageToTexture()` のような形でDOM要素を描画・アップロードする方向が説明されています。
+
+これがWebXRに入ってくると、HTML/CSSで作ったUIパネルを3D空間内の板、端末画面、看板、メニュー、ゲーム内端末のように使える可能性が出てきます。[Quest Browser 146.0でWebGPU in WebXRを試す](/tech-articles/quest-browser-146-webgpu-webxr)記事でも触れたように、Quest BrowserでもHTML-in-Canvasの実験的な動作が報告されています。
+
+ただし、WebXRとの統合はまだ議論中です。2026年5月のImmersive Web face-to-faceでは、HTML-in-CanvasをWebXRでどう扱うかが議題になりました。[議事録](https://www.w3.org/2026/05/19-immersive-web-minutes.html)では、WebXR側の主な課題として入力処理、イベントの通し方、レイヤーとの関係、same-origin制約、そして「まずはquad in spaceから始めるのが妥当ではないか」という方向が話されています。
+
+つまり、HTML-in-CanvasはWebXR UIの大きな候補ですが、現時点では「本番WebXRでどこでも使える標準機能」ではありません。実験用・将来設計用として追いかける段階です。PlayCanvas での具体的な実装は、[PlayCanvasでHTML-in-Canvasを使う](/tech-articles/playcanvas-html-in-canvas)で整理しています。
+
+## Spatial CSSはWebXRとは別レイヤーの「空間化されたWebページ」
+
+もう一つの大きな流れがSpatial CSSです。
+
+[WebKitのCSS Spatial Layout explainer](https://github.com/WebKit/explainers/blob/main/css-spatial/explainer.md)では、CSS Spatial Layoutを、relative/absolute positioning、inset、anchor positioning、box alignmentのような既存のCSS概念をz軸方向にも拡張し、ページ内の要素を実際の奥行きに配置できる仕組みとして説明しています。そこでは、WebXRの置き換えではなく、通常のWebページの中で奥行き表現や空間的なレイアウトを扱うことが目的だと明記されています。
+
+たとえば、Spatial CSSが目指す世界では、通常のカードや見出しをCSSだけで少し前に浮かせたり、ページの一部に3Dポータルを作ったり、3DモデルにDOMラベルをアンカーしたりする発想が出てきます。
+
+```css
+.product-card {
+  spatial: page;
+}
+
+.product-card:hover img {
+  position: relative;
+  inset-back: 1cm;
+}
+```
+
+これはWebXRのように、アプリがXRセッションを開始し、フレームごとにレンダリングし、コントローラーやハンドトラッキングを扱うモデルとは違います。Spatial CSSは、より「Webページそのものを空間対応にする」方向です。
+
+2026年5月の[Immersive Web WG/CGとCSSWGの合同議論](https://www.w3.org/2026/05/20-immersive-web-minutes.html)でも、Spatial LayoutはCSSを中心に空間表現をWebへ持ち込む提案として扱われ、3Dコンテンツと2D DOMをどう同じシステムに載せるかが議論されています。
+
+[Safari 27 betaでvisionOS向けImmersive Webが前進](/tech-articles/safari-27-beta-visionos-immersive-website-environments-webxr)のように、Appleプラットフォームでは `<model>` 要素やimmersive APIが別軸で進んでいますが、Spatial CSSはWebページ全体の空間化という、さらに広いレイヤーの話です。
+
+## background-materialは空間UIの見た目に関係する
+
+Spatial CSSと近い話題として、`background-material` も議論されています。これはOSが持つガラス風、パネル風、ポップアップ風のような「システム定義のマテリアル」をCSSから使う提案です。[WebSpatialのexplainer](https://github.com/webspatial/WebSpatialExplainers/blob/main/background-material/explainer.md)では、`background-material` を、`background-color` を受け取れる要素の背景にシステム定義マテリアルを描画するCSSプロパティとして説明しています。
+
+これはWebXRの描画APIではありません。しかし、空間Web UIを作るうえでは重要です。Vision ProやAndroid XRのような空間コンピューティング環境では、Webページのパネルが周囲のOS UIと自然に馴染むかどうかが体験に大きく影響します。
+
+ただし、この分野もまだ提案・議論段階です。今すぐBANGEOの入門記事で「使えるAPI」として紹介するより、「空間Web UIの将来像」として整理するのが安全です。
+
+## 開発者はどう考えればよいか
+
+今WebXRアプリを作るなら、まずは用途ごとにUIの作り方を分けるのが現実的です。
+
+ARの上に説明や設定UIを重ねるならDOM Overlayを検討します。3D空間の中で完全に没入型のUIを作るなら、three.jsやPlayCanvasなどの3D UI、テクスチャ、レイキャストを使うのが安定しています。
+
+HTML-in-Canvasは、HTML/CSSのUIを3D空間内のテクスチャとして扱う将来候補です。Chrome CanaryやOrigin Trialで実験する価値はありますが、本番前提にするにはブラウザ対応とAPI変更リスクを見ておく必要があります。
+
+Spatial CSSは、WebXRアプリというより、WebページやブラウザUIそのものが空間対応していく流れです。WebXR開発者にとっては「将来、WebXRでしかできなかった一部の空間UIが、CSS側でも表現できるようになるかもしれない」という意味で重要です。
+
+## BANGEOでの整理
+
+WebXR UIは次の4層で整理しています。詳細とデモリンクは[標準化・対応状況ページの WebXR UI 4層モデル](/webxr-status#webxr-ui-layers)を参照してください。
+
+| 層 | 状態 | デモ |
+| --- | --- | --- |
+| 3D UI（メッシュベース） | 実用 | [/demos/ui-interaction](/demos/ui-interaction) |
+| DOM Overlay | 標準化中 | [/demos/dom-overlay-ar](/demos/dom-overlay-ar) |
+| HTML-in-Canvas | 実験段階 | [/demos/html-texture-panel](/demos/html-texture-panel) |
+| Spatial CSS | 提案・議論中 | — |
+
+DOM Overlay と HTML-in-Canvas の違いは[比較表](/webxr-status#webxr-ui-comparison)でも確認できます。
+
+## 関連リンク
+
+- [WebXR DOM Overlays Module（ワーキングドラフト）](https://www.w3.org/TR/webxr-dom-overlays-1/)
+- [WICG: HTML-in-Canvas](https://github.com/WICG/html-in-canvas)
+- [Introducing the HTML-in-Canvas API origin trial（Chrome for Developers）](https://developer.chrome.com/blog/html-in-canvas-origin-trial)
+- [Immersive Web face-to-face May 2026 day 1（議事録）](https://www.w3.org/2026/05/19-immersive-web-minutes.html)
+- [WebKit: CSS Spatial Layout explainer](https://github.com/WebKit/explainers/blob/main/css-spatial/explainer.md)
+- [Immersive Web WG/CG May 2026 face-to-face Day 2（議事録）](https://www.w3.org/2026/05/20-immersive-web-minutes.html)
+- [WebSpatial: background-material explainer](https://github.com/webspatial/WebSpatialExplainers/blob/main/background-material/explainer.md)
+- [Quest Browser 146.0でWebGPU in WebXRが実験的に利用可能に](/tech-articles/quest-browser-146-webgpu-webxr)
+- [BANGEO：標準化・対応状況](/webxr-status)

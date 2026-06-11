@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOM Overlay AR</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #111; font-family: sans-serif; }
+        #info {
+            position: absolute; top: 10px; width: 100%; text-align: center; color: white;
+            pointer-events: none; z-index: 5; text-shadow: 0 1px 2px black;
+        }
+        #info a { color: #f4a83a; pointer-events: auto; }
+        .desc { font-size: 0.8em; opacity: 0.85; margin-top: 4px; padding: 0 10px; }
+        #overlay-root {
+            display: none;
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 10;
+        }
+        #overlay-root.active { display: block; }
+        #overlay-panel {
+            position: absolute;
+            left: 50%;
+            bottom: 24px;
+            transform: translateX(-50%);
+            width: min(92vw, 360px);
+            padding: 16px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.92);
+            color: #111827;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+            pointer-events: auto;
+        }
+        #overlay-panel h4 { margin: 0 0 8px; font-size: 16px; }
+        #overlay-panel p { margin: 0 0 12px; font-size: 13px; line-height: 1.5; color: #4b5563; }
+        #overlay-panel button {
+            width: 100%;
+            padding: 10px 12px;
+            border: none;
+            border-radius: 999px;
+            background: #e11d48;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        #overlay-panel button + button { margin-top: 8px; background: #111827; }
+        #status { font-size: 12px; color: #6b7280; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <div id="info">
+        <h3>DOM Overlay AR</h3>
+        <div class="desc">immersive-ar セッション中に DOM Overlay で 2D UI を重ねるデモ。`beforexrselect` で XR 入力の重複を抑制します。</div>
+    </div>
+
+    <div id="overlay-root">
+        <div id="overlay-panel">
+            <h4>DOM Overlay パネル</h4>
+            <p>通常の HTML/CSS で書いた UI が AR 体験の上に表示されます。ボタンは DOM として操作できます。</p>
+            <button id="reset-btn" type="button">キューブをリセット</button>
+            <button id="end-btn" type="button">セッションを終了</button>
+            <div id="status">dom-overlay: 待機中</div>
+        </div>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
+        import { ARButton } from 'https://unpkg.com/three@0.160.0/examples/jsm/webxr/ARButton.js';
+
+        const overlayRoot = document.getElementById('overlay-root');
+        const overlayPanel = document.getElementById('overlay-panel');
+        const statusEl = document.getElementById('status');
+        const resetBtn = document.getElementById('reset-btn');
+        const endBtn = document.getElementById('end-btn');
+
+        let camera, scene, renderer, cube;
+
+        overlayPanel.addEventListener('beforexrselect', (event) => {
+            event.preventDefault();
+        });
+
+        resetBtn.addEventListener('click', () => {
+            if (cube) {
+                cube.rotation.set(0, 0, 0);
+                cube.position.set(0, 0, -1);
+            }
+            statusEl.textContent = 'キューブをリセットしました';
+        });
+
+        endBtn.addEventListener('click', async () => {
+            const session = renderer.xr.getSession();
+            if (session) await session.end();
+        });
+
+        init();
+        animate();
+
+        function init() {
+            const container = document.createElement('div');
+            document.body.appendChild(container);
+
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
+
+            const light = new THREE.HemisphereLight(0xffffff, 0xbbbbff, 2);
+            scene.add(light);
+
+            cube = new THREE.Mesh(
+                new THREE.BoxGeometry(0.2, 0.2, 0.2),
+                new THREE.MeshNormalMaterial()
+            );
+            cube.position.set(0, 0, -1);
+            scene.add(cube);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.xr.enabled = true;
+            container.appendChild(renderer.domElement);
+
+            renderer.xr.addEventListener('sessionstart', () => {
+                overlayRoot.classList.add('active');
+                statusEl.textContent = 'dom-overlay: 有効';
+            });
+            renderer.xr.addEventListener('sessionend', () => {
+                overlayRoot.classList.remove('active');
+                statusEl.textContent = 'dom-overlay: 終了';
+            });
+
+            document.body.appendChild(
+                ARButton.createButton(renderer, {
+                    optionalFeatures: ['dom-overlay'],
+                    domOverlay: { root: overlayRoot },
+                })
+            );
+
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            renderer.setAnimationLoop(render);
+        }
+
+        function render(_time, frame) {
+            if (cube) cube.rotation.y += 0.01;
+            renderer.render(scene, camera);
+        }
+    </script>
+</body>
+</html>

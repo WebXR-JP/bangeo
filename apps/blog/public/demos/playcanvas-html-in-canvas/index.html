@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlayCanvas HTML-in-Canvas | BANGEO WebXR Demo</title>
+    <link rel="icon" type="image/png" href="https://bangeo.net/favicon.png">
+    <style>
+        :root {
+            --ink: #080b13;
+            --muted: #647084;
+            --paper: #fffefe;
+            --line: rgba(15, 23, 42, 0.08);
+            --rose: #e11d48;
+            --rose-soft: #fff1f2;
+            --violet: #7c3aed;
+            --cyan: #0891b2;
+        }
+
+        * { box-sizing: border-box; }
+        html { min-height: 100%; background: #fff; }
+        body {
+            min-height: 100vh;
+            margin: 0;
+            color: var(--ink);
+            font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+            background:
+                radial-gradient(circle at 12% 18%, rgba(244, 63, 94, 0.16), transparent 28rem),
+                radial-gradient(circle at 86% 22%, rgba(8, 145, 178, 0.13), transparent 32rem),
+                radial-gradient(circle at 54% 92%, rgba(124, 58, 237, 0.10), transparent 32rem),
+                #ffffff;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(15, 23, 42, 0.035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(15, 23, 42, 0.035) 1px, transparent 1px);
+            background-size: 44px 44px;
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,0.75), transparent 72%);
+        }
+
+        .nav {
+            position: fixed;
+            inset: 0 0 auto 0;
+            z-index: 40;
+            padding: 14px;
+        }
+
+        .nav-inner {
+            max-width: 1180px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 10px 12px 10px 16px;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.74);
+            box-shadow: 0 20px 70px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255,255,255,0.9);
+            backdrop-filter: blur(20px) saturate(1.2);
+            -webkit-backdrop-filter: blur(20px) saturate(1.2);
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            color: inherit;
+            text-decoration: none;
+            font-weight: 950;
+            letter-spacing: -0.04em;
+        }
+
+        .brand img { width: 34px; height: 34px; border-radius: 10px; }
+        .nav-links { display: flex; gap: 8px; align-items: center; }
+
+        .nav-link {
+            color: #334155;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            padding: 10px 14px;
+            border-radius: 999px;
+            transition: background 180ms ease, color 180ms ease;
+        }
+
+        .nav-link:hover { background: var(--rose-soft); color: var(--rose); }
+
+        main {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: calc(96px + env(safe-area-inset-top, 0px)) 20px calc(40px + env(safe-area-inset-bottom, 0px));
+        }
+
+        .hero {
+            width: min(1120px, 100%);
+            display: grid;
+            grid-template-columns: minmax(0, 1.04fr) minmax(280px, 0.96fr);
+            align-items: center;
+            gap: clamp(24px, 5vw, 72px);
+        }
+
+        .hero-copy { min-width: 0; }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: fit-content;
+            padding: 8px 12px;
+            border: 1px solid rgba(225, 29, 72, 0.18);
+            border-radius: 999px;
+            background: rgba(255, 241, 242, 0.72);
+            color: #9f1239;
+            font-size: 11px;
+            font-weight: 950;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            box-shadow: 0 14px 32px rgba(225, 29, 72, 0.10);
+        }
+
+        .eyebrow::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 999px;
+            background: var(--rose);
+            box-shadow: 0 0 0 6px rgba(225, 29, 72, 0.12);
+        }
+
+        h1 {
+            margin: 18px 0 16px;
+            max-width: 12ch;
+            font-size: clamp(34px, 8vw, 92px);
+            line-height: 0.95;
+            letter-spacing: -0.075em;
+            word-break: keep-all;
+            overflow-wrap: anywhere;
+        }
+
+        .lead {
+            max-width: 38rem;
+            color: var(--muted);
+            font-size: clamp(14px, 2.4vw, 18px);
+            line-height: 1.85;
+            font-weight: 600;
+            margin: 0 0 24px;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .run-button,
+        .ghost-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-height: 52px;
+            padding: 0 22px;
+            border-radius: 999px;
+            border: 0;
+            cursor: pointer;
+            font: inherit;
+            font-size: 14px;
+            font-weight: 950;
+            text-decoration: none;
+            transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+        }
+
+        .run-button {
+            color: white;
+            background: linear-gradient(135deg, #080b13, #1f2937 58%, #e11d48);
+            box-shadow: 0 18px 42px rgba(15, 23, 42, 0.20), 0 10px 28px rgba(225, 29, 72, 0.18);
+        }
+
+        .run-button:hover { transform: translateY(-2px); box-shadow: 0 24px 60px rgba(15, 23, 42, 0.24), 0 16px 36px rgba(225, 29, 72, 0.24); }
+        .run-button:active { transform: translateY(0); }
+
+        .ghost-button {
+            color: #111827;
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+        }
+
+        .ghost-button:hover { background: white; transform: translateY(-2px); }
+
+        .note {
+            margin-top: 20px;
+            color: #94a3b8;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1.7;
+        }
+
+        .preview-shell {
+            position: relative;
+            min-height: clamp(360px, 52vw, 560px);
+            width: 100%;
+        }
+
+        .preview-card {
+            position: absolute;
+            inset: clamp(12px, 3vw, 28px) 0 auto auto;
+            width: min(390px, 100%);
+            max-width: 100%;
+            padding: clamp(18px, 3vw, 22px);
+            border-radius: clamp(24px, 4vw, 34px);
+            background: rgba(255, 255, 255, 0.68);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 44px 100px rgba(15, 23, 42, 0.15), inset 0 1px 0 rgba(255,255,255,0.9);
+            backdrop-filter: blur(22px) saturate(1.2);
+            -webkit-backdrop-filter: blur(22px) saturate(1.2);
+            transform: rotate(2deg);
+        }
+
+        .preview-card::before {
+            content: "";
+            position: absolute;
+            inset: 14px;
+            border-radius: 26px;
+            border: 1px solid rgba(255,255,255,0.75);
+            pointer-events: none;
+        }
+
+        .preview-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .dots { display: flex; gap: 8px; }
+        .dot { width: 10px; height: 10px; border-radius: 999px; background: #fb7185; }
+        .dot:nth-child(2) { background: #fbbf24; }
+        .dot:nth-child(3) { background: #22c55e; }
+
+        .texture-pill {
+            padding: 7px 10px;
+            border-radius: 999px;
+            background: #0f172a;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 950;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .preview-title {
+            margin: 0 0 12px;
+            font-size: clamp(24px, 5vw, 34px);
+            line-height: 1.02;
+            letter-spacing: -0.05em;
+        }
+
+        .preview-copy {
+            margin: 0 0 18px;
+            color: #64748b;
+            line-height: 1.75;
+            font-size: 13px;
+            font-weight: 650;
+        }
+
+        .mini-code {
+            display: grid;
+            gap: 8px;
+            margin: 20px 0;
+            padding: 16px;
+            border-radius: 20px;
+            background: #0f172a;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 42px rgba(15,23,42,0.18);
+            color: #cbd5e1;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 11px;
+        }
+
+        .mini-code span:nth-child(1) { color: #fda4af; }
+        .mini-code span:nth-child(2) { color: #93c5fd; }
+        .mini-code span:nth-child(3) { color: #86efac; }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .feature {
+            min-height: 86px;
+            padding: 12px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.78);
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            box-shadow: 0 10px 24px rgba(15,23,42,0.06);
+        }
+
+        .feature strong {
+            display: block;
+            font-size: 11px;
+            font-weight: 950;
+            letter-spacing: -0.02em;
+        }
+
+        .feature span {
+            display: block;
+            margin-top: 8px;
+            color: #94a3b8;
+            font-size: 10px;
+            line-height: 1.45;
+            font-weight: 700;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 999px;
+            filter: blur(0.2px);
+            box-shadow: 0 36px 80px rgba(15, 23, 42, 0.13);
+        }
+
+        .orb-a { width: 128px; height: 128px; left: 10%; top: 12%; background: linear-gradient(135deg, #fb7185, #e11d48); }
+        .orb-b { width: 86px; height: 86px; right: 18%; bottom: 10%; background: linear-gradient(135deg, #22d3ee, #2563eb); }
+        .orb-c { width: 58px; height: 58px; left: 18%; bottom: 18%; background: linear-gradient(135deg, #c4b5fd, #7c3aed); }
+
+        #demo-container {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: none;
+            background: #05070d;
+        }
+
+        #demo-frame {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            display: block;
+        }
+
+        .close-demo {
+            position: fixed;
+            top: calc(14px + env(safe-area-inset-top, 0px));
+            right: calc(14px + env(safe-area-inset-right, 0px));
+            z-index: 110;
+            width: 48px;
+            height: 48px;
+            display: none;
+            place-items: center;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.16);
+            background: rgba(8, 11, 19, 0.58);
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: transform 180ms ease, background 180ms ease;
+        }
+
+        .close-demo:hover { background: #e11d48; transform: scale(1.04); }
+
+        @media (max-width: 960px) {
+            .hero {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            .hero-copy { order: 1; }
+            .preview-shell { order: 2; min-height: 420px; }
+
+            h1 { max-width: none; }
+        }
+
+        @media (max-width: 720px) {
+            .nav { padding: 10px 12px; }
+            .nav-inner { padding: 8px 10px 8px 14px; }
+            .brand span { font-size: 15px; }
+            .brand img { width: 30px; height: 30px; }
+
+            main {
+                align-items: flex-start;
+                padding-top: calc(88px + env(safe-area-inset-top, 0px));
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
+            .preview-shell { min-height: 0; }
+            .preview-card {
+                position: relative;
+                inset: auto;
+                width: 100%;
+                transform: none;
+            }
+
+            .orb-a { width: 92px; height: 92px; left: auto; right: 8px; top: -10px; }
+            .orb-b { width: 68px; height: 68px; right: 12px; bottom: -16px; }
+            .orb-c { display: none; }
+
+            .feature-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .feature { min-height: 72px; padding: 10px; }
+        }
+
+        @media (max-width: 560px) {
+            .nav-link { font-size: 11px; padding: 8px 12px; }
+            h1 { font-size: clamp(30px, 11vw, 40px); line-height: 1.02; }
+            .eyebrow { font-size: 10px; letter-spacing: 0.12em; }
+            .feature-grid { grid-template-columns: 1fr; }
+            .actions { align-items: stretch; flex-direction: column; }
+            .run-button, .ghost-button { width: 100%; min-height: 48px; }
+            .mini-code { font-size: 10px; overflow-x: auto; }
+            .close-demo { width: 44px; height: 44px; font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav" aria-label="デモナビゲーション">
+        <div class="nav-inner">
+            <a class="brand" href="https://bangeo.net/">
+                <img src="https://bangeo.net/favicon.png" alt="BANGEO">
+                <span>BANGEO WebXR</span>
+            </a>
+            <div class="nav-links">
+                <a class="nav-link" href="/">← デモ一覧</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero" aria-labelledby="hero-title">
+            <div class="hero-copy">
+                <div class="eyebrow">PlayCanvas / Experimental UI Texture</div>
+                <h1 id="hero-title">HTMLが、3Dの面になる。</h1>
+                <p class="lead">
+                    DOMで作ったUIを、そのままPlayCanvasの3Dシーンへ。CSSの質感、テキスト、ボタン、ホバーを「平面に貼った画像」ではなく、ライブなHTMLとして見せる紹介デモです。
+                </p>
+                <div class="actions">
+                    <button class="run-button" type="button" onclick="runDemo()">▶ コンテンツを実行</button>
+                    <a class="ghost-button" href="https://developer.playcanvas.com/ja/user-manual/graphics/advanced-rendering/html-in-canvas/" target="_blank" rel="noreferrer">公式ドキュメント</a>
+                </div>
+                <p class="note">
+                    ※ HTML-in-Canvasは実験的APIです。未対応ブラウザでは、同じHTMLパネルをDOM Overlayとして表示します。
+                </p>
+            </div>
+
+            <div class="preview-shell" aria-hidden="true">
+                <div class="orb orb-a"></div>
+                <div class="orb orb-b"></div>
+                <div class="orb orb-c"></div>
+                <div class="preview-card">
+                    <div class="preview-top">
+                        <div class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+                        <span class="texture-pill">HTML Texture</span>
+                    </div>
+                    <h2 class="preview-title">DOM UI<br>inside Canvas</h2>
+                    <p class="preview-copy">3Dに貼られているのに、CSSの角丸・影・グラデーション・ボタン状態をそのまま保ちます。</p>
+                    <div class="mini-code">
+                        <span>&lt;section class="glass-panel"&gt;</span>
+                        <span>texture.setSource(htmlElement)</span>
+                        <span>canvas.getElementTransform(...)</span>
+                    </div>
+                    <div class="feature-grid">
+                        <div class="feature"><strong>CSS</strong><span>影とグラデーション</span></div>
+                        <div class="feature"><strong>Texture</strong><span>GPUへアップロード</span></div>
+                        <div class="feature"><strong>Hit Test</strong><span>DOMクリック対応</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="demo-container" aria-label="PlayCanvasデモ">
+        <button class="close-demo" onclick="closeDemo()" title="デモを終了" aria-label="デモを終了">×</button>
+        <iframe id="demo-frame" title="PlayCanvas HTML-in-Canvas Demo"></iframe>
+    </div>
+
+    <script>
+        function runDemo() {
+            const container = document.getElementById('demo-container');
+            const frame = document.getElementById('demo-frame');
+            const closeBtn = document.querySelector('.close-demo');
+            const base = window.location.pathname.replace(/\/?$/, "/");
+            frame.src = base + "app.html";
+            container.style.display = 'block';
+            closeBtn.style.display = 'grid';
+        }
+
+        function closeDemo() {
+            const container = document.getElementById('demo-container');
+            const frame = document.getElementById('demo-frame');
+            const closeBtn = document.querySelector('.close-demo');
+            frame.src = '';
+            container.style.display = 'none';
+            closeBtn.style.display = 'none';
+        }
+    </script>
+</body>
+</html>

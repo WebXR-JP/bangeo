@@ -1,0 +1,252 @@
+---
+title: "PlayCanvasでHTML-in-Canvasを使う──3DシーンにHTML/CSSをテクスチャとして貼る"
+description: "PlayCanvasのHTML-in-Canvas対応を、v2.19.2の更新・基本実装・インタラクション・フォールバックまで日本語で整理します。CSS / Texture / Hit Test を体験できる BANGEO デモ付き。"
+date: "2026年6月11日"
+category: "TECH"
+tags:
+  - "PlayCanvas"
+  - "HTML-in-Canvas"
+  - "WebGL"
+  - "WebGPU"
+  - "WebXR UI"
+  - "Texture"
+  - "Canvas"
+author: "BANGEO Team"
+thumbnail: "/assets/tech/playcanvas-html-in-canvas.webp"
+draft: false
+---
+
+3Dシーンの中に、スタイル付きテキストやフォーム、インタラクティブなUIパネルを置きたい──WebXR開発でもよくある要望です。
+
+従来は、HTMLで作ったUIを画像に焼き込む、canvas 2Dで描く、3Dメッシュとしてボタンを組む、といった方法が主流でした。どれも動きますが、CSSアニメーション、`:hover`、フォーカス管理、アクセシビリティ、国際化といった「HTML/CSSがもともと得意なこと」を、エンジン側で再実装しがちです。
+
+[PlayCanvasのHTML-in-Canvasドキュメント](https://developer.playcanvas.com/user-manual/graphics/advanced-rendering/html-in-canvas/)が示す方向は、ここを変えようとするものです。**生きたHTMLとCSSを、そのままWebGL/WebGPUテクスチャとして3D空間内の面に貼る**。これがHTML-in-Canvasの狙いです。
+
+ただし、これはまだ実験的なブラウザAPIです。本番採用の前に、対応検出とフォールバックを必ず設計してください。BANGEOでは、WebXR UIの将来候補として追いかけつつ、現時点では「実験」として扱うのが安全です。
+
+## HTML-in-Canvasとは何か
+
+HTML-in-Canvasは、HTML要素のレイアウトと描画をブラウザに任せつつ、その結果をcanvas・WebGL・WebGPUのテクスチャへ渡すためのAPI群です。
+
+[PlayCanvas Developer Site](https://developer.playcanvas.com/user-manual/graphics/advanced-rendering/html-in-canvas/)では、次のような用途が挙げられています。
+
+- スタイル付きテキスト
+- インタラクティブなUIパネル
+- フォーム
+- その他のDOMコンテンツを3Dシーン内の面に表示
+
+重要なのは「画像化」だけではない点です。ブラウザがHTML要素のレイアウト、ヒットテスト、アクセシビリティを把握したまま、描画結果だけをテクスチャ側へ渡すことを目指しています。詳しい背景は[WebXRでHTML UIを扱う未来](/tech-articles/webxr-html-ui-dom-overlay-html-in-canvas-spatial-css)で、DOM OverlayやSpatial CSSとの役割分担とあわせて整理しています。
+
+### 現時点での注意
+
+HTML-in-Canvasは実験的APIです。[WICG explainer](https://github.com/WICG/html-in-canvas)が提案の全体像を説明しており、[Chrome for Developersの記事](https://developer.chrome.com/blog/html-in-canvas-origin-trial)では、Chrome 148〜150のOrigin Trial、Chrome Canary 149以降では `chrome://flags/#canvas-draw-element` を有効化して試せると案内されています。
+
+PlayCanvas公式ドキュメントでは、**現時点ではWebGL backendのみ対応**とされています。WebGPU向けの対応は、ブラウザ側APIの整備を待つ段階です。一方、PlayCanvas Engine v2.19.2では `copyElementImageToTexture` を使ったWebGPU経路の実験的対応も入っています（後述）。
+
+## PlayCanvas Engine v2.19.2の更新
+
+[PlayCanvas Engine](https://github.com/playcanvas/engine/releases) v2.19.2（2026年6月3日）では、HTML-in-Canvas textureまわりに注目すべき変更が入りました。
+
+[PR #8810](https://github.com/playcanvas/engine/pull/8810)では、HTML-in-Canvas APIのWebGPUサポートを追加し、以前はWebGLのみだったHTML要素のlive texture source利用をWebGPU backendでも扱えるようにする、と説明されています。具体的には、ブラウザが `queue.copyElementImageToTexture` を公開している場合にWebGPU deviceが `supportsHtmlTextures = true` を返し、WebGPUの2D texture uploadでHTML要素を `copyElementImageToTexture` 経由で処理する変更です。
+
+[PR #8828](https://github.com/playcanvas/engine/pull/8828)では、Chromium側のHTML-in-Canvas提案における破壊的API変更に合わせて、WebGPUの `copyElementImageToTexture` とWebGLの `texElementImage2D` 呼び出しを更新したと説明されています。この変更はChrome Canaryに関係するもので、リリース版ブラウザには影響しないとPR本文で説明されています。
+
+これは「今日からすべてのブラウザでHTML UIをWebXR空間に置ける」という話ではありません。むしろ、ブラウザ側の実験APIに、3Dエンジン側が対応し始めていることが重要です。
+
+## ブラウザ対応の検出
+
+PlayCanvasでは `device.supportsHtmlTextures` で、現在のデバイスがHTML要素テクスチャに対応しているかを確認します。
+
+```javascript
+if (device.supportsHtmlTextures) {
+  // HTML-in-Canvas が利用可能
+} else {
+  // DOM Overlay や canvas rasterization などのフォールバックを用意する
+}
+```
+
+このプロパティは、HTML-in-Canvas APIを実装していないブラウザでは `false` を返します。アプリケーション側では、**常にフォールバック経路を用意する**ことが前提です。
+
+BANGEOの[PlayCanvas HTML-in-Canvas デモ](/demos/playcanvas-html-in-canvas)では、非対応時は公式サンプルと同様に **DOM Overlay** へ切り替えます。
+
+## 仕組み──3つのプリミティブ
+
+HTML-in-Canvas APIは、大きく3つのプリミティブで構成されます。
+
+### 1. `layoutsubtree` 属性
+
+`<canvas>` に `layoutsubtree` を付けると、子HTML要素がレイアウトとヒットテストの対象になります。子要素はブラウザによってレイアウトされますが、canvasへ明示的に描画するまでは画面上には表示されません。
+
+```html
+<canvas id="application-canvas" layoutsubtree>
+  <div id="ui-panel">...</div>
+</canvas>
+```
+
+### 2. `texElementImage2D`（WebGL）
+
+WebGL拡張として、HTML要素の描画結果をテクスチャへアップロードします。PlayCanvasでは、HTML要素を `Texture.setSource()` に渡すと、この処理を内部で扱います。
+
+### 3. `paint` イベント
+
+子要素の見た目が変わるたびにcanvasへ発火するイベントです。DOMの変更をテクスチャへ反映するために使います。
+
+```javascript
+canvas.addEventListener("paint", () => {
+  texture.upload();
+});
+```
+
+WebGPUでは `copyElementImageToTexture` が対応する経路になります。Chromium側の提案変更に合わせてAPIが更新される可能性があるため、実装時はエンジンとブラウザのバージョンをセットで確認してください。
+
+## 基本実装──HTMLをテクスチャとして貼る
+
+PlayCanvasでHTML要素を3Dオブジェクトのテクスチャにする流れは、次の4ステップです。
+
+```javascript
+// 1. アプリケーション canvas で HTML-in-Canvas を有効化
+canvas.setAttribute("layoutsubtree", "true");
+
+// 2. HTML要素を作成・スタイル
+const htmlElement = document.createElement("div");
+htmlElement.style.width = "512px";
+htmlElement.style.height = "512px";
+htmlElement.innerHTML = "<h1>Hello 3D World</h1>";
+canvas.appendChild(htmlElement);
+
+// 3. テクスチャを作成し、HTML要素をソースに設定
+const texture = new pc.Texture(device, {
+  width: 512,
+  height: 512,
+  format: pc.PIXELFORMAT_RGBA8,
+});
+
+// 最初の paint を待ってからソースを設定
+canvas.addEventListener("paint", () => {
+  texture.setSource(htmlElement);
+}, { once: true });
+canvas.requestPaint();
+
+// 内容が変わるたびに再アップロード
+canvas.addEventListener("paint", () => {
+  texture.upload();
+});
+
+// 4. マテリアルにテクスチャを適用
+const material = new pc.StandardMaterial();
+material.diffuseMap = texture;
+material.update();
+```
+
+HTML要素には通常のCSSがそのまま使えます。アニメーション、グラデーション、flexbox、`backdrop-filter` なども、フレームごとにテクスチャへ描画されます。
+
+3D空間では、薄い平面メッシュに `emissiveMap` として貼るのが定番です。商品カード、ゲーム内端末、説明ラベル、設定パネルなどに向きます。半透明のガラス風UIでは `BLEND_PREMULTIPLIED` と `opacityMap` の組み合わせが有効です。
+
+## インタラクティブなUI──ヒットテスト
+
+HTMLをテクスチャとして貼るだけなら「表示」はできます。クリックやホバーを有効にするには、**DOM要素のCSS transformを3D投影と同期**させる必要があります。ブラウザがヒットテストを行えるようにするためです。
+
+PlayCanvasの `canvas.getElementTransform(element, drawTransform)` は、描画変換行列を渡すことで要素をヒットテスト対象に登録します。公式の [html-texture-configurator](https://github.com/playcanvas/engine/blob/main/examples/src/examples/misc/html-texture-configurator.example.mjs) サンプルでは、行列計算を担う `HtmlSync` クラスが紹介されています。
+
+```javascript
+// 同期ヘルパーを一度だけ作成
+const sync = new HtmlSync(canvas, htmlElement, planeEntity, panelWidth, panelHeight);
+
+// 毎フレーム更新して 3D 投影と DOM 位置を同期
+app.on("update", () => {
+  sync.update(camera.camera);
+});
+
+// 通常の DOM イベントでクリック・ホバーを処理
+htmlElement.addEventListener("click", (e) => {
+  const button = e.target.closest("[data-mode]");
+  if (button) {
+    // CSS / Texture / Hit Test モードの切り替えなど
+  }
+});
+```
+
+ブラウザがヒットテストを担うため、`:hover` 疑似クラス、フォーカス管理、アクセシビリティ機能が期待どおり動きます。WebXRとの接続はまだ議論段階ですが、デスクトップやARプレビューでは、この経路がHTML UIを3D空間に置く現実的な方法になります。
+
+## フォールバック戦略
+
+`device.supportsHtmlTextures` が `false` のとき、PlayCanvasドキュメントは次の2つを推奨しています。
+
+### DOM Overlay
+
+HTMLパネルをcanvasの上に固定配置の `<div>` として表示します。クリック処理は通常のDOMイベントで扱えます。html-texture-configurator サンプルがこの方式を使っています。WebXRでは [DOM Overlays Module](https://www.w3.org/TR/webxr-dom-overlays-1/) との組み合わせが現実的です。BANGEOの[DOM Overlay AR デモ](/demos/dom-overlay-ar)も参考にしてください。
+
+### Canvas 2D ラスタライズ
+
+2Dコンテキストで `<canvas>` にフォールバック用コンテンツを描き、そのcanvasをテクスチャソースにします。HTML-in-Canvas非対応ブラウザでも動きますが、インタラクションやライブ更新は制限されます。
+
+BANGEOの[PlayCanvas HTML-in-Canvas デモ](/demos/playcanvas-html-in-canvas)は、**DOM Overlay フォールバック** を採用しています。対応ブラウザでは3D平面にHTMLパネルを貼り、非対応時は画面右に同じパネルを重ね表示します。どちらのモードでも、パネル内のタブ切り替えは通常のDOMイベントで動作します。
+
+## APIリファレンス（PlayCanvas側）
+
+PlayCanvasで押さえるべきAPIは次の2つです。
+
+| API | 役割 |
+| --- | --- |
+| `GraphicsDevice.supportsHtmlTextures` | HTML-in-Canvas対応の有無を検出 |
+| `Texture.setSource()` | HTML要素（またはcanvas）をテクスチャソースに設定 |
+
+ブラウザ側のAPI（`layoutsubtree`、`paint`、`texElementImage2D`、`copyElementImageToTexture`、`getElementTransform` など）の詳細は、[WICG explainer](https://github.com/WICG/html-in-canvas)と[PlayCanvas公式ドキュメント](https://developer.playcanvas.com/user-manual/graphics/advanced-rendering/html-in-canvas/)を参照してください。
+
+## WebXR UIとの関係
+
+HTML-in-Canvasが成熟すれば、PlayCanvasで次のような設計が現実的になる可能性があります。
+
+- HTML/CSSで商品カードや設定パネルを作る
+- PlayCanvasの3Dシーン内の板にテクスチャとして貼る
+- WebXRでは、その板をユーザーの前に配置する
+- 入力はレイ・ポインターとHTML側のヒットテストを接続する
+
+ただし、現時点で最も難しいのは「表示」ではなく「入力」です。2026年5月の[Immersive Web face-to-face](https://www.w3.org/2026/05/19-immersive-web-minutes.html)では、同一オリジン制約、レイヤーとの関係、まずは空間内のquadとして扱う方向などが議論されています。
+
+BANGEOでは、HTML-in-Canvasを本番推奨APIとしてではなく、**WebXR UIの将来を理解するための実験トピック**として扱っています。
+
+## BANGEOでの実装
+
+PlayCanvas HTML-in-Canvas を試すとき、BANGEOでは次のリソースを使えます。
+
+| 切り口 | リンク |
+| --- | --- |
+| HTMLが3Dの面になる（CSS / Texture / Hit Test の紹介デモ） | [/demos/playcanvas-html-in-canvas](/demos/playcanvas-html-in-canvas) |
+| HTML テクスチャパネルの別実装 | [/demos/html-texture-panel](/demos/html-texture-panel) |
+| DOM Overlay と HTML-in-Canvas の比較 | [比較表（標準化・対応状況）](/webxr-status#webxr-ui-comparison) |
+| WebXR UI 全体の整理 | [WebXRでHTML UIを扱う未来](/tech-articles/webxr-html-ui-dom-overlay-html-in-canvas-spatial-css) |
+| WebGPU 時代の WebXR UI | [Quest Browser 146.0の記事](/tech-articles/quest-browser-146-webgpu-webxr) |
+
+デモでは、ライブなHTMLパネルを3D平面に貼り、**CSS Layer** / **Texture Upload** / **Hit Test** の3モードをタブで切り替えながら、HTML-in-Canvasの仕組みを体験できます。左側には「HTMLカード」風の3Dオブジェクト、右側には実際のDOM UIがテクスチャとして表示されます。対応ブラウザでは3Dパネル上でクリック・ホバーが動き、非対応時は同じHTMLをDOM Overlayとして表示します。
+
+<DemoIframe
+  src="/demos/playcanvas-html-in-canvas/app.html"
+  title="PlayCanvas HTML-in-Canvas デモ"
+  fullPageHref="/demos/playcanvas-html-in-canvas"
+  height={520}
+  caption="パネル内のタブで CSS Layer / Texture Upload / Hit Test を切り替えられます。Chrome Canary では chrome://flags/#canvas-draw-element を有効にすると、3D平面へのテクスチャ貼り付けとヒットテストを体験できます。"
+/>
+
+## まとめ
+
+PlayCanvasのHTML-in-Canvas対応は、3Dシーン内にHTML/CSSのUIを自然に置くための重要な一歩です。
+
+- `supportsHtmlTextures` で対応を検出し、必ずフォールバックを用意する
+- `layoutsubtree` + `Texture.setSource()` + `paint` でテクスチャ連携する
+- インタラクションには `getElementTransform` と行列同期ヘルパーによるヒットテストが必要
+- v2.19.2 で WebGPU 経路の実験対応が追加されたが、本番採用はまだ早い
+
+まずはBANGEOのデモで動作を確認し、対応ブラウザとフォールバックの両方を見ながら、自分のプロジェクトに取り込むのがよいでしょう。
+
+## 関連リンク
+
+- [HTML-in-Canvas（PlayCanvas Developer Site）](https://developer.playcanvas.com/user-manual/graphics/advanced-rendering/html-in-canvas/)
+- [html-texture-configurator サンプル（PlayCanvas Engine）](https://github.com/playcanvas/engine/blob/main/examples/src/examples/misc/html-texture-configurator.example.mjs)
+- [feat(webgpu): support HTML-in-Canvas textures（PR #8810）](https://github.com/playcanvas/engine/pull/8810)
+- [fix: update HTML-in-Canvas texture upload（PR #8828）](https://github.com/playcanvas/engine/pull/8828)
+- [WICG HTML-in-Canvas explainer](https://github.com/WICG/html-in-canvas)
+- [Introducing the HTML-in-Canvas API origin trial（Chrome for Developers）](https://developer.chrome.com/blog/html-in-canvas-origin-trial)
+- [PlayCanvas HTML-in-Canvas デモ（BANGEO）](/demos/playcanvas-html-in-canvas)
+- [WebXRでHTML UIを扱う未来（BANGEO）](/tech-articles/webxr-html-ui-dom-overlay-html-in-canvas-spatial-css)
+- [BANGEO：標準化・対応状況](/webxr-status)

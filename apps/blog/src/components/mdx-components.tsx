@@ -1,5 +1,6 @@
 import type { MDXComponents } from "mdx/types";
 import { CodeBlockCopyButton } from "./code-block-copy";
+import { DemoIframe } from "./demo-iframe";
 
 function Pre(props: React.ComponentPropsWithoutRef<"pre">) {
 	const { children, className, ...rest } = props;
@@ -34,4 +35,5 @@ function Pre(props: React.ComponentPropsWithoutRef<"pre">) {
 
 export const mdxComponents: MDXComponents = {
 	pre: Pre,
+	DemoIframe,
 };

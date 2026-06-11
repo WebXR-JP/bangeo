@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>PlayCanvas HTML-in-Canvas Demo</title>
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+            touch-action: none;
+            background: #fff7f9;
+            font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+        }
+
+        #application-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+            touch-action: none;
+            background: #fff7f9;
+        }
+
+        #status,
+        #hint {
+            position: fixed;
+            z-index: 20;
+            pointer-events: none;
+            color: #fff;
+            background: rgba(8, 11, 19, 0.72);
+            border: 1px solid rgba(255,255,255,0.12);
+            box-shadow: 0 18px 48px rgba(8, 11, 19, 0.18);
+            backdrop-filter: blur(16px) saturate(1.15);
+            -webkit-backdrop-filter: blur(16px) saturate(1.15);
+        }
+
+        #status {
+            left: max(12px, env(safe-area-inset-left, 0px));
+            right: max(12px, env(safe-area-inset-right, 0px));
+            bottom: max(12px, env(safe-area-inset-bottom, 0px));
+            max-width: none;
+            padding: 10px 14px;
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 800;
+            line-height: 1.5;
+        }
+
+        #hint {
+            top: max(12px, env(safe-area-inset-top, 0px));
+            left: max(12px, env(safe-area-inset-left, 0px));
+            right: max(12px, env(safe-area-inset-right, 0px));
+            max-width: 28rem;
+            padding: 10px 13px;
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 800;
+            line-height: 1.55;
+        }
+
+        @media (max-width: 720px) {
+            #hint { display: none; }
+            #status {
+                font-size: 10px;
+                padding: 9px 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #status {
+                border-radius: 14px;
+                line-height: 1.45;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="application-canvas"></canvas>
+    <div id="hint">HTMLパネル内のボタンをクリック：3D内でCSS / Texture / Hit Testの説明が切り替わります。</div>
+    <div id="status">読み込み中…</div>
+    <script type="module" src="./example.mjs"></script>
+</body>
+</html>
