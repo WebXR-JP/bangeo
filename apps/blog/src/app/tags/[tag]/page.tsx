@@ -2,6 +2,7 @@ import { blog, experiments } from "fumadocs-mdx:collections/server";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { collectTags, tagPath } from "@/lib/collect-tags";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
 
 interface PageProps {
@@ -9,16 +10,9 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
-	const allDocs = [...getDocs(blog), ...getDocs(experiments)];
-	const tags = new Set<string>();
-	for (const doc of allDocs) {
-		if (doc.tags && Array.isArray(doc.tags)) {
-			for (const tag of doc.tags) {
-				tags.add(tag);
-			}
-		}
-	}
-	return Array.from(tags).map((tag) => ({ tag }));
+	return collectTags([...getDocs(blog), ...getDocs(experiments)]).map(
+		(tag) => ({ tag }),
+	);
 }
 
 export async function generateMetadata({
@@ -36,7 +30,7 @@ export async function generateMetadata({
 	return {
 		title: `タグ: ${tag}`,
 		description,
-		alternates: { canonical: `/tags/${tag}` },
+		alternates: { canonical: tagPath(tag) },
 	};
 }
 

@@ -1,5 +1,6 @@
 import { blog, experiments, podcast } from "fumadocs-mdx:collections/server";
 import type { MetadataRoute } from "next";
+import { collectTags, tagPath } from "@/lib/collect-tags";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
 
 const BASE_URL = "https://bangeo.net";
@@ -25,6 +26,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
 		changeFrequency: "monthly" as const,
 		priority: 0.6,
 	}));
+
+	const tagDocs = collectTags([...getDocs(blog), ...getDocs(experiments)]).map(
+		(tag) => ({
+			url: `${BASE_URL}${tagPath(tag)}`,
+			lastModified: new Date(),
+			changeFrequency: "weekly" as const,
+			priority: 0.4,
+		}),
+	);
 
 	return [
 		{
@@ -120,5 +130,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
 		...techArticleDocs,
 		...experimentDocs,
 		...podcastDocs,
+		...tagDocs,
 	];
 }

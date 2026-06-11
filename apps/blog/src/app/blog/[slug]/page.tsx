@@ -1,5 +1,5 @@
 import { blog } from "fumadocs-mdx:collections/server";
-import { redirect } from "next/navigation";
+import { permanentRedirect } from "next/navigation";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
 
 interface PageProps {
@@ -18,5 +18,5 @@ export async function generateStaticParams(): Promise<{ slug: string }[]> {
  */
 export default async function BlogPostPage({ params }: PageProps) {
 	const { slug } = await params;
-	redirect(`/tech-articles/${slug}`);
+	permanentRedirect(`/tech-articles/${slug}`);
 }

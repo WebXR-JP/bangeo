@@ -1,4 +1,8 @@
 import { createMDX } from "fumadocs-mdx/next";
+import {
+	buildExperimentDemoRedirects,
+	LEGACY_REDIRECTS,
+} from "./src/lib/seo-redirects.mjs";
 
 const withMDX = createMDX();
 
@@ -21,6 +25,8 @@ export default withMDX({
 	},
 	async redirects() {
 		return [
+			...LEGACY_REDIRECTS,
+			...buildExperimentDemoRedirects(),
 			{
 				source: "/tech-articles/playcanvas-html-in-canvas-guide",
 				destination: "/tech-articles/playcanvas-html-in-canvas",

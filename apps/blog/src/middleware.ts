@@ -2,7 +2,26 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
-	const { pathname } = request.nextUrl;
+	const host = request.headers.get("host") ?? "";
+
+	// www → 非 www（canonical と一致させる）
+	if (host.startsWith("www.")) {
+		const url = request.nextUrl.clone();
+		url.host = host.replace(/^www\./, "");
+		return NextResponse.redirect(url, 301);
+	}
+
+	const { pathname, searchParams } = request.nextUrl;
+
+	// クエリ付き URL の重複を防ぐ（?author=, ?q= など）
+	if (
+		(pathname === "/tech-articles" || pathname === "/experiments") &&
+		searchParams.size > 0
+	) {
+		const url = request.nextUrl.clone();
+		url.search = "";
+		return NextResponse.redirect(url, 301);
+	}
 
 	// /demos/:slug (no trailing slash, no file extension) -> serve index.html
 	const demoMatch = pathname.match(/^\/demos\/([^/.]+)$/);
@@ -16,5 +35,7 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-	matcher: ["/demos/:path*"],
+	matcher: [
+		"/((?!_next/static|_next/image|favicon.png|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?|webmanifest|json)$).*)",
+	],
 };
