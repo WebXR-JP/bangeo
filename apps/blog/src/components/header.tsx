@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { OptimizedImage } from "@/components/optimized-image";
+import { ICON_IMAGE_SIZES } from "@/lib/image-defaults";
 import { NAV_CATEGORIES } from "@/lib/navigation";
 
 export function Header() {
@@ -41,9 +43,13 @@ export function Header() {
 						href="/"
 						className="flex items-center gap-2.5 md:gap-3 group shrink-0"
 					>
-						<img
-							src="/favicon.png"
+						<OptimizedImage
+							src="/favicon.svg"
 							alt="BANGEOマスコット"
+							width={36}
+							height={36}
+							sizes={ICON_IMAGE_SIZES}
+							priority
 							className="w-8 h-8 md:w-9 md:h-9 transition-transform duration-200 group-hover:scale-110 group-active:scale-90"
 						/>
 						<span className="font-black text-base md:text-lg tracking-tight text-gray-900">
@@ -105,7 +111,7 @@ export function Header() {
 					<div className="flex items-center gap-2">
 						<Link
 							href="/search"
-							className="p-2 text-gray-400 hover:text-[#e11d48] transition-colors"
+							className="p-2 text-gray-500 hover:text-[#e11d48] transition-colors"
 							aria-label="検索"
 						>
 							<svg

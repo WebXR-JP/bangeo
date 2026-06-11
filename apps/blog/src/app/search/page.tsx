@@ -60,7 +60,7 @@ function SearchContent() {
 						placeholder="キーワードで検索 (タイトル、説明文、タグ)"
 						value={query}
 						onChange={(e) => setQuery(e.target.value)}
-						className="w-full px-5 py-3.5 bg-white border border-gray-200 rounded-2xl text-gray-950 placeholder:text-gray-400 focus:outline-hidden focus:ring-2 focus:ring-[#e11d48] focus:border-transparent transition-shadow"
+						className="w-full px-5 py-3.5 bg-white border border-gray-200 rounded-2xl text-gray-950 placeholder:text-gray-500 focus:outline-hidden focus:ring-2 focus:ring-[#e11d48] focus:border-transparent transition-shadow"
 						// biome-ignore lint/a11y/noAutofocus: 検索ページでは自動フォーカスが望ましい
 						autoFocus
 					/>
@@ -111,7 +111,7 @@ function SearchContent() {
 											{item.typeLabel}
 										</span>
 										{item.category && (
-											<span className="px-2.5 py-1 bg-rose-50 text-[#e11d48] rounded-md text-[10px] font-black uppercase tracking-wide">
+											<span className="px-2.5 py-1 bg-rose-50 text-rose-700 rounded-md text-[10px] font-black uppercase tracking-wide">
 												{item.category}
 											</span>
 										)}
@@ -124,7 +124,7 @@ function SearchContent() {
 											{item.description}
 										</p>
 									)}
-									<div className="flex items-center gap-4 text-xs text-gray-400 font-medium">
+									<div className="flex items-center gap-4 text-xs text-gray-500 font-medium">
 										{item.date && <span>{item.date}</span>}
 										{item.tags && item.tags.length > 0 && (
 											<div className="flex gap-1.5">

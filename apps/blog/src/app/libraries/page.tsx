@@ -56,7 +56,7 @@ export default function LibrariesPage() {
 							</a>
 						</div>
 
-						<p className="text-xs text-gray-400 leading-relaxed">
+						<p className="text-xs text-gray-500 leading-relaxed">
 							更新状況や導入方法の詳細は公式ドキュメントと GitHub
 							リポジトリを参照してください。
 						</p>

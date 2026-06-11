@@ -10,7 +10,14 @@ export default withMDX({
 	allowedDevOrigins: ["localhost", "127.0.0.1"],
 	reactStrictMode: true,
 	images: {
-		remotePatterns: [],
+		formats: ["image/avif", "image/webp"],
+		remotePatterns: [
+			{
+				protocol: "https",
+				hostname: "i.ytimg.com",
+				pathname: "/vi/**",
+			},
+		],
 	},
 	trailingSlash: false,
 	async rewrites() {

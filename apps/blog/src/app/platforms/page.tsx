@@ -85,7 +85,7 @@ export default function PlatformsPage() {
 										{/* Notes */}
 										<div className="lg:w-1/4 lg:text-right">
 											{platform.notes && (
-												<p className="text-[10px] text-gray-400 font-medium italic leading-relaxed">
+												<p className="text-[10px] text-gray-500 font-medium italic leading-relaxed">
 													{platform.notes}
 												</p>
 											)}

@@ -6,14 +6,16 @@ import { Analytics, GTMNoScript } from "@/components/analytics";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { StructuredData } from "@/components/structured-data";
+import { SITE_URL } from "@/lib/site-url";
 import { ADSENSE_CLIENT, HAS_ADSENSE, HAS_GTM } from "@/lib/third-party";
 
 const notoSansJP = Noto_Sans_JP({
 	subsets: ["latin"],
-	weight: ["400", "500", "600", "700", "900"],
+	weight: ["400", "700", "900"],
 	variable: "--font-noto-sans-jp",
 	display: "swap",
-	adjustFontFallback: false,
+	preload: true,
+	adjustFontFallback: true,
 });
 
 export const viewport: Viewport = {
@@ -29,9 +31,12 @@ export const metadata: Metadata = {
 	},
 	description:
 		"ブラウザだけで動くWebXR（VR/AR）の日本語リソース。デモ、技術解説、標準化状況を日本語でまとめた情報サイト。",
-	metadataBase: new URL("https://bangeo.net"),
+	metadataBase: new URL(SITE_URL),
 	icons: {
-		icon: "/favicon.png",
+		icon: [
+			{ url: "/favicon.svg", type: "image/svg+xml" },
+			{ url: "/favicon.png", type: "image/png", sizes: "192x192" },
+		],
 	},
 	manifest: "/site.webmanifest",
 	openGraph: {
@@ -60,10 +65,10 @@ export const metadata: Metadata = {
 		follow: true,
 	},
 	alternates: {
-		canonical: "https://bangeo.net",
+		canonical: SITE_URL,
 		languages: {
-			ja: "https://bangeo.net",
-			"x-default": "https://bangeo.net",
+			ja: SITE_URL,
+			"x-default": SITE_URL,
 		},
 	},
 	authors: [{ name: "BANGEO" }],
@@ -83,6 +88,8 @@ export default function RootLayout({
 	return (
 		<html lang="ja" className={notoSansJP.variable} suppressHydrationWarning>
 			<head>
+				<link rel="preconnect" href="https://i.ytimg.com" />
+				<link rel="dns-prefetch" href="https://i.ytimg.com" />
 				{HAS_GTM && (
 					<>
 						<link rel="preconnect" href="https://www.googletagmanager.com" />

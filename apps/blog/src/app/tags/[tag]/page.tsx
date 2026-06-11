@@ -68,7 +68,7 @@ export default async function TagDetailPage({ params }: PageProps) {
 			<div className="mb-8">
 				<Link
 					href="/tags"
-					className="text-sm font-bold text-gray-400 hover:text-[#e11d48] transition-colors mb-4 inline-block"
+					className="text-sm font-bold text-gray-600 hover:text-[#e11d48] transition-colors mb-4 inline-block"
 				>
 					← すべてのタグに戻る
 				</Link>
@@ -96,12 +96,12 @@ export default async function TagDetailPage({ params }: PageProps) {
 								>
 									<div className="mb-3 flex items-center gap-2">
 										{post.category && (
-											<span className="px-2.5 py-1 bg-rose-50 text-[#e11d48] rounded-md text-[10px] font-black uppercase tracking-wide">
+											<span className="px-2.5 py-1 bg-rose-50 text-rose-700 rounded-md text-[10px] font-black uppercase tracking-wide">
 												{post.category}
 											</span>
 										)}
 										{post.date && (
-											<time className="text-xs text-gray-400 font-medium">
+											<time className="text-xs text-gray-500 font-medium">
 												{post.date}
 											</time>
 										)}
@@ -137,7 +137,7 @@ export default async function TagDetailPage({ params }: PageProps) {
 								>
 									<div className="mb-3 flex items-center gap-2 flex-wrap">
 										{exp.category && (
-											<span className="px-2.5 py-1 bg-rose-50 text-[#e11d48] rounded-md text-[10px] font-black uppercase tracking-wide">
+											<span className="px-2.5 py-1 bg-rose-50 text-rose-700 rounded-md text-[10px] font-black uppercase tracking-wide">
 												{exp.category}
 											</span>
 										)}
@@ -147,7 +147,7 @@ export default async function TagDetailPage({ params }: PageProps) {
 											</span>
 										)}
 										{exp.date && (
-											<time className="text-xs text-gray-400 font-medium">
+											<time className="text-xs text-gray-500 font-medium">
 												{exp.date}
 											</time>
 										)}
@@ -161,7 +161,7 @@ export default async function TagDetailPage({ params }: PageProps) {
 										</p>
 									)}
 									{exp.estimatedTime && (
-										<span className="text-xs text-gray-400 font-medium">
+										<span className="text-xs text-gray-500 font-medium">
 											約{exp.estimatedTime}分
 										</span>
 									)}

@@ -79,11 +79,11 @@ export default async function PodcastEpisodePage({ params }: PageProps) {
 					</div>
 					<div className="flex-1 min-w-0">
 						<div className="mb-3 flex flex-wrap items-center gap-2">
-							<span className="px-2.5 py-1 bg-rose-50 text-[#e11d48] rounded-md text-[10px] font-black uppercase tracking-wide">
+							<span className="px-2.5 py-1 bg-rose-50 text-rose-700 rounded-md text-[10px] font-black uppercase tracking-wide">
 								EP {String(doc.episodeNumber || "")}
 							</span>
 							{doc.date && (
-								<time className="text-xs text-gray-400 font-medium">
+								<time className="text-xs text-gray-500 font-medium">
 									{String(doc.date)}
 								</time>
 							)}
@@ -124,7 +124,7 @@ export default async function PodcastEpisodePage({ params }: PageProps) {
 					>
 						{metaItems.map((item) => (
 							<div key={item.label} className="px-5 py-3.5">
-								<p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+								<p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">
 									{item.label}
 								</p>
 								<p className="text-sm font-bold text-gray-950">{item.value}</p>
@@ -172,7 +172,7 @@ export default async function PodcastEpisodePage({ params }: PageProps) {
 			<footer className="mt-12 pt-8 border-t border-gray-100">
 				<Link
 					href="/podcast"
-					className="text-sm font-bold text-gray-400 hover:text-[#e11d48] transition-colors"
+					className="text-sm font-bold text-gray-600 hover:text-[#e11d48] transition-colors"
 				>
 					← エピソード一覧に戻る
 				</Link>

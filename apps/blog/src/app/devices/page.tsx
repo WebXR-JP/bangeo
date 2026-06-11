@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { OptimizedImage } from "@/components/optimized-image";
 import {
 	AR_DEVICES,
 	type DeviceWebxrSummary,
@@ -44,7 +45,7 @@ function DeviceCard({ device }: { device: DeviceWebxrSummary }) {
 			<div className="mt-8 grid gap-8 md:grid-cols-2">
 				<div className="space-y-6">
 					<div>
-						<h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+						<h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
 							対応ブラウザ
 						</h4>
 						<ul className="mt-2 space-y-2 text-sm text-gray-600 leading-relaxed">
@@ -57,7 +58,7 @@ function DeviceCard({ device }: { device: DeviceWebxrSummary }) {
 						</ul>
 					</div>
 					<div>
-						<h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+						<h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
 							接続タイプ
 						</h4>
 						<p className="mt-2 text-sm text-gray-600 leading-relaxed">
@@ -65,7 +66,7 @@ function DeviceCard({ device }: { device: DeviceWebxrSummary }) {
 						</p>
 					</div>
 					<div>
-						<h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+						<h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
 							価格帯
 						</h4>
 						<p className="mt-2 text-sm text-gray-600 leading-relaxed">
@@ -73,7 +74,7 @@ function DeviceCard({ device }: { device: DeviceWebxrSummary }) {
 						</p>
 					</div>
 					<div>
-						<h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+						<h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
 							入手可能性
 						</h4>
 						<p className="mt-2 text-sm text-gray-600 leading-relaxed">
@@ -84,7 +85,7 @@ function DeviceCard({ device }: { device: DeviceWebxrSummary }) {
 
 				<div className="space-y-6">
 					<div>
-						<h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+						<h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
 							特徴・注意点
 						</h4>
 						<ul className="mt-2 space-y-2 text-sm text-gray-600 leading-relaxed">
@@ -105,9 +106,12 @@ function DeviceCard({ device }: { device: DeviceWebxrSummary }) {
 export default function DevicesPage() {
 	return (
 		<div className="relative px-4 md:px-6 py-16 md:py-20 max-w-7xl mx-auto overflow-hidden">
-			<img
+			<OptimizedImage
 				src="/assets/mascot/hero.png"
 				alt=""
+				width={384}
+				height={384}
+				sizes="384px"
 				className="absolute top-20 -left-20 w-96 h-96 opacity-[0.02] pointer-events-none -rotate-12"
 			/>
 			<div className="space-y-24 relative z-10">

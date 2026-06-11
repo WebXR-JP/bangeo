@@ -1,7 +1,9 @@
 import { blog } from "fumadocs-mdx:collections/server";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { OptimizedImage } from "@/components/optimized-image";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
+import { CARD_IMAGE_SIZES, NO_IMAGE } from "@/lib/image-defaults";
 
 export const metadata: Metadata = {
 	title: "ブログ",
@@ -46,24 +48,24 @@ export default function TechArticlesIndexPage() {
 							href={`/tech-articles/${slug}`}
 							className="group block bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-2xl hover:shadow-gray-200/50 hover:border-transparent hover:-translate-y-1 transition-all duration-300"
 						>
-							<div className="aspect-video bg-gray-100 overflow-hidden">
-								<img
-									src={
-										post.thumbnail ? String(post.thumbnail) : "/no-image.png"
-									}
+							<div className="aspect-video bg-gray-100 overflow-hidden relative">
+								<OptimizedImage
+									src={post.thumbnail ? String(post.thumbnail) : NO_IMAGE}
 									alt={post.title}
-									className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+									fill
+									sizes={CARD_IMAGE_SIZES}
+									className="object-cover group-hover:scale-105 transition-transform duration-500"
 								/>
 							</div>
 							<div className="p-6">
 								<div className="flex items-center gap-2 mb-4">
 									{post.category && (
-										<span className="px-2.5 py-1 bg-rose-50 text-[#e11d48] rounded-md text-[10px] font-black uppercase tracking-wide">
+										<span className="px-2.5 py-1 bg-rose-50 text-rose-700 rounded-md text-[10px] font-black uppercase tracking-wide">
 											{String(post.category)}
 										</span>
 									)}
 									{post.date && (
-										<time className="text-xs text-gray-400 font-medium">
+										<time className="text-xs text-gray-500 font-medium">
 											{String(post.date)}
 										</time>
 									)}
@@ -87,7 +89,7 @@ export default function TechArticlesIndexPage() {
 											</span>
 										))}
 										{tags.length > 3 && (
-											<span className="text-xs text-gray-400">
+											<span className="text-xs text-gray-500">
 												+{tags.length - 3}
 											</span>
 										)}

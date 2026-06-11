@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { OptimizedImage } from "@/components/optimized-image";
+import { ICON_IMAGE_SIZES } from "@/lib/image-defaults";
 import { FOOTER_BOTTOM_LINKS, FOOTER_MAIN_LINKS } from "@/lib/navigation";
 
 export function Footer() {
@@ -11,10 +13,13 @@ export function Footer() {
 							href="/"
 							className="inline-flex items-center gap-3 rounded-full border border-rose-100/80 bg-white/90 px-4 py-3 shadow-sm shadow-rose-100/40"
 						>
-							<img
-								src="/favicon.png"
+							<OptimizedImage
+								src="/favicon.svg"
 								alt=""
 								aria-hidden="true"
+								width={32}
+								height={32}
+								sizes={ICON_IMAGE_SIZES}
 								className="w-8 h-8 shrink-0"
 							/>
 							<span className="font-black text-xl tracking-tight text-gray-900 whitespace-nowrap">
@@ -43,7 +48,7 @@ export function Footer() {
 						))}
 					</div>
 				</div>
-				<div className="mt-12 pt-8 border-t border-gray-100 flex flex-col gap-5 text-sm text-gray-400 md:flex-row md:items-center md:justify-between">
+				<div className="mt-12 pt-8 border-t border-gray-100 flex flex-col gap-5 text-sm text-gray-500 md:flex-row md:items-center md:justify-between">
 					<p className="font-medium">
 						&copy; {new Date().getFullYear()} BANGEO
 					</p>

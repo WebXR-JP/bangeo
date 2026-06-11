@@ -46,7 +46,7 @@ export default function DeviceSubmitPage() {
 								ヘッドセットに映像を送信します。
 							</p>
 							<div className="space-y-2 pt-2">
-								<p className="text-xs font-bold text-gray-400 uppercase tracking-wide">
+								<p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
 									対応デバイス例
 								</p>
 								<div className="flex flex-wrap gap-2">
@@ -65,14 +65,14 @@ export default function DeviceSubmitPage() {
 								</div>
 							</div>
 							<div className="space-y-2 pt-2">
-								<p className="text-xs font-bold text-gray-400 uppercase tracking-wide">
+								<p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
 									必要なソフトウェア
 								</p>
 								<div className="flex flex-wrap gap-2">
-									<span className="px-3 py-1 bg-rose-50 text-[#e11d48] rounded-full text-xs font-medium">
+									<span className="px-3 py-1 bg-rose-50 text-rose-700 rounded-full text-xs font-medium">
 										SteamVR
 									</span>
-									<span className="px-3 py-1 bg-rose-50 text-[#e11d48] rounded-full text-xs font-medium">
+									<span className="px-3 py-1 bg-rose-50 text-rose-700 rounded-full text-xs font-medium">
 										Oculus PC App
 									</span>
 								</div>
@@ -88,7 +88,7 @@ export default function DeviceSubmitPage() {
 								PCなしで、VRヘッドセット内蔵のブラウザから直接WebXRコンテンツを体験できます。追加のセットアップが不要なため、すぐに始められます。
 							</p>
 							<div className="space-y-2 pt-2">
-								<p className="text-xs font-bold text-gray-400 uppercase tracking-wide">
+								<p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
 									対応デバイス例
 								</p>
 								<div className="flex flex-wrap gap-2">
@@ -104,17 +104,17 @@ export default function DeviceSubmitPage() {
 								</div>
 							</div>
 							<div className="space-y-2 pt-2">
-								<p className="text-xs font-bold text-gray-400 uppercase tracking-wide">
+								<p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
 									使用ブラウザ
 								</p>
 								<div className="flex flex-wrap gap-2">
-									<span className="px-3 py-1 bg-rose-50 text-[#e11d48] rounded-full text-xs font-medium">
+									<span className="px-3 py-1 bg-rose-50 text-rose-700 rounded-full text-xs font-medium">
 										Meta Quest Browser
 									</span>
-									<span className="px-3 py-1 bg-rose-50 text-[#e11d48] rounded-full text-xs font-medium">
+									<span className="px-3 py-1 bg-rose-50 text-rose-700 rounded-full text-xs font-medium">
 										Pico Browser
 									</span>
-									<span className="px-3 py-1 bg-rose-50 text-[#e11d48] rounded-full text-xs font-medium">
+									<span className="px-3 py-1 bg-rose-50 text-rose-700 rounded-full text-xs font-medium">
 										Safari（visionOS）
 									</span>
 								</div>
@@ -128,7 +128,7 @@ export default function DeviceSubmitPage() {
 								Android端末のChromeブラウザでAR機能を利用できます。カメラ越しに仮想オブジェクトを現実世界に配置する体験ができます。
 							</p>
 							<div className="space-y-2 pt-2">
-								<p className="text-xs font-bold text-gray-400 uppercase tracking-wide">
+								<p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
 									対応環境
 								</p>
 								<div className="flex flex-wrap gap-2">
@@ -163,7 +163,7 @@ export default function DeviceSubmitPage() {
 								VRヘッドセットがなくても、ブラウザ拡張機能を使ってWebXRコンテンツの開発・テストができます。
 							</p>
 							<div className="space-y-2 pt-2">
-								<p className="text-xs font-bold text-gray-400 uppercase tracking-wide">
+								<p className="text-xs font-bold text-gray-500 uppercase tracking-wide">
 									推奨ツール
 								</p>
 								<div className="flex flex-wrap gap-2">
@@ -171,7 +171,7 @@ export default function DeviceSubmitPage() {
 										href="https://chromewebstore.google.com/detail/immersive-web-emulator/cgffilbpcibhmcfbgggfhfolhkfbhmik"
 										target="_blank"
 										rel="noopener noreferrer"
-										className="px-3 py-1 bg-rose-50 text-[#e11d48] rounded-full text-xs font-bold hover:bg-rose-100 transition-colors"
+										className="px-3 py-1 bg-rose-50 text-rose-700 rounded-full text-xs font-bold hover:bg-rose-100 transition-colors"
 									>
 										Immersive Web Emulator →
 									</a>
@@ -306,7 +306,7 @@ export default function DeviceSubmitPage() {
 								</p>
 							</a>
 						</div>
-						<p className="text-xs text-gray-400 mt-6 text-center font-bold underline hover:text-[#e11d48]">
+						<p className="text-xs text-gray-500 mt-6 text-center font-bold underline hover:text-[#e11d48]">
 							<a href="/tech-articles">すべての技術解説記事を見る →</a>
 						</p>
 					</div>

@@ -1,7 +1,9 @@
 import { blog, experiments, podcast } from "fumadocs-mdx:collections/server";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { OptimizedImage } from "@/components/optimized-image";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
+import { CARD_IMAGE_SIZES } from "@/lib/image-defaults";
 
 export const metadata: Metadata = {
 	title: "BANGEO｜WebXR日本語リソース",
@@ -166,7 +168,7 @@ export default function HomePage() {
 						</div>
 						<Link
 							href="/experiments"
-							className="text-sm font-bold text-gray-400 hover:text-[#e11d48] transition-colors hidden md:flex items-center gap-1"
+							className="text-sm font-bold text-gray-600 hover:text-[#e11d48] transition-colors hidden md:flex items-center gap-1"
 						>
 							すべて見る
 							<svg
@@ -198,10 +200,12 @@ export default function HomePage() {
 									>
 										<div className="aspect-video bg-gray-100 relative overflow-hidden">
 											{exp.thumbnail ? (
-												<img
+												<OptimizedImage
 													src={String(exp.thumbnail)}
 													alt={exp.title}
-													className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+													fill
+													sizes={CARD_IMAGE_SIZES}
+													className="object-cover group-hover:scale-105 transition-transform duration-500"
 												/>
 											) : (
 												<div className="w-full h-full flex items-center justify-center">
@@ -211,7 +215,7 @@ export default function HomePage() {
 												</div>
 											)}
 											{exp.category && (
-												<span className="absolute top-4 left-4 px-2.5 py-1 bg-white/95 backdrop-blur-xs text-[10px] font-black text-[#e11d48] rounded-md uppercase tracking-wide">
+												<span className="absolute top-4 left-4 px-2.5 py-1 bg-white/95 backdrop-blur-xs text-[10px] font-black text-rose-700 rounded-md uppercase tracking-wide">
 													{String(exp.category)}
 												</span>
 											)}
@@ -248,7 +252,7 @@ export default function HomePage() {
 					<div className="mt-12 text-center md:hidden">
 						<Link
 							href="/experiments"
-							className="inline-flex items-center gap-1 text-sm font-bold text-gray-400 hover:text-[#e11d48] transition-colors"
+							className="inline-flex items-center gap-1 text-sm font-bold text-gray-600 hover:text-[#e11d48] transition-colors"
 						>
 							すべて見る
 							<svg
@@ -284,7 +288,7 @@ export default function HomePage() {
 						</div>
 						<Link
 							href="/tech-articles"
-							className="text-sm font-bold text-gray-400 hover:text-[#e11d48] transition-colors hidden md:flex items-center gap-1"
+							className="text-sm font-bold text-gray-600 hover:text-[#e11d48] transition-colors hidden md:flex items-center gap-1"
 						>
 							すべて見る
 							<svg
@@ -315,7 +319,7 @@ export default function HomePage() {
 								>
 									<div className="flex items-center gap-2 mb-5">
 										{post.category && (
-											<span className="px-2.5 py-1 bg-rose-50 text-[#e11d48] rounded-md text-[10px] font-black uppercase tracking-wide">
+											<span className="px-2.5 py-1 bg-rose-50 text-rose-700 rounded-md text-[10px] font-black uppercase tracking-wide">
 												{String(post.category)}
 											</span>
 										)}
@@ -328,7 +332,7 @@ export default function HomePage() {
 											{post.description}
 										</p>
 									)}
-									<div className="text-xs text-gray-400 font-medium">
+									<div className="text-xs text-gray-500 font-medium">
 										{post.date ? String(post.date) : ""}
 									</div>
 								</Link>
@@ -339,7 +343,7 @@ export default function HomePage() {
 					<div className="mt-12 text-center md:hidden">
 						<Link
 							href="/tech-articles"
-							className="inline-flex items-center gap-1 text-sm font-bold text-gray-400 hover:text-[#e11d48] transition-colors"
+							className="inline-flex items-center gap-1 text-sm font-bold text-gray-600 hover:text-[#e11d48] transition-colors"
 						>
 							すべて見る
 							<svg

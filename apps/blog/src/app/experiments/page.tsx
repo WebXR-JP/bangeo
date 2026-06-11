@@ -1,7 +1,9 @@
 import { experiments } from "fumadocs-mdx:collections/server";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { OptimizedImage } from "@/components/optimized-image";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
+import { CARD_IMAGE_SIZES } from "@/lib/image-defaults";
 
 export const metadata: Metadata = {
 	title: "デモ",
@@ -52,13 +54,15 @@ export default function ExperimentsIndexPage() {
 							>
 								{exp.thumbnail ? (
 									<div className="aspect-video bg-gray-100 relative overflow-hidden">
-										<img
+										<OptimizedImage
 											src={String(exp.thumbnail)}
 											alt={exp.title}
-											className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+											fill
+											sizes={CARD_IMAGE_SIZES}
+											className="object-cover group-hover:scale-105 transition-transform duration-500"
 										/>
 										{exp.category && (
-											<span className="absolute top-4 left-4 px-2.5 py-1 bg-white/95 backdrop-blur-xs text-[10px] font-black text-[#e11d48] rounded-md uppercase tracking-wide">
+											<span className="absolute top-4 left-4 px-2.5 py-1 bg-white/95 backdrop-blur-xs text-[10px] font-black text-rose-700 rounded-md uppercase tracking-wide">
 												{String(exp.category)}
 											</span>
 										)}
@@ -71,7 +75,7 @@ export default function ExperimentsIndexPage() {
 								<div className="p-6">
 									<div className="flex items-center gap-2 mb-3">
 										{!exp.thumbnail && exp.category && (
-											<span className="px-2.5 py-1 bg-rose-50 text-[#e11d48] rounded-md text-[10px] font-black uppercase tracking-wide">
+											<span className="px-2.5 py-1 bg-rose-50 text-rose-700 rounded-md text-[10px] font-black uppercase tracking-wide">
 												{String(exp.category)}
 											</span>
 										)}
@@ -89,7 +93,7 @@ export default function ExperimentsIndexPage() {
 											{exp.description}
 										</p>
 									)}
-									<div className="flex items-center justify-between text-xs text-gray-400 font-medium">
+									<div className="flex items-center justify-between text-xs text-gray-500 font-medium">
 										{exp.date && <time>{String(exp.date)}</time>}
 										{exp.estimatedTime && (
 											<span>約{String(exp.estimatedTime)}分</span>

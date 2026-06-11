@@ -3,7 +3,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { mdxComponents } from "@/components/mdx-components";
+import { OptimizedImage } from "@/components/optimized-image";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
+import { THUMB_IMAGE_SIZES } from "@/lib/image-defaults";
 
 interface PageProps {
 	params: Promise<{ slug: string }>;
@@ -84,23 +86,26 @@ export default async function ExperimentPage({ params }: PageProps) {
 			<header className="mb-8">
 				<div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
 					{doc.thumbnail && (
-						<div className="w-full md:w-56 md:min-w-56 aspect-video overflow-hidden rounded-xl bg-gray-100 shrink-0">
-							<img
+						<div className="w-full md:w-56 md:min-w-56 aspect-video overflow-hidden rounded-xl bg-gray-100 shrink-0 relative">
+							<OptimizedImage
 								src={String(doc.thumbnail)}
 								alt={doc.title}
-								className="w-full h-full object-cover"
+								fill
+								sizes={THUMB_IMAGE_SIZES}
+								priority
+								className="object-cover"
 							/>
 						</div>
 					)}
 					<div className="flex-1 min-w-0">
 						<div className="mb-3 flex flex-wrap items-center gap-2">
 							{doc.category && (
-								<span className="px-2.5 py-1 bg-rose-50 text-[#e11d48] rounded-md text-[10px] font-black uppercase tracking-wide">
+								<span className="px-2.5 py-1 bg-rose-50 text-rose-700 rounded-md text-[10px] font-black uppercase tracking-wide">
 									{String(doc.category)}
 								</span>
 							)}
 							{doc.date && (
-								<time className="text-xs text-gray-400 font-medium">
+								<time className="text-xs text-gray-500 font-medium">
 									{String(doc.date)}
 								</time>
 							)}
@@ -141,7 +146,7 @@ export default async function ExperimentPage({ params }: PageProps) {
 					>
 						{metaItems.map((item) => (
 							<div key={item.label} className="px-5 py-3.5">
-								<p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+								<p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">
 									{item.label}
 								</p>
 								{item.value ? (
@@ -186,7 +191,7 @@ export default async function ExperimentPage({ params }: PageProps) {
 			<footer className="mt-12 pt-8 border-t border-gray-100">
 				<Link
 					href="/experiments"
-					className="text-sm font-bold text-gray-400 hover:text-[#e11d48] transition-colors"
+					className="text-sm font-bold text-gray-600 hover:text-[#e11d48] transition-colors"
 				>
 					← デモ一覧に戻る
 				</Link>

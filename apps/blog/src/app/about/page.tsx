@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { OptimizedImage } from "@/components/optimized-image";
+import { MASCOT_IMAGE_SIZES } from "@/lib/image-defaults";
 
 export const metadata: Metadata = {
 	title: "私たちについて",
@@ -11,19 +13,26 @@ export const metadata: Metadata = {
 export default function AboutPage() {
 	return (
 		<div className="relative max-w-6xl mx-auto px-4 md:px-6 py-16 md:py-20 overflow-hidden">
-			<img
+			<OptimizedImage
 				src="/assets/mascot/watermark.png"
 				alt=""
+				width={600}
+				height={600}
+				sizes="600px"
 				className="absolute w-[600px] top-1/2 -right-40 -rotate-12 opacity-[0.04] pointer-events-none"
 			/>
 			<div className="space-y-24 md:space-y-32 relative z-10">
 				{/* Hero */}
 				<header className="space-y-8 text-center max-w-4xl mx-auto">
 					<div className="flex justify-center mb-4">
-						<img
+						<OptimizedImage
 							src="/assets/mascot/hero.png"
 							alt="BANGEOマスコット"
-							className="w-32 md:w-40"
+							width={160}
+							height={160}
+							sizes={MASCOT_IMAGE_SIZES}
+							priority
+							className="w-32 md:w-40 h-auto"
 						/>
 					</div>
 					<h1 className="text-4xl md:text-6xl font-black tracking-tighter leading-tight text-gray-900">
@@ -39,9 +48,12 @@ export default function AboutPage() {
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 					<div className="p-10 bg-white/60 border border-white rounded-[3rem] space-y-6">
 						<div className="mb-6 h-20">
-							<img
+							<OptimizedImage
 								src="/assets/mascot/vr.png"
 								alt="デモマスコット"
+								width={160}
+								height={80}
+								sizes="160px"
 								className="h-full w-auto object-contain"
 							/>
 						</div>
@@ -60,9 +72,12 @@ export default function AboutPage() {
 					</div>
 					<div className="p-10 bg-white/60 border border-white rounded-[3rem] space-y-6">
 						<div className="mb-6 h-20">
-							<img
+							<OptimizedImage
 								src="/assets/mascot/tech.png"
 								alt="技術マスコット"
+								width={160}
+								height={80}
+								sizes="160px"
 								className="h-full w-auto object-contain"
 							/>
 						</div>

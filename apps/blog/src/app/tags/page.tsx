@@ -52,7 +52,7 @@ export default function TagsPage() {
 								<h2 className="font-black text-lg text-gray-950 group-hover:text-[#e11d48] transition-colors">
 									{tag}
 								</h2>
-								<span className="inline-flex items-center justify-center w-8 h-8 text-xs font-black bg-rose-50 text-[#e11d48] rounded-full">
+								<span className="inline-flex items-center justify-center w-8 h-8 text-xs font-black bg-rose-50 text-rose-700 rounded-full">
 									{count}
 								</span>
 							</div>

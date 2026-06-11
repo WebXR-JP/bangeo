@@ -1,12 +1,4 @@
 {
 	"framework": "nextjs",
-	"installCommand": "pnpm install --filter @bangeo/blog...",
-	"redirects": [
-		{
-			"source": "/:path*",
-			"has": [{ "type": "host", "value": "www.bangeo.net" }],
-			"destination": "https://bangeo.net/:path*",
-			"permanent": true
-		}
-	]
+	"installCommand": "pnpm install --filter @bangeo/blog..."
 }

@@ -2,15 +2,6 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
-	const host = request.headers.get("host") ?? "";
-
-	// www → 非 www（canonical と一致させる）
-	if (host.startsWith("www.")) {
-		const url = request.nextUrl.clone();
-		url.host = host.replace(/^www\./, "");
-		return NextResponse.redirect(url, 301);
-	}
-
 	const { pathname, searchParams } = request.nextUrl;
 
 	// クエリ付き URL の重複を防ぐ（?author=, ?q= など）
@@ -35,7 +26,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-	matcher: [
-		"/((?!_next/static|_next/image|favicon.png|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?|webmanifest|json)$).*)",
-	],
+	matcher: ["/tech-articles", "/experiments", "/demos/:path*"],
 };

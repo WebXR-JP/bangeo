@@ -3,7 +3,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { mdxComponents } from "@/components/mdx-components";
+import { OptimizedImage } from "@/components/optimized-image";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
+import { NO_IMAGE, THUMB_IMAGE_SIZES } from "@/lib/image-defaults";
+import { SITE_URL } from "@/lib/site-url";
 
 const BASE_PATH = "/tech-articles";
 
@@ -60,7 +63,7 @@ export default async function TechArticlePage({ params }: PageProps) {
 		)
 		.slice(0, 3);
 
-	const shareUrl = `https://bangeo.net${BASE_PATH}/${slug}`;
+	const shareUrl = `${SITE_URL}${BASE_PATH}/${slug}`;
 	const shareText = encodeURIComponent(doc.title);
 	const shareUrlEncoded = encodeURIComponent(shareUrl);
 
@@ -70,27 +73,30 @@ export default async function TechArticlePage({ params }: PageProps) {
 				{/* Header */}
 				<header className="mb-12">
 					<div className="flex flex-col md:flex-row gap-6 md:gap-10 items-start">
-						<div className="w-full md:w-56 md:min-w-56 aspect-video overflow-hidden rounded-xl bg-gray-100 shrink-0">
-							<img
-								src={doc.thumbnail ? String(doc.thumbnail) : "/no-image.png"}
+						<div className="w-full md:w-56 md:min-w-56 aspect-video overflow-hidden rounded-xl bg-gray-100 shrink-0 relative">
+							<OptimizedImage
+								src={doc.thumbnail ? String(doc.thumbnail) : NO_IMAGE}
 								alt={doc.title}
-								className="w-full h-full object-cover"
+								fill
+								sizes={THUMB_IMAGE_SIZES}
+								priority
+								className="object-cover"
 							/>
 						</div>
 						<div className="flex-1 min-w-0">
 							<div className="mb-4 flex flex-wrap items-center gap-3">
 								{doc.category && (
-									<span className="px-2.5 py-1 bg-rose-50 text-[#e11d48] rounded-md text-[10px] font-black uppercase tracking-widest">
+									<span className="px-2.5 py-1 bg-rose-50 text-rose-700 rounded-md text-[10px] font-black uppercase tracking-widest">
 										{String(doc.category)}
 									</span>
 								)}
 								{doc.date && (
-									<time className="text-[11px] text-gray-400 font-medium tracking-wide">
+									<time className="text-[11px] text-gray-500 font-medium tracking-wide">
 										{String(doc.date)}
 									</time>
 								)}
 								{doc.author && (
-									<span className="text-[11px] text-gray-400 font-medium tracking-wide">
+									<span className="text-[11px] text-gray-500 font-medium tracking-wide">
 										{String(doc.author)}
 									</span>
 								)}
@@ -129,15 +135,17 @@ export default async function TechArticlePage({ params }: PageProps) {
 				<section className="mt-20 pt-10 border-t border-gray-100">
 					<div className="p-8 bg-gray-50/80 rounded-2xl">
 						<div className="flex items-center gap-5">
-							<div className="w-16 h-16 rounded-full overflow-hidden bg-white border-2 border-gray-100 flex-shrink-0">
-								<img
-									src="/images/authors/bangeo-team.png"
+							<div className="w-16 h-16 rounded-full overflow-hidden bg-white border-2 border-gray-100 flex-shrink-0 relative">
+								<OptimizedImage
+									src="/images/authors/bangeo-team.webp"
 									alt={doc.author ? String(doc.author) : "BANGEO"}
-									className="w-full h-full object-cover"
+									fill
+									sizes="64px"
+									className="object-cover"
 								/>
 							</div>
 							<div className="flex-1">
-								<p className="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-0.5">
+								<p className="text-[10px] font-bold tracking-widest text-gray-500 uppercase mb-0.5">
 									この記事を書いた人
 								</p>
 								<h3 className="text-lg font-black text-gray-900 mb-1">
@@ -151,7 +159,7 @@ export default async function TechArticlePage({ params }: PageProps) {
 
 						{otherArticles.length > 0 && (
 							<div className="mt-6 pt-6 border-t border-gray-200/60">
-								<h4 className="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-3">
+								<h4 className="text-[10px] font-bold tracking-widest text-gray-500 uppercase mb-3">
 									{doc.author ? String(doc.author) : "BANGEO"}
 									の他の記事
 								</h4>
@@ -168,7 +176,7 @@ export default async function TechArticlePage({ params }: PageProps) {
 													{a.title}
 												</h5>
 												{a.date && (
-													<p className="text-[10px] text-gray-400">
+													<p className="text-[10px] text-gray-500">
 														{String(a.date)}
 													</p>
 												)}

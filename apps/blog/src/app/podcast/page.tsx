@@ -1,7 +1,9 @@
 import { podcast } from "fumadocs-mdx:collections/server";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { OptimizedImage } from "@/components/optimized-image";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
+import { CARD_IMAGE_SIZES } from "@/lib/image-defaults";
 
 export const metadata: Metadata = {
 	title: "ポッドキャスト",
@@ -50,10 +52,12 @@ export default function PodcastIndexPage() {
 								className="block aspect-video bg-gray-100 relative overflow-hidden"
 							>
 								{youtubeId ? (
-									<img
+									<OptimizedImage
 										src={`https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`}
 										alt={ep.title}
-										className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+										fill
+										sizes={CARD_IMAGE_SIZES}
+										className="object-cover group-hover:scale-105 transition-transform duration-500"
 									/>
 								) : (
 									<div className="w-full h-full bg-gradient-to-br from-rose-50 to-gray-50 flex items-center justify-center">
@@ -75,7 +79,7 @@ export default function PodcastIndexPage() {
 								className="p-5 flex-1 flex flex-col"
 							>
 								<div className="flex items-center gap-2 mb-2">
-									<span className="px-2.5 py-1 bg-rose-50 text-[#e11d48] rounded-md text-[10px] font-black uppercase tracking-wide">
+									<span className="px-2.5 py-1 bg-rose-50 text-rose-700 rounded-md text-[10px] font-black uppercase tracking-wide">
 										EP {String(ep.episodeNumber || "")}
 									</span>
 								</div>
@@ -87,7 +91,7 @@ export default function PodcastIndexPage() {
 										{ep.description}
 									</p>
 								)}
-								<div className="mt-3 text-xs text-gray-400 font-medium">
+								<div className="mt-3 text-xs text-gray-500 font-medium">
 									{ep.date && <time>{String(ep.date)}</time>}
 								</div>
 							</Link>
