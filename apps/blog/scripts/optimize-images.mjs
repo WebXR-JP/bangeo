@@ -9,7 +9,6 @@ const publicDir = path.resolve(__dirname, "../public");
 
 const MAX_THUMB_WIDTH = 640;
 const MAX_OG_WIDTH = 1200;
-const FAVICON_SIZE = 192;
 const NO_IMAGE_WIDTH = 640;
 const NO_IMAGE_HEIGHT = 360;
 
