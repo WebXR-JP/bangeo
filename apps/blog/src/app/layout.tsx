@@ -67,6 +67,9 @@ export const metadata: Metadata = {
 			ja: SITE_URL,
 			"x-default": SITE_URL,
 		},
+		types: {
+			"application/rss+xml": `${SITE_URL}/rss.xml`,
+		},
 	},
 	authors: [{ name: "BANGEO" }],
 	formatDetection: {

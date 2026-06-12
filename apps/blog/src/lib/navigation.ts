@@ -74,6 +74,7 @@ export const FOOTER_BOTTOM_LINKS = [
 		external: true,
 	},
 	{ name: "X", href: "https://x.com/bangeo_jp", external: true },
+	{ name: "RSS", href: "/rss.xml" },
 	{ name: "サイトマップ", href: "/sitemap.xml" },
 	{ name: "プライバシーポリシー", href: "/privacy-policy" },
 ];

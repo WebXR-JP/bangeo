@@ -31,6 +31,7 @@ pnpm check
 - デモは `content/experiments/*.mdx`
 - ポッドキャストは `content/podcast/*.mdx`
 - `draft: true` を付けたコンテンツは公開対象から除外
+- RSS フィードは `/rss.xml` で配信し、公開済みの技術記事・デモ・ポッドキャストを更新日順に通知
 
 ## 環境変数
 
