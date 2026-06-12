@@ -1,0 +1,212 @@
+---
+title: "Safari 27のHTML model要素とは何か──Webページに3Dモデルを置く新しい標準"
+description: "Safari 27 betaでiOS、iPadOS、macOSにも広がったHTML model要素を解説。USDZ、sourceフォールバック、ready promise、orbit操作、AR Quick Look、Spatial Webでの位置づけを整理します。"
+date: "2026年6月12日"
+category: "TECH"
+tags:
+  - "HTML model"
+  - "Safari"
+  - "WebKit"
+  - "USDZ"
+  - "Spatial Web"
+  - "Web 3D"
+  - "visionOS"
+  - "AR Quick Look"
+author: "BANGEO Team"
+thumbnail: "/assets/tech/safari-27-visionos-immersive-web.webp"
+draft: false
+---
+
+Safari 27 betaで、3Dモデル表示が「HTMLの仕事」にかなり近づいています。
+
+AppleのWebKitチームは、WWDC26に合わせて公開した[Safari 27 betaの新機能](https://webkit.org/blog/17967/news-from-wwdc26-webkit-in-safari-27-beta/)として、HTMLの `<model>` 要素をiOS、iPadOS、macOSのSafariにも広げたことを発表しました。これまでvisionOSで提供されていた `<model>` がAppleプラットフォーム全体へ広がり、Webページへ3Dモデルを埋め込む方法が少しずつ変わり始めています。
+
+基本的な使い方はかなりシンプルです。
+
+```html
+<model src="teapot.usdz"></model>
+```
+
+WebKitの発表でも、標準HTMLだけでインタラクティブな3Dコンテンツを埋め込める例が示されています。従来、Webで3Dモデルを表示するには、three.js、Babylon.js、`<model-viewer>`、独自WebGL実装などを使うのが一般的でした。`<model>` は、その一部をブラウザネイティブのHTML要素として扱おうとする動きです。
+
+AppleのWWDC26セッション「[Get started with the HTML Model Element](https://developer.apple.com/videos/play/wwdc2026/215/)」でも、`<model>` は画像を置くように3Dモデルを追加できるネイティブHTML要素として紹介されています。Appleは、現在のWeb 3Dで `<model-viewer>` のようなJavaScriptライブラリが広く使われていることを踏まえつつ、`<model>` では追加ライブラリなしにプラットフォーム側で直接レンダリングできる点を強調しています。
+
+## model要素はWebXRではない。でもSpatial Webにはかなり近い
+
+まず整理しておきたいのは、`<model>` はWebXR Device APIそのものではない、という点です。
+
+WebXRは、VRヘッドセットやARデバイスの姿勢、入力、空間セッションなどを扱うAPIです。一方、`<model>` はWebページ内に3Dモデルを埋め込むためのHTML要素です。つまり、WebXRセッションを開始しなくても、ECサイトの商品画像の横に3Dモデルを置いたり、観光ページに文化財の3Dモデルを表示したり、教育教材に立体オブジェクトを埋め込んだりできます。
+
+W3C Immersive Web Community Groupで進められている[`<model>` 要素の仕様案](https://immersive-web.github.io/model-element/)では、3DグラフィックコンテンツをHTML文書内に宣言的に埋め込み、ユーザーエージェント、つまりブラウザが直接レンダリングするための要素として説明されています。ただし、仕様文書はDraft Community Group Reportであり、完成済みの標準として扱う段階ではありません。
+
+BANGEO読者向けに言えば、これは「WebXRの新機能」というより、「Spatial Webの土台がHTML側にも入ってきたニュース」と見るのがよさそうです。3Dや空間コンテンツが、特別なWebアプリだけでなく、通常のWebページの部品として扱われる方向に進んでいます。
+
+## 何ができるのか：USDZ、フォールバック、読み込み完了、orbit操作
+
+Appleのセッションでは、`<model>` の基本的な使い方として、`src` 属性でUSDZファイルを指定する方法と、`<source>` 要素でMIME typeを指定する方法が紹介されています。USDZは、ジオメトリ、マテリアル、テクスチャ、アニメーションなど、3Dモデルに必要な情報を1つのファイルにまとめられる形式です。AppleはSafariが他の形式もサポートするとしつつ、最初に試す形式としてUSDZを推奨しています。
+
+たとえば、商品ページなら次のように書けます。
+
+```html
+<model id="product-model" src="product.usdz">
+  <img src="product-fallback.jpg" alt="商品の3Dモデルの代替画像">
+</model>
+```
+
+この中に入っている `<img>` は、`<model>` をサポートしないブラウザや古いSafari向けのフォールバックです。非対応ブラウザでは `<model>` 内の画像を表示することで、ユーザーに商品イメージを伝えられます。
+
+また、3Dモデルは画像よりも重くなりやすく、数十MB以上になることもあります。そのため、`ready` promiseでモデルの読み込み完了を検知し、ローディング表示を消すような実装も重要です。
+
+```html
+<model id="product-model" src="product.usdz">
+  <img src="product-fallback.jpg" alt="商品の3Dモデル">
+</model>
+
+<script>
+  const model = document.getElementById("product-model");
+
+  model.ready
+    .then(() => {
+      // ローディング表示を隠す
+    })
+    .catch(() => {
+      // 読み込み失敗時にフォールバックUIを表示する
+    });
+</script>
+```
+
+インタラクションも用意されています。`stagemode="orbit"` を指定すると、ユーザーがモデルを左右に回転したり、上下に傾けたりできるようになります。
+
+```html
+<model src="shoe.usdz" stagemode="orbit">
+  <img src="shoe.jpg" alt="靴の3Dモデル">
+</model>
+```
+
+Appleの説明では、orbitモードではモデルが回転中にクリップされにくいようにスケーリングされ、縦方向の傾きは自然に元へ戻る挙動になります。商品を1点だけ回して見せるような用途では、この標準インタラクションだけでもかなり使いやすそうです。
+
+さらに細かく制御したい場合は、`entityTransform` をJavaScriptから操作できます。Appleのサンプルでは、`DOMMatrix` を使ってモデルを特定角度へ回転させる実装が紹介されています。ただし、`entityTransform` を使う場合は `stagemode` を無効にする必要があり、モデルの一部が表示領域から外れてクリップされる可能性もあるため、位置やスケールの調整が必要になります。
+
+## sourceで複数形式、imgでフォールバックという設計
+
+`<model>` が面白いのは、画像や動画に近いHTMLの作法で3Dモデルを扱おうとしている点です。
+
+W3C側の仕様案では、`<model>` 内に複数の `<source>` を置き、USDZやGLBなど複数形式の候補を指定する例が示されています。`<source>` の選択は `<video>` に近い考え方で、トップレベルの `src` 属性があればそれを優先し、なければ互換性のある最初の `<source>` を選ぶ流れです。
+
+```html
+<model stagemode="orbit">
+  <source src="teapot.usdz" type="model/vnd.usdz+zip">
+  <source src="teapot.glb" type="model/gltf-binary">
+  <img src="teapot.png" alt="ティーポットの3Dモデル">
+</model>
+```
+
+この構造は、3D Commerceや教育コンテンツを作る開発者にとって重要です。現実の制作パイプラインでは、Apple向けにUSDZ、WebGLや他ブラウザ向けにGLB / glTF、非対応環境向けに画像、という複数アセットを用意する必要があるからです。
+
+ただし、現時点で「`<model>` を書けば全ブラウザで同じ体験が出る」と考えるのは早いです。Appleのセッションでは、未対応ブラウザ向けにはpolyfillを使える一方、Apple Vision Proのステレオスコピック表示のようにpolyfillでは再現できない機能もあると説明されています。
+
+```html
+<script type="module">
+  if (!window.HTMLModelElement) {
+    import("model-element-polyfill.js").then(() => {
+      // Polyfill ready to use
+    });
+  }
+</script>
+```
+
+つまり、当面はネイティブ `<model>`、polyfill、`<model-viewer>`、静止画フォールバックを組み合わせる段階になりそうです。
+
+## Safari 27 betaで追加された細かい改善
+
+Safari 27 betaでは、`<model>` そのものの対応拡大だけでなく、関連するレンダリングや挙動の改善も入っています。
+
+WebKitの発表によると、Safari 27 betaでは `<model>` 要素に `dynamic-range-limit` のサポートが追加され、iOSとmacOSで3DコンテンツのHDRレンダリング範囲を制御できるようになりました。また、センチメートル単位で作られたアセットが想定の100倍サイズで表示される問題や、`stagemode="orbit"` の物理挙動がiOSとvisionOSで異なっていた問題も修正されています。
+
+これは地味ですが、かなり実務寄りの改善です。3Dモデルは、DCCツール、CAD、スキャンアプリ、生成AIツールなど、さまざまな制作環境から出てきます。そのため、単位系、スケール、原点、マテリアル、テクスチャサイズが崩れることはよくあります。ブラウザ側でこうした不整合が減るほど、Web制作側は「3Dを置く」ことに集中しやすくなります。
+
+同じWebKit記事では、Spatial Web関連のbug fixとしてWebXR viewportの初期値問題も修正されています。`<model>` とWebXRは別レイヤーですが、Safari 27 beta全体としては、Appleプラットフォーム上のWeb 3D / Spatial Web体験を底上げする更新と見てよさそうです。
+
+## AR Quick LookやvisionOSとの接続
+
+`<model>` はWebページ内の3D表示にとどまりません。Appleのセッションでは、`<a rel="ar">` でUSDZファイルを包むことで、iOSやiPadOSではAR Quick Look体験につなげられる例も紹介されています。
+
+```html
+<a rel="ar" href="chair.usdz">
+  <model src="chair.usdz">
+    <img src="chair.jpg" alt="椅子の3Dモデル">
+  </model>
+</a>
+```
+
+これにより、ECサイトでは「ページ上で3Dモデルを回して確認する」から「自分の部屋にARで置いてみる」までを、比較的自然な導線でつなげられます。家具、靴、バッグ、家電、インテリア、アート作品など、3D Commerceとの相性はかなり高い領域です。
+
+visionOSではさらに、`<model>` が立体視表示や没入型Web環境にもつながります。WebKitはSafari 27 beta in visionOS 27で、`<model>` 要素と1つのJavaScript API呼び出しにより、没入型Webサイト環境を提供できるようになったと説明しています。チケット販売サイトで座席からの眺めを確認する、ホテルサイトで部屋の中を歩くように見る、といった例も挙げられています。
+
+BANGEOでは、このvisionOS側の動きについても[別記事で整理しています](/tech-articles/safari-27-beta-visionos-immersive-website-environments-webxr)。`<model>` は単体の3Dビューアとしてだけでなく、Apple Vision Pro向けのSpatial Web導線としても見ておきたい要素です。
+
+## 制作パイプラインではUSDZ最適化が重要になる
+
+`<model>` がHTMLで書けるようになっても、3Dモデルそのものが重すぎればWeb体験としては厳しくなります。Appleのセッションでも、3Dモデルはインターネット越しでは読み込みに時間がかかるため、プロダクション投入前の最適化が重要だと説明されています。
+
+セッション内では、`usdcrush` でUSDZファイルを軽量化し、7.9MBのモデルを1.9MBまで削減した例が紹介されています。また、`usdrecord` を使うと、3Dファイルからサムネイルやフォールバック画像を生成できるとも説明されています。どちらのコマンドラインツールもmacOSにインストール済みのUSD関連ツール群の一部として紹介されています。
+
+これは、記事やLPに1つだけ3Dモデルを置く場合よりも、ECカタログのように大量の商品3Dモデルを扱う場合に効いてきます。3Dモデル、フォールバック画像、サムネイル、AR用USDZ、他ブラウザ向けGLBをまとめて生成・検証するパイプラインが必要になります。
+
+確認したいポイントは、だいたい次のあたりです。
+
+- USDZのファイルサイズがモバイル回線でも許容できるか
+- テクスチャ解像度が必要以上に大きくないか
+- DCCツール側の単位とSafari上の表示スケールが合っているか
+- 商品や教材として見せたい角度に初期表示が向いているか
+- フォールバック画像のaltテキストが意味を伝えられているか
+- AR Quick Lookで見たときに原点、サイズ、影、マテリアルが破綻していないか
+
+HTML要素として書けることと、Web向け3Dアセットとして快適に配信できることは別問題です。`<model>` を本番投入するなら、マークアップだけでなくアセット制作・圧縮・検証までセットで設計する必要があります。
+
+## model-viewerやthree.jsは不要になるのか？
+
+すぐに不要になるわけではありません。
+
+`<model>` の方向性は大きいですが、現時点ではSafari 27 betaを中心とするAppleプラットフォームでの話です。Chrome、Edge、Firefoxを含む全ブラウザで同じレベルのネイティブ対応があるわけではありません。
+
+また、複雑な3Dシーン、ゲーム的なインタラクション、複数オブジェクトの制御、物理演算、カスタムシェーダー、WebGPU / WebGLベースの表現では、今後もthree.jsやBabylon.jsのようなライブラリが必要です。
+
+一方で、商品1点を回して見せる、文化財モデルをページ内に置く、教材として立体物を確認させる、といった用途では、`<model>` は非常に強い選択肢になりえます。とくにAppleデバイス向けの体験を重視するサイトでは、ネイティブ要素としての軽さ、OSレベルのAR Quick Look連携、visionOSでの空間表示との接続が魅力になります。
+
+つまり、今後の実装方針は「全部を `<model>` へ置き換える」ではなく、次のような棲み分けになりそうです。
+
+```html
+<!-- Apple Safariではネイティブ3D表示 -->
+<model src="product.usdz" stagemode="orbit">
+  <img src="product.jpg" alt="商品の3Dモデル">
+</model>
+
+<!-- 非対応ブラウザでは画像、polyfill、またはmodel-viewer / three.jsへフォールバック -->
+```
+
+3Dモデル表示が「特殊なJavaScriptアプリ」から「HTMLの埋め込みメディア」に近づいていく。ここが今回のニュースの本質です。
+
+## BANGEO読者が今チェックすべきこと
+
+まず確認したいのは、自分たちの3DアセットがUSDZで用意できるかどうかです。既存のGLB / glTF資産がある場合は、USDZへの変換、マテリアル再現、テクスチャ圧縮、ファイルサイズ、AR Quick Lookでの見え方を検証する必要があります。
+
+次に、フォールバック設計です。`<model>` が表示できない環境でも、商品や教材の意味が伝わるように、`<img>` の代替画像とaltテキストを必ず用意するべきです。W3Cの仕様案でも、`<model>` 非対応ブラウザ向けにフォールバックコンテンツを入れる例や、モデルとフォールバック画像の両方に代替テキストを与える例が示されています。
+
+最後に、これはWebXR本体の代替ではなく、Webページの中に空間コンテンツを自然に混ぜるための技術だと捉えるのがよいでしょう。WebXRは没入セッションを扱う技術、`<model>` は通常のWebページに3Dモデルを埋め込む技術です。両者は競合というより、Spatial Webを構成する別レイヤーです。
+
+## まとめ：3Dモデルは「貼る」時代に近づいている
+
+Safari 27 betaの `<model>` 対応拡大は、Web 3Dにとってかなり象徴的なアップデートです。これまでWeb上の3Dモデルは、JavaScriptライブラリやWebGL実装に詳しい開発者の領域でした。しかし `<model>` は、3Dモデルを画像や動画のようにHTMLで扱う方向を示しています。
+
+もちろん、まだ課題はあります。仕様は作業中で、クロスブラウザ対応もこれからです。USDZ、GLB / glTF、フォールバック画像、polyfill、アセット最適化を含めた設計は欠かせません。
+
+それでも、Webページに3Dモデルを直接置く未来はかなり近づいてきました。ECの商品表示、教育、観光、文化財、建築、不動産、空間LP。BANGEOが追っているSpatial Webの現場では、`<model>` は今後かなり重要なキーワードになりそうです。
+
+## 関連リンク
+
+- [News from WWDC26: WebKit in Safari 27 beta](https://webkit.org/blog/17967/news-from-wwdc26-webkit-in-safari-27-beta/)
+- [Get started with the HTML Model Element（WWDC26）](https://developer.apple.com/videos/play/wwdc2026/215/)
+- [What’s new in WebKit for Safari 27（WWDC26）](https://developer.apple.com/videos/play/wwdc2026/204/)
+- [The `<model>` Element（Immersive Web Community Group）](https://immersive-web.github.io/model-element/)
+- [BANGEO：Safari 27 betaでvisionOS向けImmersive Webが前進](/tech-articles/safari-27-beta-visionos-immersive-website-environments-webxr)
