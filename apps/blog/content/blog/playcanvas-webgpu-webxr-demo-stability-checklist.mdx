@@ -1,0 +1,471 @@
+---
+title: "PlayCanvas v2.19.7から見る WebGPU / WebXRデモの実機安定化チェックリスト"
+description: "PlayCanvasでWebGPU / WebXRデモをBANGEOに埋め込む前に確認したい、エンジンバージョン、ブラウザ、WebGPU、WebXR、入力、depth、iframeのチェックリストです。"
+date: "2026年6月13日"
+category: "GUIDE"
+tags:
+  - "PlayCanvas"
+  - "WebXR"
+  - "WebGPU"
+  - "Quest Browser"
+  - "XrNavigation"
+  - "HTML-in-Canvas"
+  - "Permissions Policy"
+author: "BANGEO Team"
+thumbnail: "/assets/tech/webgpu-webxr-quest-browser.webp"
+draft: false
+---
+
+PlayCanvasでWebXRやWebGPUのデモを作るとき、コードが正しいだけでは十分ではありません。
+
+WebXRは端末、ブラウザ、GPU、入力デバイス、権限、HTTPS、iframeの許可設定に強く依存します。PlayCanvas公式ドキュメントでも、WebXRにはカメラ、ジャイロ、加速度センサー、CPU/GPU、OS、ブラウザサポートなどの要件があると説明されています。Meta QuestではAnchors、Depth Sensing、Gamepads、Hand Tracking、Hit Testingなどの機能が表に挙げられています。([PlayCanvas][4])
+
+そのためBANGEOでWebXRデモを公開するなら、記事本文にコードだけでなく、**実機検証の条件**をセットで載せるのが重要です。
+
+PlayCanvas Engine v2.19.7では、WebGPU、XR navigation、scene depthまわりの安定化更新が入りました。これは、WebXRデモ公開前のチェック項目を見直すよいタイミングです。([GitHub][1])
+
+## まず記事に載せたい検証環境テンプレート
+
+BANGEOの記事内では、デモのすぐ下に次のような検証環境ブロックを置くと分かりやすくなります。
+
+```md
+### 検証環境
+
+- PlayCanvas Engine: v2.19.7
+- PlayCanvas Editor / Engine only: Engine only
+- Browser:
+  - Quest Browser 146.x
+  - Chrome Canary
+  - Chrome Stable
+- Device:
+  - Meta Quest 3
+  - Android device
+  - Desktop Chrome
+- Rendering path:
+  - WebGL
+  - WebGPU
+- XR mode:
+  - immersive-vr
+  - immersive-ar
+  - inline
+- Input:
+  - Touch controllers
+  - Hand tracking
+  - Gamepad without thumbstick axes
+- Depth:
+  - Disabled
+  - WebXR depth / depth projection enabled
+- iframe:
+  - xr-spatial-tracking allowed
+  - fullscreen allowed
+- Fallback:
+  - WebGPU unavailable時はWebGLへ切り替え
+  - WebXR unavailable時は通常3D表示へ切り替え
+```
+
+## チェック1：PlayCanvas Engineのバージョンを固定する
+
+まず確認すべきなのは、PlayCanvas Engineのバージョンです。
+
+PlayCanvas Engine v2.19.7は、2026年6月12日のリリースで、PowerVR GPU向けWebGPU無効化、`XrNavigation`のNaN修正、scene depth decodeの選択修正などが入っています。([GitHub][1])
+
+BANGEOのデモ記事では、単に「PlayCanvasで作った」と書くのではなく、次のようにバージョンを書いておきます。
+
+```md
+このデモは PlayCanvas Engine v2.19.7 で確認しています。
+```
+
+npmで管理する場合は、`package.json` でバージョンを固定します。
+
+```json
+{
+  "dependencies": {
+    "playcanvas": "2.19.7"
+  }
+}
+```
+
+CDNを使う場合も、`latest` のような指定は避け、記事に使ったバージョンへ固定します。
+
+```html
+<!-- 例：実際に使うCDN URLはプロジェクト構成に合わせて固定する -->
+<script src=".../playcanvas-2.19.7.min.js"></script>
+```
+
+## チェック2：WebGPUが使えるかをアプリ側で確認する
+
+WebGPUデモでは、`navigator.gpu` の有無を最初に確認します。
+
+```js
+async function checkWebGPU() {
+  if (!("gpu" in navigator)) {
+    return {
+      available: false,
+      reason: "navigator.gpu is not available",
+    };
+  }
+
+  try {
+    const adapter = await navigator.gpu.requestAdapter();
+
+    if (!adapter) {
+      return {
+        available: false,
+        reason: "GPUAdapter is not available",
+      };
+    }
+
+    return {
+      available: true,
+      reason: "WebGPU adapter is available",
+    };
+  } catch (error) {
+    return {
+      available: false,
+      reason: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+```
+
+ただし、これだけで「PlayCanvasのWebGPU経路が必ず使える」とは言い切れません。v2.19.7では、Imagination PowerVR GPU、具体例としてPixel 10系でWebGPUを一時的に無効化する対応が入っています。つまり、ブラウザAPIとしてWebGPUが見えていても、エンジン側が安全のためWebGPU経路を避ける可能性があります。([GitHub][1])
+
+```js
+const webgpuStatus = await checkWebGPU();
+
+if (!webgpuStatus.available) {
+  console.warn("WebGPU fallback to WebGL:", webgpuStatus.reason);
+  // WebGL用の初期化へ切り替える
+}
+```
+
+## チェック3：Quest Browserのバージョンを確認する
+
+Quest BrowserでWebXRデモを試す場合は、Browserのバージョンを必ず書きます。
+
+Metaのリリースノートでは、Quest Browser 146.0で Experimental WebGPU Support、WebXR Depth Projection、stereoscopic video playback の実験対応が追加されています。また、WebXR bounded floor spaceの修正やChromium Milestone 146への更新も記載されています。([Meta for Developers][2])
+
+一方、Browser 146.2は、セキュリティ、信頼性、パフォーマンス、速度最適化が中心の保守更新として扱われています。([Meta for Developers][5])
+
+```md
+### Quest Browserでの確認
+
+- Quest Browser 146.0:
+  - Experimental WebGPU in WebXR
+  - WebXR Depth Projection
+  - WebXR bounded floor space修正
+
+- Quest Browser 146.2:
+  - セキュリティ・信頼性・パフォーマンス改善中心
+  - 146.0由来のWebGPU / depth系機能は継続追跡
+```
+
+## チェック4：WebXR sessionが作れるかを確認する
+
+WebXRデモでは、`navigator.xr` と `isSessionSupported()` を使って、セッションが作れるかを確認します。
+
+```js
+async function checkWebXR() {
+  if (!("xr" in navigator)) {
+    return {
+      immersiveVr: false,
+      immersiveAr: false,
+      reason: "navigator.xr is not available",
+    };
+  }
+
+  try {
+    const immersiveVr = await navigator.xr.isSessionSupported("immersive-vr");
+    const immersiveAr = await navigator.xr.isSessionSupported("immersive-ar");
+
+    return {
+      immersiveVr,
+      immersiveAr,
+      reason: "WebXR checked",
+    };
+  } catch (error) {
+    return {
+      immersiveVr: false,
+      immersiveAr: false,
+      reason: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+```
+
+WebXRが使えない場合は、通常の3D表示へフォールバックします。
+
+```js
+const xrStatus = await checkWebXR();
+
+if (!xrStatus.immersiveVr && !xrStatus.immersiveAr) {
+  console.warn("WebXR is not available:", xrStatus.reason);
+  showNonXRDemo();
+}
+```
+
+## チェック5：iframe埋め込みでは `xr-spatial-tracking` を許可する
+
+BANGEOにPlayCanvasデモを埋め込む場合、iframeの権限設定も重要です。
+
+MDNでは、Permissions-Policyの `xr-spatial-tracking` は現在の文書がWebXR Device APIを使えるかどうかを制御するディレクティブであり、ブロックされると `isSessionSupported()` や `requestSession()` が `SecurityError` で失敗する場合があると説明されています。([MDNウェブドキュメント][6])
+
+```html
+<div class="bangeo-demo-frame">
+  <iframe
+    title="PlayCanvas WebXR Demo"
+    src="https://playcanv.as/e/p/PROJECT_ID/"
+    loading="lazy"
+    allow="camera; microphone; xr-spatial-tracking; fullscreen"
+    allowfullscreen
+  ></iframe>
+</div>
+```
+
+```css
+.bangeo-demo-frame {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #111;
+  margin: 24px 0;
+}
+
+.bangeo-demo-frame iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+```
+
+WebXRがiframe内でうまく動かない環境に備えて、デモ下には別タブリンクも置きます。
+
+## チェック6：XR入力は複数パターンで見る
+
+v2.19.7では、thumbstick axesを持たないgamepadで `XrNavigation` のrigがNaNに壊れる問題が修正されています。([GitHub][1])
+
+BANGEOの検証では、少なくとも次の状態を分けて確認します。
+
+```md
+### XR入力チェック
+
+- Touch controllerあり
+- Hand trackingのみ
+- Gamepadはあるがthumbstick axesなし
+- 入力デバイスなし
+- セッション中に入力デバイスを切り替えた場合
+```
+
+```js
+function getMoveAxes(inputSource) {
+  const gamepad = inputSource.gamepad;
+
+  if (!gamepad || !Array.isArray(gamepad.axes)) {
+    return { x: 0, y: 0 };
+  }
+
+  const x = Number.isFinite(gamepad.axes[2]) ? gamepad.axes[2] : 0;
+  const y = Number.isFinite(gamepad.axes[3]) ? gamepad.axes[3] : 0;
+
+  return { x, y };
+}
+```
+
+## チェック7：depth / occlusion系デモはオン・オフ両方で確認する
+
+Quest Browser 146.0では、WebXR Depth Projectionのサポートが追加されています。([Meta for Developers][2])
+
+PlayCanvas v2.19.7でもscene depth decodeの選択修正が入っているため、depthやocclusionを使うデモでは特に実機確認が必要です。([GitHub][1])
+
+```md
+### Depth / Occlusionチェック
+
+- depthなしでもデモが表示されるか
+- depthありで前後関係が破綻しないか
+- 左右目で見え方がずれないか
+- WebGL経路とWebGPU経路で見え方が大きく変わらないか
+- Quest BrowserとDesktop Chromeで挙動差があるか
+- depthが取得できない場合にエラーで止まらないか
+```
+
+## チェック8：HTML-in-Canvas UIデモは特にフォールバックを用意する
+
+PlayCanvasのHTML-in-Canvasドキュメントでは、HTML/CSSコンテンツをWebGL textureとして3Dシーン内のsurfaceに表示でき、`device.supportsHtmlTextures` で対応状況を検出し、非対応時にはDOM Overlayやcanvas rasterizationなどのフォールバックを用意するよう説明されています。([PlayCanvas][7])
+
+一方、PlayCanvas Engine v2.19.2のリリースノートでは、HTML-in-Canvas texturesをWebGPUの `copyElementImageToTexture` で扱う対応と、HTML-in-Canvas texture upload APIの更新が入っています。([GitHub][1])
+
+> PlayCanvas Engine側ではHTML-in-Canvas textureのWebGPU対応が入り始めています。ただしHTML-in-Canvas自体が実験的APIであり、ブラウザ対応やAPI形状は変わる可能性があります。実装では `supportsHtmlTextures` を確認し、非対応時のフォールバックを用意してください。
+
+```js
+function canUseHtmlTextures(app) {
+  const device = app.graphicsDevice;
+  return !!device.supportsHtmlTextures;
+}
+
+if (canUseHtmlTextures(app)) {
+  setupHtmlTexturePanel();
+} else {
+  setupDomOverlayFallback();
+}
+```
+
+## チェック9：デモ読み込みはボタン式にする
+
+WebXR / WebGPUデモは、ページ表示直後にGPUや大量アセットを使い始めることがあります。BANGEOの記事に複数デモを埋め込む場合は、最初からiframeを読み込むより、読者がボタンを押したときだけ読み込む形が安全です。
+
+```html
+<div class="bangeo-demo-loader" data-playcanvas-demo>
+  <button type="button" class="bangeo-demo-button">
+    PlayCanvasデモを読み込む
+  </button>
+  <p class="bangeo-demo-note">
+    WebXR / WebGPUを使う実験デモです。対応ブラウザで動作を確認してください。
+  </p>
+</div>
+
+<script>
+  document.querySelectorAll("[data-playcanvas-demo]").forEach((root) => {
+    const button = root.querySelector("button");
+
+    button.addEventListener("click", () => {
+      const iframe = document.createElement("iframe");
+
+      iframe.title = "PlayCanvas WebXR Demo";
+      iframe.src = "https://playcanv.as/e/p/PROJECT_ID/";
+      iframe.loading = "lazy";
+      iframe.allow = "camera; microphone; xr-spatial-tracking; fullscreen";
+      iframe.allowFullscreen = true;
+
+      root.innerHTML = "";
+      root.classList.add("is-loaded");
+      root.appendChild(iframe);
+    });
+  });
+</script>
+```
+
+```css
+.bangeo-demo-loader {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 16px;
+  background: #111;
+  color: #fff;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  padding: 24px;
+  margin: 24px 0;
+}
+
+.bangeo-demo-loader.is-loaded {
+  padding: 0;
+  display: block;
+  overflow: hidden;
+}
+
+.bangeo-demo-loader iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+}
+
+.bangeo-demo-button {
+  font: inherit;
+  font-weight: 700;
+  padding: 12px 20px;
+  border-radius: 999px;
+  border: 0;
+  cursor: pointer;
+}
+
+.bangeo-demo-note {
+  max-width: 560px;
+  margin: 12px auto 0;
+  font-size: 14px;
+  opacity: 0.8;
+}
+```
+
+## BANGEO用チェックリスト
+
+記事の末尾には、読者がそのまま使えるチェックリストを置きます。
+
+```md
+## 公開前チェックリスト
+
+### Engine
+- [ ] PlayCanvas Engineのバージョンを固定した
+- [ ] 記事本文にEngineバージョンを書いた
+- [ ] v2.19.7以降で動作確認した
+
+### Browser / Device
+- [ ] Quest Browserのバージョンを書いた
+- [ ] Desktop Chromeで確認した
+- [ ] Android Chromeで確認した
+- [ ] Quest実機で確認した
+
+### WebGPU
+- [ ] `navigator.gpu` の有無を確認した
+- [ ] `requestAdapter()` の失敗時に止まらない
+- [ ] WebGPU不可の場合にWebGLへフォールバックする
+- [ ] 特定GPUでWebGPUが無効化される可能性を注意書きした
+
+### WebXR
+- [ ] `navigator.xr` の有無を確認した
+- [ ] `isSessionSupported()` の結果でUIを切り替えた
+- [ ] immersive-vr / immersive-ar / inline を分けて確認した
+- [ ] WebXR不可の場合に通常3D表示へフォールバックする
+
+### iframe
+- [ ] iframeに `xr-spatial-tracking` を許可した
+- [ ] iframeに `fullscreen` を許可した
+- [ ] WebXRが動かない場合の別タブリンクを置いた
+
+### Input
+- [ ] controllerありで確認した
+- [ ] hand trackingで確認した
+- [ ] thumbstick axesなしの入力で壊れない
+- [ ] 入力デバイスなしでもエラーにならない
+
+### Depth
+- [ ] depthなしで表示できる
+- [ ] depthありで前後関係が破綻しない
+- [ ] WebGPU / WebGLで見え方を比較した
+- [ ] depth非対応時のfallbackを用意した
+
+### HTML UI
+- [ ] `supportsHtmlTextures` を確認した
+- [ ] HTML-in-Canvas非対応時のfallbackを用意した
+- [ ] DOM Overlayとの違いを書いた
+```
+
+## BANGEOのデモ記事に入れる注意書き
+
+WebGPU / WebXR / HTML-in-Canvasを含む記事では、デモの近くに次の注意書きを置いておくと安全です。
+
+> このデモは実験的なWeb APIやブラウザ機能を含みます。PlayCanvas Engine、Quest Browser、Chrome、GPU、端末、入力デバイスの組み合わせによって動作が変わる場合があります。WebGPUやWebXRが利用できない環境では、WebGL版または通常3D表示へフォールバックします。
+
+HTML-in-Canvasを含む場合は、もう少し具体的にします。
+
+> HTML-in-Canvasは実験的なブラウザAPIです。対応ブラウザ以外ではHTML UI textureが動作しない場合があります。このデモでは、対応状況を確認したうえで、非対応時にはDOM Overlayまたは通常のcanvas表示へ切り替えます。
+
+## まとめ
+
+PlayCanvas v2.19.7は、WebXR仕様そのものの更新ではありません。しかし、WebGPU / WebXRデモを実機で公開するなら、かなり重要な安定化更新です。
+
+特に、特定GPUでWebGPUを無効化する対応、`XrNavigation` の入力デバイス差分修正、scene depth decode修正は、BANGEOのように読者が実際にデモを触るサイトでは無視できません。
+
+WebXR記事では、コードだけでなく、検証環境を書くことが大切です。PlayCanvas Engineのバージョン、Quest Browserのバージョン、WebGPUの有効状態、WebXR sessionの可否、入力デバイス、depth、iframeのallow属性まで書いておくと、読者が自分の環境で問題を切り分けやすくなります。
+
+BANGEOでは、今後PlayCanvasデモを埋め込む記事に、このチェックリストを標準で付けるとよさそうです。
+
+[1]: https://github.com/playcanvas/engine/releases "Releases · playcanvas/engine · GitHub"
+[2]: https://developers.meta.com/horizon/downloads/package/browser/146.0?view=full_width "Meta for Developers"
+[4]: https://developer.playcanvas.com/ja/user-manual/xr/platforms/ "プラットフォーム | PlayCanvas Developer Site"
+[5]: https://developers.meta.com/horizon/release-notes/web/ "Release notes | Meta Horizon OS Developers"
+[6]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Permissions-Policy/xr-spatial-tracking "Permissions-Policy: xr-spatial-tracking directive - HTTP | MDN"
+[7]: https://developer.playcanvas.com/user-manual/graphics/advanced-rendering/html-in-canvas/ "HTML-in-Canvas | PlayCanvas Developer Site"

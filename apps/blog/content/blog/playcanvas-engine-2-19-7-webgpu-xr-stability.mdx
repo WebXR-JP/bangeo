@@ -1,0 +1,178 @@
+---
+title: "PlayCanvas Engine v2.19.7：WebGPU / XR 実機検証向けの安定化更新"
+description: "PlayCanvas Engine v2.19.7で入ったWebGPU、XR入力、scene depth周辺の安定化更新を、WebXRデモを実機公開する開発者向けに整理します。"
+date: "2026年6月13日"
+category: "NEWS"
+tags:
+  - "PlayCanvas"
+  - "WebGPU"
+  - "WebXR"
+  - "XrNavigation"
+  - "Meta Quest Browser"
+  - "HTML-in-Canvas"
+  - "GSplat"
+author: "BANGEO Team"
+thumbnail: "/assets/tech/webgpu-webxr-quest-browser.webp"
+draft: false
+---
+
+PlayCanvas Engine v2.19.7 が 2026年6月12日に公開されました。今回のリリースは大きな新機能追加というより、**WebGPU / WebXR デモを実機で動かすときに効いてくる安定化更新**として見るのがよさそうです。
+
+リリースノートでは、Imagination PowerVR GPU、具体例として Pixel 10 系で WebGPU を一時的に無効化する対応、thumbstick axes を持たない gamepad で `XrNavigation` の rig が NaN で壊れる問題の修正、scene depth decode の選択修正、DOF effect の解像度非依存化が挙がっています。([GitHub][1])
+
+BANGEOでPlayCanvasのWebXRデモ、WebGPUデモ、HTML-in-Canvas UIデモを扱う場合、これは小さく見えてかなり重要です。WebXR記事ではコードの説明だけでなく、**どのブラウザ、どの端末、どのGPU、どの入力デバイスで動いたのか**が読者の再現性に直結するからです。
+
+## v2.19.7で見るべき変更点
+
+今回の更新で、BANGEO読者に説明すべきポイントは3つあります。
+
+1つ目は、特定GPUでWebGPUを一時的に無効化する対応です。リリースノートでは、Imagination PowerVR GPU、具体例として Pixel 10 が挙げられています。これは、WebGPU対応ブラウザであっても、実際の端末・GPU・ドライバの組み合わせによってはWebGPU経路を使わない判断が必要になることを示しています。([GitHub][1])
+
+2つ目は、`XrNavigation` の修正です。thumbstick axes を持たない gamepad で XR navigation rig が NaN に壊れる問題が修正されています。XRでは、コントローラー、ハンドトラッキング、ゲームパッド、OS側の仮想入力などが環境によって変わります。入力が「いつも左右スティックを持つ」と決め打ちされた実装は、実機で壊れやすくなります。([GitHub][1])
+
+3つ目は、scene depth decode の選択修正です。WebXRのAR表現では、現実空間との前後関係、オクルージョン、深度情報の扱いが重要になります。Quest Browser 146.0でも WebXR Depth Projection のサポートが追加されており、PlayCanvas側のscene depthまわりの安定化は、今後のMixed Realityデモで効いてくる可能性があります。([Meta for Developers][2])
+
+## なぜWebXR開発者に関係するのか
+
+PlayCanvas Engineは、WebGL2、WebGPU、WebXRを扱えるWeb向け3Dエンジンです。公式READMEでも、PlayCanvasはWebGL2とWebGPU上に構築されたオープンソースエンジンで、XRはWebXRによる没入型AR/VR体験をサポートする機能として説明されています。([GitHub][3])
+
+そのため、PlayCanvasでWebXRデモを作るときは、単に「WebXRが使えるか」だけでは足りません。実際には、次のような層が重なります。
+
+```text
+端末
+  ↓
+GPU / ドライバ
+  ↓
+OS / ブラウザ
+  ↓
+WebXR / WebGPU / Permissions Policy
+  ↓
+PlayCanvas Engine
+  ↓
+アプリ側の入力・移動・深度・UI実装
+```
+
+v2.19.7の更新は、このうち「GPU」「XR入力」「scene depth」の層に関係します。つまり、仕様の新機能ではありませんが、**デモを公開したときに読者が実機で動かせるかどうか**に関係する更新です。
+
+## v2.19系はWebGPU / WebXRの流れが強い
+
+今回のv2.19.7だけを見ると修正リリースに見えますが、v2.19系全体を見ると、WebGPU / WebXRまわりの動きがかなり多く入っています。
+
+PlayCanvas Engine v2.19.0では、`XrBridge`、WebGPU immersive XR presentation、WebGPU XR device loss、WebGPU AR camera color、WebGPU XR depth bridge、WebGPU multiview frame pass など、WebGPUとWebXRをつなぐための更新が多数入っています。([GitHub][1])
+
+さらにv2.19.2では、HTML-in-Canvas texturesをWebGPUの `copyElementImageToTexture` 経由で扱う対応と、新しいHTML-in-Canvas texture upload APIへの更新が入っています。([GitHub][1])
+
+つまりv2.19.7は、単独の小さな修正というより、v2.19系で進んできた **WebGPU + WebXR + HTML UI texture** の流れを、実機で壊れにくくするための更新として見ると理解しやすいです。
+
+## WebGPUは「対応している」だけでは足りない
+
+WebGPU対応の話では、つい `navigator.gpu` があるかどうかだけを見がちです。しかし、PlayCanvas v2.19.7で特定GPU向けにWebGPUを一時的に無効化していることから分かるように、実際のデモ公開ではもう少し慎重に見る必要があります。
+
+BANGEOの記事では、WebGPUデモの説明に次の注意書きを入れておくと安全です。
+
+> WebGPU対応ブラウザであっても、端末やGPU、ドライバ、ブラウザバージョンによってWebGPU経路が無効化される場合があります。PlayCanvasデモでは、WebGPUが使えない場合にWebGLへフォールバックする設計にしておくと安全です。
+
+実装側では、WebGPU前提で初期化するのではなく、WebGPUが使えなかった場合のWebGL経路を用意しておくのが現実的です。
+
+```js
+async function detectWebGPU() {
+  if (!("gpu" in navigator)) {
+    return false;
+  }
+
+  try {
+    const adapter = await navigator.gpu.requestAdapter();
+    return !!adapter;
+  } catch (error) {
+    console.warn("WebGPU detection failed:", error);
+    return false;
+  }
+}
+
+const canUseWebGPU = await detectWebGPU();
+
+console.log("WebGPU available:", canUseWebGPU);
+```
+
+ただし、PlayCanvas側が内部的に特定GPUを回避する場合もあるため、アプリ側では「WebGPU APIがある」ことと「このデモがWebGPU経路で安定して動く」ことを分けて考える必要があります。
+
+## XR入力は「axesがある前提」にしない
+
+v2.19.7の `XrNavigation` 修正は、WebXR入力の説明にも使いやすい例です。
+
+WebXRでは、コントローラーやgamepad情報が常に同じ形で来るとは限りません。thumbstick axesを持たない入力デバイスもあります。今回の修正はPlayCanvas内部のものですが、アプリ側でも「axesがある前提」で処理を書かないほうが安全です。
+
+```js
+function readThumbstick(inputSource) {
+  const gamepad = inputSource.gamepad;
+
+  if (!gamepad || !Array.isArray(gamepad.axes)) {
+    return { x: 0, y: 0, available: false };
+  }
+
+  const x = Number.isFinite(gamepad.axes[2]) ? gamepad.axes[2] : 0;
+  const y = Number.isFinite(gamepad.axes[3]) ? gamepad.axes[3] : 0;
+
+  return { x, y, available: true };
+}
+```
+
+PlayCanvasの移動システムやXRメニューを使う場合でも、BANGEOのデモ記事では、**コントローラーあり、ハンドトラッキング、入力なし、モバイルAR**のように複数条件で検証したかを書いておくと親切です。
+
+## scene depthを使うデモは特に実機検証が必要
+
+scene depthやWebXR Depth Projectionは、Mixed Reality系デモで重要になります。仮想オブジェクトが現実の机や壁の後ろに隠れる、現実空間の奥行きに合わせて合成する、といった表現に関係するためです。
+
+Meta Quest Browser 146.0では、Experimental WebGPU in WebXRに加えて、in-browser WebXR depth projection supportが追加されています。([Meta for Developers][2])
+
+ただし、深度系の機能は、端末、ブラウザ、セッションモード、権限、AR/MR環境によって挙動が変わりやすい領域です。PlayCanvas v2.19.7でscene depth decodeの選択修正が入っていることからも、深度を使うデモでは「動いた／動かない」だけではなく、**前後関係が正しく出るか、左右目で破綻しないか、WebGPU / WebGLで差が出ないか**まで確認したほうがよいです。([GitHub][1])
+
+## BANGEOで更新すべきページ
+
+この更新は、WebXR Device APIやWebXR AR Moduleのステータスが変わった話ではありません。一方で、次のようなページには反映する価値があります。
+
+```text
+/webxr-status
+/playcanvas
+/playcanvas-webxr
+/webgpu-webxr
+/webxr-ui
+/webxr-samples
+```
+
+`/webxr-status` では、PlayCanvas欄に次のような短い更新メモを追加するのがよさそうです。
+
+> PlayCanvas Engine latest確認: v2.19.7, 2026-06-12。WebGPU / XR入力 / scene depthまわりの安定化更新あり。WebGPU in WebXRやHTML-in-Canvas textureの実験デモでは、使用Engineバージョンと検証端末を明記すること。
+
+`/playcanvas-webxr` や `/webgpu-webxr` では、記事冒頭またはサンプル下に次のような検証情報を付けると、読者が再現しやすくなります。
+
+```md
+### 検証環境
+
+- PlayCanvas Engine: v2.19.7
+- Browser: Quest Browser 146.x / Chrome Canary / Chrome Stable
+- Device: Quest 3 / Android / Desktop
+- Rendering path: WebGL / WebGPU
+- XR mode: immersive-vr / immersive-ar / inline
+- Input: controllers / hand tracking / no thumbstick gamepad
+- Depth: enabled / disabled
+- Fallback: WebGPU unavailable時はWebGLへ切り替え
+```
+
+## BANGEO用の短い公開文
+
+BANGEOの更新欄では、次のように短くまとめられます。
+
+> PlayCanvas Engine v2.19.7 では、WebGPUとXR入力まわりの安定化更新が入りました。特定GPUでWebGPUを一時的に無効化する対応、thumbstick axesを持たないgamepadでXR navigation rigが壊れる問題の修正、scene depth decodeの選択修正などが含まれます。WebGPU in WebXRやHTML-in-Canvas textureのような実験的デモでは、PlayCanvas Engineのバージョン、ブラウザ、端末、GPU、入力デバイスを明記して検証するのが安全です。
+
+## まとめ
+
+PlayCanvas Engine v2.19.7は、見た目に分かりやすい新機能リリースではありません。しかし、BANGEOでWebXR / WebGPUデモを扱うなら重要です。
+
+特に、WebGPUが特定GPUで無効化される可能性、XR入力デバイスの差分、scene depthの扱いは、デモ公開時の再現性に直結します。
+
+BANGEOでは、PlayCanvasデモ記事に「使用Engineバージョン」と「検証環境」を必ず付ける方針にするとよさそうです。WebXRの学習記事は、APIの説明だけでなく、実機で動く条件まで書いてあるほうが、開発者にとって実用的です。
+
+[1]: https://github.com/playcanvas/engine/releases "Releases · playcanvas/engine · GitHub"
+[2]: https://developers.meta.com/horizon/downloads/package/browser/146.0?view=full_width "Meta for Developers"
+[3]: https://github.com/playcanvas/engine/tree/v2.19.7 "GitHub - playcanvas/engine at v2.19.7 · GitHub"
