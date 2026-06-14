@@ -1,4 +1,3 @@
-import { existsSync } from "node:fs";
 import { readdir, rename, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -53,6 +52,15 @@ async function writeOptimized(filePath, pipeline) {
 	await rename(tempPath, filePath);
 }
 
+async function writeWebpVariant(filePath) {
+	if (!/\.(png|jpe?g)$/i.test(filePath)) return;
+	const webpPath = filePath.replace(/\.(png|jpe?g)$/i, ".webp");
+	await sharp(filePath).webp({ quality: 80 }).toFile(webpPath);
+	console.log(
+		`updated webp variant: ${path.relative(publicDir, webpPath).replace(/\\/g, "/")}`,
+	);
+}
+
 async function optimizeFile(filePath) {
 	const relative = path.relative(publicDir, filePath).replace(/\\/g, "/");
 	const ext = path.extname(filePath).toLowerCase();
@@ -88,13 +96,7 @@ async function optimizeFile(filePath) {
 	const metadata = await image.metadata();
 	if (!metadata.width || metadata.width <= maxWidth) {
 		if (ext === ".png" || ext === ".jpg" || ext === ".jpeg") {
-			const webpPath = filePath.replace(/\.(png|jpe?g)$/i, ".webp");
-			if (!existsSync(webpPath)) {
-				await sharp(filePath).webp({ quality: 80 }).toFile(webpPath);
-				console.log(
-					`created webp variant: ${path.relative(publicDir, webpPath).replace(/\\/g, "/")}`,
-				);
-			}
+			await writeWebpVariant(filePath);
 		}
 		return;
 	}
@@ -104,6 +106,7 @@ async function optimizeFile(filePath) {
 		sharp(filePath).resize(maxWidth, null, { withoutEnlargement: true }),
 	);
 	console.log(`resized ${relative} (${Math.round(info.size / 1024)}KB)`);
+	await writeWebpVariant(filePath);
 }
 
 await ensureNoImagePlaceholder();

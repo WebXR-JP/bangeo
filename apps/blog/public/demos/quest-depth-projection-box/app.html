@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quest奥行き合成デモ</title>
+  <style>
+    :root {
+      --ink: #111827;
+      --muted: #64748b;
+      --line: #e5edf7;
+      --rose: #e11d48;
+      --rose-soft: #fff1f2;
+      --blue: #2797d8;
+      --cyan: #24c7dc;
+      --panel: rgba(255, 255, 255, 0.92);
+    }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body {
+      font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+      background: linear-gradient(135deg, #fff7f9, #f8fbff 58%, #eef8ff);
+      color: var(--ink);
+    }
+    .shell {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 310px;
+      gap: 16px;
+      padding: 16px;
+    }
+    .stage {
+      min-width: 0;
+      border: 1px solid rgba(39, 151, 216, 0.16);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.68);
+      box-shadow: 0 18px 60px rgba(15, 23, 42, 0.08);
+      overflow: hidden;
+      position: relative;
+    }
+    canvas { display: block; width: 100%; height: 100%; }
+    .badge-row {
+      position: absolute;
+      left: 14px;
+      top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      pointer-events: none;
+    }
+    .badge {
+      border: 1px solid rgba(39, 151, 216, 0.16);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.86);
+      color: #2563a8;
+      padding: 5px 9px;
+      font-size: 11px;
+      font-weight: 900;
+      box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
+    }
+    .panel {
+      border: 1px solid rgba(225, 29, 72, 0.12);
+      border-radius: 18px;
+      background: var(--panel);
+      box-shadow: 0 18px 60px rgba(15, 23, 42, 0.1);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      min-width: 0;
+    }
+    h1 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.35;
+      letter-spacing: 0;
+    }
+    .lead {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+      font-weight: 650;
+    }
+    .seg {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    button {
+      appearance: none;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: white;
+      color: #334155;
+      min-height: 38px;
+      padding: 8px 10px;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+    }
+    button:hover { border-color: rgba(225, 29, 72, 0.35); }
+    button[aria-pressed="true"] {
+      border-color: rgba(225, 29, 72, 0.4);
+      background: var(--rose-soft);
+      color: var(--rose);
+    }
+    label {
+      display: grid;
+      gap: 8px;
+      color: #334155;
+      font-size: 12px;
+      font-weight: 900;
+    }
+    input[type="range"] { width: 100%; accent-color: var(--rose); }
+    .readout {
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 14px;
+      background: #f8fbff;
+      border: 1px solid var(--line);
+      font-size: 12px;
+      line-height: 1.55;
+      color: #475569;
+      font-weight: 700;
+    }
+    .readout strong { color: var(--ink); }
+    @media (max-width: 780px) {
+      .shell {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(0, 1fr) auto;
+        padding: 10px;
+      }
+      .panel { max-height: 42vh; overflow: auto; }
+      h1 { font-size: 16px; }
+      .lead { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="stage" aria-label="奥行き合成プレビュー">
+      <canvas id="stage"></canvas>
+      <div class="badge-row">
+        <span class="badge" id="xrBadge">WebXR確認中</span>
+        <span class="badge" id="depthBadge">奥行き表示の確認</span>
+      </div>
+    </section>
+    <aside class="panel">
+      <div>
+        <h1>Quest奥行き合成デモ</h1>
+        <p class="lead">現実の机エッジと仮想ボックスの前後関係を、奥行きを使う表示と使わない表示で比較します。</p>
+      </div>
+      <div class="seg" role="group" aria-label="depth mode">
+        <button id="depthOn" type="button" aria-pressed="true">奥行きを使う</button>
+        <button id="depthOff" type="button" aria-pressed="false">奥行きなし</button>
+      </div>
+      <label>
+        箱の奥行き
+        <input id="boxDepth" type="range" min="20" max="90" value="62">
+      </label>
+      <label>
+        机エッジの奥行き
+        <input id="tableDepth" type="range" min="25" max="80" value="50">
+      </label>
+      <button id="sweep" type="button">前後比較を再生</button>
+      <div class="readout" id="readout">
+        <strong>判定中</strong>
+        <span>奥行き合成の見え方を計算しています。</span>
+      </div>
+    </aside>
+  </div>
+  <script>
+    const canvas = document.getElementById("stage");
+    const ctx = canvas.getContext("2d");
+    const depthOn = document.getElementById("depthOn");
+    const depthOff = document.getElementById("depthOff");
+    const boxDepth = document.getElementById("boxDepth");
+    const tableDepth = document.getElementById("tableDepth");
+    const sweep = document.getElementById("sweep");
+    const readout = document.getElementById("readout");
+    const xrBadge = document.getElementById("xrBadge");
+    const depthBadge = document.getElementById("depthBadge");
+
+    let useDepth = true;
+    let sweepStart = 0;
+    let sweeping = false;
+    let xrSupported = false;
+
+    function resize() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+      canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    async function detectXR() {
+      if (!navigator.xr || !navigator.xr.isSessionSupported) {
+        xrBadge.textContent = "WebXRなし";
+        return;
+      }
+      try {
+        xrSupported = await navigator.xr.isSessionSupported("immersive-ar");
+        xrBadge.textContent = xrSupported ? "ARセッション対応" : "ARは代替表示";
+      } catch (_error) {
+        xrBadge.textContent = "ARは代替表示";
+      }
+    }
+
+    function setMode(next) {
+      useDepth = next;
+      depthOn.setAttribute("aria-pressed", String(useDepth));
+      depthOff.setAttribute("aria-pressed", String(!useDepth));
+      depthBadge.textContent = useDepth ? "奥行き合成: 有効" : "奥行き合成: 無効";
+    }
+
+    function roundedRect(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+
+    function drawRoom(w, h, t) {
+      const grad = ctx.createLinearGradient(0, 0, w, h);
+      grad.addColorStop(0, "#fff7f9");
+      grad.addColorStop(0.55, "#f8fbff");
+      grad.addColorStop(1, "#eaf7ff");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.strokeStyle = "rgba(39, 151, 216, 0.18)";
+      ctx.lineWidth = 1;
+      const horizon = h * 0.46;
+      for (let i = -8; i <= 8; i++) {
+        const x = w * 0.5 + i * w * 0.07;
+        ctx.beginPath();
+        ctx.moveTo(x, horizon);
+        ctx.lineTo(w * 0.5 + i * w * 0.18, h);
+        ctx.stroke();
+      }
+      for (let i = 0; i < 9; i++) {
+        const y = horizon + i * i * h * 0.008;
+        ctx.beginPath();
+        ctx.moveTo(w * 0.08, y);
+        ctx.lineTo(w * 0.92, y);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = "rgba(225, 29, 72, 0.08)";
+      ctx.beginPath();
+      ctx.arc(w * 0.18, h * 0.2 + Math.sin(t * 0.001) * 8, 58, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function drawCube(x, y, size, occluded) {
+      ctx.save();
+      ctx.globalAlpha = occluded ? 0.32 : 0.82;
+      const g = ctx.createLinearGradient(x, y - size, x + size, y + size);
+      g.addColorStop(0, "rgba(36, 199, 220, 0.92)");
+      g.addColorStop(1, "rgba(87, 180, 255, 0.58)");
+      ctx.fillStyle = g;
+      ctx.strokeStyle = "#12b8d0";
+      ctx.lineWidth = 3;
+      roundedRect(x - size * 0.6, y - size * 0.55, size * 1.2, size * 1.1, 8);
+      ctx.fill();
+      ctx.stroke();
+      ctx.globalAlpha *= 0.85;
+      ctx.beginPath();
+      ctx.moveTo(x - size * 0.6, y - size * 0.55);
+      ctx.lineTo(x - size * 0.25, y - size * 0.86);
+      ctx.lineTo(x + size * 0.95, y - size * 0.86);
+      ctx.lineTo(x + size * 0.6, y - size * 0.55);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x + size * 0.6, y - size * 0.55);
+      ctx.lineTo(x + size * 0.95, y - size * 0.86);
+      ctx.lineTo(x + size * 0.95, y + size * 0.24);
+      ctx.lineTo(x + size * 0.6, y + size * 0.55);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawTable(w, h, tableY, front) {
+      ctx.save();
+      ctx.fillStyle = "#f8fafc";
+      ctx.strokeStyle = "#97a6ba";
+      ctx.lineWidth = 2;
+      roundedRect(w * 0.28, tableY, w * 0.48, h * 0.075, 10);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#e6ecf4";
+      ctx.fillRect(w * 0.32, tableY + h * 0.073, 14, h * 0.21);
+      ctx.fillRect(w * 0.7, tableY + h * 0.073, 14, h * 0.21);
+      if (front) {
+        ctx.fillStyle = "rgba(248, 250, 252, 0.94)";
+        roundedRect(w * 0.28, tableY, w * 0.48, h * 0.075, 10);
+        ctx.fill();
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function draw(time) {
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      drawRoom(w, h, time);
+
+      if (sweeping) {
+        const elapsed = time - sweepStart;
+        const value = 55 + Math.sin(elapsed * 0.003) * 26;
+        boxDepth.value = String(Math.round(value));
+        if (elapsed > 3600) sweeping = false;
+      }
+
+      const cubeDepth = Number(boxDepth.value);
+      const edgeDepth = Number(tableDepth.value);
+      const cubeBehindTable = cubeDepth > edgeDepth;
+      const cubeX = w * (0.42 + (cubeDepth - 55) * 0.003);
+      const cubeY = h * (0.54 + (cubeDepth - 55) * 0.003);
+      const cubeSize = Math.max(56, Math.min(w, h) * 0.16);
+      const tableY = h * (0.59 + (edgeDepth - 55) * 0.002);
+
+      ctx.strokeStyle = "rgba(39, 151, 216, 0.34)";
+      ctx.setLineDash([6, 8]);
+      for (let i = 0; i < 5; i++) {
+        const y = h * 0.28 + i * h * 0.08;
+        ctx.beginPath();
+        ctx.moveTo(w * 0.2, y);
+        ctx.lineTo(w * 0.82, y + (i - 2) * 6);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+
+      const occlude = useDepth && cubeBehindTable;
+      drawTable(w, h, tableY, false);
+      drawCube(cubeX, cubeY, cubeSize, occlude);
+      if (occlude) drawTable(w, h, tableY, true);
+
+      ctx.fillStyle = "#111827";
+      ctx.font = "900 12px system-ui";
+      ctx.fillText(useDepth ? "奥行きを使った合成" : "平面として重ねる表示", w * 0.08, h - 26);
+      ctx.fillStyle = useDepth && cubeBehindTable ? "#e11d48" : "#2797d8";
+      ctx.beginPath();
+      ctx.arc(w * 0.055, h - 30, 7, 0, Math.PI * 2);
+      ctx.fill();
+
+      const title = useDepth
+        ? cubeBehindTable
+          ? "奥行きあり: 机の手前面で箱を隠す"
+          : "奥行きあり: 箱は机より手前"
+        : "奥行きなし: 箱は常に上に重なる";
+      readout.innerHTML = `<strong>${title}</strong><span>箱 ${cubeDepth} / 机 ${edgeDepth}。Quest実機では奥行き合成の対応状況とブラウザ設定で差が出ます。</span>`;
+
+      requestAnimationFrame(draw);
+    }
+
+    depthOn.addEventListener("click", () => setMode(true));
+    depthOff.addEventListener("click", () => setMode(false));
+    sweep.addEventListener("click", () => {
+      sweeping = true;
+      sweepStart = performance.now();
+    });
+    window.addEventListener("resize", resize);
+    resize();
+    setMode(true);
+    detectXR();
+    requestAnimationFrame(draw);
+  </script>
+</body>
+</html>

@@ -1,0 +1,176 @@
+{
+	"styleVersion": "blob-v1",
+	"styleReference": [
+		"/assets/tech/unity-webxr-build-guide.png",
+		"/assets/tech/webxr-colocation-meta-quest.png"
+	],
+	"rules": [
+		"パステル blob マスコット系（mint green + sky blue の丸いキャラ）。",
+		"unity-webxr-build-guide / webxr-colocation-meta-quest と同じ線画・配色・背景グラデーション。",
+		"キャラは記事ごとに同じデザインで統一。",
+		"文字・数字・透かし・商標ロゴなし（タイトルは記事側で表示）。",
+		"3:2 横長。主題が小さく表示されても判別できる中央構図。",
+		"PNG 原本 + WebP を apps/blog/public/assets/{tech,news}/ に保存。",
+		"frontmatter の thumbnail は WebP を優先。"
+	],
+	"articles": [
+		{
+			"slug": "unity-webxr-sample",
+			"filename": "unity-webxr-build-guide",
+			"assetDir": "tech",
+			"thumbnail": "/assets/tech/unity-webxr-build-guide.webp"
+		},
+		{
+			"slug": "webxr-colocation-meta-quest",
+			"filename": "webxr-colocation-meta-quest",
+			"assetDir": "tech",
+			"thumbnail": "/assets/tech/webxr-colocation-meta-quest.webp"
+		},
+		{
+			"slug": "webxr-device-api-inline-stereo-space-warp-2026-06",
+			"filename": "webxr-inline-stereo-space-warp",
+			"assetDir": "tech",
+			"thumbnail": "/assets/tech/webxr-inline-stereo-space-warp.webp"
+		},
+		{
+			"slug": "threejs-r184-webxr-layers-hand-model-cache",
+			"filename": "threejs-r184-webxr-layers",
+			"assetDir": "tech",
+			"thumbnail": "/assets/tech/threejs-r184-webxr-layers.webp"
+		},
+		{
+			"slug": "safari-27-beta-visionos-immersive-website-environments-webxr",
+			"filename": "safari-27-visionos-immersive-web",
+			"assetDir": "tech",
+			"thumbnail": "/assets/tech/safari-27-visionos-immersive-web.webp"
+		},
+		{
+			"slug": "safari-27-html-model-element-spatial-web",
+			"filename": "safari-27-html-model-element",
+			"assetDir": "tech",
+			"thumbnail": "/assets/tech/safari-27-html-model-element.webp"
+		},
+		{
+			"slug": "webxr-html-ui-dom-overlay-html-in-canvas-spatial-css",
+			"filename": "webxr-html-ui-spatial",
+			"assetDir": "tech",
+			"thumbnail": "/assets/tech/webxr-html-ui-spatial.webp"
+		},
+		{
+			"slug": "webxr-performance-foveation-fixed-dynamic-eye-tracking",
+			"filename": "webxr-foveation-performance",
+			"assetDir": "tech",
+			"thumbnail": "/assets/tech/webxr-foveation-performance.webp"
+		},
+		{
+			"slug": "quest-browser-146-webgpu-webxr",
+			"filename": "webgpu-webxr-quest-browser",
+			"assetDir": "tech",
+			"thumbnail": "/assets/tech/webgpu-webxr-quest-browser.webp"
+		},
+		{
+			"slug": "pcvr-webxr-guide",
+			"filename": "pcvr-webxr-guide",
+			"assetDir": "tech",
+			"thumbnail": "/assets/tech/pcvr-webxr-guide.webp"
+		},
+		{
+			"slug": "meta-quest-browser-url-launch",
+			"filename": "meta-web-launch",
+			"assetDir": "tech",
+			"thumbnail": "/assets/tech/meta-web-launch.webp"
+		},
+		{
+			"slug": "ios-webxr-app-clip-guide",
+			"filename": "ios-webxr-app-clip",
+			"assetDir": "tech",
+			"thumbnail": "/assets/tech/ios-webxr-app-clip.webp"
+		},
+		{
+			"slug": "playcanvas-html-in-canvas",
+			"filename": "playcanvas-html-in-canvas",
+			"assetDir": "tech",
+			"thumbnail": "/assets/tech/playcanvas-html-in-canvas.webp"
+		},
+		{
+			"slug": "playcanvas-engine-2-19-7-webgpu-xr-stability",
+			"filename": "playcanvas-engine-2-19-7-webgpu-xr-stability",
+			"assetDir": "tech",
+			"thumbnail": "/assets/tech/playcanvas-engine-2-19-7-webgpu-xr-stability.webp"
+		},
+		{
+			"slug": "iwsdk-ai-vr-development",
+			"filename": "iwsdk-gallery-detail-xr",
+			"assetDir": "tech",
+			"thumbnail": "/assets/tech/iwsdk-gallery-detail-xr.webp"
+		},
+		{
+			"slug": "8thwall-world-effects",
+			"filename": "8thwall-world-effects",
+			"assetDir": "tech",
+			"thumbnail": "/assets/tech/8thwall-world-effects.webp"
+		},
+		{
+			"slug": "webxr-advent-calendar-2025",
+			"filename": "webxr-advent-calendar-2025",
+			"assetDir": "news",
+			"thumbnail": "/assets/news/webxr-advent-calendar-2025.webp"
+		},
+		{
+			"slug": "meta-quest-price-change-2026",
+			"filename": "meta-quest-price-change-2026",
+			"assetDir": "news",
+			"thumbnail": "/assets/news/meta-quest-price-change-2026.webp"
+		},
+		{
+			"slug": "pico-4-ultra-price-change-2026",
+			"filename": "pico-4-ultra-price-change-2026",
+			"assetDir": "news",
+			"thumbnail": "/assets/news/pico-4-ultra-price-change-2026.webp"
+		},
+		{
+			"slug": "pico-developer-special-event-2026",
+			"filename": "pico-developer-special-event-2026",
+			"assetDir": "news",
+			"thumbnail": "/assets/news/pico-developer-special-event-2026.webp"
+		}
+	],
+	"experiments": [
+		{
+			"slug": "quest-depth-projection-box",
+			"filename": "quest-depth-projection-box",
+			"assetDir": "experiments",
+			"thumbnail": "/assets/experiments/quest-depth-projection-box.webp"
+		},
+		{
+			"slug": "webgpu-fallback-lab",
+			"filename": "webgpu-fallback-lab",
+			"assetDir": "experiments",
+			"thumbnail": "/assets/experiments/webgpu-fallback-lab.webp"
+		},
+		{
+			"slug": "spatial-model-preview",
+			"filename": "spatial-model-preview",
+			"assetDir": "experiments",
+			"thumbnail": "/assets/experiments/spatial-model-preview.webp"
+		},
+		{
+			"slug": "xr-mesh-export",
+			"filename": "xr-mesh-export",
+			"assetDir": "experiments",
+			"thumbnail": "/assets/experiments/xr-mesh-export.webp"
+		},
+		{
+			"slug": "8thwall-face-glasses",
+			"filename": "8thwall-face-glasses",
+			"assetDir": "experiments",
+			"thumbnail": "/assets/experiments/8thwall-face-glasses.webp"
+		},
+		{
+			"slug": "iwsdk-gallery",
+			"filename": "iwsdk-gallery",
+			"assetDir": "experiments",
+			"thumbnail": "/assets/experiments/iwsdk-gallery.webp"
+		}
+	]
+}

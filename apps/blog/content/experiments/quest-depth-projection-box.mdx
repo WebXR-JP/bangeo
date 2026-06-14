@@ -1,0 +1,88 @@
+---
+title: "Quest奥行き合成デモ"
+description: "QuestのMR環境で、仮想の箱が現実の机や壁との前後関係を持てるか確認するための奥行き合成実験です。"
+date: "2026-06-14"
+category: "Quest MR"
+tags:
+  - "WebXR"
+  - "奥行き"
+  - "Meta Quest"
+  - "MR"
+  - "代替表示"
+frameworks:
+  - "素のHTML"
+  - "Canvas"
+devices:
+  - "Meta Quest"
+  - "デスクトップ"
+difficulty: "intermediate"
+estimatedTime: 4
+link: "/demos/quest-depth-projection-box/xr.html"
+thumbnail: "/assets/experiments/quest-depth-projection-box.webp"
+---
+
+QuestのMR環境で、仮想オブジェクトが現実物体の手前にあるのか、奥にあるのかを確認するための実験です。
+
+このデモでは、実機の奥行きAPI（Depth API）を直接使う前に、机のエッジと仮想ボックスの奥行きをスライダーで動かし、奥行きを使う表示と使わない表示の差分を見える形にしています。Quest Browserで奥行き合成を試す前に、どの状態を検証すべきか整理するための仕様カードとして使えます。
+
+## 通常プレビュー
+
+<DemoIframe
+  src="/demos/quest-depth-projection-box/app.html"
+  title="Quest奥行き合成デモ"
+  fullPageHref="/demos/quest-depth-projection-box/app.html"
+  height={520}
+  caption="奥行きを使う / 使わないを切り替え、箱と机エッジの奥行きを動かして前後関係を比較できます。"
+/>
+
+## WebXRデモ
+
+<DemoIframe
+  src="/demos/quest-depth-projection-box/xr.html"
+  title="Quest奥行き合成デモ（WebXR）"
+  fullPageHref="/demos/quest-depth-projection-box/xr.html"
+  height={520}
+  caption="Quest BrowserやWebXR EmulatorでARに入ると、目の前に半透明の箱と机エッジを表示します。奥行きAPIが使えない環境でも通常3D表示として確認できます。"
+/>
+
+## 試せること
+
+- 奥行きを使う / 使わないを切り替えて、仮想ボックスの合成結果を比べる
+- 箱と机エッジの奥行きを動かし、どの位置で隠れるべきか確認する
+- WebXRがないデスクトップ環境でも、奥行き合成で見るべき状態を確認する
+
+## 学べること
+
+WebXRの奥行き系機能は、コードだけでなく端末、ブラウザ、実験フラグ、セッションモードに強く依存します。
+
+そのため、デモ公開時は「奥行き情報が使えるか」だけではなく、奥行き情報が使えない場合にどう見せるか、前後関係が左右目で破綻しないか、通常AR表示へ落ちた時に意味が伝わるかを確認する必要があります。
+
+## 対応環境
+
+| 環境 | 状態 |
+| --- | --- |
+| Quest Browser 146.x以降 | 実験検証向け |
+| デスクトップChrome | 代替プレビュー |
+| iOS Safari | 非対応 / 概念プレビュー |
+
+## 実装メモ
+
+- 体験パターン: MR空間での奥行き合成プレビュー
+- 描画: Canvas 2Dによる通常プレビュー / Three.jsによるWebXRデモ
+- XRモード: `immersive-ar` 想定
+- 任意機能: 奥行き系機能
+- 代替表示: 奥行きなしの通常合成として表示
+
+## 用語メモ
+
+| 用語 | このページでの意味 |
+| --- | --- |
+| 奥行き合成 | 現実の机や壁との前後関係を使って、仮想オブジェクトを自然に重ねる表示 |
+| 奥行きなし表示 | 奥行き情報を使わず、仮想オブジェクトを画面上にそのまま重ねる表示 |
+| 代替表示 | 端末やブラウザが対応していない時でも、通常の3D表示として体験を残すこと |
+
+## 関連記事
+
+- [Quest Browser 146.0でWebGPU in WebXRが実験的に利用可能に](/tech-articles/quest-browser-146-webgpu-webxr)
+- [PlayCanvas Engine v2.19.7：WebGPU / XR 実機検証向けの安定化更新](/tech-articles/playcanvas-engine-2-19-7-webgpu-xr-stability)
+- [WebXR標準化・対応状況](/webxr-status)

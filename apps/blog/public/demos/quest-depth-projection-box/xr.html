@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quest奥行き合成デモ（WebXR）</title>
+  <style>
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body {
+      font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+      background: linear-gradient(135deg, #fff7f9, #eef8ff);
+      color: #111827;
+    }
+    canvas { display: block; }
+    .hud {
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      top: 12px;
+      z-index: 10;
+      display: grid;
+      gap: 8px;
+      pointer-events: none;
+    }
+    .card {
+      width: min(520px, 100%);
+      border: 1px solid rgba(39, 151, 216, 0.18);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 16px 42px rgba(15, 23, 42, 0.12);
+      padding: 12px 14px;
+    }
+    h1 { margin: 0 0 5px; font-size: 15px; line-height: 1.4; letter-spacing: 0; }
+    p { margin: 0; color: #64748b; font-size: 12px; line-height: 1.6; font-weight: 700; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .chip {
+      border-radius: 999px;
+      border: 1px solid #d8eafb;
+      background: #f8fbff;
+      color: #2563a8;
+      padding: 5px 8px;
+      font-size: 11px;
+      font-weight: 900;
+    }
+    .chip.warn { color: #be123c; border-color: #fecdd3; background: #fff1f2; }
+  </style>
+</head>
+<body>
+  <div id="overlay" class="hud">
+    <section class="card">
+      <h1>WebXRのARで奥行き合成を確認</h1>
+      <p>ARに入ると、目の前に半透明の箱を表示します。奥行きAPI対応の有無は下の表示で確認します。</p>
+      <div class="chips">
+        <span class="chip" id="xrState">WebXR確認中</span>
+        <span class="chip" id="depthState">奥行きAPI確認中</span>
+        <span class="chip">代替表示あり</span>
+      </div>
+    </section>
+  </div>
+
+  <script type="module">
+    import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
+    import { ARButton } from "https://unpkg.com/three@0.160.0/examples/jsm/webxr/ARButton.js";
+
+    const overlay = document.getElementById("overlay");
+    const xrState = document.getElementById("xrState");
+    const depthState = document.getElementById("depthState");
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 30);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.xr.enabled = true;
+    document.body.appendChild(renderer.domElement);
+
+    scene.add(new THREE.HemisphereLight(0xffffff, 0x88b8ff, 2.2));
+
+    const box = new THREE.Mesh(
+      new THREE.BoxGeometry(0.34, 0.34, 0.34),
+      new THREE.MeshStandardMaterial({
+        color: 0x17c8df,
+        transparent: true,
+        opacity: 0.62,
+        roughness: 0.35,
+        metalness: 0.05,
+      }),
+    );
+    box.position.set(0, 0, -1.15);
+    scene.add(box);
+
+    const edge = new THREE.Mesh(
+      new THREE.BoxGeometry(0.9, 0.08, 0.18),
+      new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.55 }),
+    );
+    edge.position.set(0, -0.25, -1.05);
+    scene.add(edge);
+
+    const grid = new THREE.GridHelper(2.2, 12, 0x86c8ef, 0xcfe8fa);
+    grid.position.set(0, -0.3, -1.1);
+    scene.add(grid);
+
+    function updateSupportText() {
+      const hasXR = !!navigator.xr;
+      xrState.textContent = hasXR ? "WebXRあり" : "WebXRなし";
+      xrState.classList.toggle("warn", !hasXR);
+
+      const hasDepthApi =
+        "XRWebGLBinding" in window ||
+        ("XRFrame" in window && "getDepthInformation" in XRFrame.prototype);
+      depthState.textContent = hasDepthApi ? "奥行きAPI候補あり" : "奥行きAPI未検出";
+      depthState.classList.toggle("warn", !hasDepthApi);
+    }
+
+    updateSupportText();
+
+    document.body.appendChild(
+      ARButton.createButton(renderer, {
+        optionalFeatures: ["local-floor", "dom-overlay", "depth-sensing"],
+        domOverlay: { root: overlay },
+        depthSensing: {
+          usagePreference: ["gpu-optimized", "cpu-optimized"],
+          dataFormatPreference: ["luminance-alpha", "float32"],
+        },
+      }),
+    );
+
+    renderer.xr.addEventListener("sessionstart", () => {
+      xrState.textContent = "ARセッション中";
+      overlay.style.pointerEvents = "none";
+    });
+    renderer.xr.addEventListener("sessionend", () => {
+      xrState.textContent = "ARセッション終了";
+    });
+
+    window.addEventListener("resize", () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    renderer.setAnimationLoop((time) => {
+      box.rotation.y = time * 0.001;
+      box.rotation.x = Math.sin(time * 0.0012) * 0.12;
+      renderer.render(scene, camera);
+    });
+  </script>
+</body>
+</html>

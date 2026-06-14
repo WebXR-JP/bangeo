@@ -11,89 +11,15 @@ import {
 	XRMesh as XRMeshComponent,
 	XRPlane as XRPlaneComponent,
 } from "@iwsdk/core";
+import { Group, Matrix4, type Mesh } from "three";
 import {
-	BufferAttribute,
-	BufferGeometry,
-	DoubleSide,
-	Group,
-	Matrix4,
-	Mesh,
-	MeshBasicMaterial,
-	Shape,
-	ShapeGeometry,
-} from "three";
-import { GLTFExporter } from "three/examples/jsm/exporters/GLTFExporter.js";
-
-// ---- カラーマッピング ----------------------------------------
-
-const LABEL_COLOR: Record<string, number> = {
-	floor: 0x4ade80,
-	wall: 0x60a5fa,
-	ceiling: 0xa78bfa,
-	table: 0xfb923c,
-	couch: 0xfb923c,
-	door: 0xfb923c,
-	window: 0xfb923c,
-};
-const DEFAULT_MESH_COLOR = 0x94a3b8;
-
-function colorForLabel(label?: string): number {
-	if (!label) return DEFAULT_MESH_COLOR;
-	return LABEL_COLOR[label.toLowerCase()] ?? DEFAULT_MESH_COLOR;
-}
-
-// ---- DOM ヘルパー -------------------------------------------
-
-function showToast(message: string): void {
-	const toast = document.getElementById("toast");
-	if (!toast) return;
-	toast.textContent = message;
-	toast.classList.add("visible");
-	setTimeout(() => toast.classList.remove("visible"), 3000);
-}
-
-function updateStatus(
-	meshCount: number,
-	planeCount: number,
-	state: string,
-): void {
-	const elMesh = document.getElementById("status-meshes");
-	const elPlane = document.getElementById("status-planes");
-	const elState = document.getElementById("status-state");
-	if (elMesh) elMesh.textContent = `Meshes: ${meshCount}`;
-	if (elPlane) elPlane.textContent = `Planes: ${planeCount}`;
-	if (elState) elState.textContent = `Status: ${state}`;
-}
-
-function activateOverlay(): void {
-	const overlay = document.getElementById("overlay-root");
-	if (overlay) overlay.classList.add("active");
-}
-
-function deactivateOverlay(): void {
-	const overlay = document.getElementById("overlay-root");
-	if (overlay) overlay.classList.remove("active");
-}
-
-// ---- ハプティクス -------------------------------------------
-
-function hapticPulse(): void {
-	try {
-		const gamepads = navigator.getGamepads?.() ?? [];
-		for (const gp of gamepads) {
-			if (!gp) continue;
-			// GamepadHapticActuator に pulse が存在しないブラウザ実装を動的に参照する
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const actuator = (gp as any).hapticActuators?.[0];
-			if (actuator?.pulse) {
-				actuator.pulse(0.5, 100).catch(() => {});
-				break;
-			}
-		}
-	} catch (_) {
-		// ハプティクス非対応環境ではサイレントに無視
-	}
-}
+	createDetectedMesh,
+	createDetectedPlane,
+	disposeDetectedMesh,
+} from "../lib/detected-geometry.js";
+import { exportGroupAsGlb } from "../lib/glb-export.js";
+import { pulseHapticFeedback } from "../lib/haptics.js";
+import { OverlayController } from "../lib/overlay.js";
 
 // ---- システム本体 -------------------------------------------
 
@@ -104,6 +30,7 @@ export class MeshVisualizerSystem extends createSystem({
 	/** エクスポート対象グループ */
 	public exportGroup = new Group();
 
+	private overlay = new OverlayController();
 	private matrixBuffer = new Matrix4();
 
 	/** XRMesh (webxr) -> Three.js Mesh のマップ */
@@ -118,8 +45,8 @@ export class MeshVisualizerSystem extends createSystem({
 		this.exportGroup.name = "room-export";
 
 		this.xrManager.addEventListener("sessionstart", () => {
-			activateOverlay();
-			updateStatus(0, 0, "Scanning");
+			this.overlay.activate();
+			this.overlay.updateStatus(0, 0, "Scanning");
 			this.exportGroup.clear();
 			this.meshObjects.clear();
 			this.planeObjects.clear();
@@ -127,7 +54,7 @@ export class MeshVisualizerSystem extends createSystem({
 		});
 
 		this.xrManager.addEventListener("sessionend", () => {
-			deactivateOverlay();
+			this.overlay.deactivate();
 			this.scene.remove(this.exportGroup);
 			this.meshObjects.clear();
 			this.planeObjects.clear();
@@ -142,12 +69,12 @@ export class MeshVisualizerSystem extends createSystem({
 		) as HTMLButtonElement | null;
 
 		btnExport?.addEventListener("click", () => {
-			hapticPulse();
+			pulseHapticFeedback();
 			this.exportGLB();
 		});
 
 		btnReset?.addEventListener("click", () => {
-			hapticPulse();
+			pulseHapticFeedback();
 			this.resetScan();
 		});
 	}
@@ -169,7 +96,11 @@ export class MeshVisualizerSystem extends createSystem({
 			this.syncPlanes(detectedPlanes, frame, referenceSpace);
 		}
 
-		updateStatus(this.meshObjects.size, this.planeObjects.size, "Scanning");
+		this.overlay.updateStatus(
+			this.meshObjects.size,
+			this.planeObjects.size,
+			"Scanning",
+		);
 	}
 
 	// ---- メッシュ同期 ------------------------------------------
@@ -183,8 +114,7 @@ export class MeshVisualizerSystem extends createSystem({
 		for (const [rawMesh, threeMesh] of this.meshObjects) {
 			if (!detectedMeshes.has(rawMesh)) {
 				this.exportGroup.remove(threeMesh);
-				(threeMesh.geometry as BufferGeometry).dispose();
-				(threeMesh.material as MeshBasicMaterial).dispose();
+				disposeDetectedMesh(threeMesh);
 				this.meshObjects.delete(rawMesh);
 			}
 		}
@@ -202,34 +132,15 @@ export class MeshVisualizerSystem extends createSystem({
 				cachedTime !== rawMesh.lastChangedTime;
 
 			if (needsRebuild) {
-				// ジオメトリを(再)生成
-				const geometry = new BufferGeometry();
-				geometry.setAttribute(
-					"position",
-					new BufferAttribute(rawMesh.vertices.slice(), 3),
-				);
-				geometry.setIndex(new BufferAttribute(rawMesh.indices.slice(), 1));
-				geometry.computeVertexNormals();
-
-				const color = colorForLabel(rawMesh.semanticLabel);
-				const material = new MeshBasicMaterial({
-					color,
-					wireframe: true,
-					transparent: true,
-					opacity: 0.6,
-				});
-
+				const nextMesh = createDetectedMesh(rawMesh);
 				const existing = this.meshObjects.get(rawMesh);
 				if (existing) {
-					(existing.geometry as BufferGeometry).dispose();
-					(existing.material as MeshBasicMaterial).dispose();
-					existing.geometry = geometry;
-					existing.material = material;
+					disposeDetectedMesh(existing);
+					existing.geometry = nextMesh.geometry;
+					existing.material = nextMesh.material;
 				} else {
-					const threeMesh = new Mesh(geometry, material);
-					threeMesh.name = `mesh-${rawMesh.semanticLabel ?? "unknown"}`;
-					this.exportGroup.add(threeMesh);
-					this.meshObjects.set(rawMesh, threeMesh);
+					this.exportGroup.add(nextMesh);
+					this.meshObjects.set(rawMesh, nextMesh);
 				}
 
 				this.meshChangedTime.set(rawMesh, rawMesh.lastChangedTime);
@@ -255,8 +166,7 @@ export class MeshVisualizerSystem extends createSystem({
 		for (const [rawPlane, threeMesh] of this.planeObjects) {
 			if (!detectedPlanes.has(rawPlane)) {
 				this.exportGroup.remove(threeMesh);
-				(threeMesh.geometry as BufferGeometry).dispose();
-				(threeMesh.material as MeshBasicMaterial).dispose();
+				disposeDetectedMesh(threeMesh);
 				this.planeObjects.delete(rawPlane);
 			}
 		}
@@ -269,31 +179,9 @@ export class MeshVisualizerSystem extends createSystem({
 			this.matrixBuffer.fromArray(pose.transform.matrix);
 
 			if (!this.planeObjects.has(rawPlane)) {
-				const shape = new Shape();
-				const pts = rawPlane.polygon;
-				if (pts.length < 3) continue;
+				const threeMesh = createDetectedPlane(rawPlane);
+				if (!threeMesh) continue;
 
-				// Y=0 の polygon を XZ 平面 → Three.js ShapeGeometry (XY 平面) に変換
-				shape.moveTo(pts[0].x, pts[0].z);
-				for (let i = 1; i < pts.length; i++) {
-					shape.lineTo(pts[i].x, pts[i].z);
-				}
-				shape.closePath();
-
-				const geometry = new ShapeGeometry(shape);
-				// XY -> XZ に回転して水平/垂直を適切に扱う
-				geometry.rotateX(-Math.PI / 2);
-
-				const color = colorForLabel(rawPlane.semanticLabel);
-				const material = new MeshBasicMaterial({
-					color,
-					transparent: true,
-					opacity: 0.3,
-					side: DoubleSide,
-				});
-
-				const threeMesh = new Mesh(geometry, material);
-				threeMesh.name = `plane-${rawPlane.orientation ?? "unknown"}-${rawPlane.semanticLabel ?? "unknown"}`;
 				this.exportGroup.add(threeMesh);
 				this.planeObjects.set(rawPlane, threeMesh);
 			}
@@ -310,54 +198,30 @@ export class MeshVisualizerSystem extends createSystem({
 	// ---- GLB エクスポート --------------------------------------
 
 	private exportGLB(): void {
-		const exporter = new GLTFExporter();
-		const now = new Date();
-		const pad = (n: number) => String(n).padStart(2, "0");
-		const dateStr =
-			`${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}` +
-			`-${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-		const filename = `room-${dateStr}.glb`;
-
-		exporter.parse(
-			this.exportGroup,
-			(result: ArrayBuffer | { [key: string]: unknown }) => {
-				const blob = new Blob([result as ArrayBuffer], {
-					type: "model/gltf-binary",
-				});
-				const url = URL.createObjectURL(blob);
-				const a = document.createElement("a");
-				a.href = url;
-				a.download = filename;
-				a.style.display = "none";
-				document.body.appendChild(a);
-				a.click();
-				document.body.removeChild(a);
-				setTimeout(() => URL.revokeObjectURL(url), 10000);
-				showToast(`Saved: ${filename}`);
+		exportGroupAsGlb(this.exportGroup, {
+			onSuccess: (filename) => {
+				this.overlay.showToast(`Saved: ${filename}`);
 			},
-			(error: ErrorEvent) => {
+			onError: (error) => {
 				console.error("[MeshVisualizerSystem] GLTFExporter error:", error);
-				showToast("Export failed");
+				this.overlay.showToast("Export failed");
 			},
-			{ binary: true },
-		);
+		});
 	}
 
 	// ---- リセット -----------------------------------------------
 
 	private resetScan(): void {
 		for (const mesh of this.meshObjects.values()) {
-			(mesh.geometry as BufferGeometry).dispose();
-			(mesh.material as MeshBasicMaterial).dispose();
+			disposeDetectedMesh(mesh);
 		}
 		for (const mesh of this.planeObjects.values()) {
-			(mesh.geometry as BufferGeometry).dispose();
-			(mesh.material as MeshBasicMaterial).dispose();
+			disposeDetectedMesh(mesh);
 		}
 		this.exportGroup.clear();
 		this.meshObjects.clear();
 		this.planeObjects.clear();
-		updateStatus(0, 0, "Scanning");
-		showToast("Scan reset");
+		this.overlay.updateStatus(0, 0, "Scanning");
+		this.overlay.showToast("Scan reset");
 	}
 }

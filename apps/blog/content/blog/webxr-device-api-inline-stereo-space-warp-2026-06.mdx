@@ -53,6 +53,64 @@ session.requestAnimationFrame((time, frame) => {
 
 そのため、ヘッドセットで本格的なVR体験を作る場合は、これまでどおり `immersive-vr` を使います。`inline-stereo` は、Webページ内の3Dプレビューや埋め込み型XRビューを、対応環境でステレオ表示したい場合に関係する機能です。
 
+## PR #1436の議論で見えてきたinline-stereoのポイント
+
+`inline-stereo` は、最初から現在の形で固まっていたわけではありません。
+
+Immersive Webの[PR #1436](https://github.com/immersive-web/webxr/pull/1436)では、当初 `inline-stereo` を新しいsession modeとして追加する提案から議論が始まりました。提案時点では、ユーザー操作から要求された場合に空間権限の許可を求める可能性や、head trackingを許可しない場合に固定ステレオ表示へ落とす可能性も含めて説明されていました。
+
+しかし、最終的にWebXR Device APIの仕様本文では、`inline-stereo` は `XRSessionMode` ではなく、`inline` セッション向けのfeature descriptorとして整理されています。現在の `XRSessionMode` は `"inline"`、`"immersive-vr"`、`"immersive-ar"` の3つで、`inline-stereo` はこのsession mode一覧には入りません。（[WebXR Device API](https://www.w3.org/TR/webxr/)）
+
+つまり、開発者が呼び出す形は次のようになります。
+
+```javascript
+const session = await navigator.xr.requestSession("inline", {
+  optionalFeatures: ["inline-stereo"],
+});
+```
+
+`requestSession("inline-stereo")` のような新しいsession modeを指定するのではなく、あくまで `"inline"` セッションに対して `optionalFeatures` または `requiredFeatures` として `inline-stereo` を要求する、という整理です。
+
+PRのレビューでは、一時的に `head-tracked` のようなfeature descriptorを追加する案も含まれていました。しかしレビューでは、「head trackingを得るために常に `head-tracked` featureを要求しなければならない」と誤解される可能性が指摘されました。その後、PR作者は `head-tracked` 関連の記述を削除し、trackingが必要な場合は既存のreference space、特に `local` の扱いに寄せる方向に整理しています。
+
+ここは実装者にとって大事なポイントです。`inline-stereo` は「ステレオ表示を要求する機能」であり、「head trackingを有効化する機能」ではありません。head trackingや空間トラッキングが必要な場合は、reference spaceの要求や権限の扱いを別に考える必要があります。
+
+仕様本文でも、`local` reference spaceはinline sessionでは同意が必要と整理されています。一方で、`inline-stereo` feature descriptorそのものは、inline presentationでstereo primary viewsを露出するためのものとして定義されています。（[WebXR Device API](https://www.w3.org/TR/webxr/)）
+
+もうひとつ議論になったのが、projection matrixとview matrixをどのように計算するかです。
+
+レビューでは、tracked inline stereoの場合に、canvasが「ページの奥にある1:1スケールの3D世界への窓」のように振る舞うのか、それともCSSのportalやHTMLの`<model>`要素に近い、ページ上のcanvasサイズや面に結びついたジオラマ的な空間として振る舞うのかが論点になりました。
+
+この点について、現在の仕様では、`inline-stereo` が有効なinline sessionでは、ユーザーエージェントがoutput canvasのgeometryを使ってviewごとのprojection matrixを計算する、と説明されています。（[WebXR Device API](https://www.w3.org/TR/webxr/)）
+
+ただし、レビューでは「tracked inline stereoにおけるprojection matrix / view matrixの意味は、実装間で差が出やすい領域なので、さらに詳細化したほうがよい」という指摘も残っています。PR自体は2026年6月9日にマージされていますが、この周辺は今後も追加議論の余地がある部分です。
+
+アクセシビリティ面でも議論がありました。たとえば、ユーザーエージェントが `inline-stereo` をサポートすると示しながら、アクセシビリティ上の理由で片方のviewだけを表示したり、左右で同じmatrixを返したりしてよいのか、という論点です。最終コメントでは、以前の提案では許容されていたものの、現在の案では許容しない方向になり、開発者側が必要に応じて `inline-stereo` をoptionalにすればよい、という整理が示されています。
+
+そのため、既存記事で書いたように、まずは次のような実装方針が現実的です。
+
+```javascript
+const session = await navigator.xr.requestSession("inline", {
+  optionalFeatures: ["inline-stereo"],
+});
+
+const supportsInlineStereo =
+  session.enabledFeatures?.includes("inline-stereo") ?? false;
+```
+
+`inline-stereo` を必須にすると、対応していない環境ではセッション開始に失敗する可能性があります。一方、`optionalFeatures` として扱えば、対応環境ではステレオ表示、非対応環境では従来の単眼inline表示に戻すことができます。
+
+PR #1436は、1ファイルの仕様本文に対して70行追加・50行削除の差分としてマージされました。表面的には小さな仕様追加に見えますが、議論の中身を見ると、inline表示、head tracking、reference space、projection matrix、ページ上のスケール感、アクセシビリティまで関わる変更です。（[マージコミット](https://github.com/immersive-web/webxr/commit/f19a6dd3a0136a2a16fbaf368cfd8563a6af0dcb)）
+
+BANGEOとしては、`inline-stereo` を「inlineでも左右2viewを扱えるようになる機能」として紹介しつつ、現時点では次のように整理しておくのがよさそうです。
+
+* `inline-stereo` は新しいsession modeではなく、`inline` セッション用のfeature descriptor
+* `inline-stereo` はhead trackingそのものを要求する機能ではない
+* trackingが必要な場合はreference spaceと権限の扱いを別途確認する
+* 対応環境では `pose.views` に `"left"` / `"right"` の2つのviewが入る
+* 非対応環境も考えるなら `optionalFeatures` と `enabledFeatures` で分岐する
+* projection / view matrixの細かい意味づけは、今後の実装差分に注意する
+
 ## 実装で確認したいinline-stereoのポイント
 
 既存のWebXRコンテンツでは、次のような実装になっていることがあります。
@@ -128,6 +186,7 @@ WebXRは「ブラウザでVR/ARを表示する」段階から、より細かいr
 
 ## 関連リンク
 
+- [Immersive Web PR #1436: add support for inline-stereo](https://github.com/immersive-web/webxr/pull/1436)
 - [WebXR Device API（勧告候補草案、2026-06-09）](https://www.w3.org/TR/webxr/)
 - [WebXR Layers API Level 1（ワーキングドラフト、2026-06-01）](https://www.w3.org/TR/webxrlayers-1/)
 - [WebXR Space Warp | Meta Horizon OS Developers](https://developers.meta.com/horizon/documentation/web/webxr-space-warp/)

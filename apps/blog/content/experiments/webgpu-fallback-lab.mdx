@@ -1,0 +1,89 @@
+---
+title: "WebGPUからWebGLへ切り替える実験"
+description: "WebGPUが使えない端末やブラウザで、WebGL相当の描画経路へ切り替える判断を可視化するデモです。"
+date: "2026-06-14"
+category: "描画性能"
+tags:
+  - "WebGPU"
+  - "WebGL"
+  - "WebXR"
+  - "代替表示"
+  - "描画性能"
+frameworks:
+  - "素のHTML"
+  - "Canvas"
+devices:
+  - "デスクトップ"
+  - "Meta Quest"
+  - "モバイル"
+difficulty: "intermediate"
+estimatedTime: 5
+link: "/demos/webgpu-fallback-lab/xr.html"
+thumbnail: "/assets/experiments/webgpu-fallback-lab.webp"
+---
+
+WebGPU対応ブラウザが増えても、すべての端末でWebGPU経路を前提にできるわけではありません。
+
+このデモでは、`navigator.gpu` と実行先GPUの取得結果を見ながら、自動判定 / WebGPU優先 / WebGL固定の描画経路を切り替えます。実際のレンダリングはCanvasによる可視化ですが、公開デモで必要になる「WebGPUが使えない時にWebGLへ切り替える」という判断を体験できます。
+
+## 通常プレビュー
+
+<DemoIframe
+  src="/demos/webgpu-fallback-lab/app.html"
+  title="WebGPUからWebGLへ切り替える実験"
+  fullPageHref="/demos/webgpu-fallback-lab/app.html"
+  height={520}
+  caption="自動判定 / WebGPU優先 / WebGL固定を切り替え、WebGPU未対応時にWebGLへ切り替わる状態を確認できます。"
+/>
+
+## WebXRデモ
+
+<DemoIframe
+  src="/demos/webgpu-fallback-lab/xr.html"
+  title="WebGPU対応確認をWebXRで見る"
+  fullPageHref="/demos/webgpu-fallback-lab/xr.html"
+  height={520}
+  caption="WebXR表示自体は広く動くWebGLで描画し、端末がWebGPUに対応しているかを画面上で確認します。"
+/>
+
+## 試せること
+
+- 現在のブラウザでWebGPUの実行先が取得できるか確認する
+- WebGPUを優先した時に、未対応環境ではWebGLへ切り替わる流れを見る
+- 描画時間の目安を見ながら、代替表示設計の説明に使う
+
+## 学べること
+
+WebGPUは、APIが存在するかどうかと、実際にその端末で安定して使えるかが別問題です。
+
+WebXRデモでは、WebGPUが使える場合だけ高負荷な表現を有効にし、使えない場合はWebGL経路や軽量表現に落とす設計が必要になります。特にQuestやAndroid端末では、GPUやブラウザバージョンによって有効な経路が変わる可能性があります。
+
+## 対応環境
+
+| 環境 | 状態 |
+| --- | --- |
+| デスクトップChrome / Edge | WebGPUまたはWebGL代替 |
+| Quest Browser 146.x以降 | 実験検証向け |
+| iOS Safari | WebGL代替表示 |
+
+## 実装メモ
+
+- 体験パターン: WebGPU対応確認とWebGLへの切り替え
+- 描画: Canvas 2Dによる通常プレビュー / Three.jsによるWebXRデモ
+- 対応検出: `navigator.gpu` / `requestAdapter()`
+- XR: WebXRは任意
+- 代替表示: WebGPU不可の場合はWebGL相当の軽量経路へ切り替え
+
+## 用語メモ
+
+| 用語 | このページでの意味 |
+| --- | --- |
+| WebGPU対応あり | ブラウザからWebGPUの実行先を取得できる状態 |
+| WebGL代替 | WebGPUが使えない時に、広く対応しているWebGLの描画へ切り替えること |
+| 自動判定 | 端末の対応状況を見て、WebGPUかWebGL代替かをページ側で選ぶこと |
+
+## 関連記事
+
+- [Quest Browser 146.0でWebGPU in WebXRが実験的に利用可能に](/tech-articles/quest-browser-146-webgpu-webxr)
+- [PlayCanvas Engine v2.19.7：WebGPU / XR 実機検証向けの安定化更新](/tech-articles/playcanvas-engine-2-19-7-webgpu-xr-stability)
+- [WebXR標準化・対応状況](/webxr-status)
