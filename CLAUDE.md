@@ -76,3 +76,11 @@ AR と VR で置き場所・URLパターンが違うので注意する。
 - 絵文字は使わない（既存のMDX記事群に合わせる）
 - 日付は和暦との混在を避け、MDXでは `"YYYY-MM-DD"` または `"YYYY年M月D日"` 形式で書く
 - タグ・カテゴリはブログ側の既存分類を踏襲する（GUIDE / TECH / NEWS / VR / AR）
+
+## 記事制作・サムネイル
+
+ブログ記事の作成・修正・レビューでは、`.claude/skills/bangeo-article-authoring/SKILL.md` と `reference.md` を参照する。
+
+- BANGEOはOSSなので、記事・README・スキル・ガイドは公開される前提で書く
+- 読者向けでない編集チェックやエージェント向け手順は、記事MDXではなく `.claude/skills/` に置く
+- サムネイルは既存画像の雰囲気を確認し、必要ならCodex Imageで新規生成して `apps/blog/public/assets/` に保存する
