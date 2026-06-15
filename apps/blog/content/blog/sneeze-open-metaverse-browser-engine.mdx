@@ -1,6 +1,6 @@
 ---
-title: "SneezeはWebXRの新機能ではない──空間ブラウザエンジン構想として追う"
-description: "Metaverse Standards ForumとRP1が発表したオープンソースのメタバースブラウザエンジンSneezeを、WebXRの隣接トピックとして整理します。"
+title: "Sneezeとは？WebXRとは別の「空間ブラウザエンジン」をわかりやすく整理"
+description: "Metaverse Standards ForumとRP1が発表したSneezeを、WebXRとの違い、SOM、近接ベースの発見、OpenXR/WASM構成から整理します。"
 date: "2026年6月15日"
 category: "TECH"
 tags:
@@ -18,7 +18,7 @@ draft: false
 
 Metaverse Standards Forumは2026年6月15日、Open Metaverse Browser Initiative、略してOMBIの一環として、オープンソースのメタバースブラウザエンジン「Sneeze」を発表しました。
 
-発表では、SneezeはApache 2.0ライセンスで公開され、RP1がリードアーキテクト兼メンテナとして関わると説明されています。BANGEOでは、これを「WebXR Device APIの新機能」ではなく、Spatial Web / Open Metaverse Browser / 空間ブラウザの隣接トピックとして追いかけます。
+発表では、SneezeはApache 2.0ライセンスで公開され、RP1がリードアーキテクト兼メンテナとして関わると説明されています。この記事では、これを「WebXR Device APIの新機能」ではなく、Spatial Web / Open Metaverse Browser / 空間ブラウザの隣接トピックとして整理します。
 
 ## まず大事：SneezeはWebXR APIではない
 
@@ -26,7 +26,7 @@ Sneezeは、ChromeやSafariの中で `navigator.xr.requestSession()` を呼ぶ�
 
 WebXR Device APIが「WebページからXRデバイス、センサー、HMDにアクセスするためのAPI」だとすると、Sneezeは「複数の空間サービスを同じ3Dシーンに合成するための、別系統のブラウザエンジン構想」です。
 
-この違いを混ぜると、読者にとってかなり分かりづらくなります。BANGEO的には、SneezeはWebXRの代替ではなく、WebXRの隣で進む空間ブラウザの実装実験として見るのがよさそうです。
+この違いを混ぜると、Sneezeの位置づけが分かりづらくなります。SneezeはWebXRの代替ではなく、WebXRの隣で進む空間ブラウザの実装実験と捉えるのが自然です。
 
 ## 何が発表されたのか
 
@@ -76,7 +76,7 @@ WebXR開発者にとっては、ここが「今すぐ使うAPI」ではなく「
 
 OMBI文書は、Sneeze / MBEをWebブラウザの置き換えとは位置づけていません。むしろ、Webブラウザに組み込まれる自己完結したエンジンとして、HTMLレンダラーとは別に空間ファブリックを扱う可能性を説明しています。
 
-なので、BANGEOではSneezeを「WebXRの対抗馬」とは書きません。より正確には、WebXRがWebブラウザからXRデバイスへ入る道だとすると、Sneezeは空間サービスをブラウズするための別種のエンジンです。
+そのため、Sneezeを「WebXRの対抗馬」と見るのは正確ではありません。WebXRがWebブラウザからXRデバイスへ入る道だとすると、Sneezeは空間サービスをブラウズするための別種のエンジンです。
 
 整理すると、こうです。
 
@@ -96,19 +96,19 @@ OMBI文書は、Sneeze / MBEをWebブラウザの置き換えとは位置づけ�
 
 ## まだ注意して扱うべきところ
 
-発表文は大きなビジョンを掲げていますが、BANGEOでは少し慎重に扱います。
+発表文は大きなビジョンを掲げていますが、現時点では少し慎重に見る必要があります。
 
-SneezeのGitHubリポジトリは公開されていますが、READMEでは静的ライブラリとしてビルドしてアプリケーションに組み込む形が説明されています。少なくとも、読者に「今すぐ安定した開発者向けブラウザとして使える」と案内する段階ではなく、初期公開された参照実装・実験実装として追うのが安全です。
+SneezeのGitHubリポジトリは公開されていますが、READMEでは静的ライブラリとしてビルドしてアプリケーションに組み込む形が説明されています。少なくとも「今すぐ安定した開発者向けブラウザとして使える」と案内する段階ではなく、初期公開された参照実装・実験実装として捉えるのが安全です。
 
 また、RMAPについても、OMBI文書では今後オープン標準として進める意図が示されている段階です。SOM、RMAP、位置情報抽象化、権限モデル、空間アドレス、開発者ツールなど、これから詰めるべき部分はかなり残っています。
 
-## BANGEOでの扱い
+## まとめ
 
-BANGEOでは、SneezeをWebXR実装状況ではなく「Spatial Webの隣接トピック」として追跡します。
+Sneezeは、WebXR実装状況そのものではなく、Spatial Webの隣接トピックとして見るのが自然です。
 
-今すぐWebXR学習者の実装ルートが変わるわけではありません。ただし、ARグラス時代に「Webのように空間サービスを開く」とはどういうことかを考える上で、Sneeze / OMBIはかなり重要な動きです。
+今すぐWebXR学習者の実装ルートが変わるわけではありません。ただし、ARグラス時代に「Webのように空間サービスを開く」とはどういうことかを考える上で、Sneeze / OMBIは重要な比較対象になります。
 
-名前は冗談みたいですが、SOM、WASM sandbox、OpenXR、RMAPの設計思想はかなり本気です。これは追う価値があります。
+SOM、WASM sandbox、OpenXR、RMAPの設計思想は、今後の空間ブラウザやマルチサービス3Dシーン合成を考えるうえで注目しておきたいポイントです。
 
 ## 参考リンク
 
