@@ -82,6 +82,28 @@ export const WEBXR_SPEC_UPDATES: WebXRSpecUpdate[] = [
 
 export const WEBXR_WG_DISCUSSIONS: WebXRWgDiscussion[] = [
 	{
+		title: "Sneeze / Open Metaverse Browser Engine",
+		publishedAt: "2026-06-15",
+		status: "追跡中",
+		sourceUrl: "https://omb.wiki/sneeze",
+		issueUrl: "https://github.com/MetaverseStandards/sneeze",
+		summary:
+			"Metaverse Standards Forum と RP1 が OMBI の一環として発表したオープンソースのメタバースブラウザエンジン。WebXR API本体の更新ではなく、SOM、近接ベースのサービス発見、WASMサンドボックス、OpenXR、ANARIなどを組み合わせる Spatial Web の隣接トピックとして追跡します。",
+		topics: [
+			"Scene Object Model（SOM）による複数origin / 複数サービスの3Dシーン合成",
+			"URLナビゲーションではなく、近接ベースで空間ファブリックやサービスを発見するモデル",
+			"サービスごとのWebAssemblyサンドボックスと権限モデル",
+			"OpenXR、ANARI、glTF、SPIR-V、RMAPを組み合わせるネイティブ寄りの実装レイヤー",
+			"初期公開された参照実装・実験実装として扱い、安定した開発者向けブラウザとは案内しない",
+		],
+		relatedFeatures: [
+			"Spatial Web",
+			"Open Metaverse Browser Initiative",
+			"WebXR Device API",
+		],
+		articleCandidate: true,
+	},
+	{
 		title: "WebXR integration with HTML-in-canvas",
 		publishedAt: "2026-05-19",
 		status: "議論中",
