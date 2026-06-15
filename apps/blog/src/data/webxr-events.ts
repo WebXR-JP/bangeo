@@ -102,6 +102,53 @@ export const WEBXR_DEVICE_WATCH_TARGETS = [
 
 export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 	{
+		title: "Sneeze / OMBI at AWE USA 2026",
+		slug: "sneeze-ombi-awe-usa-2026",
+		category: "Event / Spatial Web / Standards Watch",
+		startDate: "2026-06-16",
+		endDate: "2026-06-17",
+		timezone: "America/Los_Angeles",
+		location: "Long Beach, California",
+		status: "live",
+		importance: "medium",
+		confidence: "high",
+		sourceUrl: "https://metaverse-standards.org/event/awe-2026/",
+		sourceType: "primary",
+		entityTags: [
+			"AWE USA 2026",
+			"Sneeze",
+			"OMBI",
+			"Metaverse Standards Forum",
+			"RP1",
+			"Sean Mann",
+			"Neil Trevett",
+		],
+		watchTopics: [
+			"From Web Browser to Metaverse Browser",
+			"Open Metaverse Browser Initiative roundtable",
+			"Sneeze architecture and roadmap",
+			"SOM / RMAP / OpenXR / WASM の標準化動向",
+		],
+		affectedBangeoPages: [
+			"/events",
+			"/webxr-status",
+			"/notes/open-metaverse-browser",
+			"/articles/sneeze-open-metaverse-browser-engine",
+		],
+		recommendedAction:
+			"AWE終了後、セッション資料、動画、GitHub更新、OMBI roadmapを確認する。WebXR本体ではなく Spatial Web / Open Metaverse Browser の隣接トピックとして扱う。",
+		lastCheckedAt: "2026-06-15",
+		nextCheckAt: "2026-06-18",
+		notes:
+			"Metaverse Standards Forum のAWE 2026ページで、6月16日の『From Web Browser to Metaverse Browser』と6月17日の『Roundtable Discussions: Open Metaverse Browser Initiative』が案内されている。",
+		region: "global",
+		organizerType: "standards",
+		watchMode: "primary",
+		webxrRelevance: "adjacent",
+		developerRelevance: "medium",
+		labCandidate: true,
+	},
+	{
 		title: "AWE USA 2026",
 		slug: "awe-usa-2026",
 		category: "XR / Spatial AI / WebAR",
