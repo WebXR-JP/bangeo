@@ -15,6 +15,7 @@ export const NAV_CATEGORIES: NavCategory[] = [
 		items: [
 			{ name: "WebXRとは", href: "/webxr-explainer" },
 			{ name: "標準化・対応状況", href: "/webxr-status" },
+			{ name: "イベントウォッチ", href: "/events" },
 			{ name: "活用事例集", href: "/platforms" },
 			{ name: "対応デバイス一覧", href: "/devices" },
 		],
@@ -60,6 +61,7 @@ export const FOOTER_MAIN_LINKS = [
 	{ name: "技術記事", href: "/tech-articles" },
 	{ name: "ポッドキャスト", href: "/podcast" },
 	{ name: "標準化状況", href: "/webxr-status" },
+	{ name: "イベント", href: "/events" },
 	{ name: "デバイス", href: "/devices" },
 	{ name: "ライブラリ", href: "/libraries" },
 	{ name: "私たちについて", href: "/about" },
