@@ -213,7 +213,7 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		endDate: "2026-05-20",
 		timezone: "America/Los_Angeles",
 		location: "Online / Mountain View",
-		status: "recap-needed",
+		status: "archived",
 		importance: "high",
 		confidence: "high",
 		sourceUrl: "https://io.google/",
@@ -233,13 +233,18 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 			"WebGPU",
 			"agentic web tooling",
 		],
-		affectedBangeoPages: ["/webxr-status", "/tech-articles", "/experiments"],
+		affectedBangeoPages: [
+			"/webxr-status",
+			"/tech-articles/webxr-html-ui-dom-overlay-html-in-canvas-spatial-css",
+			"/tech-articles/playcanvas-html-in-canvas",
+			"/experiments",
+		],
 		recommendedAction:
-			"Chrome公式ブログ、Google Developers Blog、セッション動画を確認し、WebXR周辺のHTML-in-Canvas、WebGPU、Android XR関連更新を回収する。",
+			"Chrome公式ブログ、Google Developers Blog、セッション動画を確認済み。HTML-in-Canvas系の内容は既存記事へ反映済みのため、今後はAndroid XRやWebGPUの追加発表のみ継続追跡する。",
 		lastCheckedAt: "2026-06-15",
-		nextCheckAt: "2026-06-16",
+		nextCheckAt: "2026-07-15",
 		notes:
-			"Google I/O 2026は開催済み。Chrome公式ブログでHTML-in-CanvasなどのWeb Platform更新が紹介されているため、発表回収対象にする。",
+			"Google I/O 2026は開催済み。Chrome公式ブログで紹介されたHTML-in-CanvasなどのWeb Platform更新はBANGEOのHTML UI/HTML-in-Canvas関連記事へ反映済み。Google I/O単体記事は作らず、追加発表が出た場合のみ継続追跡する。",
 	},
 	{
 		title: "WWDC26",
@@ -249,7 +254,7 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		endDate: "2026-06-12",
 		timezone: "America/Los_Angeles",
 		location: "Online / Apple Park",
-		status: "recap-needed",
+		status: "archived",
 		importance: "high",
 		confidence: "high",
 		sourceUrl:
@@ -270,13 +275,18 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 			"spatial browsing",
 			"3D content workflows",
 		],
-		affectedBangeoPages: ["/webxr-status", "/tech-articles", "/devices"],
+		affectedBangeoPages: [
+			"/webxr-status",
+			"/tech-articles/safari-27-beta-visionos-immersive-website-environments-webxr",
+			"/tech-articles/safari-27-html-model-element-spatial-web",
+			"/devices",
+		],
 		recommendedAction:
-			"Apple Developerのセッション動画、Safari/WebKitリリースノート、visionOS 27関連資料を確認し、Spatial Webや3Dコンテンツに関係する更新を整理する。",
+			"Apple Developerのセッション動画、Safari/WebKitリリースノート、visionOS 27関連資料を確認済み。Spatial Web、HTML model要素、WebXR viewport修正はSafari 27関連記事へ反映済み。",
 		lastCheckedAt: "2026-06-15",
-		nextCheckAt: "2026-06-16",
+		nextCheckAt: "2026-07-15",
 		notes:
-			"Apple公式ニュースルームではWWDC26が2026年6月8日にキックオフし、100本以上の新しいセッションが公開されると案内されている。",
+			"WWDC26は開催済み。WebKit公式のSafari 27 beta記事でSpatial Web、HTML model要素、WebXR viewport修正を確認し、BANGEOのSafari 27関連記事2本へ反映済み。",
 	},
 	{
 		title: "XR・メタバース総合展 夏 / ∞mugen",
