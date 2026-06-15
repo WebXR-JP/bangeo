@@ -1,6 +1,6 @@
 ---
 title: "Sneezeとは？WebXRとは別の「空間ブラウザエンジン」をわかりやすく整理"
-description: "Metaverse Standards ForumとRP1が発表したSneezeを、WebXRとの違い、SOM、近接ベースの発見、OpenXR/WASM構成から整理します。"
+description: "Metaverse Standards Forum（MSF）とRP1が発表したSneezeを、WebXRとの違い、SOM、近接ベースの発見、OpenXR/WASM構成から整理します。"
 date: "2026年6月15日"
 category: "TECH"
 tags:
@@ -16,9 +16,11 @@ author: "BANGEO Team"
 draft: false
 ---
 
-Metaverse Standards Forumは2026年6月15日、Open Metaverse Browser Initiative、略してOMBIの一環として、オープンソースのメタバースブラウザエンジン「Sneeze」を発表しました。
+Metaverse Standards Forum（MSF）は2026年6月15日、Open Metaverse Browser Initiative、略してOMBIの一環として、オープンソースのメタバースブラウザエンジン「Sneeze」を発表しました。
 
-発表では、SneezeはApache 2.0ライセンスで公開され、RP1がリードアーキテクト兼メンテナとして関わると説明されています。この記事では、これを「WebXR Device APIの新機能」ではなく、Spatial Web / Open Metaverse Browser / 空間ブラウザの隣接トピックとして整理します。
+先に登場人物を整理しておきます。Metaverse Standards Forumは、メタバースや空間コンピューティングに関わる標準化団体・企業・開発者をつなぎ、相互運用性の議論を進めるための業界フォーラムです。RP1は、公式サイトでメタバースブラウザとエコシステムを掲げている企業で、今回のSneezeではリードアーキテクト兼メンテナとして説明されています。
+
+つまり今回の発表は、「MSFという場で、RP1が中心になって、空間ブラウザの参照実装をオープンソースとして出した」という話です。SneezeはApache 2.0ライセンスで公開されています。この記事では、これを「WebXR Device APIの新機能」ではなく、Spatial Web / Open Metaverse Browser / 空間ブラウザの隣接トピックとして整理します。
 
 ## まず大事：SneezeはWebXR APIではない
 
@@ -30,7 +32,7 @@ WebXR Device APIが「WebページからXRデバイス、センサー、HMDに�
 
 ## 何が発表されたのか
 
-Sneezeは、Metaverse Standards ForumとRP1が進めるOMBIから出てきたOpen Metaverse Browser Engineです。
+Sneezeは、Metaverse Standards Forum（MSF）とRP1が進めるOMBIから出てきたOpen Metaverse Browser Engineです。OMBIは、Open Metaverse Browser Initiativeの略で、空間コンテンツや空間サービスを特定企業の閉じた環境だけに依存させず、標準ベースで扱えるようにするための取り組みです。
 
 公式発表では、Blink、WebKit、Geckoが2Dドキュメント向けのブラウザエンジンであるのに対して、Sneezeは空間コンピューティング向けに作られたエンジンだと説明されています。既存ブラウザに組み込むことも、スタンドアロンのネイティブなメタバースブラウザを動かすことも想定されています。
 
@@ -113,6 +115,7 @@ SOM、WASM sandbox、OpenXR、RMAPの設計思想は、今後の空間ブラウ�
 ## 参考リンク
 
 - [Metaverse Standards Forum: AWE 2026 / OMBI and Sneeze sessions](https://metaverse-standards.org/event/awe-2026/)
+- [RP1 official site](https://rp1.com/)
 - [Open Metaverse Browser Architecture](https://omb.wiki/sneeze)
 - [Sneeze GitHub repository](https://github.com/MetaverseStandards/sneeze)
 - [WebXR Device API Candidate Recommendation Draft](https://www.w3.org/TR/2026/CRD-webxr-20260609/)
