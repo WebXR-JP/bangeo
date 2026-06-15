@@ -20,12 +20,13 @@ export const metadata: Metadata = {
 };
 
 const statusGroups: { title: string; statuses: WebXREventStatus[] }[] = [
-	{ title: "開催中", statuses: ["live"] },
-	{ title: "発表回収が必要", statuses: ["recap-needed"] },
+	{ title: "開催中・直近", statuses: ["live", "live-soon"] },
+	{ title: "回収待ち", statuses: ["recap-needed"] },
 	{
-		title: "今後の重要イベント",
-		statuses: ["live-soon", "schedule-live", "upcoming", "announced"],
+		title: "これから",
+		statuses: ["schedule-live", "upcoming", "announced"],
 	},
+	{ title: "その他", statuses: ["archived"] },
 ];
 
 const statusBadgeClass: Record<WebXREventStatus, string> = {
@@ -42,11 +43,11 @@ const filters = [
 	{ key: "all", label: "All" },
 	{ key: "global", label: "Global" },
 	{ key: "japan", label: "Japan" },
-	{ key: "standards", label: "Standards" },
+	{ key: "device", label: "Device" },
 	{ key: "browser", label: "Browser" },
-	{ key: "device", label: "Device Hands-on" },
+	{ key: "standards", label: "Standards" },
 	{ key: "community", label: "Community" },
-	{ key: "recap", label: "Recap Needed" },
+	{ key: "recap", label: "Recap" },
 ] as const;
 
 type EventFilter = (typeof filters)[number]["key"];
@@ -116,100 +117,104 @@ function matchesFilter(
 	}
 }
 
-function EventMetaBadges({ event }: { event: (typeof WEBXR_EVENTS)[number] }) {
+function formatEventDate(event: (typeof WEBXR_EVENTS)[number]) {
+	const format = (date: string) => {
+		const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
+		if (!match) return date;
+		return `${Number(match[2])}/${Number(match[3])}`;
+	};
+
+	return event.endDate && event.endDate !== event.startDate
+		? `${format(event.startDate)}〜${format(event.endDate)}`
+		: format(event.startDate);
+}
+
+function eventTags(event: (typeof WEBXR_EVENTS)[number]) {
 	const derivedRegion =
 		event.region ?? (event.category.includes("Japan") ? "japan" : "global");
-	const badges: string[] = [
+	return [
 		regionLabels[derivedRegion],
 		event.organizerType ? organizerLabels[event.organizerType] : undefined,
-		event.hasHandsOn ? "🕶 Device Hands-on" : undefined,
+		event.hasHandsOn ? "Device" : undefined,
 		event.webxrRelevance ? relevanceLabels[event.webxrRelevance] : undefined,
-		event.labCandidate ? "🧪 Lab candidate" : undefined,
-		event.status === "recap-needed" || event.watchMode === "recap"
-			? "📝 Recap needed"
-			: undefined,
-	].filter((badge): badge is string => Boolean(badge));
-
-	return (
-		<div className="mt-4 flex flex-wrap gap-2">
-			{badges.map((badge) => (
-				<span
-					key={badge}
-					className="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-black text-gray-700"
-				>
-					{badge}
-				</span>
-			))}
-		</div>
-	);
+		...event.entityTags,
+	]
+		.filter((tag): tag is string => Boolean(tag))
+		.filter((tag, index, tags) => tags.indexOf(tag) === index);
 }
 
 function EventCard({ event }: { event: (typeof WEBXR_EVENTS)[number] }) {
 	return (
-		<article className="rounded-[2rem] border border-gray-100 bg-white/85 p-6 shadow-xs">
-			<div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-				<div>
-					<h3 className="text-xl font-black tracking-tight text-gray-950">
-						{event.title}
-					</h3>
-					<p className="mt-1 text-sm font-bold text-gray-500">
-						{event.startDate}〜{event.endDate} / {event.location}
-					</p>
-				</div>
-				<div className="flex flex-wrap gap-2">
+		<article className="rounded-2xl border border-gray-100 bg-white/85 p-4 shadow-xs">
+			<div className="space-y-2">
+				<h3 className="text-base font-black tracking-tight text-gray-950 md:text-lg">
+					{event.title}
+				</h3>
+				<p className="text-sm font-bold text-gray-600">
+					{formatEventDate(event)}・{event.location}
+				</p>
+				<div className="flex flex-wrap gap-1.5 text-[11px] font-black">
 					<span
-						className={`rounded-full px-3 py-1 text-xs font-black ${statusBadgeClass[event.status]}`}
+						className={`rounded-full px-2.5 py-1 ${statusBadgeClass[event.status]}`}
 					>
 						{WEBXR_EVENT_STATUS_LABELS[event.status]}
 					</span>
-					<span className="rounded-full bg-rose-50 px-3 py-1 text-xs font-black text-rose-700">
+					<span className="rounded-full bg-rose-50 px-2.5 py-1 text-rose-700">
 						重要度: {WEBXR_EVENT_IMPORTANCE_LABELS[event.importance]}
 					</span>
+					<span className="rounded-full bg-gray-100 px-2.5 py-1 text-gray-700">
+						{regionLabels[event.region ?? "global"]}
+					</span>
 				</div>
+				<div className="flex flex-wrap gap-1.5">
+					{eventTags(event)
+						.slice(0, 3)
+						.map((tag) => (
+							<span
+								key={tag}
+								className="rounded-full border border-gray-200 px-2 py-0.5 text-[11px] font-bold text-gray-600"
+							>
+								{tag}
+							</span>
+						))}
+				</div>
+				<p className="text-sm leading-6 text-gray-700">
+					<span className="font-black text-gray-950">見る: </span>
+					{event.watchTopics.slice(0, 2).join(" / ")}
+				</p>
 			</div>
 
-			<p className="mt-4 text-sm font-bold text-gray-700">{event.category}</p>
-			<EventMetaBadges event={event} />
-			<div className="mt-5 grid gap-5 md:grid-cols-2">
-				<div>
-					<h4 className="text-xs font-black uppercase tracking-widest text-gray-400">
-						見るポイント
-					</h4>
-					<ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-gray-700">
-						{event.watchTopics.map((topic) => (
-							<li key={topic}>{topic}</li>
-						))}
-					</ul>
+			<details className="mt-3 border-t border-gray-100 pt-3 text-sm">
+				<summary className="cursor-pointer font-black text-gray-700">
+					詳細
+				</summary>
+				<div className="mt-3 space-y-3 text-gray-700">
+					<p className="leading-7">{event.recommendedAction}</p>
+					<div>
+						<p className="text-xs font-black uppercase tracking-widest text-gray-400">
+							BANGEO更新候補
+						</p>
+						<div className="mt-2 flex flex-wrap gap-2">
+							{event.affectedBangeoPages.map((page) => (
+								<span key={page} className="font-mono text-xs text-gray-600">
+									{page}
+								</span>
+							))}
+						</div>
+					</div>
+					<p className="text-xs text-gray-500">
+						最終確認: {event.lastCheckedAt} / 次回確認: {event.nextCheckAt}
+					</p>
+					<a
+						href={event.sourceUrl}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="inline-flex font-black text-gray-950 underline decoration-gray-200 underline-offset-4 hover:decoration-gray-900"
+					>
+						一次情報
+					</a>
 				</div>
-				<div>
-					<h4 className="text-xs font-black uppercase tracking-widest text-gray-400">
-						BANGEO更新候補
-					</h4>
-					<ul className="mt-2 space-y-1 text-sm text-gray-700">
-						{event.affectedBangeoPages.map((page) => (
-							<li key={page} className="font-mono text-xs">
-								{page}
-							</li>
-						))}
-					</ul>
-				</div>
-			</div>
-			<p className="mt-5 rounded-2xl bg-gray-50 p-4 text-sm leading-7 text-gray-700">
-				{event.recommendedAction}
-			</p>
-			<div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-gray-100 pt-4 text-xs text-gray-500">
-				<span>
-					最終確認: {event.lastCheckedAt} / 次回確認: {event.nextCheckAt}
-				</span>
-				<a
-					href={event.sourceUrl}
-					target="_blank"
-					rel="noopener noreferrer"
-					className="font-bold text-gray-900 underline decoration-gray-200 underline-offset-4 hover:decoration-gray-900"
-				>
-					一次情報を見る
-				</a>
-			</div>
+			</details>
 		</article>
 	);
 }
@@ -228,29 +233,25 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
 	);
 
 	return (
-		<div className="mx-auto max-w-6xl px-5 py-16 md:px-8 md:py-20">
-			<header className="mb-12 space-y-5">
+		<div className="mx-auto max-w-6xl px-4 py-8 md:px-8 md:py-14">
+			<header className="mb-6 space-y-3">
 				<p className="text-xs font-black uppercase tracking-[0.25em] text-rose-600">
 					WebXR Event Watch
 				</p>
-				<h1 className="text-4xl font-black tracking-tighter text-gray-950 md:text-6xl">
-					WebXRイベントウォッチ
+				<h1 className="text-3xl font-black tracking-tighter text-gray-950 md:text-5xl">
+					WebXRイベント
 				</h1>
-				<p className="max-w-3xl text-base font-medium leading-8 text-gray-600 md:text-lg">
+				<p className="max-w-3xl text-sm font-medium leading-7 text-gray-600 md:text-base">
 					WebXR / WebAR / Spatial Web
-					開発者が追うべきグローバル/日本国内イベント、デバイスメーカー寄りの展示会を整理しています。イベントそのもののニュースではなく、BANGEOで更新すべき仕様・ブラウザ・フレームワーク・学習ページを見つけるための一覧です。
+					開発者向けに、標準化・ブラウザ・国内XRイベント・デバイス展示を追跡しています。
 				</p>
-				<div className="rounded-[2rem] border border-rose-100 bg-rose-50/60 p-5 text-sm leading-7 text-rose-950">
-					直近30日以内のイベント、開催中イベント、開催後7日以内のイベントを重点確認します。イベント後は公式ブログ、動画、リリースノート、GitHub差分を回収し、必要に応じて
-					<Link href="/webxr-status" className="font-black underline">
-						/webxr-status
-					</Link>
-					や関連記事、実験ページへ反映します。
-				</div>
 				<p className="text-xs font-bold text-gray-400">
-					Last updated: {WEBXR_EVENTS_LAST_UPDATED}
+					更新: {WEBXR_EVENTS_LAST_UPDATED}
 				</p>
-				<div className="flex flex-wrap gap-2">
+			</header>
+
+			<nav className="sticky top-0 z-20 -mx-4 mb-6 overflow-x-auto bg-white/90 px-4 py-2 backdrop-blur md:-mx-8 md:px-8">
+				<div className="flex min-w-max gap-2 pb-1">
 					{filters.map((filter) => (
 						<Link
 							key={filter.key}
@@ -259,50 +260,30 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
 									? "/events"
 									: `/events?filter=${filter.key}`
 							}
-							className={`rounded-full px-4 py-2 text-xs font-black transition-colors ${
+							className={`whitespace-nowrap rounded-full border px-3 py-1.5 text-sm font-black transition-colors ${
 								selectedFilter === filter.key
-									? "bg-gray-950 text-white"
-									: "bg-white text-gray-600 hover:bg-gray-100"
+									? "border-gray-950 bg-gray-950 text-white"
+									: "border-gray-200 bg-white text-gray-600 hover:bg-gray-100"
 							}`}
 						>
 							{filter.label}
 						</Link>
 					))}
 				</div>
-			</header>
+			</nav>
 
-			<section className="mb-12 rounded-[2rem] border border-gray-100 bg-white/80 p-6">
-				<h2 className="text-lg font-black text-gray-950">
-					Device Watch Targets
-				</h2>
-				<p className="mt-2 text-sm leading-7 text-gray-600">
-					WebXRに直接関係しない発表でも、ブラウザ、WebView、WebGPU、OpenXR、空間UI、スマートグラス、MRヘッドセット、開発者向けSDKに関係する場合は
-					adjacent として拾います。
-				</p>
-				<div className="mt-4 flex flex-wrap gap-2">
-					{WEBXR_DEVICE_WATCH_TARGETS.map((target) => (
-						<span
-							key={target}
-							className="rounded-full bg-gray-50 px-3 py-1 text-[11px] font-bold text-gray-600"
-						>
-							{target}
-						</span>
-					))}
-				</div>
-			</section>
-
-			<div className="space-y-12">
+			<div className="space-y-8">
 				{statusGroups.map((group) => {
 					const events = filteredEvents.filter((event) =>
 						group.statuses.includes(event.status),
 					);
 					if (events.length === 0) return null;
 					return (
-						<section key={group.title} className="space-y-5">
-							<h2 className="text-2xl font-black tracking-tight text-gray-950">
+						<section key={group.title} className="space-y-3">
+							<h2 className="text-xl font-black tracking-tight text-gray-950">
 								{group.title}
 							</h2>
-							<div className="grid gap-5">
+							<div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
 								{events.map((event) => (
 									<EventCard key={event.slug} event={event} />
 								))}
@@ -311,6 +292,22 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
 					);
 				})}
 			</div>
+
+			<details className="mt-8 rounded-2xl border border-gray-100 bg-white/80 p-4 text-sm">
+				<summary className="cursor-pointer font-black text-gray-900">
+					追跡中のデバイスメーカー
+				</summary>
+				<div className="mt-3 flex flex-wrap gap-2">
+					{WEBXR_DEVICE_WATCH_TARGETS.map((target) => (
+						<span
+							key={target}
+							className="rounded-full border border-gray-200 px-2 py-1 text-xs text-gray-600"
+						>
+							{target}
+						</span>
+					))}
+				</div>
+			</details>
 		</div>
 	);
 }
