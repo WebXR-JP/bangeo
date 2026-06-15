@@ -79,6 +79,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
 			priority: 0.7,
 		},
 		{
+			url: `${SITE_URL}/events`,
+			lastModified: new Date(),
+			changeFrequency: "weekly",
+			priority: 0.7,
+		},
+		{
 			url: `${SITE_URL}/platforms`,
 			lastModified: new Date(),
 			changeFrequency: "monthly",
