@@ -21,13 +21,104 @@ WebXRの標準仕様まわりで、開発者が確認しておきたい更新が
 
 どちらも「いますぐ全ブラウザで使える新機能」というより、WebXRを実装する側が今後の互換性や検証項目を見直すための重要な仕様更新です。BANGEOの[標準化・対応状況ページ](/webxr-status)でも、これらの仕様は随時追跡しています。
 
+## まず、inlineは「VRの小さい版」ではない
+
+`inline` は名前だけでは直感的に分かりにくいですが、BANGEOではまず「WebXRのページ内モード」と捉えると理解しやすいです。
+
+`inline session` は、小さいVRではありません。ARの簡易版でもありません。ただの3D canvasの正式名称でもありません。
+
+一番近い言い方は、Webページの中で、XRアプリを「まだ没入しない状態」で動かすモードです。つまり `inline` は、XR体験に入る前の通常表示モードです。
+
+WebXR Device APIで定義されている主要な `XRSessionMode` は、`inline`、`immersive-vr`、`immersive-ar` の3つです。コードでは、どの種類のXRセッションを作るかをsession mode文字列で指定します。
+
+```javascript
+await navigator.xr.requestSession("inline");
+await navigator.xr.requestSession("immersive-vr");
+await navigator.xr.requestSession("immersive-ar");
+```
+
+短く言うと、次の整理です。
+
+```txt
+inline = ページ内で見る
+immersive-vr = 仮想空間に入る
+immersive-ar = 現実に重ねる
+```
+
+## inline sessionはWebページとXR体験のあいだにある「玄関」
+
+普通の画面で見る限り、`inline session` は普通の3D canvasとよく似ています。これは間違いではありません。`inline session` も最終的にはWebページ内のcanvasに描画されることが多いからです。
+
+ただし、違いは表示の見た目ではなく、役割です。
+
+* canvas = ページの中に3Dを描く場所
+* inline session = ページの中でWebXR体験をプレビューし、必要に応じてVRやARへ進むための入口
+
+旅行でたとえるなら、普通のcanvasはホテルの写真や地図を見ることに近いです。まだその場所の外から情報を見ています。一方、`inline session` は入口ロビーにいる状態です。まだ客室には入っていませんが、そのホテルの中に入る準備はできています。`immersive-vr` は客室に入って空間として体験する状態で、`immersive-ar` は自分の家にホテルの家具を置いてみるような状態です。
+
+家具の商品ページで考えると、普通のcanvasは「ページ内で椅子の3Dモデルを回して見る」ための表示です。`inline session` は、ページ内で椅子を見たうえで、対応していればそのままVRで実物大表示したり、ARで自分の部屋に置いたりする流れの最初の状態です。
+
+つまり `inline session` は、WebページとVR/AR体験のあいだにある「玄関」です。ユーザーはまだVR空間に入っていません。現実世界にARを重ねてもいません。でも、Webページの中でWebXRアプリはすでに動き始めています。
+
+## セッションモードの違いを整理する
+
+| mode | 直感的な説明 | 使う場面 |
+| --- | --- | --- |
+| `inline` | Webページ内でWebXRアプリを小さく開く | 3Dプレビュー、VR/ARに入る前の確認、対応端末向けの入口 |
+| `immersive-vr` | XRアプリの中に入る | VR空間、研修、ゲーム、3D展示 |
+| `immersive-ar` | XRアプリを現実世界に重ねる | 家具配置、ARガイド、MRデモ |
+
+さらに短く覚えるなら、次のようになります。
+
+```txt
+canvas
+= ページに3D模型を貼る
+
+inline session
+= ページの中でXRアプリを小さく開く
+
+immersive-vr
+= XRアプリの中に入る
+
+immersive-ar
+= XRアプリを現実世界に重ねる
+```
+
+この「小さく開く」が重要です。`inline` はページ内にありますが、ただの画像やcanvasではなく、XRアプリの入口です。
+
+## WebXRは3Dエンジンそのものではない
+
+ここで大事なのは、WebXRは3Dエンジンそのものではない、という点です。WebXRはXRデバイスとブラウザをつなぎ、view、timing、input、deviceとのやり取りを管理するAPIです。実際の3D描画はthree.js、Babylon.js、A-Frame、PlayCanvasなどのライブラリや、アプリ側のWebGL / WebGPU実装が担当します。
+
+つまり、BANGEOでは次のように分けて考えるとわかりやすいです。
+
+* WebXR = XRデバイスとブラウザをつなぐAPI
+* three.jsなど = 3Dを描く道具
+* canvas = ページ内で3Dを描く部品
+* session = どの見せ方でXRを始めるか
+* inline session = XR体験に入る前のWebページ内モード
+
 ## inline-stereoとは何か
 
-WebXRには、ヘッドセット全体を使う `immersive-vr` や `immersive-ar` とは別に、HTML文書内にXRコンテンツを表示する `inline` セッションがあります。
+`inline-stereo` は、新しいsession modeではありません。`inline session` を左右2つの視点で表示するための機能です。
+
+普通の `inline session` は、ページ内に3Dを表示します。しかし見た目は普通のcanvasに近く、立体感は限定的です。`inline-stereo` を使うと、ページ内の3D表示でも、左目用と右目用の2つのviewを扱えるようになります。
+
+```txt
+普通の inline
+= ページ内に3Dを表示する
+
+inline-stereo
+= ページ内の3Dを、左右の目で違う見え方にする
+```
+
+これにより、ヘッドセット内ブラウザや空間ディスプレイ上で、Webページの中の3Dコンテンツを立体的に見せる可能性が出てきます。たとえば、記事中の3D地球儀が平面に貼られた画像ではなく奥行きのある球に見える、商品ページの3Dスニーカーがカードの中で少し浮いて見える、建築モデルがページの中にある小さな模型のように見える、といった方向です。
 
 通常の `inline` セッションでは、表示に使われるviewは1つで、`eye` は `"none"` になります。一方、今回仕様に入っている `inline-stereo` は、`inline` セッションでも対応環境では左右2つのprimary viewを扱えるようにするためのfeature descriptorです。仕様では、`inline-stereo` が有効な `inline` セッションでは、view listに `"left"` と `"right"` の2つのprimary viewが含まれると説明されています。
 
-つまり、今後のWebXR実装では、`inline` セッションだからといって `pose.views.length === 1` と決め打ちしないほうが安全です。
+つまり、`inline-stereo` は「VRに入るための機能」ではなく、「Webページの中の3D」を「ページの中の小さな立体物」に近づけるための仕組みです。`immersive-vr` が仮想空間に入るモードだとすると、`inline-stereo` はページの中の3Dを立体化する方向の機能です。
+
+そのため、今後のWebXR実装では、`inline` セッションだからといって `pose.views.length === 1` と決め打ちしないほうが安全です。
 
 ```javascript
 const session = await navigator.xr.requestSession("inline", {
