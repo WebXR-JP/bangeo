@@ -141,13 +141,15 @@ export const WEBXR_WG_DISCUSSIONS: WebXRWgDiscussion[] = [
 ];
 
 export const WEBXR_STATUS_META = {
-	lastChecked: "2026年6月11日",
+	lastChecked: "2026年6月15日",
 	sources: {
 		standards: "https://www.w3.org/TR/?filter-tr-name=webxr",
 		docTypes: "https://www.w3.org/TR/tr/",
 		proposals: "https://github.com/immersive-web/proposals/issues",
 		chromeStatus: "https://chromestatus.com/features?q=webxr",
 		mdnBcd: "https://github.com/mdn/browser-compat-data",
+		metaHorizonReleaseNotes:
+			"https://developers.meta.com/horizon/release-notes/web/",
 	},
 };
 
@@ -336,11 +338,11 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 		support: {
 			chromeDesktop: "未対応",
 			chromeAndroid: "未対応",
-			quest: "未確認",
+			quest: "146.0+（Experimental）",
 			safari: "未対応",
 		},
 		description:
-			"エディターズドラフト（2025-04-09）。WebGPU を使って WebXR セッションに描画するための連携方法を定める仕様です。",
+			"エディターズドラフト（2025-04-09）。WebGPU を使って WebXR セッションに描画するための連携方法を定める仕様です。Meta Horizon OS Developers release notes では、Quest Browser 146.0（2026-04-21）で Experimental WebGPU support が追加されたと案内されています。",
 		specUrl: "https://www.w3.org/TR/webxr-webgpu-binding-1/",
 	},
 	{
@@ -350,11 +352,11 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 		support: {
 			chromeDesktop: "未対応",
 			chromeAndroid: "90+",
-			quest: "対応",
+			quest: "146.0+（Lab / depth projection）",
 			safari: "未対応",
 		},
 		description:
-			"W3C のワーキングドラフト（2025-12-10）。深度情報を取得し、オクルージョンなどの表現に活用するための仕様です。",
+			"W3C のワーキングドラフト（2025-12-10）。深度情報を取得し、オクルージョンなどの表現に活用するための仕様です。Quest Browser 146.0（2026-04-21）では in-browser WebXR depth projection support が追加されましたが、BANGEOでは実験・Lab扱いで追跡します。",
 		specUrl: "https://www.w3.org/TR/webxr-depth-sensing-1/",
 	},
 	{
