@@ -133,6 +133,12 @@
 			"filename": "pico-developer-special-event-2026",
 			"assetDir": "news",
 			"thumbnail": "/assets/news/pico-developer-special-event-2026.webp"
+		},
+		{
+			"slug": "webxr-events-watch-2026",
+			"filename": "webxr-events-watch-2026",
+			"assetDir": "news",
+			"thumbnail": "/assets/news/webxr-events-watch-2026.webp"
 		}
 	],
 	"experiments": [
