@@ -33,7 +33,20 @@ function Pre(props: React.ComponentPropsWithoutRef<"pre">) {
 	);
 }
 
+function Table(props: React.ComponentPropsWithoutRef<"table">) {
+	const { children, className, ...rest } = props;
+
+	return (
+		<section className="article-table-scroll" aria-label="記事内テーブル">
+			<table className={className} {...rest}>
+				{children}
+			</table>
+		</section>
+	);
+}
+
 export const mdxComponents: MDXComponents = {
 	pre: Pre,
+	table: Table,
 	DemoIframe,
 };
