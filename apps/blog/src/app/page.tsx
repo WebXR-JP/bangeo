@@ -19,17 +19,102 @@ function parseContentDate(value?: string): number {
 }
 
 export const metadata: Metadata = {
-	title: "BANGEO｜WebXR日本語リソース",
+	title: "WebXR日本語リソース｜VR・ARデモ、対応ブラウザ、実装ガイド",
 	description:
-		"ブラウザで動く WebXR（VR/AR）の情報を日本語で整理したリソースサイト。デモ、技術解説、標準化状況をまとめています。",
+		"BANGEOはWebXR（VR/AR/MR）を日本語で学ぶ技術ハブです。Meta Quest、iPhone、Android、PCブラウザで試せるデモ、対応ブラウザ、WebXR Device API、Three.js、PlayCanvas、WebGPUの実装ガイドを整理しています。",
+	keywords: [
+		"WebXR",
+		"WebXR 日本語",
+		"WebXR とは",
+		"WebXR デモ",
+		"WebXR iPhone",
+		"WebXR iOS",
+		"Meta Quest WebXR",
+		"WebGPU WebXR",
+		"Three.js WebXR",
+	],
 	openGraph: {
-		title: "BANGEO｜WebXR日本語リソース",
+		title: "WebXR日本語リソース｜VR・ARデモ、対応ブラウザ、実装ガイド",
 		description:
-			"ブラウザで動く WebXR（VR/AR）の情報を日本語で整理したリソースサイト。デモ、技術解説、標準化状況をまとめています。",
+			"BANGEOはWebXR（VR/AR/MR）を日本語で学ぶ技術ハブです。Meta Quest、iPhone、Android、PCブラウザで試せるデモ、対応ブラウザ、WebXR Device API、Three.js、PlayCanvas、WebGPUの実装ガイドを整理しています。",
 		type: "website",
+		images: ["/ogp.png"],
+	},
+	twitter: {
+		card: "summary_large_image",
+		title: "WebXR日本語リソース｜VR・ARデモ、対応ブラウザ、実装ガイド",
+		description:
+			"WebXRの基礎、対応ブラウザ、Meta QuestやiPhoneで試せるVR/ARデモ、Three.js・PlayCanvas・WebGPUの実装ガイドを日本語で整理。",
+		images: ["/ogp.png"],
 	},
 	alternates: { canonical: "/" },
 };
+
+const searchIntentLinks = [
+	{ label: "WebXRとは", href: "/webxr-explainer" },
+	{ label: "WebXR デモ", href: "/experiments" },
+	{ label: "iPhone WebXR", href: "/tech-articles/ios-webxr-app-clip-guide" },
+	{ label: "Meta Quest WebXR", href: "/devices/meta-quest" },
+	{ label: "対応ブラウザ", href: "/webxr-status" },
+	{
+		label: "WebGPU WebXR",
+		href: "/tech-articles/quest-browser-146-webgpu-webxr",
+	},
+] as const;
+
+const startGuides = [
+	{
+		title: "WebXRとは",
+		description:
+			"WebXR Device API、immersive-vr、immersive-ar、ブラウザでVR/ARを動かす基本を整理。",
+		href: "/webxr-explainer",
+		label: "基礎から読む",
+	},
+	{
+		title: "対応ブラウザとデバイス",
+		description:
+			"Meta Quest、iPhone、Android、PCブラウザでWebXRがどこまで使えるかを確認。",
+		href: "/webxr-status",
+		label: "対応状況を見る",
+	},
+	{
+		title: "WebXRデモを試す",
+		description:
+			"ヘッドセット、スマートフォン、PCで動くBANGEOのWebXR実験を一覧から体験。",
+		href: "/experiments",
+		label: "デモへ進む",
+	},
+	{
+		title: "iPhoneでWebXRを動かす",
+		description:
+			"iOS Safariの制約、App Clip、アプリ連携を含めたiPhone向けWebXR導線を解説。",
+		href: "/tech-articles/ios-webxr-app-clip-guide",
+		label: "iPhone対応を読む",
+	},
+] as const;
+
+const trackedTopics = [
+	{
+		title: "WebXR Device API",
+		description:
+			"VR/AR/MRセッション、入力、空間トラッキング、ブラウザ実装の標準化を追います。",
+	},
+	{
+		title: "Three.js / PlayCanvas",
+		description:
+			"WebXR実装で使われる主要ライブラリと、実機で詰まりやすい設定を整理します。",
+	},
+	{
+		title: "Meta Quest Browser",
+		description:
+			"Quest Browser、WebGPU、ハンドトラッキング、没入型Webアプリの動作確認を扱います。",
+	},
+	{
+		title: "iPhone / iOS WebXR",
+		description:
+			"Safari単体で難しい領域と、App Clipやネイティブ連携で補う実装方針を扱います。",
+	},
+] as const;
 
 export default function HomePage() {
 	const blogPosts = getDocs(blog)
@@ -70,23 +155,34 @@ export default function HomePage() {
 							<div className="inline-flex items-center gap-2.5 px-4 py-2 bg-white/80 backdrop-blur-xs border border-rose-100 rounded-full shadow-sm shadow-rose-100/60">
 								<span className="w-2 h-2 bg-[#e11d48] rounded-full animate-pulse" />
 								<span className="text-xs font-semibold text-rose-700 tracking-wide">
-									ブラウザで動くXR
+									WebXR / VR / AR / MR
 								</span>
 							</div>
 							<h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.08] text-gray-950">
-								インストール不要の
+								WebXRを日本語で学び、
 								<br />
 								<span className="bg-gradient-to-r from-[#be123c] via-[#e11d48] to-rose-400 bg-clip-text text-transparent">
-									VR/AR
+									VR/ARをブラウザで動かす
 								</span>
-								<span className="text-gray-950"> を作ろう</span>
 							</h1>
 							<p className="text-lg md:text-xl text-gray-600 leading-relaxed max-w-xl">
-								ブラウザで動く WebXR
-								の情報を、デモ・技術解説・標準化状況の切り口で
+								BANGEOは WebXR Device API、Meta Quest、iPhone、
+								Android、Three.js、PlayCanvas、WebGPU
+								を横断して、ブラウザで動くVR/ARのデモと実装ガイドを
 								<span className="text-gray-950 font-semibold">日本語</span>
-								で整理しています。
+								で整理する技術リソースです。
 							</p>
+							<div className="flex flex-wrap gap-2 max-w-2xl">
+								{searchIntentLinks.map((link) => (
+									<Link
+										key={link.href}
+										href={link.href}
+										className="inline-flex items-center rounded-full border border-rose-100 bg-white/75 px-3 py-1.5 text-xs font-bold text-gray-600 shadow-sm shadow-rose-100/40 transition-colors hover:border-rose-200 hover:text-[#e11d48]"
+									>
+										{link.label}
+									</Link>
+								))}
+							</div>
 							<div className="flex flex-col sm:flex-row gap-4 pt-2">
 								<Link
 									href="/experiments"
@@ -109,10 +205,10 @@ export default function HomePage() {
 									</svg>
 								</Link>
 								<Link
-									href="/tech-articles"
+									href="/webxr-explainer"
 									className="inline-flex items-center justify-center px-7 py-4 bg-white/80 backdrop-blur-xs border border-rose-100 text-gray-950 text-sm font-bold rounded-xl hover:bg-white hover:border-rose-200 transition-all duration-200 shadow-sm"
 								>
-									記事を読む
+									WebXRを学ぶ
 								</Link>
 							</div>
 						</div>
@@ -167,6 +263,47 @@ export default function HomePage() {
 					</div>
 				</div>
 			</header>
+
+			{/* Start Guides */}
+			<section className="py-16 md:py-20 bg-white">
+				<div className="max-w-6xl mx-auto px-6 md:px-8">
+					<div className="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-10">
+						<div>
+							<p className="text-xs font-black tracking-[0.28em] text-rose-600 mb-3">
+								START HERE
+							</p>
+							<h2 className="text-3xl font-black tracking-tight text-gray-950">
+								WebXRを始める導線
+							</h2>
+						</div>
+						<p className="max-w-2xl text-sm md:text-base text-gray-500 leading-relaxed">
+							「WebXRとは何か」から「どのブラウザで動くか」「QuestやiPhoneでどう試すか」まで、検索で来た人が最短で目的の情報に届けるように整理しています。
+						</p>
+					</div>
+
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+						{startGuides.map((guide) => (
+							<Link
+								key={guide.href}
+								href={guide.href}
+								className="group flex h-full flex-col justify-between rounded-2xl border border-gray-100 bg-gray-50/70 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-rose-100 hover:bg-white hover:shadow-2xl hover:shadow-gray-200/50"
+							>
+								<div>
+									<h3 className="text-lg font-black text-gray-950 group-hover:text-[#e11d48] transition-colors">
+										{guide.title}
+									</h3>
+									<p className="mt-3 text-sm leading-relaxed text-gray-500">
+										{guide.description}
+									</p>
+								</div>
+								<span className="mt-6 inline-flex text-xs font-black text-gray-600 group-hover:text-[#e11d48]">
+									{guide.label}
+								</span>
+							</Link>
+						))}
+					</div>
+				</div>
+			</section>
 
 			{/* Demos Section */}
 			<section className="py-20 md:py-28 bg-gray-50/80">
@@ -375,6 +512,39 @@ export default function HomePage() {
 								/>
 							</svg>
 						</Link>
+					</div>
+				</div>
+			</section>
+
+			{/* Topics */}
+			<section className="py-20 md:py-28 bg-white">
+				<div className="max-w-6xl mx-auto px-6 md:px-8">
+					<div className="max-w-3xl mb-12">
+						<p className="text-xs font-black tracking-[0.28em] text-rose-600 mb-3">
+							WEBXR TOPICS
+						</p>
+						<h2 className="text-3xl font-black tracking-tight text-gray-950">
+							BANGEOで追うWebXRテーマ
+						</h2>
+						<p className="mt-4 text-base leading-relaxed text-gray-500">
+							WebXRは対応ブラウザ、デバイス、ライブラリ、標準化の動きが密接に絡みます。BANGEOでは実機で試せる情報を軸に、開発者が判断しやすい形で更新していきます。
+						</p>
+					</div>
+
+					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+						{trackedTopics.map((topic) => (
+							<div
+								key={topic.title}
+								className="rounded-2xl border border-gray-100 bg-gray-50/70 p-6"
+							>
+								<h3 className="text-base font-black text-gray-950">
+									{topic.title}
+								</h3>
+								<p className="mt-3 text-sm leading-relaxed text-gray-500">
+									{topic.description}
+								</p>
+							</div>
+						))}
 					</div>
 				</div>
 			</section>
