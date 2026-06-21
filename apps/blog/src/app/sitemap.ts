@@ -92,7 +92,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 			url: `${SITE_URL}/about`,
 			lastModified: SITE_STRUCTURE_UPDATED,
 			changeFrequency: "monthly",
-			priority: 0.7,
+			priority: 0.9,
 		},
 		{
 			url: `${SITE_URL}/webxr-explainer`,
@@ -104,25 +104,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
 			url: `${SITE_URL}/webxr-status`,
 			lastModified: SITE_STRUCTURE_UPDATED,
 			changeFrequency: "monthly",
-			priority: 0.7,
+			priority: 0.9,
 		},
 		{
 			url: `${SITE_URL}/events`,
 			lastModified: SITE_STRUCTURE_UPDATED,
 			changeFrequency: "weekly",
-			priority: 0.7,
+			priority: 0.9,
 		},
 		{
 			url: `${SITE_URL}/platforms`,
 			lastModified: SITE_STRUCTURE_UPDATED,
 			changeFrequency: "monthly",
-			priority: 0.7,
+			priority: 0.9,
 		},
 		{
 			url: `${SITE_URL}/devices`,
 			lastModified: SITE_STRUCTURE_UPDATED,
 			changeFrequency: "monthly",
-			priority: 0.7,
+			priority: 0.9,
 		},
 		{
 			url: `${SITE_URL}/libraries`,
