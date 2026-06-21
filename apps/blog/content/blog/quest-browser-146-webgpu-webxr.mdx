@@ -53,14 +53,14 @@ WebXRは、ブラウザからVRやARのセッションを開始し、ヘッド�
 
 146.0では、in-browser WebXR depth projection support も追加されています。これは、QuestのMR環境で現実空間の奥行きと仮想オブジェクトの前後関係を検証するうえで重要です。ただし、depth projection は端末、権限、セッションモード、実験フラグ、ブラウザ実装の組み合わせに強く依存するため、BANGEOでは **Lab扱い** として追跡します。
 
-同じリリースで WebXR bounded floor space issues が修正された点も、ルームスケール系デモでは重要です。`bounded-floor` / `local-floor` を使うデモでは、境界形状の取得、床高さ、再センタリング後の座標、左右目での破綻がないかを Quest Browser 146.x 以降で再確認する価値があります。
+同じリリースで WebXR bounded floor space issues が修正された点も、ルームスケール系デモでは重要です。`bounded-floor` / `local-floor` を使うデモでは、boundsGeometry の取得、床高さ、再センタリング後の座標、左右目での破綻がないかを Quest Browser 146.x 以降で再確認する価値があります。
 
 ## BANGEOで優先的に検証するページ
 
 - [WebXR標準化・対応状況](/webxr-status): WebGPU binding は Quest Browser 146.0+ Experimental、depth projection は Lab として表記
-- [Quest奥行き合成デモ](/experiments/quest-depth-projection-box): depth projection の実機検証メモを追加
+- [WebXR Depth Occlusion デモ](/experiments/quest-depth-projection-box): depth projection の実機検証メモを追加
 - [WebGPUからWebGLへ切り替える実験](/experiments/webgpu-fallback-lab): WebGPU availability と WebGL fallback の確認
-- [ルームスケール境界ビューア](/experiments/room-scale-bounds-viewer): bounded-floor 修正後の境界取得確認
+- [WebXR Bounded Floor ビューア](/experiments/room-scale-bounds-viewer): bounded-floor 修正後の境界取得確認
 
 ## 有効化方法
 

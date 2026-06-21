@@ -1,14 +1,16 @@
 ---
-title: "ルームスケール境界ビューア"
-description: "Quest Browserのbounded-floor / local-floor挙動を確認し、プレイエリア境界と床基準のずれを可視化する実験です。"
+title: "WebXR Bounded Floor ビューア — プレイエリア境界（boundsGeometry）の可視化"
+description: "WebXR の bounded-floor / local-floor ReferenceSpaceType と boundsGeometry でプレイエリア境界を可視化し、Quest Browser 146 修正後の床基準とのずれを確認する実験。"
 date: "2026-06-15"
 category: "Quest MR"
 tags:
   - "WebXR"
   - "bounded-floor"
+  - "local-floor"
+  - "boundsGeometry"
   - "Meta Quest"
-  - "ルームスケール"
-  - "境界"
+  - "Quest Browser"
+  - "play area"
 frameworks:
   - "素のHTML"
   - "Canvas"
@@ -23,13 +25,13 @@ thumbnail: "/assets/experiments/xr-mesh-export.webp"
 
 QuestのWebXRセッションで、`bounded-floor` / `local-floor` の基準とプレイエリア境界を確認するための実験です。
 
-Meta Horizon OS Developers release notesでは、Quest Browser 146.0（2026年4月21日）で WebXR bounded floor space issues の修正が案内されています。このデモは、修正後のQuest Browser 146.x以降で、境界形状、床高さ、再センタリング後の座標が期待どおりに見えるかを確認するための検証カードです。
+Meta Horizon OS Developers release notesでは、Quest Browser 146.0（2026年4月21日）で WebXR bounded floor space issues の修正が案内されています。このデモは、修正後のQuest Browser 146.x以降で、boundsGeometry の形状、床高さ、再センタリング後の座標が期待どおりに見えるかを確認するための検証カードです。
 
 ## 通常プレビュー
 
 <DemoIframe
   src="/demos/room-tracking/app.html"
-  title="ルームスケール境界ビューア"
+  title="WebXR Bounded Floor ビューア"
   fullPageHref="/demos/room-tracking/app.html"
   height={520}
   caption="bounded-floor / local-floor の取得結果と、プレイエリア境界の見え方を確認します。"
@@ -66,5 +68,5 @@ Quest Browser 146.0のbounded-floor修正後も、端末や環境によって結
 ## 関連記事
 
 - [Quest Browser 146.xでWebGPU / WebXR depth projectionが実験的に追加](/tech-articles/quest-browser-146-webgpu-webxr)
-- [Quest奥行き合成デモ](/experiments/quest-depth-projection-box)
+- [WebXR Depth Occlusion デモ](/experiments/quest-depth-projection-box)
 - [WebXR標準化・対応状況](/webxr-status)
