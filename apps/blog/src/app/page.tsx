@@ -116,6 +116,32 @@ const trackedTopics = [
 	},
 ] as const;
 
+const webxrPerspectives = [
+	{
+		title: "WebXRはアプリ配布ではなく、URLでXRを届ける技術",
+		description:
+			"WebXRの強みは、VR/AR体験をアプリストアの配布だけに閉じ込めず、URL、検索、SNS、QRコードから起動できる点です。展示、教育、EC、プロトタイプ、技術デモのように「まず触ってもらう」場面で特に効きます。",
+	},
+	{
+		title: "対応状況はブラウザ名だけでは判断できない",
+		description:
+			"同じChrome系でも、PC、Android、Meta Quest Browserでは使える機能が変わります。iPhoneではSafari単体の制約もあるため、WebXR Device API、AR、DOM Overlay、WebGPUを分けて確認する必要があります。",
+	},
+	{
+		title: "実装はライブラリと標準化の両方を見る",
+		description:
+			"Three.jsやPlayCanvasで動くコードを書くことと、WebXRの仕様やブラウザ実装を理解することは別の課題です。BANGEOでは、サンプルコードだけでなく、仕様、issue、実機差分まで追えるようにします。",
+	},
+] as const;
+
+const learningQuestions = [
+	"Meta QuestでブラウザだけのVRデモを公開したい",
+	"iPhoneでWebXR相当の体験をどう届けるか知りたい",
+	"Three.jsやPlayCanvasでWebXRを始めたい",
+	"WebGPUとWebXRの関係、対応状況、実験機能を追いたい",
+	"DOM Overlay、Hit Test、Depth SensingなどAR機能を整理したい",
+] as const;
+
 export default function HomePage() {
 	const blogPosts = getDocs(blog)
 		.filter((post) => !post.draft)
@@ -301,6 +327,54 @@ export default function HomePage() {
 								</span>
 							</Link>
 						))}
+					</div>
+				</div>
+			</section>
+
+			{/* Why WebXR */}
+			<section className="py-20 md:py-28 bg-rose-50/40">
+				<div className="max-w-6xl mx-auto px-6 md:px-8">
+					<div className="grid gap-12 lg:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] lg:items-start">
+						<div className="space-y-6">
+							<p className="text-xs font-black tracking-[0.28em] text-rose-600">
+								WHY WEBXR
+							</p>
+							<h2 className="text-3xl md:text-4xl font-black tracking-tight text-gray-950">
+								WebXRは「ブラウザでXRを起動する」だけの話ではありません
+							</h2>
+							<p className="text-base md:text-lg leading-relaxed text-gray-600">
+								WebXRは、VRヘッドセット、スマートフォン、PCブラウザをまたいで、空間コンテンツをWebの配信モデルに乗せるための技術です。URLで共有できる一方で、端末、ブラウザ、入力方式、センサー、権限、描画APIの差がそのまま体験品質に出ます。
+							</p>
+							<p className="text-base md:text-lg leading-relaxed text-gray-600">
+								そのためBANGEOでは、単に「動くサンプル」を並べるだけでなく、どの環境で何ができるのか、なぜその実装を選ぶのか、どの仕様やissueを追えば判断できるのかまで整理していきます。
+							</p>
+							<div className="rounded-2xl border border-rose-100 bg-white p-6">
+								<h3 className="text-lg font-black text-gray-950">
+									こんな疑問から読めます
+								</h3>
+								<ul className="mt-4 space-y-3 text-sm font-bold leading-relaxed text-gray-600">
+									{learningQuestions.map((question) => (
+										<li key={question}>{question}</li>
+									))}
+								</ul>
+							</div>
+						</div>
+
+						<div className="grid gap-5">
+							{webxrPerspectives.map((perspective) => (
+								<div
+									key={perspective.title}
+									className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm shadow-gray-100/70"
+								>
+									<h3 className="text-xl font-black leading-snug text-gray-950">
+										{perspective.title}
+									</h3>
+									<p className="mt-3 text-sm md:text-base leading-relaxed text-gray-500">
+										{perspective.description}
+									</p>
+								</div>
+							))}
+						</div>
 					</div>
 				</div>
 			</section>

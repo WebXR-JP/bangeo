@@ -107,6 +107,95 @@ export default function WebXRStatusPage() {
 					</p>
 				</div>
 
+				{/* Main Table Section */}
+				<section className="space-y-8">
+					<div className="flex flex-col gap-4 border-b border-gray-200 pb-4 md:flex-row md:items-end md:justify-between">
+						<div>
+							<h2 className="text-3xl font-black tracking-tight text-gray-950">
+								まず一覧で見る
+							</h2>
+							<p className="mt-2 text-sm font-medium text-gray-600">
+								仕様名、標準化ステージ、主要ブラウザの対応状況を先に確認できます。
+							</p>
+						</div>
+						<span className="inline-flex w-fit items-center px-3 py-1 bg-rose-100 text-rose-700 rounded-full text-xs font-black">
+							{WEBXR_FEATURES.length} 機能
+						</span>
+					</div>
+					<div className="text-xs text-gray-500 space-y-1">
+						<p>最終確認: {WEBXR_STATUS_META.lastChecked}</p>
+						<p>
+							凡例: 79+ = 対応を確認できる最小バージョン、OT = Origin
+							Trial、Flag = フラグ有効、Exp = 実験的機能、対応 =
+							対応済み（版数不明）、未対応 = 未実装、未確認 = 公開情報なし
+						</p>
+					</div>
+
+					<div className="bg-white/80 border border-white rounded-[2.5rem] shadow-xs overflow-hidden">
+						<div className="overflow-x-auto">
+							<table className="w-full text-sm">
+								<thead>
+									<tr className="bg-gray-50 border-b border-gray-200">
+										<th className="px-6 py-4 text-left font-black text-gray-700">
+											機能
+										</th>
+										<th className="px-6 py-4 text-left font-black text-gray-700">
+											ステータス
+										</th>
+										{WEBXR_BROWSER_COLUMNS.map((column) => (
+											<th
+												key={column.key}
+												className="px-2 py-4 text-center font-black text-gray-700"
+											>
+												{column.label}
+											</th>
+										))}
+									</tr>
+								</thead>
+								<tbody className="divide-y divide-gray-100">
+									{sortedFeatures.map((f) => (
+										<tr
+											key={f.name}
+											className="hover:bg-red-50 transition-colors group"
+										>
+											<td className="px-6 py-4">
+												<div className="flex flex-col gap-1">
+													{f.specUrl ? (
+														<a
+															href={f.specUrl}
+															target="_blank"
+															rel="noopener noreferrer"
+															className="text-base font-bold text-gray-900 group-hover:text-red-600 transition-colors"
+														>
+															{f.name}
+														</a>
+													) : (
+														<span className="text-base font-bold text-gray-900">
+															{f.name}
+														</span>
+													)}
+													<span className="text-xs text-gray-500 font-medium">
+														{f.description}
+													</span>
+												</div>
+											</td>
+											<td className="px-6 py-4">
+												<ProgressBar stage={f.stage} />
+											</td>
+											{WEBXR_BROWSER_COLUMNS.map((column) => (
+												<BrowserCell
+													key={column.key}
+													value={f.support[column.key as BrowserKey]}
+												/>
+											))}
+										</tr>
+									))}
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</section>
+
 				{/* Standards Process Card */}
 				<div className="p-8 bg-white/80 border border-white rounded-[2.5rem] shadow-xs">
 					<h2 className="text-2xl font-black text-gray-950 mb-6">
@@ -223,168 +312,63 @@ export default function WebXRStatusPage() {
 				{/* WG Discussions */}
 				<section className="space-y-6">
 					<h2 className="text-2xl font-black text-gray-950">
-						WG議論・記事候補
+						WG議論・記事候補の短い一覧
 					</h2>
 					<p className="text-sm text-gray-600 font-medium">
 						Immersive Web WG の議事録で議論されているが、W3C TR
-						としては未確定のトピックです。策定状況一覧には含めず、議論中・追跡中として記録しています。
+						としては未確定のトピックです。大きな詳細カードではなく、追うべき論点だけを短く記録しています。
 					</p>
-					<div className="space-y-4">
+					<div className="overflow-hidden rounded-[2rem] border border-amber-100 bg-white/80 shadow-xs">
 						{WEBXR_WG_DISCUSSIONS.map((discussion) => (
 							<div
 								key={`${discussion.title}-${discussion.publishedAt}`}
-								className="rounded-[2rem] border border-amber-100 bg-amber-50/60 p-6 shadow-xs"
+								className="border-b border-amber-100/70 p-5 last:border-b-0"
 							>
-								<div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-									<h3 className="text-lg font-black text-gray-900">
-										{discussion.issueUrl ? (
-											<a
-												href={discussion.issueUrl}
-												target="_blank"
-												rel="noopener noreferrer"
-												className="hover:text-red-600 transition-colors"
-											>
-												{discussion.title}
-											</a>
-										) : (
-											discussion.title
-										)}
-									</h3>
-									<div className="flex flex-wrap items-center gap-2">
-										<WgDiscussionStatusBadge status={discussion.status} />
-										{discussion.articleCandidate ? (
-											<span className="inline-flex items-center rounded-full bg-white px-2 py-1 text-[10px] font-black text-gray-600">
-												記事候補
-											</span>
-										) : null}
-										<p className="text-xs font-bold text-gray-500">
-											{discussion.publishedAt}
+								<div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
+									<div className="min-w-0">
+										<div className="flex flex-wrap items-center gap-2">
+											{discussion.issueUrl ? (
+												<a
+													href={discussion.issueUrl}
+													target="_blank"
+													rel="noopener noreferrer"
+													className="text-base font-black text-gray-900 hover:text-red-600 transition-colors"
+												>
+													{discussion.title}
+												</a>
+											) : (
+												<h3 className="text-base font-black text-gray-900">
+													{discussion.title}
+												</h3>
+											)}
+											<WgDiscussionStatusBadge status={discussion.status} />
+											{discussion.articleCandidate ? (
+												<span className="inline-flex items-center rounded-full bg-rose-50 px-2 py-1 text-[10px] font-black text-rose-700">
+													記事候補
+												</span>
+											) : null}
+										</div>
+										<p className="mt-2 text-sm leading-relaxed text-gray-700">
+											{discussion.summary}
+										</p>
+										<p className="mt-2 text-xs leading-relaxed text-gray-500">
+											論点: {discussion.topics.slice(0, 2).join(" / ")}
 										</p>
 									</div>
+									<div className="flex flex-wrap gap-3 text-xs font-bold text-gray-500 md:justify-end">
+										<span>{discussion.publishedAt}</span>
+										<a
+											href={discussion.sourceUrl}
+											target="_blank"
+											rel="noopener noreferrer"
+											className="text-gray-900 underline decoration-gray-200 underline-offset-4 hover:decoration-gray-900 transition-all"
+										>
+											議事録
+										</a>
+									</div>
 								</div>
-								<p className="mt-3 text-sm text-gray-700 leading-relaxed">
-									{discussion.summary}
-								</p>
-								<ul className="mt-4 list-disc space-y-1 pl-5 text-sm text-gray-700">
-									{discussion.topics.map((topic) => (
-										<li key={topic}>{topic}</li>
-									))}
-								</ul>
-								{discussion.relatedFeatures.length > 0 ? (
-									<p className="mt-4 text-xs text-gray-600">
-										関連機能: {discussion.relatedFeatures.join(" / ")}
-									</p>
-								) : null}
-								<p className="mt-3 text-xs">
-									<a
-										href={discussion.sourceUrl}
-										target="_blank"
-										rel="noopener noreferrer"
-										className="font-bold text-gray-900 underline decoration-gray-200 underline-offset-4 hover:decoration-gray-900 transition-all"
-									>
-										Immersive Web 議事録（{discussion.publishedAt}）
-									</a>
-								</p>
 							</div>
 						))}
-					</div>
-				</section>
-
-				{/* Main Table Section */}
-				<section className="space-y-8">
-					<div className="flex items-center justify-between border-b border-gray-200 pb-4">
-						<div className="flex items-center gap-4">
-							<h2 className="text-3xl font-black tracking-tight text-gray-950">
-								策定状況と対応一覧
-							</h2>
-							<span className="inline-flex items-center px-3 py-1 bg-rose-100 text-rose-700 rounded-full text-xs font-black">
-								{WEBXR_FEATURES.length} 機能
-							</span>
-						</div>
-					</div>
-					<div className="text-xs text-gray-500 space-y-1">
-						<p>最終確認: {WEBXR_STATUS_META.lastChecked}</p>
-						<p>
-							標準化ステージは、W3C TR と Immersive Web Community Group
-							の公開情報をもとに、提案段階から勧告までを 5
-							段階で整理しています。
-						</p>
-						<p>
-							ブラウザ対応は Chrome Platform Status と MDN Browser Compatibility
-							Data などの公開情報をもとに整理しています。
-						</p>
-						<p>Quest 列は MDN BCD の Oculus Browser 情報を基準にしています。</p>
-						<p>
-							凡例: 79+ = 対応を確認できる最小バージョン、OT = Origin
-							Trial、Flag = フラグ有効、Exp = 実験的機能、対応 =
-							対応済み（版数不明）、未対応 = 未実装、未確認 = 公開情報なし
-						</p>
-					</div>
-
-					<div className="bg-white/80 border border-white rounded-[2.5rem] shadow-xs overflow-hidden">
-						<div className="overflow-x-auto">
-							<table className="w-full text-sm">
-								<thead>
-									<tr className="bg-gray-50 border-b border-gray-200">
-										<th className="px-6 py-4 text-left font-black text-gray-700">
-											機能
-										</th>
-										<th className="px-6 py-4 text-left font-black text-gray-700">
-											ステータス
-										</th>
-										{WEBXR_BROWSER_COLUMNS.map((column) => (
-											<th
-												key={column.key}
-												className="px-2 py-4 text-center font-black text-gray-700"
-											>
-												{column.label}
-											</th>
-										))}
-									</tr>
-								</thead>
-								<tbody className="divide-y divide-gray-100">
-									{sortedFeatures.map((f) => (
-										<tr
-											key={f.name}
-											className="hover:bg-red-50 transition-colors group"
-										>
-											<td className="px-6 py-4">
-												<div className="flex flex-col gap-1">
-													{f.specUrl ? (
-														<a
-															href={f.specUrl}
-															target="_blank"
-															rel="noopener noreferrer"
-															className="text-base font-bold text-gray-900 group-hover:text-red-600 transition-colors"
-														>
-															{f.name}
-														</a>
-													) : (
-														<span className="text-base font-bold text-gray-900">
-															{f.name}
-														</span>
-													)}
-													<div className="flex items-center gap-2">
-														<span className="text-xs text-gray-500 font-medium">
-															{f.description}
-														</span>
-													</div>
-												</div>
-											</td>
-											<td className="px-6 py-4">
-												<ProgressBar stage={f.stage} />
-											</td>
-											{WEBXR_BROWSER_COLUMNS.map((column) => (
-												<BrowserCell
-													key={column.key}
-													value={f.support[column.key as BrowserKey]}
-												/>
-											))}
-										</tr>
-									))}
-								</tbody>
-							</table>
-						</div>
 					</div>
 				</section>
 
