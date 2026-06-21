@@ -35,6 +35,11 @@ export const NAV_CATEGORIES: NavCategory[] = [
 			{ name: "私たちについて", href: "/about" },
 			{ name: "ポッドキャスト", href: "/podcast" },
 			{
+				name: "GitHub (外部)",
+				href: "https://github.com/WebXR-JP/bangeo",
+				external: true,
+			},
+			{
 				name: "WebXR JP (外部)",
 				href: "https://discord.com/invite/9WyRvAwX7B",
 				external: true,
@@ -67,6 +72,11 @@ export const FOOTER_MAIN_LINKS = [
 	{ name: "私たちについて", href: "/about" },
 	{ name: "FAQ", href: "/faq" },
 	{ name: "お問い合わせ", href: "/contact" },
+	{
+		name: "GitHub",
+		href: "https://github.com/WebXR-JP/bangeo",
+		external: true,
+	},
 ];
 
 export const FOOTER_BOTTOM_LINKS = [
@@ -76,6 +86,11 @@ export const FOOTER_BOTTOM_LINKS = [
 		external: true,
 	},
 	{ name: "X", href: "https://x.com/bangeo_jp", external: true },
+	{
+		name: "GitHub",
+		href: "https://github.com/WebXR-JP/bangeo",
+		external: true,
+	},
 	{ name: "RSS", href: "/rss.xml" },
 	{ name: "サイトマップ", href: "/sitemap.xml" },
 	{ name: "プライバシーポリシー", href: "/privacy-policy" },

@@ -4,9 +4,16 @@ import Link from "next/link";
 export const metadata: Metadata = {
 	title: "お問い合わせ",
 	description:
-		"BANGEO は OSS として公開しています。質問、改善提案、不具合報告、コントリビュートの窓口をまとめています。",
+		"BANGEO は OSS として公開しています。質問、改善提案、不具合報告、記事寄稿、WebXRデモや企画の相談窓口をまとめています。",
 	alternates: { canonical: "/contact" },
 };
+
+const welcomeTopics = [
+	"WebXR、WebGPU、Three.js、PlayCanvasの記事寄稿",
+	"Meta Quest、iPhone、Android、PCブラウザでの動作検証",
+	"デモ追加、イベント掲載、ニュース提供、リンク追加の相談",
+	"誤字、古い情報、リンク切れ、不具合の報告",
+] as const;
 
 const contacts = [
 	{
@@ -110,6 +117,9 @@ export default function ContactPage() {
 					GitHub とコミュニティから受け付けています。
 				</p>
 				<p className="text-base md:text-lg text-gray-500 font-medium leading-relaxed">
+					記事寄稿、検証協力、WebXRデモの追加、イベント情報、企画提案も自由に募集しています。まとまっていなくても、まずはIssueやDiscordで相談してください。
+				</p>
+				<p className="text-base md:text-lg text-gray-500 font-medium leading-relaxed">
 					公開リポジトリ:{" "}
 					<a
 						href="https://github.com/WebXR-JP/bangeo"
@@ -121,6 +131,32 @@ export default function ContactPage() {
 					</a>
 				</p>
 			</header>
+
+			<section className="mb-16 rounded-2xl border border-rose-100 bg-rose-50/50 p-7 md:p-9">
+				<div className="grid gap-8 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:items-start">
+					<div>
+						<p className="text-xs font-black tracking-[0.28em] text-rose-600 mb-3">
+							CONTRIBUTION
+						</p>
+						<h2 className="text-2xl md:text-3xl font-black tracking-tight text-gray-950">
+							自由に企画・寄稿を募集しています
+						</h2>
+						<p className="mt-4 text-sm md:text-base leading-relaxed text-gray-500 font-medium">
+							WebXRは実機差分が大きい分野です。小さな検証メモ、スクリーンショット、デモの失敗談、公式リリースの共有も価値があります。
+						</p>
+					</div>
+					<ul className="grid gap-3 text-sm font-bold text-gray-600">
+						{welcomeTopics.map((topic) => (
+							<li
+								key={topic}
+								className="rounded-xl border border-white bg-white/80 px-4 py-3"
+							>
+								{topic}
+							</li>
+						))}
+					</ul>
+				</div>
+			</section>
 
 			{/* Contact cards */}
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">

@@ -605,6 +605,60 @@ export default function HomePage() {
 				</div>
 			</section>
 
+			{/* Trust */}
+			<section className="py-20 md:py-28 bg-white">
+				<div className="max-w-6xl mx-auto px-6 md:px-8">
+					<div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(20rem,0.72fr)] lg:items-center">
+						<div className="space-y-6">
+							<p className="text-xs font-black tracking-[0.28em] text-rose-600">
+								OPEN PROJECT
+							</p>
+							<h2 className="text-3xl md:text-4xl font-black tracking-tight text-gray-950">
+								BANGEOは公開リポジトリで運営しています
+							</h2>
+							<p className="text-base md:text-lg leading-relaxed text-gray-500">
+								記事、デモ、サイト改善は GitHub
+								で確認できます。WebXRの検証メモ、誤字修正、リンク切れ、不具合報告、デモ追加の相談まで、Issue
+								やPull Requestで自由に受け付けています。
+							</p>
+							<div className="flex flex-col sm:flex-row gap-3">
+								<a
+									href="https://github.com/WebXR-JP/bangeo"
+									target="_blank"
+									rel="noopener noreferrer"
+									className="inline-flex items-center justify-center rounded-xl bg-gray-950 px-6 py-4 text-sm font-black text-white transition-colors hover:bg-[#e11d48]"
+								>
+									GitHubを見る
+								</a>
+								<Link
+									href="/about"
+									className="inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white px-6 py-4 text-sm font-black text-gray-950 transition-colors hover:border-rose-200 hover:text-[#e11d48]"
+								>
+									私たちについて
+								</Link>
+								<Link
+									href="/contact"
+									className="inline-flex items-center justify-center rounded-xl border border-gray-200 bg-white px-6 py-4 text-sm font-black text-gray-950 transition-colors hover:border-rose-200 hover:text-[#e11d48]"
+								>
+									問い合わせる
+								</Link>
+							</div>
+						</div>
+						<div className="rounded-2xl border border-gray-100 bg-gray-50/80 p-7">
+							<h3 className="text-lg font-black text-gray-950">
+								歓迎していること
+							</h3>
+							<ul className="mt-5 space-y-3 text-sm font-medium leading-relaxed text-gray-500">
+								<li>WebXR対応状況の実機報告</li>
+								<li>Meta Quest、iPhone、Androidでの動作確認</li>
+								<li>記事の誤り、古くなった情報、リンク切れの報告</li>
+								<li>Three.js、PlayCanvas、WebGPU関連のデモ提案</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</section>
+
 			{/* Community CTA */}
 			<section className="py-16 md:py-20 bg-gray-950">
 				<div className="max-w-6xl mx-auto px-6 md:px-8 flex flex-col md:flex-row justify-between items-center gap-6">

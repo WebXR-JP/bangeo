@@ -6,9 +6,34 @@ import { MASCOT_IMAGE_SIZES } from "@/lib/image-defaults";
 export const metadata: Metadata = {
 	title: "私たちについて",
 	description:
-		"BANGEO は、WebXR に関する情報を日本語で整理して公開するオープンなナレッジベースです。",
+		"BANGEO は WebXR、VR/AR、Meta Quest、iPhone、WebGPU の情報を日本語で整理するオープンな技術リソースです。GitHubで改善提案、寄稿、検証協力を受け付けています。",
 	alternates: { canonical: "/about" },
 };
+
+const principles = [
+	{
+		title: "実機で確認できる情報を重視",
+		description:
+			"Meta Quest、iPhone、Android、PCブラウザなど、WebXRを実際に試すときに必要な前提や制約を整理します。",
+	},
+	{
+		title: "出典と公開情報を追う",
+		description:
+			"W3C、ブラウザベンダー、ライブラリのGitHub、公式ドキュメントを確認し、古くなりやすい情報を更新します。",
+	},
+	{
+		title: "日本語で探せる入口を作る",
+		description:
+			"英語の仕様やissueに直接行く前に、背景、用語、判断ポイントを日本語で理解できる状態を目指します。",
+	},
+] as const;
+
+const contributionItems = [
+	"WebXR対応状況の実機レポート",
+	"記事の誤字、リンク切れ、古い情報の修正",
+	"Three.js、PlayCanvas、WebGPU、iPhone WebXRの検証メモ",
+	"BANGEOで扱ってほしいニュース、デモ、イベント情報",
+] as const;
 
 export default function AboutPage() {
 	return (
@@ -40,9 +65,56 @@ export default function AboutPage() {
 					</h1>
 					<p className="text-xl md:text-2xl text-gray-500 font-medium leading-relaxed">
 						BANGEO は、WebXR
-						に関する情報を日本語で整理して公開するオープンなナレッジベースです。
+						に関する情報を日本語で整理して公開するオープンな技術リソースです。記事、デモ、改善提案は
+						GitHub とコミュニティを通じて育てています。
 					</p>
+					<div className="flex flex-col sm:flex-row justify-center gap-3 pt-2">
+						<a
+							href="https://github.com/WebXR-JP/bangeo"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="inline-flex items-center justify-center rounded-full bg-gray-950 px-7 py-4 text-sm font-black text-white transition-colors hover:bg-[#e11d48]"
+						>
+							GitHubを見る
+						</a>
+						<Link
+							href="/contact"
+							className="inline-flex items-center justify-center rounded-full border border-rose-100 bg-white px-7 py-4 text-sm font-black text-gray-950 transition-colors hover:border-rose-200 hover:text-[#e11d48]"
+						>
+							参加・問い合わせ
+						</Link>
+					</div>
 				</header>
+
+				{/* Principles */}
+				<section className="space-y-10">
+					<div className="max-w-3xl">
+						<p className="text-xs font-black tracking-[0.28em] text-rose-600 mb-3">
+							WHY BANGEO
+						</p>
+						<h2 className="text-3xl md:text-5xl font-black tracking-tight text-gray-950">
+							WebXRを日本語で追い続けるために
+						</h2>
+						<p className="mt-5 text-lg leading-relaxed text-gray-500 font-medium">
+							WebXRは仕様、ブラウザ実装、デバイス、ライブラリの更新が速く、古い情報が検索結果に残りやすい領域です。BANGEOは、開発者が判断しやすいように、検証しやすい情報と出典への導線をまとめます。
+						</p>
+					</div>
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+						{principles.map((principle) => (
+							<div
+								key={principle.title}
+								className="rounded-2xl border border-gray-100 bg-white/70 p-7"
+							>
+								<h3 className="text-xl font-black text-gray-950">
+									{principle.title}
+								</h3>
+								<p className="mt-4 text-sm leading-relaxed text-gray-500 font-medium">
+									{principle.description}
+								</p>
+							</div>
+						))}
+					</div>
+				</section>
 
 				{/* Features */}
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -143,16 +215,35 @@ export default function AboutPage() {
 							参加する
 						</h2>
 						<p className="text-xl text-gray-300 font-medium leading-relaxed max-w-2xl mx-auto">
-							改善提案、不具合報告、コンテンツ追加の相談は GitHub
-							とコミュニティから受け付けています。
+							BANGEOでは、WebXRに関する検証協力、記事の改善、デモ提案、イベント情報の共有を歓迎しています。小さな修正も歓迎です。
 						</p>
 					</div>
-					<Link
-						href="/contact"
-						className="inline-block px-12 py-5 bg-[#e11d48] text-white rounded-full font-black text-lg hover:bg-[#be185d] transition-all transform hover:scale-105"
-					>
-						参加方法を見る
-					</Link>
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-3xl mx-auto text-left">
+						{contributionItems.map((item) => (
+							<div
+								key={item}
+								className="rounded-2xl border border-white/10 bg-white/5 px-5 py-4 text-sm font-bold text-gray-200"
+							>
+								{item}
+							</div>
+						))}
+					</div>
+					<div className="flex flex-col sm:flex-row justify-center gap-3">
+						<a
+							href="https://github.com/WebXR-JP/bangeo/issues"
+							target="_blank"
+							rel="noopener noreferrer"
+							className="inline-flex items-center justify-center px-8 py-4 bg-[#e11d48] text-white rounded-full font-black text-base hover:bg-[#be185d] transition-all"
+						>
+							GitHub Issuesへ
+						</a>
+						<Link
+							href="/contact"
+							className="inline-flex items-center justify-center px-8 py-4 bg-white text-gray-950 rounded-full font-black text-base hover:bg-rose-50 transition-all"
+						>
+							参加方法を見る
+						</Link>
+					</div>
 				</section>
 			</div>
 		</div>

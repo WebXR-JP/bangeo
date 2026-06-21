@@ -41,6 +41,8 @@ export function Footer() {
 							<Link
 								key={link.name}
 								href={link.href}
+								target={link.external ? "_blank" : undefined}
+								rel={link.external ? "noopener noreferrer" : undefined}
 								className="inline-flex items-center min-h-9 rounded-full px-3 py-2 hover:bg-white/70 hover:text-[#e11d48] transition-colors"
 							>
 								{link.name}
