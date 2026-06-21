@@ -96,29 +96,29 @@ HTML-in-Canvasの重要な点は、単に「HTMLを画像化する」だけで�
 }
 ```
 
-これはWebXRのように、アプリがXRセッションを開始し、フレームごとにレンダリングし、コントローラーやハンドトラッキングを扱うモデルとは違います。Spatial CSSは、より「Webページそのものを空間対応にする」方向です。
+これはWebXRのように、アプリがXRセッションを開始し、フレームごとにレンダリングし、コントローラーやhand trackingを扱うモデルとは違います。Spatial CSSは、より「Webページそのものを空間対応にする」方向です。
 
 2026年5月の[Immersive Web WG/CGとCSSWGの合同議論](https://www.w3.org/2026/05/20-immersive-web-minutes.html)でも、Spatial LayoutはCSSを中心に空間表現をWebへ持ち込む提案として扱われ、3Dコンテンツと2D DOMをどう同じシステムに載せるかが議論されています。
 
 [Safari 27 betaでvisionOS向けImmersive Webが前進](/tech-articles/safari-27-beta-visionos-immersive-website-environments-webxr)のように、Appleプラットフォームでは `<model>` 要素やimmersive APIが別軸で進んでいますが、Spatial CSSはWebページ全体の空間化という、さらに広いレイヤーの話です。
 
-## background-materialは空間UIの見た目に関係する
+## background-materialはspatial UIの見た目に関係する
 
 Spatial CSSと近い話題として、`background-material` も議論されています。これはOSが持つガラス風、パネル風、ポップアップ風のような「システム定義のマテリアル」をCSSから使う提案です。[WebSpatialのexplainer](https://github.com/webspatial/WebSpatialExplainers/blob/main/background-material/explainer.md)では、`background-material` を、`background-color` を受け取れる要素の背景にシステム定義マテリアルを描画するCSSプロパティとして説明しています。
 
-これはWebXRの描画APIではありません。しかし、空間Web UIを作るうえでは重要です。Vision ProやAndroid XRのような空間コンピューティング環境では、Webページのパネルが周囲のOS UIと自然に馴染むかどうかが体験に大きく影響します。
+これはWebXRの描画APIではありません。しかし、spatial web UIを作るうえでは重要です。Vision ProやAndroid XRのような空間コンピューティング環境では、Webページのパネルが周囲のOS UIと自然に馴染むかどうかが体験に大きく影響します。
 
-ただし、この分野もまだ提案・議論段階です。今すぐBANGEOの入門記事で「使えるAPI」として紹介するより、「空間Web UIの将来像」として整理するのが安全です。
+ただし、この分野もまだ提案・議論段階です。今すぐBANGEOの入門記事で「使えるAPI」として紹介するより、「spatial web UIの将来像」として整理するのが安全です。
 
 ## 開発者はどう考えればよいか
 
 今WebXRアプリを作るなら、まずは用途ごとにUIの作り方を分けるのが現実的です。
 
-ARの上に説明や設定UIを重ねるならDOM Overlayを検討します。3D空間の中で完全に没入型のUIを作るなら、three.jsやPlayCanvasなどの3D UI、テクスチャ、raycastingを使うのが安定しています。
+ARの上に説明や設定UIを重ねるならDOM Overlayを検討します。3D空間の中で完全にimmersiveなUIを作るなら、three.jsやPlayCanvasなどの3D UI、テクスチャ、raycastingを使うのが安定しています。
 
 HTML-in-Canvasは、HTML/CSSのUIを3D空間内のテクスチャとして扱う将来候補です。Chrome CanaryやOrigin Trialで実験する価値はありますが、本番前提にするにはブラウザ対応とAPI変更リスクを見ておく必要があります。
 
-Spatial CSSは、WebXRアプリというより、WebページやブラウザUIそのものが空間対応していく流れです。WebXR開発者にとっては「将来、WebXRでしかできなかった一部の空間UIが、CSS側でも表現できるようになるかもしれない」という意味で重要です。
+Spatial CSSは、WebXRアプリというより、WebページやブラウザUIそのものが空間対応していく流れです。WebXR開発者にとっては「将来、WebXRでしかできなかった一部のspatial UIが、CSS側でも表現できるようになるかもしれない」という意味で重要です。
 
 ## BANGEOでの整理
 
