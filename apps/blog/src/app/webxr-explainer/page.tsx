@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { codeToHtml } from "shiki";
 import { BreadcrumbStructuredData } from "@/components/breadcrumb-structured-data";
+import { CodeBlockCopyButton } from "@/components/code-block-copy";
 
 export const metadata: Metadata = {
 	title: "WebXRとは？使い方・対応ブラウザ・デモを日本語で解説",
@@ -15,7 +17,33 @@ export const metadata: Metadata = {
 	alternates: { canonical: "/webxr-explainer" },
 };
 
-export default function WebXRExplainerPage() {
+const MINIMAL_CODE = `if (!navigator.xr) {
+  showFallback();
+}
+
+const supported = await navigator.xr.isSessionSupported("immersive-vr");
+if (!supported) {
+  showFallback();
+}
+
+const session = await navigator.xr.requestSession("immersive-vr", {
+  optionalFeatures: ["local-floor", "bounded-floor"],
+});
+
+const referenceSpace = await session.requestReferenceSpace("local-floor");
+session.requestAnimationFrame(function onFrame(time, frame) {
+  const pose = frame.getViewerPose(referenceSpace);
+  if (pose) {
+    renderSceneForXR(pose);
+  }
+  session.requestAnimationFrame(onFrame);
+});`;
+
+export default async function WebXRExplainerPage() {
+	const minimalCodeHtml = await codeToHtml(MINIMAL_CODE, {
+		lang: "javascript",
+		theme: "rose-pine-moon",
+	});
 	return (
 		<div className="relative px-4 md:px-6 py-16 md:py-20 max-w-5xl mx-auto overflow-hidden">
 			<BreadcrumbStructuredData
@@ -427,29 +455,16 @@ export default function WebXRExplainerPage() {
 						WebXRアプリは、対応確認、セッション開始、reference
 						space取得、フレームループの順に組み立てます。実際の描画はThree.jsやBabylon.jsなどのライブラリに任せることが多いですが、APIの流れは次の形です。
 					</p>
-					<pre className="overflow-x-auto rounded-2xl bg-gray-950 p-5 text-sm text-gray-100">
-						<code>{`if (!navigator.xr) {
-  showFallback();
-}
-
-const supported = await navigator.xr.isSessionSupported("immersive-vr");
-if (!supported) {
-  showFallback();
-}
-
-const session = await navigator.xr.requestSession("immersive-vr", {
-  optionalFeatures: ["local-floor", "bounded-floor"],
-});
-
-const referenceSpace = await session.requestReferenceSpace("local-floor");
-session.requestAnimationFrame(function onFrame(time, frame) {
-  const pose = frame.getViewerPose(referenceSpace);
-  if (pose) {
-    renderSceneForXR(pose);
-  }
-  session.requestAnimationFrame(onFrame);
-});`}</code>
-					</pre>
+					<figure className="code-block-figure" data-language="javascript">
+						<figcaption className="code-block-header">
+							<span className="code-block-lang">javascript</span>
+						</figcaption>
+						<div className="code-block-body">
+							{/* biome-ignore lint/security/noDangerouslySetInnerHtml: shiki output is trusted */}
+							<div dangerouslySetInnerHTML={{ __html: minimalCodeHtml }} />
+							<CodeBlockCopyButton />
+						</div>
+					</figure>
 					<p className="text-sm text-gray-500 leading-relaxed">
 						本番では、HTTPS配信、ユーザー操作を起点にしたsession開始、権限エラー、feature未対応、WebGL/WebGPU
 						context loss、通常表示へのfallbackを必ず扱います。
