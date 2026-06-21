@@ -58,6 +58,24 @@ export default withMDX({
 					},
 				],
 			},
+			{
+				source: "/demos/:path*",
+				headers: [
+					{
+						key: "X-Robots-Tag",
+						value: "noindex, follow",
+					},
+				],
+			},
+			{
+				source: "/demo/:path*",
+				headers: [
+					{
+						key: "X-Robots-Tag",
+						value: "noindex, follow",
+					},
+				],
+			},
 		];
 	},
 	experimental: {
