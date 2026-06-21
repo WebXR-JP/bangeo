@@ -80,6 +80,59 @@ draft: false
 - depth/occlusionデモはdepthなしでも表示できる
 - HTML-in-Canvasデモは `device.supportsHtmlTextures` を確認し、fallbackを用意する
 
+## 用語とSEO：公的技術名称を優先する
+
+BANGEOは技術者が調べて使うサイトなので、記事・デモの用語は検索クエリに乗る公的な技術名称を優先する。和製語・独自の言い換えは避ける。
+
+### 優先する公的名称
+
+| 分類 | 公的名称 | 避ける和製語 |
+| --- | --- | --- |
+| WebXR ReferenceSpaceType | `local` / `local-floor` / `bounded-floor` / `unbounded` | ルームスケール境界、境界取得 |
+| WebXR プロパティ | `boundsGeometry` / `featurePointCloud` / `motionVectorTexture` / `depthStencilTexture` | 境界形状、3D特徴点、動き |
+| WebXR 機能Module | `Hit Test Module` / `Anchors Module` / `Hand Input Module` / `Depth Sensing Module` / `Lighting Estimation Module` / `DOM Overlays Module` / `Layers Module` | ヒットテスト、ヒット判定、空間アンカー、ハンドトラッキング、奥行き合成、奥行き表現 |
+| WebXR session mode | `inline` / `immersive-vr` / `immersive-ar` / `inline-stereo` | ページ内モード、没入型表示 |
+| WebXR Mesh | `XRMeshDetection` | シーンメッシュ、メッシュ取得 |
+| Quest 公式実装名 | `scene capture` / `room mesh` / `depth projection` / `app space warp` / `passthrough` / `Spatial Anchors` | 空間スキャン、ルームスキャン、奥行き、パススルー（MR）、空間アンカー |
+| 8th Wall 公式 | `world sensing` / `world tracking` / `SLAM` / `face mesh` / `face attachment` / `Face Effects` / `Image Targets` / `Sky Effects` / `World Effects` | ワールドトラッキング、特徴点、自動追従 |
+| 業界標準 | `occlusion` / `depth occlusion` / `MR合成` / `passthrough` / `fallback` / `polyfill` / `hit test` / `hand tracking` / `eye tracking` / `spatial mapping` / `spatial UI` / `co-presence` / `VR sickness` / `stereo rendering` / `foveated rendering` / `artifact` | 奥行き合成、代替表示、代替ライブラリ、ヒット判定、ハンドトラッキング、視線追跡、空間認識、空間UI、共存、酔い、ステレオレンダリング、描画崩れ、破綻 |
+
+### 和製語を使う場合のルール
+
+どうしても和製語を使う場合は公的名称を併記する。和製語単独では使わない。
+
+```
+✕ ハンドトラッキングに対応
+○ hand tracking（ハンドトラッキング）に対応
+```
+
+### 注釈の入れ方
+
+公的技術名称のうち読者に説明が必要なもの（仕様プロパティ名・Module名・メーカー実装名）は、初出箇所の直後または「用語メモ」セクションに1-2行の注釈を入れる。毎回ではなく記事内で1回（初出または用語メモ）でよい。
+
+```
+boundsGeometry（XRBoundedReferenceSpace の境界ジオメトリ。プレイエリアの外周を表す点列）
+depth projection（Quest Browser 146 で実装された WebXR Depth Sensing の実装名。depth テクスチャを使って仮想オブジェクトの前後関係を合成する）
+app space warp（Meta のレイトレーシング負荷軽減機能。motion vector と depth を使って前フレームから現在フレームを外挿する）
+scene capture（Quest の部屋形状取得機能。room mesh と semantic label をまとめて取得する）
+```
+
+### frontmatter tags
+
+`tags` にも和製語を入れない。`代替表示` / `奥行き` / `境界` のような和製語タグは、`fallback` / `occlusion` / `bounded-floor` のような公的名称に置き換える。
+
+### title と description
+
+`title` は技術者が検索クエリに入れる公的名称を前半に配置する。説明的な和製語タイトル（「〇〇ビューア」「〇〇デモ」「〇〇実験」）は、公的名称を先にした形に作り直す。
+
+```
+✕ ルームスケール境界ビューア
+○ WebXR Bounded Floor ビューア — boundsGeometry の可視化
+
+✕ Quest奥行き合成デモ
+○ WebXR Depth Occlusion デモ — Quest depth projection でMR合成を検証
+```
+
 ## 公開記事に入れてよい注意書き
 
 ```md
