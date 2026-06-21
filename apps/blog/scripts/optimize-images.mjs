@@ -80,6 +80,23 @@ async function optimizeFile(filePath) {
 	const info = await stat(filePath);
 	const maxWidth = relative.includes("ogp") ? MAX_OG_WIDTH : MAX_THUMB_WIDTH;
 
+	// ogp.png はTwitterのCardクローラーがタイムアウトしやすいため、
+	// width に関わらず強制再圧縮する（palette圧縮で軽量化）
+	if (relative === "ogp.png") {
+		await writeOptimized(
+			filePath,
+			sharp(filePath).png({
+				compressionLevel: 9,
+				palette: true,
+				colors: 128,
+				quality: 70,
+			}),
+		);
+		console.log(`compressed ${relative} (${Math.round(info.size / 1024)}KB)`);
+		await writeWebpVariant(filePath);
+		return;
+	}
+
 	if (ext === ".gif") {
 		const webpPath = filePath.replace(/\.gif$/i, ".webp");
 		await sharp(filePath, { animated: false })
