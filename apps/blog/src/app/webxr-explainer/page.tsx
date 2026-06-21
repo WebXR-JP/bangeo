@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BreadcrumbStructuredData } from "@/components/breadcrumb-structured-data";
 
 export const metadata: Metadata = {
 	title: "WebXRとは？使い方・対応ブラウザ・デモを日本語で解説",
@@ -17,6 +18,9 @@ export const metadata: Metadata = {
 export default function WebXRExplainerPage() {
 	return (
 		<div className="relative px-4 md:px-6 py-16 md:py-20 max-w-5xl mx-auto overflow-hidden">
+			<BreadcrumbStructuredData
+				items={[{ name: "WebXRとは", path: "/webxr-explainer" }]}
+			/>
 			<div className="space-y-16 relative z-10">
 				{/* Header */}
 				<div className="space-y-6 text-center">

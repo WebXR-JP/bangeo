@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BreadcrumbStructuredData } from "@/components/breadcrumb-structured-data";
 import {
 	WEBXR_DEVICE_WATCH_TARGETS,
 	WEBXR_EVENT_IMPORTANCE_LABELS,
@@ -13,9 +14,9 @@ import {
 } from "@/data/webxr-events";
 
 export const metadata: Metadata = {
-	title: "WebXRイベントウォッチ",
+	title: "WebXRイベントウォッチ｜Meta Connect・WWDC・AWE・XR Kaigi",
 	description:
-		"WebXR / WebAR / Spatial Web 開発者が追うべきイベントと、BANGEOで更新されそうなページを整理しています。",
+		"Meta Connect、Google I/O、Apple WWDC、AWE、W3C TPAC、XR Kaigiなど、WebXR / WebAR / Spatial Web 開発者が追うべきイベントと、BANGEOで更新されそうなページを整理しています。",
 	alternates: { canonical: "/events" },
 };
 
@@ -234,6 +235,9 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
 
 	return (
 		<div className="mx-auto max-w-6xl px-4 py-8 md:px-8 md:py-14">
+			<BreadcrumbStructuredData
+				items={[{ name: "WebXRイベントウォッチ", path: "/events" }]}
+			/>
 			<header className="mb-6 space-y-3">
 				<p className="text-xs font-black uppercase tracking-[0.25em] text-rose-600">
 					WebXR Event Watch

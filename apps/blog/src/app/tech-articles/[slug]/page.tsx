@@ -6,6 +6,7 @@ import { ArticleStructuredData } from "@/components/article-structured-data";
 import { mdxComponents } from "@/components/mdx-components";
 import { OptimizedImage } from "@/components/optimized-image";
 import { SocialShare } from "@/components/social-share";
+import { contentDateTime } from "@/lib/content-dates";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
 import { NO_IMAGE, THUMB_IMAGE_SIZES } from "@/lib/image-defaults";
 import { SITE_URL } from "@/lib/site-url";
@@ -27,9 +28,19 @@ const ARTICLE_FAQS: Record<
 				"WebXR API互換のAR体験をiPhoneで見せたい場合は、App Clipや専用ビューアのように、ARKitを使うネイティブ層とWebViewを組み合わせる必要があります。",
 		},
 		{
+			question: "Variant Launchは何に使いますか？",
+			answer:
+				"Variant Launchは、商用向けにApp Clip経由のWebXR AR配信を整えたい場合の候補です。ブランド表現、運用、サポート、既存WebXRコンテンツとの接続を重視する案件で検討します。",
+		},
+		{
 			question: "Safari WebXRとApp Clip WebXRは同じですか？",
 			answer:
 				"同じではありません。Safari WebXRはブラウザがWebXR APIを直接実装している状態です。App Clipを使う方法は、ARKitでカメラやトラッキングを処理し、その上にWebViewとWebXR風のAPIを組み合わせる回避策です。",
+		},
+		{
+			question: "iPhone向けARはWebXRで作るべきですか？",
+			answer:
+				"既存のWebXRコンテンツをiPhoneでも見せたい場合はApp Clip型の方法を検討できます。商品プレビューや画像認識などで十分なら、WebXR以外のWebARやAR Quick Lookの方が運用しやすい場合があります。",
 		},
 	],
 };
@@ -56,6 +67,8 @@ export async function generateMetadata({
 	if (!doc) return {};
 
 	const ogImage = doc.thumbnail ? String(doc.thumbnail) : "/ogp.png";
+	const publishedDate = doc.date ? String(doc.date) : undefined;
+	const modifiedDate = doc.updated ? String(doc.updated) : publishedDate;
 
 	return {
 		title: doc.title,
@@ -64,7 +77,8 @@ export async function generateMetadata({
 			title: doc.title,
 			description: doc.description,
 			type: "article",
-			publishedTime: doc.date ? String(doc.date) : undefined,
+			publishedTime: contentDateTime(publishedDate),
+			modifiedTime: contentDateTime(modifiedDate),
 			authors: doc.author ? [String(doc.author)] : undefined,
 			tags: (doc.tags as string[] | undefined) || [],
 			images: [{ url: ogImage, width: 1200, height: 630, alt: doc.title }],
@@ -87,6 +101,8 @@ export default async function TechArticlePage({ params }: PageProps) {
 	const MDX = doc.body;
 	const tags = doc.tags as string[] | undefined;
 	const image = doc.thumbnail ? String(doc.thumbnail) : "/ogp.png";
+	const publishedDate = doc.date ? String(doc.date) : undefined;
+	const modifiedDate = doc.updated ? String(doc.updated) : publishedDate;
 	const allDocs = getDocs(blog);
 	const otherArticles = allDocs
 		.filter(
@@ -103,7 +119,8 @@ export default async function TechArticlePage({ params }: PageProps) {
 				description={doc.description}
 				path={`${BASE_PATH}/${slug}`}
 				image={image}
-				datePublished={doc.date ? String(doc.date) : undefined}
+				datePublished={publishedDate}
+				dateModified={modifiedDate}
 				author={doc.author ? String(doc.author) : undefined}
 				categoryLabel="技術記事"
 				categoryPath={BASE_PATH}
@@ -132,8 +149,19 @@ export default async function TechArticlePage({ params }: PageProps) {
 									</span>
 								)}
 								{doc.date && (
-									<time className="text-[11px] text-gray-500 font-medium tracking-wide">
+									<time
+										dateTime={contentDateTime(publishedDate)}
+										className="text-[11px] text-gray-500 font-medium tracking-wide"
+									>
 										{String(doc.date)}
+									</time>
+								)}
+								{doc.updated && doc.updated !== doc.date && (
+									<time
+										dateTime={contentDateTime(modifiedDate)}
+										className="text-[11px] text-gray-500 font-medium tracking-wide"
+									>
+										更新: {String(doc.updated)}
 									</time>
 								)}
 								{doc.author && (

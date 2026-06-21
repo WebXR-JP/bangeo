@@ -2,24 +2,13 @@ import { blog, experiments } from "fumadocs-mdx:collections/server";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { CollectionStructuredData } from "@/components/collection-structured-data";
 import { collectTags, tagPath } from "@/lib/collect-tags";
+import { contentDateTime, contentDateValue } from "@/lib/content-dates";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
 
 interface PageProps {
 	params: Promise<{ tag: string }>;
-}
-
-function parseContentDate(value?: string): number {
-	if (!value) return 0;
-
-	const japaneseDate = value.match(/^(\d{4})年(\d{1,2})月(\d{1,2})日$/);
-	if (japaneseDate) {
-		const [, year, month, day] = japaneseDate;
-		return new Date(Number(year), Number(month) - 1, Number(day)).getTime();
-	}
-
-	const date = new Date(value);
-	return Number.isNaN(date.getTime()) ? 0 : date.getTime();
 }
 
 export async function generateStaticParams() {
@@ -66,8 +55,8 @@ export default async function TagDetailPage({ params }: PageProps) {
 				!p.draft && p.tags && Array.isArray(p.tags) && p.tags.includes(tag),
 		)
 		.sort((a, b) => {
-			const dA = parseContentDate(a.date);
-			const dB = parseContentDate(b.date);
+			const dA = contentDateValue(a.updated ?? a.date);
+			const dB = contentDateValue(b.updated ?? b.date);
 			return dB - dA;
 		});
 
@@ -77,8 +66,8 @@ export default async function TagDetailPage({ params }: PageProps) {
 				!e.draft && e.tags && Array.isArray(e.tags) && e.tags.includes(tag),
 		)
 		.sort((a, b) => {
-			const dA = parseContentDate(a.date);
-			const dB = parseContentDate(b.date);
+			const dA = contentDateValue(a.updated ?? a.date);
+			const dB = contentDateValue(b.updated ?? b.date);
 			return dB - dA;
 		});
 
@@ -88,6 +77,45 @@ export default async function TagDetailPage({ params }: PageProps) {
 
 	return (
 		<div className="max-w-6xl mx-auto px-6 md:px-8 py-16 md:py-20">
+			<CollectionStructuredData
+				name={`${tag} の記事・デモ一覧`}
+				path={tagPath(tag)}
+				description={`WebXRの技術記事、ニュース、デモを「${tag}」タグでまとめています。`}
+				breadcrumbs={[
+					{ name: "タグ一覧", path: "/tags" },
+					{ name: tag, path: tagPath(tag) },
+				]}
+				items={[
+					...blogPosts.map((post) => {
+						const slug = getSlugFromPath(post.info.path);
+						return {
+							name: post.title,
+							path: `/tech-articles/${slug}`,
+							description: post.description,
+							datePublished: post.date ? String(post.date) : undefined,
+							dateModified: post.updated
+								? String(post.updated)
+								: post.date
+									? String(post.date)
+									: undefined,
+						};
+					}),
+					...experimentsList.map((exp) => {
+						const slug = getSlugFromPath(exp.info.path);
+						return {
+							name: exp.title,
+							path: `/experiments/${slug}`,
+							description: exp.description,
+							datePublished: exp.date ? String(exp.date) : undefined,
+							dateModified: exp.updated
+								? String(exp.updated)
+								: exp.date
+									? String(exp.date)
+									: undefined,
+						};
+					}),
+				]}
+			/>
 			<div className="mb-8">
 				<Link
 					href="/tags"
@@ -125,7 +153,12 @@ export default async function TagDetailPage({ params }: PageProps) {
 											</span>
 										)}
 										{post.date && (
-											<time className="text-xs text-gray-500 font-medium">
+											<time
+												dateTime={contentDateTime(
+													post.date ? String(post.date) : undefined,
+												)}
+												className="text-xs text-gray-500 font-medium"
+											>
 												{post.date}
 											</time>
 										)}
@@ -171,7 +204,12 @@ export default async function TagDetailPage({ params }: PageProps) {
 											</span>
 										)}
 										{exp.date && (
-											<time className="text-xs text-gray-500 font-medium">
+											<time
+												dateTime={contentDateTime(
+													exp.date ? String(exp.date) : undefined,
+												)}
+												className="text-xs text-gray-500 font-medium"
+											>
 												{exp.date}
 											</time>
 										)}

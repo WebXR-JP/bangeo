@@ -1,16 +1,20 @@
 import type { Metadata } from "next";
+import { BreadcrumbStructuredData } from "@/components/breadcrumb-structured-data";
 import { WEBXR_PLATFORMS } from "@/data/platforms";
 
 export const metadata: Metadata = {
-	title: "プラットフォーム",
+	title: "WebXRプラットフォーム｜Quest Browser・iOS Safari・visionOS",
 	description:
-		"WebXR を実装・配信・体験するための主要プラットフォームや代表的サービス。",
+		"WebXRを実装・配信・体験するための主要プラットフォーム（Meta Quest Browser、iOS Safari、visionOS Safari、Chrome、Edge、Firefox）や代表サービスを整理しています。",
 	alternates: { canonical: "/platforms" },
 };
 
 export default function PlatformsPage() {
 	return (
 		<div className="px-4 md:px-6 py-16 md:py-20 max-w-7xl mx-auto">
+			<BreadcrumbStructuredData
+				items={[{ name: "プラットフォーム", path: "/platforms" }]}
+			/>
 			<div className="space-y-24">
 				{/* Header */}
 				<header className="text-center max-w-4xl mx-auto space-y-8">

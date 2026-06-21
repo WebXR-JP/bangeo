@@ -1,0 +1,55 @@
+---
+title: "WebXR Audio Space - 空間音響をブラウザで試す"
+description: "WebXR と Web Audio API を組み合わせ、ヘッドセットやブラウザ上で音の位置・距離・向きによる聞こえ方を確認する空間音響デモ。"
+date: "2026-06-21"
+category: "AUDIO"
+tags:
+  - "WebXR"
+  - "Spatial Audio"
+  - "Web Audio"
+  - "VR"
+  - "Meta Quest"
+frameworks:
+  - "WebXR"
+  - "Web Audio API"
+devices:
+  - "Meta Quest"
+  - "PC Browser"
+difficulty: "intermediate"
+estimatedTime: 5
+link: "/demos/webxr-audio-space"
+thumbnail: "/ogp.png"
+draft: false
+---
+
+WebXR と Web Audio API を使い、3D空間の中で音がどの位置から聞こえるかを確認するデモです。
+
+VRやMRの体験では、映像だけでなく音の位置が没入感に大きく影響します。ユーザーの頭の向き、音源との距離、左右の定位を確認することで、UI通知、環境音、ナビゲーション、展示演出の設計に使えます。
+
+## このデモで確認できること
+
+- 音源の位置が左右・前後に分かれて聞こえるか
+- 視点や頭の向きに合わせて定位が変わるか
+- 距離によって音量や存在感が変化するか
+- ヘッドセット、PCブラウザ、スピーカー環境で体感差があるか
+
+## 対応環境の目安
+
+Meta Quest Browser のようなWebXR対応ブラウザでは、没入型セッションと組み合わせた確認に向いています。PCブラウザでも、Web Audio API の定位や音量変化は確認できます。
+
+スマートフォンの場合は、スピーカー再生では定位が分かりにくいことがあります。検証時はイヤホンやヘッドホンを使うと差が分かりやすくなります。
+
+## 使う技術
+
+| 技術 | 用途 |
+| --- | --- |
+| WebXR | 視点やヘッドセットの姿勢に合わせて空間を更新する |
+| Web Audio API | 音源、リスナー、PannerNode で音の位置を表現する |
+| 3Dシーン | 音源の場所を視覚的に確認する |
+
+## 実装前の見方
+
+空間音響は「音が鳴る」だけでは品質判断ができません。音源の移動、距離減衰、頭を向けたときの定位変化、複数音源が重なったときの聞き分けやすさを確認してください。
+
+[デモを開く](/demos/webxr-audio-space)
+

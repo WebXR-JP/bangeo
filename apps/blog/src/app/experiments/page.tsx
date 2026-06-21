@@ -1,18 +1,20 @@
 import { experiments } from "fumadocs-mdx:collections/server";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { CollectionStructuredData } from "@/components/collection-structured-data";
 import { OptimizedImage } from "@/components/optimized-image";
+import { contentDateTime, contentDateValue } from "@/lib/content-dates";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
 import { CARD_IMAGE_SIZES } from "@/lib/image-defaults";
 
 export const metadata: Metadata = {
 	title: "WebXRデモ一覧｜VR・ARをブラウザで試す",
 	description:
-		"Meta Quest、Android、PCブラウザで試せるWebXRデモ一覧。AR、VR、MR、WebGPU、Depth Occlusionなどの実験を日本語で整理しています。",
+		"Meta Quest 3・Android Chrome・PCブラウザで試せるWebXRデモ一覧。immersive-vr / immersive-ar、Hit Test、Hand Input、Depth Occlusion、WebGPU、8th Wall、IWSDKの実験を日本語で整理しています。",
 	openGraph: {
 		title: "WebXRデモ一覧｜VR・ARをブラウザで試す",
 		description:
-			"Meta Quest、Android、PCブラウザで試せるWebXRデモ一覧。AR、VR、MR、WebGPUなどの実験を日本語で整理しています。",
+			"Meta Quest 3・Android Chrome・PCブラウザで試せるWebXRデモ一覧。immersive-vr / immersive-ar、Hit Test、Hand Input、Depth Occlusion、WebGPU、8th Wall、IWSDKの実験を日本語で整理しています。",
 		type: "website",
 	},
 	alternates: { canonical: "/experiments" },
@@ -24,29 +26,39 @@ const difficultyLabel: Record<string, string> = {
 	advanced: "上級",
 };
 
-function parseContentDate(value?: string): number {
-	if (!value) return 0;
-
-	const japaneseDate = value.match(/^(\d{4})年(\d{1,2})月(\d{1,2})日$/);
-	if (japaneseDate) {
-		const [, year, month, day] = japaneseDate;
-		return new Date(Number(year), Number(month) - 1, Number(day)).getTime();
-	}
-
-	const date = new Date(value);
-	return Number.isNaN(date.getTime()) ? 0 : date.getTime();
-}
-
 export default function ExperimentsIndexPage() {
-	const allExperiments = getDocs(experiments).sort((a, b) => {
-		const dateA = parseContentDate(a.date);
-		const dateB = parseContentDate(b.date);
-		return dateB - dateA;
-	});
+	const allExperiments = getDocs(experiments)
+		.filter((exp) => !exp.draft)
+		.sort((a, b) => {
+			const dateA = contentDateValue(a.updated ?? a.date);
+			const dateB = contentDateValue(b.updated ?? b.date);
+			return dateB - dateA;
+		});
 	const hasExperiments = allExperiments.length > 0;
 
 	return (
 		<div className="max-w-6xl mx-auto px-6 md:px-8 py-16 md:py-20">
+			<CollectionStructuredData
+				name="BANGEO WebXRデモ一覧"
+				path="/experiments"
+				description="Meta Quest、Android、PCブラウザで試せるWebXRデモ一覧。"
+				breadcrumbs={[{ name: "デモ", path: "/experiments" }]}
+				items={allExperiments.map((exp) => {
+					const slug = getSlugFromPath(exp.info.path);
+					return {
+						name: exp.title,
+						path: `/experiments/${slug}`,
+						description: exp.description,
+						image: exp.thumbnail ? String(exp.thumbnail) : undefined,
+						datePublished: exp.date ? String(exp.date) : undefined,
+						dateModified: exp.updated
+							? String(exp.updated)
+							: exp.date
+								? String(exp.date)
+								: undefined,
+					};
+				})}
+			/>
 			<header className="mb-12">
 				<h1 className="text-3xl font-black tracking-tight text-gray-950 mb-2">
 					WebXRデモ一覧
@@ -124,7 +136,15 @@ export default function ExperimentsIndexPage() {
 										</p>
 									)}
 									<div className="flex items-center justify-between text-xs text-gray-500 font-medium">
-										{exp.date && <time>{String(exp.date)}</time>}
+										{exp.date && (
+											<time
+												dateTime={contentDateTime(
+													exp.date ? String(exp.date) : undefined,
+												)}
+											>
+												{String(exp.date)}
+											</time>
+										)}
 										{exp.estimatedTime && (
 											<span>約{String(exp.estimatedTime)}分</span>
 										)}

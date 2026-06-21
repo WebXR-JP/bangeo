@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BreadcrumbStructuredData } from "@/components/breadcrumb-structured-data";
 
 export const metadata: Metadata = {
-	title: "よくある質問（FAQ）",
-	description: "WebXR や BANGEO に関する、よくある質問と回答をまとめています。",
+	title: "WebXR FAQ｜よくある質問と回答",
+	description:
+		"WebXRとは何か、iPhone(Safari)・Meta Quest・PCVRで動くか、Three.jsやBabylon.jsの選び方、WebXRとWebVR/WebARの違いなど、よくある質問に日本語で回答します。",
 	alternates: { canonical: "/faq" },
 };
 
@@ -110,6 +112,7 @@ export default function FaqPage() {
 
 	return (
 		<div className="max-w-4xl mx-auto px-6 md:px-8 py-16 md:py-20">
+			<BreadcrumbStructuredData items={[{ name: "FAQ", path: "/faq" }]} />
 			{/* Header */}
 			<header className="space-y-6 text-center mb-16">
 				<h1 className="text-4xl md:text-5xl font-black tracking-tight text-gray-950">
@@ -138,6 +141,7 @@ export default function FaqPage() {
 										<span>{item.question}</span>
 										<svg
 											className="w-5 h-5 text-gray-400 transition-transform group-open:rotate-90 shrink-0 ml-4"
+											aria-hidden="true"
 											fill="none"
 											viewBox="0 0 24 24"
 											stroke="currentColor"

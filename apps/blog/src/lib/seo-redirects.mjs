@@ -38,7 +38,7 @@ export const LEGACY_REDIRECTS = [
 	},
 	{
 		source: "/experiments/hit-test-basic",
-		destination: "/demos/hit-test-advanced",
+		destination: "/experiments/hit-test-advanced",
 		permanent: true,
 	},
 	{
@@ -63,7 +63,37 @@ export const LEGACY_REDIRECTS = [
 	},
 	{
 		source: "/experiments/spatial-audio-advanced",
-		destination: "/demos/webxr-audio-space",
+		destination: "/experiments/webxr-audio-space",
+		permanent: true,
+	},
+	{
+		source: "/experiments/geo-anchors",
+		destination: "/experiments",
+		permanent: true,
+	},
+	{
+		source: "/experiments/haptics-pulse",
+		destination: "/experiments",
+		permanent: true,
+	},
+	{
+		source: "/experiments/ui-interaction",
+		destination: "/experiments",
+		permanent: true,
+	},
+	{
+		source: "/experiments/layers-api",
+		destination: "/experiments",
+		permanent: true,
+	},
+	{
+		source: "/experiments/body-tracking",
+		destination: "/experiments",
+		permanent: true,
+	},
+	{
+		source: "/experiments/foveated-rendering",
+		destination: "/experiments",
 		permanent: true,
 	},
 	{

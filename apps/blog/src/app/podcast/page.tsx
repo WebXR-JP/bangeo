@@ -1,13 +1,15 @@
 import { podcast } from "fumadocs-mdx:collections/server";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BreadcrumbStructuredData } from "@/components/breadcrumb-structured-data";
 import { OptimizedImage } from "@/components/optimized-image";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
 import { CARD_IMAGE_SIZES } from "@/lib/image-defaults";
 
 export const metadata: Metadata = {
-	title: "ポッドキャスト",
-	description: "WebXR JPポッドキャストのエピソード一覧",
+	title: "WebXR JPポッドキャスト｜XRの話題を気軽に",
+	description:
+		"WebXR JPコミュニティのメンバーがXR・WebXR・VR/ARの話題を気軽に語るポッドキャストのエピソード一覧です。",
 	alternates: { canonical: "/podcast" },
 };
 
@@ -27,6 +29,9 @@ export default function PodcastIndexPage() {
 
 	return (
 		<div className="max-w-6xl mx-auto px-6 md:px-8 py-16 md:py-20">
+			<BreadcrumbStructuredData
+				items={[{ name: "ポッドキャスト", path: "/podcast" }]}
+			/>
 			<header className="mb-12">
 				<h1 className="text-3xl font-black tracking-tight text-gray-950 mb-2">
 					ポッドキャスト

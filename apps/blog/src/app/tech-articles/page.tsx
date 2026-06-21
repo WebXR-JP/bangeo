@@ -1,40 +1,64 @@
 import { blog } from "fumadocs-mdx:collections/server";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { CollectionStructuredData } from "@/components/collection-structured-data";
 import { OptimizedImage } from "@/components/optimized-image";
+import { contentDateTime, contentDateValue } from "@/lib/content-dates";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
 import { CARD_IMAGE_SIZES, NO_IMAGE } from "@/lib/image-defaults";
 
 export const metadata: Metadata = {
-	title: "ブログ",
+	title: "WebXR技術記事・ニュース｜実装ガイド・ブラウザ更新",
 	description:
-		"WebXR に関する技術記事、ニュース、イベント情報をまとめています。",
+		"WebXRの仕様更新、ブラウザ対応、Meta Quest・iOS Safari・WebGPUの実装ノウハウ、イベント情報を日本語で整理した技術記事一覧です。",
 	openGraph: {
-		title: "ブログ",
+		title: "WebXR技術記事・ニュース｜実装ガイド・ブラウザ更新",
 		description:
-			"WebXR に関する技術記事、ニュース、イベント情報をまとめています。",
+			"WebXRの仕様更新、ブラウザ対応、Meta Quest・iOS Safari・WebGPUの実装ノウハウ、イベント情報を日本語で整理した技術記事一覧です。",
 		type: "website",
 	},
 	alternates: { canonical: "/tech-articles" },
 };
 
 export default function TechArticlesIndexPage() {
-	const posts = getDocs(blog).sort((a, b) => {
-		const parseDate = (d: string) => {
-			const m = d.match(/(\d+)年(\d+)月(\d+)日/);
-			return m ? new Date(+m[1], +m[2] - 1, +m[3]).getTime() : 0;
-		};
-		return parseDate(String(b.date || "")) - parseDate(String(a.date || ""));
-	});
+	const posts = getDocs(blog)
+		.filter((post) => !post.draft)
+		.sort((a, b) => {
+			const dateA = contentDateValue(a.updated ?? a.date);
+			const dateB = contentDateValue(b.updated ?? b.date);
+			return dateB - dateA;
+		});
 
 	return (
 		<div className="max-w-6xl mx-auto px-6 md:px-8 py-16 md:py-20">
+			<CollectionStructuredData
+				name="BANGEO 技術記事一覧"
+				path="/tech-articles"
+				description="WebXR に関する技術記事、ニュース、イベント情報をまとめています。"
+				breadcrumbs={[{ name: "技術記事", path: "/tech-articles" }]}
+				items={posts.map((post) => {
+					const slug = getSlugFromPath(post.info.path);
+					return {
+						name: post.title,
+						path: `/tech-articles/${slug}`,
+						description: post.description,
+						image: post.thumbnail ? String(post.thumbnail) : NO_IMAGE,
+						datePublished: post.date ? String(post.date) : undefined,
+						dateModified: post.updated
+							? String(post.updated)
+							: post.date
+								? String(post.date)
+								: undefined,
+					};
+				})}
+			/>
 			<header className="mb-12">
 				<h1 className="text-3xl font-black tracking-tight text-gray-950 mb-2">
-					ブログ
+					WebXR技術記事・ニュース
 				</h1>
 				<p className="text-base text-gray-500">
-					WebXR に関する技術記事、ニュース、イベント情報をまとめています
+					WebXRの仕様更新、ブラウザ対応、Meta Quest・iOS
+					Safari・WebGPUの実装ノウハウ、イベント情報を日本語で整理しています
 				</p>
 			</header>
 
@@ -65,7 +89,12 @@ export default function TechArticlesIndexPage() {
 										</span>
 									)}
 									{post.date && (
-										<time className="text-xs text-gray-500 font-medium">
+										<time
+											dateTime={contentDateTime(
+												post.date ? String(post.date) : undefined,
+											)}
+											className="text-xs text-gray-500 font-medium"
+										>
 											{String(post.date)}
 										</time>
 									)}

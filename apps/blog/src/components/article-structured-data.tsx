@@ -1,3 +1,4 @@
+import { contentDateTime } from "@/lib/content-dates";
 import { SITE_URL } from "@/lib/site-url";
 
 type ArticleStructuredDataProps = {
@@ -6,6 +7,7 @@ type ArticleStructuredDataProps = {
 	path: string;
 	image?: string;
 	datePublished?: string;
+	dateModified?: string;
 	author?: string;
 	categoryLabel: string;
 	categoryPath: string;
@@ -18,16 +20,6 @@ type ArticleStructuredDataProps = {
 
 function absoluteUrl(pathOrUrl: string): string {
 	return new URL(pathOrUrl, SITE_URL).toString();
-}
-
-function parseJapaneseDate(value?: string): string | undefined {
-	if (!value) return undefined;
-
-	const match = value.match(/^(\d{4})年(\d{1,2})月(\d{1,2})日$/);
-	if (!match) return value;
-
-	const [, year, month, day] = match;
-	return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
 }
 
 function JsonLdScript({ data }: { data: object }) {
@@ -46,6 +38,7 @@ export function ArticleStructuredData({
 	path,
 	image = "/ogp.png",
 	datePublished,
+	dateModified,
 	author = "BANGEO",
 	categoryLabel,
 	categoryPath,
@@ -53,31 +46,40 @@ export function ArticleStructuredData({
 	faqs = [],
 }: ArticleStructuredDataProps) {
 	const url = absoluteUrl(path);
-	const published = parseJapaneseDate(datePublished);
+	const published = contentDateTime(datePublished);
+	const modified = contentDateTime(dateModified ?? datePublished);
 	const articleSchema = {
 		"@context": "https://schema.org",
-		"@type": "Article",
+		"@type": "BlogPosting",
+		"@id": `${url}#article`,
 		headline: title,
 		description,
 		url,
 		mainEntityOfPage: url,
 		image: [absoluteUrl(image)],
 		datePublished: published,
-		dateModified: published,
+		dateModified: modified,
 		inLanguage: "ja",
 		keywords: tags.join(", "),
+		articleSection: categoryLabel,
 		author: {
 			"@type": "Organization",
 			name: author,
-			url: SITE_URL,
+			url: absoluteUrl("/about"),
 		},
 		publisher: {
 			"@type": "Organization",
 			name: "BANGEO",
+			url: SITE_URL,
 			logo: {
 				"@type": "ImageObject",
 				url: absoluteUrl("/favicon.png"),
 			},
+		},
+		isPartOf: {
+			"@type": "WebSite",
+			name: "BANGEO",
+			url: SITE_URL,
 		},
 	};
 	const breadcrumbSchema = {

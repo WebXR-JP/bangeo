@@ -1,11 +1,13 @@
 import { blog, experiments } from "fumadocs-mdx:collections/server";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BreadcrumbStructuredData } from "@/components/breadcrumb-structured-data";
 import { getDocs } from "@/lib/fumadocs-utils";
 
 export const metadata: Metadata = {
-	title: "タグ一覧",
-	description: "ブログ記事やデモに付いているタグを一覧で確認できます。",
+	title: "WebXRタグ一覧｜トピック別に記事・デモを探す",
+	description:
+		"WebXR、VR、AR、Meta Quest、iPhone、WebGPU、Three.js、PlayCanvas、IWSDK、8th Wallなどのタグから、BANGEOの技術記事・デモをトピック別に探せます。",
 	alternates: { canonical: "/tags" },
 };
 
@@ -29,6 +31,7 @@ export default function TagsPage() {
 
 	return (
 		<div className="max-w-6xl mx-auto px-6 md:px-8 py-16 md:py-20">
+			<BreadcrumbStructuredData items={[{ name: "タグ一覧", path: "/tags" }]} />
 			<header className="mb-12">
 				<h1 className="text-3xl font-black tracking-tight text-gray-950 mb-2">
 					タグ一覧

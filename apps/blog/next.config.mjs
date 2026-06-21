@@ -32,6 +32,12 @@ export default withMDX({
 	},
 	async redirects() {
 		return [
+			{
+				source: "/:path*",
+				has: [{ type: "host", value: "bangeo.net" }],
+				destination: "https://www.bangeo.net/:path*",
+				permanent: true,
+			},
 			...LEGACY_REDIRECTS,
 			...buildExperimentDemoRedirects(),
 			{
@@ -50,7 +56,25 @@ export default withMDX({
 	async headers() {
 		return [
 			{
-				source: "/:path(sitemap.xml|rss.xml|search-index.json)",
+				source: "/sitemap.xml",
+				headers: [
+					{
+						key: "X-Robots-Tag",
+						value: "noindex, follow",
+					},
+				],
+			},
+			{
+				source: "/rss.xml",
+				headers: [
+					{
+						key: "X-Robots-Tag",
+						value: "noindex, follow",
+					},
+				],
+			},
+			{
+				source: "/search-index.json",
 				headers: [
 					{
 						key: "X-Robots-Tag",

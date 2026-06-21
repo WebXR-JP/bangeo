@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BreadcrumbStructuredData } from "@/components/breadcrumb-structured-data";
 import { OptimizedImage } from "@/components/optimized-image";
 import {
 	AR_DEVICES,
@@ -8,9 +9,9 @@ import {
 } from "@/data/devices";
 
 export const metadata: Metadata = {
-	title: "対応デバイス一覧",
+	title: "WebXR対応デバイス一覧｜VRヘッドセット・スマートフォン",
 	description:
-		"WebXR に対応する VR ヘッドセットやスマートフォンの対応状況、ブラウザ、接続方式をまとめた一覧です。",
+		"Meta Quest、Apple Vision Pro、HTC Vive、PICO、iPhone、Androidなど、WebXR（immersive-vr / immersive-ar）で動作確認できるVRヘッドセットとスマートフォンの対応状況・ブラウザ・接続方式を一覧で整理しています。",
 	alternates: { canonical: "/devices" },
 };
 
@@ -106,6 +107,9 @@ function DeviceCard({ device }: { device: DeviceWebxrSummary }) {
 export default function DevicesPage() {
 	return (
 		<div className="relative px-4 md:px-6 py-16 md:py-20 max-w-7xl mx-auto overflow-hidden">
+			<BreadcrumbStructuredData
+				items={[{ name: "対応デバイス一覧", path: "/devices" }]}
+			/>
 			<OptimizedImage
 				src="/assets/mascot/hero.png"
 				alt=""

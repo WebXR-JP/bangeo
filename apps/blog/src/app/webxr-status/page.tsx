@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BreadcrumbStructuredData } from "@/components/breadcrumb-structured-data";
 import {
 	type BrowserKey,
 	type Stage,
@@ -13,9 +14,9 @@ import {
 } from "@/data/webxr-status";
 
 export const metadata: Metadata = {
-	title: "標準化・対応状況",
+	title: "WebXR標準化・対応状況｜W3C仕様ステージ・ブラウザ対応",
 	description:
-		"WebXR 関連仕様の標準化状況と、主要ブラウザ・デバイスの対応状況を一覧で確認できます。",
+		"WebXR Device API と Hit Test / Anchors / Hand Input / DOM Overlays / Layers / Depth Sensing などのModule標準化ステージと、Chrome・Safari・Quest Browser・Edgeの対応状況を一覧で確認できます。",
 	alternates: { canonical: "/webxr-status" },
 };
 
@@ -93,6 +94,9 @@ export default function WebXRStatusPage() {
 
 	return (
 		<div className="relative px-4 md:px-6 py-16 md:py-20 max-w-6xl mx-auto overflow-hidden">
+			<BreadcrumbStructuredData
+				items={[{ name: "標準化・対応状況", path: "/webxr-status" }]}
+			/>
 			<div className="space-y-12 relative z-10">
 				{/* Header */}
 				<div className="space-y-6 text-center">

@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import { BreadcrumbStructuredData } from "@/components/breadcrumb-structured-data";
 
 export const metadata: Metadata = {
-	title: "開発参加・技術相談",
+	title: "WebXR開発参加・技術相談｜Issue・PR・Discord",
 	description:
-		"BANGEO は OSS として公開しています。機能提案、不具合報告、改善相談は GitHub とコミュニティで受け付けています。",
+		"BANGEOはOSSとして公開中。WebXRの機能提案、不具合報告、改善相談、デモ追加の相談はGitHub Issues・Pull Request・Discordで受け付けています。",
 	alternates: { canonical: "/consulting" },
 };
 
@@ -28,6 +29,9 @@ const services = [
 export default function ConsultingPage() {
 	return (
 		<div className="max-w-6xl mx-auto px-6 md:px-8 py-16 md:py-20">
+			<BreadcrumbStructuredData
+				items={[{ name: "開発参加・技術相談", path: "/consulting" }]}
+			/>
 			{/* Hero */}
 			<header className="space-y-8 text-center max-w-4xl mx-auto mb-20">
 				<h1 className="text-4xl md:text-5xl font-black tracking-tight text-gray-950">

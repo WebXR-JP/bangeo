@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BreadcrumbStructuredData } from "@/components/breadcrumb-structured-data";
 import { OptimizedImage } from "@/components/optimized-image";
 import { MASCOT_IMAGE_SIZES } from "@/lib/image-defaults";
 
 export const metadata: Metadata = {
-	title: "私たちについて",
+	title: "BANGEOについて｜WebXR日本語リソースの運営方針",
 	description:
-		"BANGEO は WebXR、VR/AR、Meta Quest、iPhone、WebGPU の情報を日本語で整理するオープンな技術リソースです。GitHubで改善提案、寄稿、検証協力を受け付けています。",
+		"BANGEOはWebXR・VR/AR・Meta Quest・iPhone・WebGPUの情報を日本語で整理するOSS技術リソースです。実機確認・出典重視・日本語入口の3原則で運営し、GitHubで改善提案・寄稿・検証協力を受け付けています。",
 	alternates: { canonical: "/about" },
 };
 
@@ -38,6 +39,9 @@ const contributionItems = [
 export default function AboutPage() {
 	return (
 		<div className="relative max-w-6xl mx-auto px-4 md:px-6 py-16 md:py-20 overflow-hidden">
+			<BreadcrumbStructuredData
+				items={[{ name: "私たちについて", path: "/about" }]}
+			/>
 			<OptimizedImage
 				src="/assets/mascot/watermark.png"
 				alt=""

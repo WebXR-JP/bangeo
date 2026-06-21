@@ -6,6 +6,7 @@ import { ArticleStructuredData } from "@/components/article-structured-data";
 import { mdxComponents } from "@/components/mdx-components";
 import { OptimizedImage } from "@/components/optimized-image";
 import { SocialShare } from "@/components/social-share";
+import { contentDateTime } from "@/lib/content-dates";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
 import { THUMB_IMAGE_SIZES } from "@/lib/image-defaults";
 import { SITE_URL } from "@/lib/site-url";
@@ -36,6 +37,8 @@ export async function generateMetadata({
 	const ogImage = doc.thumbnail
 		? String(doc.thumbnail)
 		: "/assets/ogp-default.png";
+	const publishedDate = doc.date ? String(doc.date) : undefined;
+	const modifiedDate = doc.updated ? String(doc.updated) : publishedDate;
 
 	return {
 		title: doc.title,
@@ -44,7 +47,8 @@ export async function generateMetadata({
 			title: doc.title,
 			description: doc.description,
 			type: "article",
-			publishedTime: doc.date ? String(doc.date) : undefined,
+			publishedTime: contentDateTime(publishedDate),
+			modifiedTime: contentDateTime(modifiedDate),
 			tags: (doc.tags as string[] | undefined) || [],
 			images: [{ url: ogImage, width: 1200, height: 630, alt: doc.title }],
 		},
@@ -76,6 +80,8 @@ export default async function ExperimentPage({ params }: PageProps) {
 	const difficulty = String(doc.difficulty || "");
 	const shareUrl = `${SITE_URL}/experiments/${slug}`;
 	const image = doc.thumbnail ? String(doc.thumbnail) : "/ogp.png";
+	const publishedDate = doc.date ? String(doc.date) : undefined;
+	const modifiedDate = doc.updated ? String(doc.updated) : publishedDate;
 
 	const metaItems = [
 		difficulty && {
@@ -98,7 +104,8 @@ export default async function ExperimentPage({ params }: PageProps) {
 				description={doc.description}
 				path={`/experiments/${slug}`}
 				image={image}
-				datePublished={doc.date ? String(doc.date) : undefined}
+				datePublished={publishedDate}
+				dateModified={modifiedDate}
 				author="BANGEO"
 				categoryLabel="デモ"
 				categoryPath="/experiments"
@@ -127,8 +134,19 @@ export default async function ExperimentPage({ params }: PageProps) {
 								</span>
 							)}
 							{doc.date && (
-								<time className="text-xs text-gray-500 font-medium">
+								<time
+									dateTime={contentDateTime(publishedDate)}
+									className="text-xs text-gray-500 font-medium"
+								>
 									{String(doc.date)}
+								</time>
+							)}
+							{doc.updated && doc.updated !== doc.date && (
+								<time
+									dateTime={contentDateTime(modifiedDate)}
+									className="text-xs text-gray-500 font-medium"
+								>
+									更新: {String(doc.updated)}
 								</time>
 							)}
 						</div>

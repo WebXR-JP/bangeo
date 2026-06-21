@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BreadcrumbStructuredData } from "@/components/breadcrumb-structured-data";
 
 export const metadata: Metadata = {
 	title: "お問い合わせ",
@@ -107,6 +108,9 @@ const contacts = [
 export default function ContactPage() {
 	return (
 		<div className="max-w-6xl mx-auto px-6 md:px-8 py-16 md:py-20">
+			<BreadcrumbStructuredData
+				items={[{ name: "お問い合わせ", path: "/contact" }]}
+			/>
 			{/* Header */}
 			<header className="space-y-6 text-center max-w-4xl mx-auto mb-16">
 				<h1 className="text-4xl md:text-5xl font-black tracking-tight text-gray-950">

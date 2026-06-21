@@ -1,27 +1,16 @@
 import { blog, experiments, podcast } from "fumadocs-mdx:collections/server";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { CollectionStructuredData } from "@/components/collection-structured-data";
 import { OptimizedImage } from "@/components/optimized-image";
+import { contentDateValue } from "@/lib/content-dates";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
 import { CARD_IMAGE_SIZES, NO_IMAGE } from "@/lib/image-defaults";
 
-function parseContentDate(value?: string): number {
-	if (!value) return 0;
-
-	const japaneseDate = value.match(/^(\d{4})年(\d{1,2})月(\d{1,2})日$/);
-	if (japaneseDate) {
-		const [, year, month, day] = japaneseDate;
-		return new Date(Number(year), Number(month) - 1, Number(day)).getTime();
-	}
-
-	const date = new Date(value);
-	return Number.isNaN(date.getTime()) ? 0 : date.getTime();
-}
-
 export const metadata: Metadata = {
-	title: "WebXR日本語リソース｜VR・ARデモ、対応ブラウザ、実装ガイド",
+	title: "WebXRを日本語で学ぶ｜VR・ARデモ・対応ブラウザ・実装ガイド",
 	description:
-		"BANGEOはWebXR（VR/AR/MR）を日本語で学ぶ技術ハブです。ブラウザで試せるデモ、対応環境、実装ガイド、標準化の動きを開発者向けに整理しています。",
+		"WebXR（VR/AR/MR）の基礎、対応ブラウザ、Meta Quest・iPhoneでの動かし方、ブラウザで試せるデモ、実装ガイド、標準化の動きを日本語で整理する技術リソース。Three.js・PlayCanvas・8th Wall・IWSDKのサンプルも公開。",
 	keywords: [
 		"WebXR",
 		"WebXR 日本語",
@@ -31,17 +20,19 @@ export const metadata: Metadata = {
 		"WebXR 実装ガイド",
 		"VR ブラウザ",
 		"AR ブラウザ",
+		"Meta Quest WebXR",
+		"iPhone WebXR",
 	],
 	openGraph: {
-		title: "WebXR日本語リソース｜VR・ARデモ、対応ブラウザ、実装ガイド",
+		title: "WebXRを日本語で学ぶ｜VR・ARデモ・対応ブラウザ・実装ガイド",
 		description:
-			"BANGEOはWebXR（VR/AR/MR）を日本語で学ぶ技術ハブです。ブラウザで試せるデモ、対応環境、実装ガイド、標準化の動きを開発者向けに整理しています。",
+			"WebXR（VR/AR/MR）の基礎、対応ブラウザ、Meta Quest・iPhoneでの動かし方、ブラウザで試せるデモ、実装ガイド、標準化の動きを日本語で整理する技術リソース。",
 		type: "website",
 		images: ["/ogp.png"],
 	},
 	twitter: {
 		card: "summary_large_image",
-		title: "WebXR日本語リソース｜VR・ARデモ、対応ブラウザ、実装ガイド",
+		title: "WebXRを日本語で学ぶ｜VR・ARデモ・対応ブラウザ・実装ガイド",
 		description:
 			"WebXRの基礎、対応ブラウザ、VR/ARデモ、実装ガイド、標準化の動きを日本語で整理。",
 		images: ["/ogp.png"],
@@ -133,16 +124,16 @@ export default function HomePage() {
 	const blogPosts = getDocs(blog)
 		.filter((post) => !post.draft)
 		.sort((a, b) => {
-			const dateA = parseContentDate(a.date);
-			const dateB = parseContentDate(b.date);
+			const dateA = contentDateValue(a.updated ?? a.date);
+			const dateB = contentDateValue(b.updated ?? b.date);
 			return dateB - dateA;
 		});
 
 	const experimentsList = getDocs(experiments)
 		.filter((exp) => !exp.draft)
 		.sort((a, b) => {
-			const dateA = parseContentDate(a.date);
-			const dateB = parseContentDate(b.date);
+			const dateA = contentDateValue(a.updated ?? a.date);
+			const dateB = contentDateValue(b.updated ?? b.date);
 			return dateB - dateA;
 		});
 
@@ -154,6 +145,48 @@ export default function HomePage() {
 
 	return (
 		<div className="overflow-x-hidden">
+			<CollectionStructuredData
+				name="BANGEO WebXR主要コンテンツ"
+				path="/"
+				description="WebXRの基礎、対応状況、技術記事、ブラウザで試せるデモへの主要導線。"
+				items={[
+					...startGuides.map((guide) => ({
+						name: guide.title,
+						path: guide.href,
+						description: guide.description,
+					})),
+					...blogPosts.slice(0, 3).map((post) => {
+						const slug = getSlugFromPath(post.info.path);
+						return {
+							name: post.title,
+							path: `/tech-articles/${slug}`,
+							description: post.description,
+							image: post.thumbnail ? String(post.thumbnail) : NO_IMAGE,
+							datePublished: post.date ? String(post.date) : undefined,
+							dateModified: post.updated
+								? String(post.updated)
+								: post.date
+									? String(post.date)
+									: undefined,
+						};
+					}),
+					...experimentsList.slice(0, 3).map((exp) => {
+						const slug = getSlugFromPath(exp.info.path);
+						return {
+							name: exp.title,
+							path: `/experiments/${slug}`,
+							description: exp.description,
+							image: exp.thumbnail ? String(exp.thumbnail) : undefined,
+							datePublished: exp.date ? String(exp.date) : undefined,
+							dateModified: exp.updated
+								? String(exp.updated)
+								: exp.date
+									? String(exp.date)
+									: undefined,
+						};
+					}),
+				]}
+			/>
 			{/* Hero */}
 			<header className="relative pt-32 pb-24 md:pt-40 md:pb-32 overflow-hidden bg-rose-50/70">
 				<div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,241,242,0.98),rgba(255,255,255,0.94)_46%,rgba(244,244,245,0.92))]" />

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BreadcrumbStructuredData } from "@/components/breadcrumb-structured-data";
 
 export const metadata: Metadata = {
 	title: "プライバシーポリシー",
@@ -10,6 +11,9 @@ export const metadata: Metadata = {
 export default function PrivacyPolicyPage() {
 	return (
 		<div className="max-w-4xl mx-auto px-6 md:px-8 py-16 md:py-20">
+			<BreadcrumbStructuredData
+				items={[{ name: "プライバシーポリシー", path: "/privacy-policy" }]}
+			/>
 			{/* Header */}
 			<header className="space-y-6 text-center mb-16">
 				<h1 className="text-4xl md:text-5xl font-black tracking-tight text-gray-950">

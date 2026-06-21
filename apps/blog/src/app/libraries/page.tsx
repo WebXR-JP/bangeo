@@ -1,15 +1,20 @@
 import type { Metadata } from "next";
+import { BreadcrumbStructuredData } from "@/components/breadcrumb-structured-data";
 import { LIBRARIES } from "@/data/libraries";
 
 export const metadata: Metadata = {
-	title: "ライブラリ",
-	description: "WebXR 開発で使われる主要ライブラリと公式ドキュメントへの導線。",
+	title: "WebXRライブラリ｜Three.js・Babylon.js・PlayCanvas・A-Frame",
+	description:
+		"WebXR開発で使われるThree.js、Babylon.js、PlayCanvas、A-Frame、React Three Fiberなどの主要ライブラリと公式ドキュメント・リポジトリへの導線を整理しています。",
 	alternates: { canonical: "/libraries" },
 };
 
 export default function LibrariesPage() {
 	return (
 		<div className="max-w-6xl mx-auto px-6 md:px-8 py-16 md:py-20">
+			<BreadcrumbStructuredData
+				items={[{ name: "ライブラリ", path: "/libraries" }]}
+			/>
 			{/* Header */}
 			<header className="mb-12">
 				<h1 className="text-3xl font-black tracking-tight text-gray-950 mb-3">
