@@ -330,7 +330,8 @@ export default async function WebXRExplainerPage() {
 										Meta Quest Browser
 									</td>
 									<td className="px-5 py-4 text-gray-700">
-										`immersive-vr` / `immersive-ar` の主要検証環境
+										<code>immersive-vr</code> / <code>immersive-ar</code>{" "}
+										の主要検証環境
 									</td>
 									<td className="px-5 py-4 text-gray-700">
 										Quest実機デモとWebXR仕様更新を優先して追跡
@@ -352,7 +353,7 @@ export default async function WebXRExplainerPage() {
 										Android Chrome
 									</td>
 									<td className="px-5 py-4 text-gray-700">
-										ARCore対応端末で`immersive-ar`検証候補
+										ARCore対応端末で<code>immersive-ar</code>検証候補
 									</td>
 									<td className="px-5 py-4 text-gray-700">
 										Hit TestやスマートフォンARの検証対象
