@@ -47,6 +47,19 @@ export default withMDX({
 			},
 		];
 	},
+	async headers() {
+		return [
+			{
+				source: "/:path(sitemap.xml|rss.xml|search-index.json)",
+				headers: [
+					{
+						key: "X-Robots-Tag",
+						value: "noindex, follow",
+					},
+				],
+			},
+		];
+	},
 	experimental: {
 		optimizePackageImports: ["fumadocs-ui", "fumadocs-core"],
 	},

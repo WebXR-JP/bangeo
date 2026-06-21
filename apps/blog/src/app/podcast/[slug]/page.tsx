@@ -3,7 +3,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { mdxComponents } from "@/components/mdx-components";
+import { SocialShare } from "@/components/social-share";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
+import { SITE_URL } from "@/lib/site-url";
 
 interface PageProps {
 	params: Promise<{ slug: string }>;
@@ -42,6 +44,13 @@ export async function generateMetadata({
 			type: "article",
 			publishedTime: doc.date ? String(doc.date) : undefined,
 			tags: (doc.tags as string[] | undefined) || [],
+			images: [{ url: "/ogp.png", width: 1200, height: 630, alt: doc.title }],
+		},
+		twitter: {
+			card: "summary_large_image",
+			title: doc.title,
+			description: doc.description,
+			images: ["/ogp.png"],
 		},
 		alternates: { canonical: `/podcast/${slug}` },
 	};
@@ -57,6 +66,7 @@ export default async function PodcastEpisodePage({ params }: PageProps) {
 
 	const spotifyUrl = doc.spotifyUrl ? String(doc.spotifyUrl) : null;
 	const youtubeId = doc.youtubeId ? String(doc.youtubeId) : null;
+	const shareUrl = `${SITE_URL}/podcast/${slug}`;
 
 	const metaItems = [
 		doc.episodeNumber && {
@@ -133,6 +143,8 @@ export default async function PodcastEpisodePage({ params }: PageProps) {
 					</div>
 				</div>
 			)}
+
+			<SocialShare url={shareUrl} title={doc.title} className="mb-10" />
 
 			{/* YouTube embed player */}
 			{youtubeId && (

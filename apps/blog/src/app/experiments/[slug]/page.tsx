@@ -4,8 +4,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { mdxComponents } from "@/components/mdx-components";
 import { OptimizedImage } from "@/components/optimized-image";
+import { SocialShare } from "@/components/social-share";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
 import { THUMB_IMAGE_SIZES } from "@/lib/image-defaults";
+import { SITE_URL } from "@/lib/site-url";
 
 interface PageProps {
 	params: Promise<{ slug: string }>;
@@ -45,6 +47,12 @@ export async function generateMetadata({
 			tags: (doc.tags as string[] | undefined) || [],
 			images: [{ url: ogImage, width: 1200, height: 630, alt: doc.title }],
 		},
+		twitter: {
+			card: "summary_large_image",
+			title: doc.title,
+			description: doc.description,
+			images: [ogImage],
+		},
 		alternates: { canonical: `/experiments/${slug}` },
 	};
 }
@@ -65,6 +73,7 @@ export default async function ExperimentPage({ params }: PageProps) {
 	const frameworks = doc.frameworks as string[] | undefined;
 	const devices = doc.devices as string[] | undefined;
 	const difficulty = String(doc.difficulty || "");
+	const shareUrl = `${SITE_URL}/experiments/${slug}`;
 
 	const metaItems = [
 		difficulty && {
@@ -170,6 +179,8 @@ export default async function ExperimentPage({ params }: PageProps) {
 					</div>
 				</div>
 			)}
+
+			<SocialShare url={shareUrl} title={doc.title} className="mb-10" />
 
 			<article className="tech-article-content max-w-none">
 				<MDX components={mdxComponents} />

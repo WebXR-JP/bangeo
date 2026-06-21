@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { mdxComponents } from "@/components/mdx-components";
 import { OptimizedImage } from "@/components/optimized-image";
+import { SocialShare } from "@/components/social-share";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
 import { NO_IMAGE, THUMB_IMAGE_SIZES } from "@/lib/image-defaults";
 import { SITE_URL } from "@/lib/site-url";
@@ -45,6 +46,12 @@ export async function generateMetadata({
 			tags: (doc.tags as string[] | undefined) || [],
 			images: [{ url: ogImage, width: 1200, height: 630, alt: doc.title }],
 		},
+		twitter: {
+			card: "summary_large_image",
+			title: doc.title,
+			description: doc.description,
+			images: [ogImage],
+		},
 		alternates: { canonical: `${BASE_PATH}/${slug}` },
 	};
 }
@@ -64,8 +71,6 @@ export default async function TechArticlePage({ params }: PageProps) {
 		.slice(0, 3);
 
 	const shareUrl = `${SITE_URL}${BASE_PATH}/${slug}`;
-	const shareText = encodeURIComponent(doc.title);
-	const shareUrlEncoded = encodeURIComponent(shareUrl);
 
 	return (
 		<div className="max-w-3xl mx-auto px-5 md:px-8 py-16 md:py-24">
@@ -189,25 +194,7 @@ export default async function TechArticlePage({ params }: PageProps) {
 					</div>
 				</section>
 
-				{/* X Share */}
-				<section className="mt-12 flex justify-center">
-					<a
-						href={`https://x.com/intent/tweet?text=${shareText}&url=${shareUrlEncoded}`}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-white border border-gray-200 text-gray-800 rounded-full text-sm font-bold hover:bg-gray-50 hover:border-gray-300 transition-all shadow-xs hover:shadow-sm"
-					>
-						<svg
-							className="w-4 h-4"
-							viewBox="0 0 24 24"
-							fill="currentColor"
-							aria-hidden="true"
-						>
-							<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-						</svg>
-						この記事をXでシェア
-					</a>
-				</section>
+				<SocialShare url={shareUrl} title={doc.title} className="mt-12" />
 
 				{/* Footer CTA */}
 				<footer className="mt-12 pt-10 border-t border-gray-100">

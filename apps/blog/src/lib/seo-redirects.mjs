@@ -62,6 +62,16 @@ export const LEGACY_REDIRECTS = [
 		permanent: true,
 	},
 	{
+		source: "/experiments/spatial-audio-advanced",
+		destination: "/demos/webxr-audio-space",
+		permanent: true,
+	},
+	{
+		source: "/experiments/face-tracking",
+		destination: "/demos/8thwall-face",
+		permanent: true,
+	},
+	{
 		source: "/hand-mesh-visualization",
 		destination: "/demos/hand-mesh-visualization",
 		permanent: true,
