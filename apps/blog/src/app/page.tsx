@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { OptimizedImage } from "@/components/optimized-image";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
-import { CARD_IMAGE_SIZES } from "@/lib/image-defaults";
+import { CARD_IMAGE_SIZES, NO_IMAGE } from "@/lib/image-defaults";
 
 function parseContentDate(value?: string): number {
 	if (!value) return 0;
@@ -21,22 +21,21 @@ function parseContentDate(value?: string): number {
 export const metadata: Metadata = {
 	title: "WebXR日本語リソース｜VR・ARデモ、対応ブラウザ、実装ガイド",
 	description:
-		"BANGEOはWebXR（VR/AR/MR）を日本語で学ぶ技術ハブです。Meta Quest、iPhone、Android、PCブラウザで試せるデモ、対応ブラウザ、WebXR Device API、Three.js、PlayCanvas、WebGPUの実装ガイドを整理しています。",
+		"BANGEOはWebXR（VR/AR/MR）を日本語で学ぶ技術ハブです。ブラウザで試せるデモ、対応環境、実装ガイド、標準化の動きを開発者向けに整理しています。",
 	keywords: [
 		"WebXR",
 		"WebXR 日本語",
 		"WebXR とは",
 		"WebXR デモ",
-		"WebXR iPhone",
-		"WebXR iOS",
-		"Meta Quest WebXR",
-		"WebGPU WebXR",
-		"Three.js WebXR",
+		"WebXR 対応ブラウザ",
+		"WebXR 実装ガイド",
+		"VR ブラウザ",
+		"AR ブラウザ",
 	],
 	openGraph: {
 		title: "WebXR日本語リソース｜VR・ARデモ、対応ブラウザ、実装ガイド",
 		description:
-			"BANGEOはWebXR（VR/AR/MR）を日本語で学ぶ技術ハブです。Meta Quest、iPhone、Android、PCブラウザで試せるデモ、対応ブラウザ、WebXR Device API、Three.js、PlayCanvas、WebGPUの実装ガイドを整理しています。",
+			"BANGEOはWebXR（VR/AR/MR）を日本語で学ぶ技術ハブです。ブラウザで試せるデモ、対応環境、実装ガイド、標準化の動きを開発者向けに整理しています。",
 		type: "website",
 		images: ["/ogp.png"],
 	},
@@ -44,23 +43,11 @@ export const metadata: Metadata = {
 		card: "summary_large_image",
 		title: "WebXR日本語リソース｜VR・ARデモ、対応ブラウザ、実装ガイド",
 		description:
-			"WebXRの基礎、対応ブラウザ、Meta QuestやiPhoneで試せるVR/ARデモ、Three.js・PlayCanvas・WebGPUの実装ガイドを日本語で整理。",
+			"WebXRの基礎、対応ブラウザ、VR/ARデモ、実装ガイド、標準化の動きを日本語で整理。",
 		images: ["/ogp.png"],
 	},
 	alternates: { canonical: "/" },
 };
-
-const searchIntentLinks = [
-	{ label: "WebXRとは", href: "/webxr-explainer" },
-	{ label: "WebXR デモ", href: "/experiments" },
-	{ label: "iPhone WebXR", href: "/tech-articles/ios-webxr-app-clip-guide" },
-	{ label: "Meta Quest WebXR", href: "/devices/meta-quest" },
-	{ label: "対応ブラウザ", href: "/webxr-status" },
-	{
-		label: "WebGPU WebXR",
-		href: "/tech-articles/quest-browser-146-webgpu-webxr",
-	},
-] as const;
 
 const startGuides = [
 	{
@@ -73,7 +60,7 @@ const startGuides = [
 	{
 		title: "対応ブラウザとデバイス",
 		description:
-			"Meta Quest、iPhone、Android、PCブラウザでWebXRがどこまで使えるかを確認。",
+			"ヘッドセット、スマートフォン、PCブラウザでWebXRがどこまで使えるかを確認。",
 		href: "/webxr-status",
 		label: "対応状況を見る",
 	},
@@ -102,12 +89,12 @@ const trackedTopics = [
 	{
 		title: "Three.js / PlayCanvas",
 		description:
-			"WebXR実装で使われる主要ライブラリと、実機で詰まりやすい設定を整理します。",
+			"WebXR実装で使われる主要ライブラリと、実機で詰まりやすい設定を必要な範囲で整理します。",
 	},
 	{
 		title: "Meta Quest Browser",
 		description:
-			"Quest Browser、WebGPU、ハンドトラッキング、没入型Webアプリの動作確認を扱います。",
+			"ヘッドセット向けブラウザでの動作確認、入力、描画、没入型Webアプリの注意点を扱います。",
 	},
 	{
 		title: "iPhone / iOS WebXR",
@@ -125,20 +112,20 @@ const webxrPerspectives = [
 	{
 		title: "対応状況はブラウザ名だけでは判断できない",
 		description:
-			"同じChrome系でも、PC、Android、Meta Quest Browserでは使える機能が変わります。iPhoneではSafari単体の制約もあるため、WebXR Device API、AR、DOM Overlay、WebGPUを分けて確認する必要があります。",
+			"同じChrome系でも、PC、スマートフォン、ヘッドセットでは使える機能が変わります。iPhoneではSafari単体の制約もあるため、WebXRの基本機能、AR機能、描画まわりを分けて確認する必要があります。",
 	},
 	{
 		title: "実装はライブラリと標準化の両方を見る",
 		description:
-			"Three.jsやPlayCanvasで動くコードを書くことと、WebXRの仕様やブラウザ実装を理解することは別の課題です。BANGEOでは、サンプルコードだけでなく、仕様、issue、実機差分まで追えるようにします。",
+			"ライブラリで動くコードを書くことと、WebXRの仕様やブラウザ実装を理解することは別の課題です。BANGEOでは、サンプルコードだけでなく、仕様、issue、実機差分まで追えるようにします。",
 	},
 ] as const;
 
 const learningQuestions = [
-	"Meta QuestでブラウザだけのVRデモを公開したい",
-	"iPhoneでWebXR相当の体験をどう届けるか知りたい",
-	"Three.jsやPlayCanvasでWebXRを始めたい",
-	"WebGPUとWebXRの関係、対応状況、実験機能を追いたい",
+	"ヘッドセットでブラウザだけのVRデモを公開したい",
+	"スマートフォンでXR体験をどう届けるか知りたい",
+	"既存のWeb向け3DライブラリでWebXRを始めたい",
+	"新しい描画機能や実験機能の対応状況を追いたい",
 	"DOM Overlay、Hit Test、Depth SensingなどAR機能を整理したい",
 ] as const;
 
@@ -192,23 +179,10 @@ export default function HomePage() {
 								</span>
 							</h1>
 							<p className="text-lg md:text-xl text-gray-600 leading-relaxed max-w-xl">
-								BANGEOは WebXR Device API、Meta Quest、iPhone、
-								Android、Three.js、PlayCanvas、WebGPU
-								を横断して、ブラウザで動くVR/ARのデモと実装ガイドを
+								BANGEOは、ブラウザで動くVR/ARの考え方、対応環境、実装上の注意点を
 								<span className="text-gray-950 font-semibold">日本語</span>
-								で整理する技術リソースです。
+								で整理する技術リソースです。まず試せるデモから入り、必要に応じて仕様や実装記事へ進めます。
 							</p>
-							<div className="flex flex-wrap gap-2 max-w-2xl">
-								{searchIntentLinks.map((link) => (
-									<Link
-										key={link.href}
-										href={link.href}
-										className="inline-flex items-center rounded-full border border-rose-100 bg-white/75 px-3 py-1.5 text-xs font-bold text-gray-600 shadow-sm shadow-rose-100/40 transition-colors hover:border-rose-200 hover:text-[#e11d48]"
-									>
-										{link.label}
-									</Link>
-								))}
-							</div>
 							<div className="flex flex-col sm:flex-row gap-4 pt-2">
 								<Link
 									href="/experiments"
@@ -327,6 +301,113 @@ export default function HomePage() {
 								</span>
 							</Link>
 						))}
+					</div>
+				</div>
+			</section>
+
+			{/* Blog / Tech Articles Section */}
+			<section className="py-20 md:py-28 bg-white">
+				<div className="max-w-6xl mx-auto px-6 md:px-8">
+					<div className="flex flex-col gap-5 md:flex-row md:justify-between md:items-end mb-12">
+						<div>
+							<p className="text-xs font-black tracking-[0.28em] text-rose-600 mb-3">
+								LATEST ARTICLES
+							</p>
+							<h2 className="text-3xl font-black tracking-tight text-gray-950">
+								最新の技術記事
+							</h2>
+							<p className="text-base text-gray-500 mt-2">
+								WebXRのニュース、仕様更新、実機検証を新しい順に読めます
+							</p>
+						</div>
+						<Link
+							href="/tech-articles"
+							className="text-sm font-bold text-gray-600 hover:text-[#e11d48] transition-colors hidden md:flex items-center gap-1"
+						>
+							すべて見る
+							<svg
+								className="w-4 h-4"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+								aria-hidden="true"
+							>
+								<path
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									strokeWidth={2}
+									d="M9 5l7 7-7 7"
+								/>
+							</svg>
+						</Link>
+					</div>
+
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+						{blogPosts.slice(0, 3).map((post) => {
+							const slug = getSlugFromPath(post.info.path);
+							return (
+								<Link
+									href={`/tech-articles/${slug}`}
+									key={slug}
+									className="group block overflow-hidden bg-white rounded-2xl border border-gray-100 hover:shadow-2xl hover:shadow-gray-200/50 hover:border-transparent hover:-translate-y-1 transition-all duration-300"
+								>
+									<div className="aspect-video bg-gray-100 relative overflow-hidden">
+										<OptimizedImage
+											src={post.thumbnail ? String(post.thumbnail) : NO_IMAGE}
+											alt={post.title}
+											fill
+											sizes={CARD_IMAGE_SIZES}
+											className="object-cover group-hover:scale-105 transition-transform duration-500"
+										/>
+									</div>
+									<div className="p-6">
+										<div className="flex flex-wrap items-center gap-2 mb-4">
+											{post.category && (
+												<span className="px-2.5 py-1 bg-rose-50 text-rose-700 rounded-md text-[10px] font-black uppercase tracking-wide">
+													{String(post.category)}
+												</span>
+											)}
+											{post.date && (
+												<time className="text-xs text-gray-500 font-medium">
+													{String(post.date)}
+												</time>
+											)}
+										</div>
+										<h3 className="font-black text-lg text-gray-950 group-hover:text-[#e11d48] transition-colors mb-3 leading-snug">
+											{post.title}
+										</h3>
+										{post.description && (
+											<p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">
+												{post.description}
+											</p>
+										)}
+									</div>
+								</Link>
+							);
+						})}
+					</div>
+
+					<div className="mt-12 text-center md:hidden">
+						<Link
+							href="/tech-articles"
+							className="inline-flex items-center gap-1 text-sm font-bold text-gray-600 hover:text-[#e11d48] transition-colors"
+						>
+							すべて見る
+							<svg
+								className="w-4 h-4"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+								aria-hidden="true"
+							>
+								<path
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									strokeWidth={2}
+									d="M9 5l7 7-7 7"
+								/>
+							</svg>
+						</Link>
 					</div>
 				</div>
 			</section>
@@ -477,97 +558,6 @@ export default function HomePage() {
 					<div className="mt-12 text-center md:hidden">
 						<Link
 							href="/experiments"
-							className="inline-flex items-center gap-1 text-sm font-bold text-gray-600 hover:text-[#e11d48] transition-colors"
-						>
-							すべて見る
-							<svg
-								className="w-4 h-4"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-								aria-hidden="true"
-							>
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									strokeWidth={2}
-									d="M9 5l7 7-7 7"
-								/>
-							</svg>
-						</Link>
-					</div>
-				</div>
-			</section>
-
-			{/* Blog / Tech Articles Section */}
-			<section className="py-20 md:py-28">
-				<div className="max-w-6xl mx-auto px-6 md:px-8">
-					<div className="flex justify-between items-end mb-12">
-						<div>
-							<h2 className="text-3xl font-black tracking-tight text-gray-950">
-								ブログ記事
-							</h2>
-							<p className="text-base text-gray-500 mt-2">
-								WebXRの技術解説とニュース
-							</p>
-						</div>
-						<Link
-							href="/tech-articles"
-							className="text-sm font-bold text-gray-600 hover:text-[#e11d48] transition-colors hidden md:flex items-center gap-1"
-						>
-							すべて見る
-							<svg
-								className="w-4 h-4"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-								aria-hidden="true"
-							>
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									strokeWidth={2}
-									d="M9 5l7 7-7 7"
-								/>
-							</svg>
-						</Link>
-					</div>
-
-					<div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-						{blogPosts.slice(0, 3).map((post) => {
-							const slug = getSlugFromPath(post.info.path);
-							return (
-								<Link
-									href={`/tech-articles/${slug}`}
-									key={slug}
-									className="group block p-7 bg-white rounded-2xl border border-gray-100 hover:shadow-2xl hover:shadow-gray-200/50 hover:border-transparent hover:-translate-y-1 transition-all duration-300"
-								>
-									<div className="flex items-center gap-2 mb-5">
-										{post.category && (
-											<span className="px-2.5 py-1 bg-rose-50 text-rose-700 rounded-md text-[10px] font-black uppercase tracking-wide">
-												{String(post.category)}
-											</span>
-										)}
-									</div>
-									<h3 className="font-black text-xl text-gray-950 group-hover:text-[#e11d48] transition-colors mb-3 leading-snug">
-										{post.title}
-									</h3>
-									{post.description && (
-										<p className="text-sm text-gray-500 line-clamp-2 mb-5 leading-relaxed">
-											{post.description}
-										</p>
-									)}
-									<div className="text-xs text-gray-500 font-medium">
-										{post.date ? String(post.date) : ""}
-									</div>
-								</Link>
-							);
-						})}
-					</div>
-
-					<div className="mt-12 text-center md:hidden">
-						<Link
-							href="/tech-articles"
 							className="inline-flex items-center gap-1 text-sm font-bold text-gray-600 hover:text-[#e11d48] transition-colors"
 						>
 							すべて見る

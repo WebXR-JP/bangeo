@@ -30,19 +30,15 @@ export const metadata: Metadata = {
 		default: "WebXR日本語リソース｜VR・ARデモ、対応ブラウザ、実装ガイド",
 	},
 	description:
-		"BANGEOはWebXR（VR/AR/MR）を日本語で学ぶ技術ハブです。Meta Quest、iPhone、Android、PCブラウザで試せるデモ、対応ブラウザ、WebXR Device API、Three.js、PlayCanvas、WebGPUの実装ガイドを整理しています。",
+		"BANGEOはWebXR（VR/AR/MR）を日本語で学ぶ技術ハブです。ブラウザで試せるデモ、対応環境、実装ガイド、標準化の動きを開発者向けに整理しています。",
 	keywords: [
 		"WebXR",
 		"WebXR 日本語",
 		"WebXR デモ",
 		"VR ブラウザ",
 		"AR ブラウザ",
-		"Meta Quest WebXR",
-		"iPhone WebXR",
-		"WebXR iOS",
-		"Three.js WebXR",
-		"PlayCanvas WebXR",
-		"WebGPU WebXR",
+		"WebXR 対応ブラウザ",
+		"WebXR 実装ガイド",
 	],
 	metadataBase: new URL(SITE_URL),
 	icons: {
@@ -55,7 +51,7 @@ export const metadata: Metadata = {
 		siteName: "BANGEO（バンオ）",
 		title: "WebXR日本語リソース｜VR・ARデモ、対応ブラウザ、実装ガイド",
 		description:
-			"BANGEOはWebXR（VR/AR/MR）を日本語で学ぶ技術ハブです。Meta Quest、iPhone、Android、PCブラウザで試せるデモ、対応ブラウザ、WebXR Device API、Three.js、PlayCanvas、WebGPUの実装ガイドを整理しています。",
+			"BANGEOはWebXR（VR/AR/MR）を日本語で学ぶ技術ハブです。ブラウザで試せるデモ、対応環境、実装ガイド、標準化の動きを開発者向けに整理しています。",
 		images: [
 			{
 				url: "/ogp.png",
@@ -71,7 +67,7 @@ export const metadata: Metadata = {
 		creator: "@bangeo_jp",
 		title: "WebXR日本語リソース｜VR・ARデモ、対応ブラウザ、実装ガイド",
 		description:
-			"BANGEOはWebXR（VR/AR/MR）を日本語で学ぶ技術ハブです。Meta Quest、iPhone、Android、PCブラウザで試せるデモと実装ガイドを整理しています。",
+			"BANGEOはWebXR（VR/AR/MR）を日本語で学ぶ技術ハブです。ブラウザで試せるデモ、対応環境、実装ガイドを整理しています。",
 		images: ["/ogp.png"],
 	},
 	robots: {
