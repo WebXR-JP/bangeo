@@ -1,6 +1,6 @@
 ---
-title: "ページ内3Dモデルを空間表示へつなぐ実験"
-description: "HTMLのmodel要素、代替ライブラリ、静止画表示を切り替えながら、Webページ内の3Dモデル表示を確認するデモです。"
+title: "HTML model 要素のプレビューと fallback — 空間表示へつなぐ実験"
+description: "HTML の model 要素、fallback ライブラリ（polyfill）、image fallback を切り替えながら、Webページ内の3Dモデル表示を確認するデモ。Safari 27 beta の model 要素と Spatial Web を想定。"
 date: "2026-06-14"
 category: "空間Web"
 tags:
@@ -8,7 +8,8 @@ tags:
   - "空間Web"
   - "Safari"
   - "Web 3D"
-  - "代替表示"
+  - "fallback"
+  - "polyfill"
 frameworks:
   - "素のHTML"
   - "Canvas"
@@ -24,16 +25,16 @@ thumbnail: "/assets/experiments/spatial-model-preview.webp"
 
 Webページ内に3Dモデルを置く方法は、JavaScriptライブラリだけでなく、HTML側の標準化にも広がっています。
 
-このデモでは、ブラウザ標準の`<model>`、JavaScriptの代替ライブラリ、静止画表示という3つの経路を同じカード上で切り替えます。実際の3Dモデルファイルは使わず、Canvas上のプレビューとして、ページ内3D表示の設計を確認できるようにしています。
+このデモでは、ブラウザ標準の `<model>`、fallback ライブラリ（polyfill）、image fallback という3つの経路を同じカード上で切り替えます。実際の3Dモデルファイルは使わず、Canvas上のプレビューとして、ページ内3D表示の設計を確認できるようにしています。
 
 ## 通常プレビュー
 
 <DemoIframe
   src="/demos/spatial-model-preview/app.html"
-  title="ページ内3Dモデルを空間表示へつなぐ実験"
+  title="HTML model 要素のプレビューと fallback"
   fullPageHref="/demos/spatial-model-preview/app.html"
   height={520}
-  caption="ブラウザ標準表示 / 代替ライブラリ / 静止画表示を切り替え、プレビューをドラッグして回転操作の考え方を確認できます。"
+  caption="native model 要素 / fallback ライブラリ / image fallback を切り替え、プレビューをドラッグして回転操作の考え方を確認できます。"
 />
 
 ## WebXRデモ
@@ -48,22 +49,22 @@ Webページ内に3Dモデルを置く方法は、JavaScriptライブラリだ�
 
 ## 試せること
 
-- ブラウザ標準のmodel要素、代替ライブラリ、静止画表示の役割を切り替えて見る
+- ブラウザ標準の model 要素、fallback ライブラリ、image fallback の役割を切り替えて見る
 - プレビューをドラッグし、商品ビューアの回転操作を確認する
-- 3D非対応環境でも意味が伝わる静止画カードを確認する
+- 3D非対応環境でも意味が伝わる image fallback カードを確認する
 
 ## 学べること
 
 `<model>` はWebXRそのものではなく、通常のWebページに3Dモデルを置くためのHTML要素です。
 
-一方で、ページ内3D、AR Quick Look、visionOSの空間Web体験は近い領域にあります。公開ページでは、ブラウザ標準対応だけに依存せず、代替ライブラリや静止画表示を用意しておくと、非対応ブラウザでも体験の入口を失いにくくなります。
+一方で、ページ内3D、AR Quick Look、visionOSの空間Web体験は近い領域にあります。公開ページでは、ブラウザ標準対応だけに依存せず、fallback ライブラリや image fallback を用意しておくと、非対応ブラウザでも体験の入口を失いにくくなります。
 
 ## 対応環境
 
 | 環境 | 状態 |
 | --- | --- |
 | Safari 27 beta | 実験検証向け |
-| デスクトップChrome / Edge | 代替プレビュー |
+| デスクトップChrome / Edge | fallback プレビュー |
 | visionOS Safari | 空間Web検証候補 |
 
 ## 実装メモ
@@ -72,15 +73,15 @@ Webページ内に3Dモデルを置く方法は、JavaScriptライブラリだ�
 - 描画: Canvas 2Dによる通常プレビュー / Three.jsによるWebXRデモ
 - API: HTML `model` 要素を想定
 - 操作: 回転プレビュー
-- 代替表示: 代替ライブラリまたは静止画カード
+- fallback: fallback ライブラリまたは image fallback
 
 ## 用語メモ
 
 | 用語 | このページでの意味 |
 | --- | --- |
-| ブラウザ標準表示 | `<model>` 要素のように、ブラウザ側の機能で3Dモデルを表示すること |
-| 代替ライブラリ | ブラウザ標準表示が使えない時に、JavaScriptライブラリで3D表示を補うこと |
-| 静止画表示 | 3Dが使えない環境でも内容が伝わるよう、画像カードとして表示すること |
+| native model 要素 | `<model>` のように、ブラウザ側の標準機能で3Dモデルを表示すること |
+| fallback ライブラリ（polyfill） | native model 要素が使えない時に、JavaScriptライブラリで3D表示を補うこと。`<model-viewer>` などが該当 |
+| image fallback | 3Dが使えない環境でも内容が伝わるよう、画像カードとして表示すること。progressive enhancement の一形態 |
 
 ## 関連記事
 
