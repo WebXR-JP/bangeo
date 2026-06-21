@@ -34,10 +34,7 @@ export async function generateMetadata({
 		title: `${tag} の記事・デモ一覧`,
 		description,
 		alternates: { canonical: tagPath(tag) },
-		robots:
-			total >= 2
-				? { index: true, follow: true }
-				: { index: false, follow: true },
+		robots: { index: false, follow: true },
 		openGraph: {
 			title: `${tag} の記事・デモ一覧`,
 			description,

@@ -1,6 +1,5 @@
 import { blog, experiments, podcast } from "fumadocs-mdx:collections/server";
 import type { MetadataRoute } from "next";
-import { collectTagCounts, tagPath } from "@/lib/collect-tags";
 import { latestContentDate, sitemapDate } from "@/lib/content-dates";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
 import { SITE_URL } from "@/lib/site-url";
@@ -52,22 +51,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
 		changeFrequency: "monthly" as const,
 		priority: 0.6,
 	}));
-
-	const tagDocs = Array.from(collectTagCounts(publicDocs).entries())
-		.filter(([, count]) => count >= 2)
-		.map(([tag]) => ({
-			url: `${SITE_URL}${tagPath(tag)}`,
-			lastModified: latestContentDate(
-				publicDocs
-					.filter(
-						(doc) =>
-							doc.tags && Array.isArray(doc.tags) && doc.tags.includes(tag),
-					)
-					.map((doc) => (doc as SitemapDoc).updated ?? doc.date),
-			),
-			changeFrequency: "weekly" as const,
-			priority: 0.4,
-		}));
 
 	return [
 		{
@@ -171,15 +154,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
 			changeFrequency: "yearly",
 			priority: 0.3,
 		},
-		{
-			url: `${SITE_URL}/tags`,
-			lastModified: latestContentModified,
-			changeFrequency: "weekly",
-			priority: 0.5,
-		},
 		...techArticleDocs,
 		...experimentDocs,
 		...podcastDocs,
-		...tagDocs,
 	];
 }

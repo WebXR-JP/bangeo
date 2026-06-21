@@ -8,6 +8,7 @@ export const metadata: Metadata = {
 	title: "WebXRタグ一覧｜トピック別に記事・デモを探す",
 	description:
 		"WebXR、VR、AR、Meta Quest、iPhone、WebGPU、Three.js、PlayCanvas、IWSDK、8th Wallなどのタグから、BANGEOの技術記事・デモをトピック別に探せます。",
+	robots: { index: false, follow: true },
 	alternates: { canonical: "/tags" },
 };
 
