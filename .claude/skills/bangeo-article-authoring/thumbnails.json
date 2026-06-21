@@ -139,6 +139,18 @@
 			"filename": "webxr-events-watch-2026",
 			"assetDir": "news",
 			"thumbnail": "/assets/news/webxr-events-watch-2026.webp"
+		},
+		{
+			"slug": "xr-metaverse-fair-2026-summer-mugen",
+			"filename": "xr-metaverse-fair-2026-summer-mugen",
+			"assetDir": "news",
+			"thumbnail": "/assets/news/xr-metaverse-fair-2026-summer-mugen.webp"
+		},
+		{
+			"slug": "sneeze-open-metaverse-browser-engine",
+			"filename": "sneeze-open-metaverse-browser-engine",
+			"assetDir": "tech",
+			"thumbnail": "/assets/tech/sneeze-open-metaverse-browser-engine.webp"
 		}
 	],
 	"experiments": [
