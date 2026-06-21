@@ -1,6 +1,6 @@
 import { blog, experiments, podcast } from "fumadocs-mdx:collections/server";
 import type { MetadataRoute } from "next";
-import { collectTags, tagPath } from "@/lib/collect-tags";
+import { collectTagCounts, tagPath } from "@/lib/collect-tags";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
 import { SITE_URL } from "@/lib/site-url";
 
@@ -45,14 +45,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
 		priority: 0.6,
 	}));
 
-	const tagDocs = collectTags([...getDocs(blog), ...getDocs(experiments)]).map(
-		(tag) => ({
+	const tagDocs = Array.from(
+		collectTagCounts([...getDocs(blog), ...getDocs(experiments)]).entries(),
+	)
+		.filter(([, count]) => count >= 2)
+		.map(([tag]) => ({
 			url: `${SITE_URL}${tagPath(tag)}`,
 			lastModified: new Date(),
 			changeFrequency: "weekly" as const,
 			priority: 0.4,
-		}),
-	);
+		}));
 
 	return [
 		{

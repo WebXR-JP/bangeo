@@ -9,6 +9,19 @@ interface PageProps {
 	params: Promise<{ tag: string }>;
 }
 
+function parseContentDate(value?: string): number {
+	if (!value) return 0;
+
+	const japaneseDate = value.match(/^(\d{4})年(\d{1,2})月(\d{1,2})日$/);
+	if (japaneseDate) {
+		const [, year, month, day] = japaneseDate;
+		return new Date(Number(year), Number(month) - 1, Number(day)).getTime();
+	}
+
+	const date = new Date(value);
+	return Number.isNaN(date.getTime()) ? 0 : date.getTime();
+}
+
 export async function generateStaticParams() {
 	return collectTags([...getDocs(blog), ...getDocs(experiments)]).map(
 		(tag) => ({ tag }),
@@ -25,12 +38,22 @@ export async function generateMetadata({
 	const expCount = getDocs(experiments).filter(
 		(e) => !e.draft && e.tags && Array.isArray(e.tags) && e.tags.includes(tag),
 	).length;
-	const description = `「${tag}」タグの記事一覧（全${blogCount + expCount}件）`;
+	const total = blogCount + expCount;
+	const description = `BANGEOの「${tag}」タグ一覧。WebXRの技術記事、ニュース、デモをトピック別にまとめています（全${total}件）。`;
 
 	return {
-		title: `タグ: ${tag}`,
+		title: `${tag} の記事・デモ一覧`,
 		description,
 		alternates: { canonical: tagPath(tag) },
+		robots:
+			total >= 2
+				? { index: true, follow: true }
+				: { index: false, follow: true },
+		openGraph: {
+			title: `${tag} の記事・デモ一覧`,
+			description,
+			type: "website",
+		},
 	};
 }
 
@@ -43,8 +66,8 @@ export default async function TagDetailPage({ params }: PageProps) {
 				!p.draft && p.tags && Array.isArray(p.tags) && p.tags.includes(tag),
 		)
 		.sort((a, b) => {
-			const dA = a.date ? new Date(a.date).getTime() : 0;
-			const dB = b.date ? new Date(b.date).getTime() : 0;
+			const dA = parseContentDate(a.date);
+			const dB = parseContentDate(b.date);
 			return dB - dA;
 		});
 
@@ -54,8 +77,8 @@ export default async function TagDetailPage({ params }: PageProps) {
 				!e.draft && e.tags && Array.isArray(e.tags) && e.tags.includes(tag),
 		)
 		.sort((a, b) => {
-			const dA = a.date ? new Date(a.date).getTime() : 0;
-			const dB = b.date ? new Date(b.date).getTime() : 0;
+			const dA = parseContentDate(a.date);
+			const dB = parseContentDate(b.date);
 			return dB - dA;
 		});
 
@@ -73,10 +96,11 @@ export default async function TagDetailPage({ params }: PageProps) {
 					← すべてのタグに戻る
 				</Link>
 				<h1 className="text-3xl font-black tracking-tight text-gray-950 mb-2">
-					タグ: {tag}
+					{tag} の記事・デモ一覧
 				</h1>
 				<p className="text-base text-gray-500">
-					全{blogPosts.length + experimentsList.length}件の記事
+					WebXRの技術記事、ニュース、デモを「{tag}」タグでまとめています。全
+					{blogPosts.length + experimentsList.length}件。
 				</p>
 			</div>
 
