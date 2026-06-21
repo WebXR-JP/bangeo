@@ -57,33 +57,34 @@ export default function HomePage() {
 	return (
 		<div className="overflow-x-hidden">
 			{/* Hero */}
-			<header className="relative pt-32 pb-24 md:pt-40 md:pb-32 overflow-hidden bg-gray-950">
-				<div className="absolute inset-0 bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950" />
-				<div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(225,29,72,0.15),transparent)]" />
-				<div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_80%_50%,rgba(59,130,246,0.08),transparent)]" />
+			<header className="relative pt-32 pb-24 md:pt-40 md:pb-32 overflow-hidden bg-rose-50/70">
+				<div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,241,242,0.98),rgba(255,255,255,0.94)_46%,rgba(244,244,245,0.92))]" />
+				<div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_48%_at_20%_8%,rgba(225,29,72,0.16),transparent_66%)]" />
+				<div className="absolute inset-0 bg-[radial-gradient(ellipse_54%_42%_at_88%_34%,rgba(251,113,133,0.14),transparent_68%)]" />
+				<div className="absolute inset-0 dot-pattern opacity-70" />
 
 				<div className="relative max-w-6xl mx-auto px-6 md:px-8">
 					<div className="grid lg:grid-cols-5 gap-16 lg:gap-20 items-center">
 						{/* Left: Text */}
 						<div className="lg:col-span-3 space-y-8">
-							<div className="inline-flex items-center gap-2.5 px-4 py-2 bg-white/5 backdrop-blur-xs border border-white/10 rounded-full">
+							<div className="inline-flex items-center gap-2.5 px-4 py-2 bg-white/80 backdrop-blur-xs border border-rose-100 rounded-full shadow-sm shadow-rose-100/60">
 								<span className="w-2 h-2 bg-[#e11d48] rounded-full animate-pulse" />
-								<span className="text-xs font-semibold text-gray-400 tracking-wide">
+								<span className="text-xs font-semibold text-rose-700 tracking-wide">
 									ブラウザで動くXR
 								</span>
 							</div>
-							<h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.08] text-white">
+							<h1 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-[1.08] text-gray-950">
 								インストール不要の
 								<br />
-								<span className="bg-gradient-to-r from-[#e11d48] via-rose-400 to-[#e11d48] bg-clip-text text-transparent">
+								<span className="bg-gradient-to-r from-[#be123c] via-[#e11d48] to-rose-400 bg-clip-text text-transparent">
 									VR/AR
 								</span>
-								<span className="text-white"> を作ろう</span>
+								<span className="text-gray-950"> を作ろう</span>
 							</h1>
-							<p className="text-lg md:text-xl text-gray-400 leading-relaxed max-w-xl">
+							<p className="text-lg md:text-xl text-gray-600 leading-relaxed max-w-xl">
 								ブラウザで動く WebXR
 								の情報を、デモ・技術解説・標準化状況の切り口で
-								<span className="text-white font-semibold">日本語</span>
+								<span className="text-gray-950 font-semibold">日本語</span>
 								で整理しています。
 							</p>
 							<div className="flex flex-col sm:flex-row gap-4 pt-2">
@@ -109,7 +110,7 @@ export default function HomePage() {
 								</Link>
 								<Link
 									href="/tech-articles"
-									className="inline-flex items-center justify-center px-7 py-4 bg-white/5 backdrop-blur-xs border border-white/10 text-white text-sm font-bold rounded-xl hover:bg-white/10 hover:border-white/20 transition-all duration-200"
+									className="inline-flex items-center justify-center px-7 py-4 bg-white/80 backdrop-blur-xs border border-rose-100 text-gray-950 text-sm font-bold rounded-xl hover:bg-white hover:border-rose-200 transition-all duration-200 shadow-sm"
 								>
 									記事を読む
 								</Link>
@@ -120,9 +121,9 @@ export default function HomePage() {
 						<div className="lg:col-span-2 grid grid-cols-2 gap-4">
 							<Link
 								href="/experiments"
-								className="group p-6 bg-white/[0.03] backdrop-blur-xs border border-white/[0.06] rounded-2xl hover:bg-white/[0.06] hover:border-white/[0.12] transition-all duration-200"
+								className="group p-6 bg-white/75 backdrop-blur-xs border border-rose-100/80 rounded-2xl shadow-sm shadow-rose-100/50 hover:bg-white hover:border-rose-200 hover:-translate-y-0.5 transition-all duration-200"
 							>
-								<div className="text-4xl font-black text-white mb-2 tracking-tight">
+								<div className="text-4xl font-black text-gray-950 mb-2 tracking-tight">
 									{formatCount(experimentsList.length)}
 								</div>
 								<div className="text-sm text-gray-500 font-medium group-hover:text-[#e11d48] transition-colors">
@@ -131,9 +132,9 @@ export default function HomePage() {
 							</Link>
 							<Link
 								href="/tech-articles"
-								className="group p-6 bg-white/[0.03] backdrop-blur-xs border border-white/[0.06] rounded-2xl hover:bg-white/[0.06] hover:border-white/[0.12] transition-all duration-200"
+								className="group p-6 bg-white/75 backdrop-blur-xs border border-rose-100/80 rounded-2xl shadow-sm shadow-rose-100/50 hover:bg-white hover:border-rose-200 hover:-translate-y-0.5 transition-all duration-200"
 							>
-								<div className="text-4xl font-black text-white mb-2 tracking-tight">
+								<div className="text-4xl font-black text-gray-950 mb-2 tracking-tight">
 									{formatCount(blogPosts.length)}
 								</div>
 								<div className="text-sm text-gray-500 font-medium group-hover:text-[#e11d48] transition-colors">
@@ -142,9 +143,9 @@ export default function HomePage() {
 							</Link>
 							<Link
 								href="/podcast"
-								className="group p-6 bg-white/[0.03] backdrop-blur-xs border border-white/[0.06] rounded-2xl hover:bg-white/[0.06] hover:border-white/[0.12] transition-all duration-200"
+								className="group p-6 bg-white/75 backdrop-blur-xs border border-rose-100/80 rounded-2xl shadow-sm shadow-rose-100/50 hover:bg-white hover:border-rose-200 hover:-translate-y-0.5 transition-all duration-200"
 							>
-								<div className="text-4xl font-black text-white mb-2 tracking-tight">
+								<div className="text-4xl font-black text-gray-950 mb-2 tracking-tight">
 									{formatCount(podcastEpisodes.length)}
 								</div>
 								<div className="text-sm text-gray-500 font-medium group-hover:text-[#e11d48] transition-colors">
@@ -153,9 +154,9 @@ export default function HomePage() {
 							</Link>
 							<Link
 								href="/tags"
-								className="group p-6 bg-white/[0.03] backdrop-blur-xs border border-white/[0.06] rounded-2xl hover:bg-white/[0.06] hover:border-white/[0.12] transition-all duration-200"
+								className="group p-6 bg-white/75 backdrop-blur-xs border border-rose-100/80 rounded-2xl shadow-sm shadow-rose-100/50 hover:bg-white hover:border-rose-200 hover:-translate-y-0.5 transition-all duration-200"
 							>
-								<div className="text-4xl font-black text-white mb-2 tracking-tight">
+								<div className="text-4xl font-black text-gray-950 mb-2 tracking-tight">
 									3
 								</div>
 								<div className="text-sm text-gray-500 font-medium group-hover:text-[#e11d48] transition-colors">
