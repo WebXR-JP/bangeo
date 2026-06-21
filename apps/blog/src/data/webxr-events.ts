@@ -77,7 +77,7 @@ export const WEBXR_EVENT_IMPORTANCE_LABELS: Record<
 	low: "低",
 };
 
-export const WEBXR_EVENTS_LAST_UPDATED = "2026-06-15";
+export const WEBXR_EVENTS_LAST_UPDATED = "2026-06-21";
 
 export const WEBXR_DEVICE_WATCH_TARGETS = [
 	"Meta / Quest / Quest Browser / Horizon OS",
@@ -109,7 +109,7 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		endDate: "2026-06-17",
 		timezone: "America/Los_Angeles",
 		location: "Long Beach, California",
-		status: "live",
+		status: "recap-needed",
 		importance: "medium",
 		confidence: "high",
 		sourceUrl: "https://metaverse-standards.org/event/awe-2026/",
@@ -137,10 +137,10 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		],
 		recommendedAction:
 			"AWE終了後、セッション資料、動画、GitHub更新、OMBI roadmapを確認する。WebXR本体ではなく Spatial Web / Open Metaverse Browser の隣接トピックとして扱う。",
-		lastCheckedAt: "2026-06-15",
-		nextCheckAt: "2026-06-18",
+		lastCheckedAt: "2026-06-21",
+		nextCheckAt: "2026-06-25",
 		notes:
-			"Metaverse Standards Forum のAWE 2026ページで、6月16日の『From Web Browser to Metaverse Browser』と6月17日の『Roundtable Discussions: Open Metaverse Browser Initiative』が案内されている。",
+			"AWE 2026内のSneeze/OMBI関連セッション（6月16〜17日）は開催済み。セッション資料、動画、GitHub更新を回収中。",
 		region: "global",
 		organizerType: "standards",
 		watchMode: "primary",
@@ -156,7 +156,7 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		endDate: "2026-06-18",
 		timezone: "America/Los_Angeles",
 		location: "Long Beach, California",
-		status: "live",
+		status: "recap-needed",
 		importance: "medium",
 		confidence: "high",
 		sourceUrl: "https://www.awexr.com/",
@@ -170,11 +170,11 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		],
 		affectedBangeoPages: ["/webxr-status", "/tech-articles", "/experiments"],
 		recommendedAction:
-			"開催中は公式セッション、出展者発表、XR/Spatial AI関連の一次情報を確認し、WebARやブラウザ実装に関係する発表を回収する。",
-		lastCheckedAt: "2026-06-15",
-		nextCheckAt: "2026-06-16",
+			"開催後7日間（〜6月25日）は公式セッション資料、出展者発表、XR/Spatial AI関連の一次情報を確認し、WebARやブラウザ実装に関係する発表を回収する。",
+		lastCheckedAt: "2026-06-21",
+		nextCheckAt: "2026-06-25",
 		notes:
-			"AWE公式ページではLong Beachで2026年6月15〜18日開催と案内されているため、開催中〜開催後7日間を重点確認期間にする。",
+			"AWE 2026は6月15〜18日にLong Beachで開催済み。開催後7日間（〜6月25日）は出展者発表・セッション資料を重点回収する。",
 	},
 	{
 		title: "Meta Connect 2026",
@@ -343,7 +343,7 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		endDate: "2026-06-19",
 		timezone: "Asia/Tokyo",
 		location: "東京ビッグサイト",
-		status: "live-soon",
+		status: "recap-needed",
 		importance: "high",
 		confidence: "high",
 		sourceUrl: "https://www.xr-fair.jp/hub/ja-jp.html",
@@ -376,11 +376,11 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 			"/notes/device-watch",
 		],
 		recommendedAction:
-			"/eventsではまもなく開催のDevice Hands-onイベントとして扱う。開催後7日間は出展社ニュース、体験レポート、デバイス仕様、ブラウザ/WebView/WebXR/OpenXR対応を確認する。",
-		lastCheckedAt: "2026-06-15",
-		nextCheckAt: "2026-06-17",
+			"開催後7日間（〜6月26日）は出展社ニュース、体験レポート、デバイス仕様、ブラウザ/WebView/WebXR/OpenXR対応を確認する。",
+		lastCheckedAt: "2026-06-21",
+		nextCheckAt: "2026-06-26",
 		notes:
-			"公式ページでは2026年6月17〜19日に東京ビッグサイトで開催予定。∞mugenはHTC NIPPON、XREAL、Shiftall、NTTコノキューデバイス、Even Realities、PICOなどデバイス体験の発表回収候補にする。",
+			"2026年6月17〜19日に東京ビッグサイトで開催済み。∞mugen出展社（HTC NIPPON、XREAL、Shiftall、NTTコノキューデバイス、Even Realities、PICO等）の発表・体験レポートを回収中。",
 		region: "japan",
 		organizerType: "expo",
 		watchMode: "recap",
