@@ -2,6 +2,7 @@ import { experiments } from "fumadocs-mdx:collections/server";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArticleStructuredData } from "@/components/article-structured-data";
 import { mdxComponents } from "@/components/mdx-components";
 import { OptimizedImage } from "@/components/optimized-image";
 import { SocialShare } from "@/components/social-share";
@@ -74,6 +75,7 @@ export default async function ExperimentPage({ params }: PageProps) {
 	const devices = doc.devices as string[] | undefined;
 	const difficulty = String(doc.difficulty || "");
 	const shareUrl = `${SITE_URL}/experiments/${slug}`;
+	const image = doc.thumbnail ? String(doc.thumbnail) : "/ogp.png";
 
 	const metaItems = [
 		difficulty && {
@@ -91,6 +93,17 @@ export default async function ExperimentPage({ params }: PageProps) {
 
 	return (
 		<div className="max-w-4xl mx-auto px-6 md:px-8 py-16 md:py-20">
+			<ArticleStructuredData
+				title={doc.title}
+				description={doc.description}
+				path={`/experiments/${slug}`}
+				image={image}
+				datePublished={doc.date ? String(doc.date) : undefined}
+				author="BANGEO"
+				categoryLabel="デモ"
+				categoryPath="/experiments"
+				tags={tags}
+			/>
 			{/* Hero: thumbnail + header side-by-side */}
 			<header className="mb-8">
 				<div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">

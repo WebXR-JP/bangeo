@@ -5,6 +5,19 @@ import { OptimizedImage } from "@/components/optimized-image";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
 import { CARD_IMAGE_SIZES } from "@/lib/image-defaults";
 
+function parseContentDate(value?: string): number {
+	if (!value) return 0;
+
+	const japaneseDate = value.match(/^(\d{4})年(\d{1,2})月(\d{1,2})日$/);
+	if (japaneseDate) {
+		const [, year, month, day] = japaneseDate;
+		return new Date(Number(year), Number(month) - 1, Number(day)).getTime();
+	}
+
+	const date = new Date(value);
+	return Number.isNaN(date.getTime()) ? 0 : date.getTime();
+}
+
 export const metadata: Metadata = {
 	title: "BANGEO｜WebXR日本語リソース",
 	description:
@@ -22,16 +35,16 @@ export default function HomePage() {
 	const blogPosts = getDocs(blog)
 		.filter((post) => !post.draft)
 		.sort((a, b) => {
-			const dateA = a.date ? new Date(a.date).getTime() : 0;
-			const dateB = b.date ? new Date(b.date).getTime() : 0;
+			const dateA = parseContentDate(a.date);
+			const dateB = parseContentDate(b.date);
 			return dateB - dateA;
 		});
 
 	const experimentsList = getDocs(experiments)
 		.filter((exp) => !exp.draft)
 		.sort((a, b) => {
-			const dateA = a.date ? new Date(a.date).getTime() : 0;
-			const dateB = b.date ? new Date(b.date).getTime() : 0;
+			const dateA = parseContentDate(a.date);
+			const dateB = parseContentDate(b.date);
 			return dateB - dateA;
 		});
 

@@ -4,24 +4,43 @@ import { collectTags, tagPath } from "@/lib/collect-tags";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
 import { SITE_URL } from "@/lib/site-url";
 
+type SitemapDoc = {
+	date?: string;
+	pubDate?: string;
+	info: { path: string };
+};
+
+function parseDate(value?: string): Date {
+	if (!value) return new Date("2026-06-15");
+
+	const japaneseDate = value.match(/^(\d{4})年(\d{1,2})月(\d{1,2})日$/);
+	if (japaneseDate) {
+		const [, year, month, day] = japaneseDate;
+		return new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+	}
+
+	const date = new Date(value);
+	return Number.isNaN(date.getTime()) ? new Date("2026-06-15") : date;
+}
+
 export default function sitemap(): MetadataRoute.Sitemap {
 	const techArticleDocs = getDocs(blog).map((doc) => ({
 		url: `${SITE_URL}/tech-articles/${getSlugFromPath(doc.info.path)}`,
-		lastModified: new Date(),
+		lastModified: parseDate((doc as SitemapDoc).pubDate ?? doc.date),
 		changeFrequency: "monthly" as const,
 		priority: 0.8,
 	}));
 
 	const experimentDocs = getDocs(experiments).map((doc) => ({
 		url: `${SITE_URL}/experiments/${getSlugFromPath(doc.info.path)}`,
-		lastModified: new Date(),
+		lastModified: parseDate((doc as SitemapDoc).pubDate ?? doc.date),
 		changeFrequency: "monthly" as const,
 		priority: 0.7,
 	}));
 
 	const podcastDocs = getDocs(podcast).map((doc) => ({
 		url: `${SITE_URL}/podcast/${getSlugFromPath(doc.info.path)}`,
-		lastModified: new Date(),
+		lastModified: parseDate((doc as SitemapDoc).pubDate ?? doc.date),
 		changeFrequency: "monthly" as const,
 		priority: 0.6,
 	}));

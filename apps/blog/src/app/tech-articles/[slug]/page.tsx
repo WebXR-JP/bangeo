@@ -2,6 +2,7 @@ import { blog } from "fumadocs-mdx:collections/server";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArticleStructuredData } from "@/components/article-structured-data";
 import { mdxComponents } from "@/components/mdx-components";
 import { OptimizedImage } from "@/components/optimized-image";
 import { SocialShare } from "@/components/social-share";
@@ -10,6 +11,28 @@ import { NO_IMAGE, THUMB_IMAGE_SIZES } from "@/lib/image-defaults";
 import { SITE_URL } from "@/lib/site-url";
 
 const BASE_PATH = "/tech-articles";
+const ARTICLE_FAQS: Record<
+	string,
+	Array<{ question: string; answer: string }>
+> = {
+	"ios-webxr-app-clip-guide": [
+		{
+			question: "iPhoneのSafariはWebXRに対応していますか？",
+			answer:
+				"2026年時点では、iPhoneのSafariだけでWebXRのimmersive-arを本番利用する前提にはしない方が安全です。visionOS SafariのWebXR対応とは別に、iOS SafariではWebXR Device APIを直接使えない前提で設計します。",
+		},
+		{
+			question: "iOSでWebXRを使うには何が必要ですか？",
+			answer:
+				"WebXR API互換のAR体験をiPhoneで見せたい場合は、App Clipや専用ビューアのように、ARKitを使うネイティブ層とWebViewを組み合わせる必要があります。",
+		},
+		{
+			question: "Safari WebXRとApp Clip WebXRは同じですか？",
+			answer:
+				"同じではありません。Safari WebXRはブラウザがWebXR APIを直接実装している状態です。App Clipを使う方法は、ARKitでカメラやトラッキングを処理し、その上にWebViewとWebXR風のAPIを組み合わせる回避策です。",
+		},
+	],
+};
 
 interface PageProps {
 	params: Promise<{ slug: string }>;
@@ -63,6 +86,7 @@ export default async function TechArticlePage({ params }: PageProps) {
 
 	const MDX = doc.body;
 	const tags = doc.tags as string[] | undefined;
+	const image = doc.thumbnail ? String(doc.thumbnail) : "/ogp.png";
 	const allDocs = getDocs(blog);
 	const otherArticles = allDocs
 		.filter(
@@ -74,6 +98,18 @@ export default async function TechArticlePage({ params }: PageProps) {
 
 	return (
 		<div className="max-w-3xl mx-auto px-5 md:px-8 py-16 md:py-24">
+			<ArticleStructuredData
+				title={doc.title}
+				description={doc.description}
+				path={`${BASE_PATH}/${slug}`}
+				image={image}
+				datePublished={doc.date ? String(doc.date) : undefined}
+				author={doc.author ? String(doc.author) : undefined}
+				categoryLabel="技術記事"
+				categoryPath={BASE_PATH}
+				tags={tags}
+				faqs={ARTICLE_FAQS[slug]}
+			/>
 			<article>
 				{/* Header */}
 				<header className="mb-12">

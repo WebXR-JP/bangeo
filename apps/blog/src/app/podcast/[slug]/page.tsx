@@ -2,6 +2,7 @@ import { podcast } from "fumadocs-mdx:collections/server";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArticleStructuredData } from "@/components/article-structured-data";
 import { mdxComponents } from "@/components/mdx-components";
 import { SocialShare } from "@/components/social-share";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
@@ -79,6 +80,19 @@ export default async function PodcastEpisodePage({ params }: PageProps) {
 
 	return (
 		<div className="max-w-4xl mx-auto px-6 md:px-8 py-16 md:py-20">
+			<ArticleStructuredData
+				title={doc.title}
+				description={doc.description}
+				path={`/podcast/${slug}`}
+				image="/ogp.png"
+				datePublished={
+					doc.pubDate ? String(doc.pubDate) : String(doc.date || "")
+				}
+				author="BANGEO"
+				categoryLabel="ポッドキャスト"
+				categoryPath="/podcast"
+				tags={tags}
+			/>
 			{/* Hero: episode icon + header side-by-side */}
 			<header className="mb-8">
 				<div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">

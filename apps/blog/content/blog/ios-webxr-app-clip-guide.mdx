@@ -1,9 +1,10 @@
 ---
-title: "iPhoneでWebXRを動かす方法 - App Clipの仕組みと活用ガイド"
-description: "iOSのSafariはWebXRを直接サポートしていませんが、App Clipという仕組みを使えばiPhoneでもWebXR ARを体験できます。EyeJack、Variant Launchなどのソリューションと、その技術的な仕組み、さらには自作への挑戦方法まで詳しく解説します。"
+title: "iPhoneでWebXRを動かす方法（2026年版）- App ClipとSafari対応状況"
+description: "iPhone・iOS SafariでWebXR ARを動かしたい開発者向けに、Safariの対応状況、App Clipを使う仕組み、EyeJackやVariant Launchの使いどころを整理します。"
 date: "2025年12月28日"
 category: "GUIDE"
 tags:
+  - "WebXR"
   - "iOS"
   - "iPhone"
   - "App Clip"
@@ -18,9 +19,25 @@ draft: false
 
 ## はじめに - iOSとWebXRの現状
 
-WebXR Device APIは、ウェブブラウザ上でVR/AR体験を提供するためのW3C勧告候補草案（CRD）です。しかし、iOSのSafariブラウザはWebXR（特に`immersive-ar`モード）を**直接サポートしていません**。
+WebXR Device APIは、ウェブブラウザ上でVR/AR体験を提供するためのW3C勧告候補草案（CRD）です。しかし、2026年時点でも、iPhoneのiOS SafariはWebXR（特に`immersive-ar`モード）を**直接サポートしていません**。
+
+Appleは[WWDC24のWebXRセッション](https://developer.apple.com/videos/play/wwdc2024/10066/)でvisionOS Safari向けのWebXR体験を紹介しています。一方で、iPhoneやiPadのSafariでWebXR ARがそのまま動く状態とは分けて考える必要があります。[MDNのWebXR Device API互換表](https://developer.mozilla.org/en-US/docs/Web/API/WebXR_Device_API)でも、iOS SafariはWebXR Device API非対応として扱われています。
 
 これはAppleがARKitというネイティブフレームワークを推進しているためと考えられていますが、Web開発者にとっては大きな課題でした。しかし、**App Clip**という仕組みを活用することで、この制約を回避できることが判明しています。
+
+この記事では、「iPhoneでWebXRを動かせるのか」「Safariだけで動くのか」「EyeJackやVariant Launchは何をしているのか」を、開発者向けに整理します。
+
+## 先に結論 - iPhoneでWebXRはどう動かす？
+
+| 方法 | iPhone Safariだけで動くか | WebXR AR用途 | 向いているケース |
+| --- | --- | --- | --- |
+| iOS Safariで直接WebXRを起動 | いいえ | 不向き | 現時点では本番導入しない |
+| App Clip経由でARKit + WebViewを使う | Safari単体ではない | 可能 | インストール不要に近いAR体験を配布したい |
+| EyeJack Play ARを使う | App Clip経由 | 可能 | まず無料でWebXR ARを試したい |
+| Variant Launchを使う | App Clip経由 | 可能 | 商用案件でブランド管理やサポートが必要 |
+| WebXRではないWebARを使う | 場合による | WebXR APIではない | 画像認識ARやカメラ合成で十分な場合 |
+
+iPhone向けに「ブラウザでARを見せたい」だけなら、WebXRにこだわらず、8th Wall、MindAR、AR Quick Look、独自WebARなども候補になります。WebXR APIとして既存のThree.js / PlayCanvas / Babylon.js実装を動かしたい場合は、App Clip型の回避策を検討するのが現実的です。
 
 ## App Clipとは？
 
@@ -111,6 +128,28 @@ Three.jsのhit-testデモや、[XR Dinosaurs](https://xrdinosaurs.com/)（GLBモ
 - 企業向けのサポートとカスタマイズ
 - ブランドに合わせたApp Clipのカスタマイズ
 
+## よくある質問
+
+### iPhoneのSafariはWebXRに対応していますか？
+
+2026年時点では、iPhoneのSafariだけでWebXRの`immersive-ar`を本番利用する前提にはしない方が安全です。visionOS SafariのWebXR対応とは別に、iOS SafariではWebXR Device APIを直接使えない前提で設計します。
+
+### iOSでWebXRを使うには何が必要ですか？
+
+WebXR API互換のAR体験をiPhoneで見せたい場合は、App Clipや専用ビューアのように、ARKitを使うネイティブ層とWebViewを組み合わせる必要があります。EyeJackやVariant Launchは、この部分をサービスとして提供する選択肢です。
+
+### Variant Launchは何に使いますか？
+
+Variant Launchは、商用向けにApp Clip経由のWebXR AR配信を整えたい場合の候補です。ブランド表現、運用、サポート、既存WebXRコンテンツとの接続を重視する案件では、無料検証用のEyeJackよりも適した選択肢になる場合があります。
+
+### Safari WebXRとApp Clip WebXRは同じですか？
+
+同じではありません。Safari WebXRはブラウザがWebXR APIを直接実装している状態を指します。App Clipを使う方法は、ARKitでカメラやトラッキングを処理し、その上にWebViewとWebXR風のAPIを組み合わせる回避策です。
+
+### iPhone向けARはWebXRで作るべきですか？
+
+既存のWebXRコンテンツをiPhoneでも見せたいなら、App Clip型の方法を検討する価値があります。一方で、商品プレビュー、画像認識、簡単なカメラ合成で十分なら、WebXR以外のWebARやAR Quick Lookの方が運用しやすい場合もあります。
+
 ## まとめ
 
 iOSでWebXRを動かすためのApp Clip技術のポイントをまとめます：
@@ -127,5 +166,7 @@ WebXR開発者にとって、iOSは長らく課題でしたが、App Clipの活�
 - [EyeJack Play AR](https://play.eyejack.xyz/)
 - [Variant Launch](https://launch.variant3d.com/)
 - [XR Dinosaurs](https://xrdinosaurs.com/)
+- [Apple Developer - Build immersive web experiences with WebXR](https://developer.apple.com/videos/play/wwdc2024/10066/)
+- [MDN - WebXR Device API](https://developer.mozilla.org/en-US/docs/Web/API/WebXR_Device_API)
 - [Immersive Web Support Table](https://immersiveweb.dev/#supporttable)
 - [Reddit - WebXR on iOS via App Clip](https://www.reddit.com/r/WebXR/comments/1kc5oao/just_a_reminder_that_webxr_is_able_to_work_albeit/)
