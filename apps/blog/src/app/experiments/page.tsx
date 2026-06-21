@@ -6,11 +6,13 @@ import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
 import { CARD_IMAGE_SIZES } from "@/lib/image-defaults";
 
 export const metadata: Metadata = {
-	title: "デモ",
-	description: "公開中の WebXR デモを一覧で確認できるページです。",
+	title: "WebXRデモ一覧｜VR・ARをブラウザで試す",
+	description:
+		"Meta Quest、Android、PCブラウザで試せるWebXRデモ一覧。AR、VR、MR、WebGPU、Depth Occlusionなどの実験を日本語で整理しています。",
 	openGraph: {
-		title: "WebXR デモ",
-		description: "公開中の WebXR デモを一覧で確認できるページです。",
+		title: "WebXRデモ一覧｜VR・ARをブラウザで試す",
+		description:
+			"Meta Quest、Android、PCブラウザで試せるWebXRデモ一覧。AR、VR、MR、WebGPUなどの実験を日本語で整理しています。",
 		type: "website",
 	},
 	alternates: { canonical: "/experiments" },
@@ -22,11 +24,24 @@ const difficultyLabel: Record<string, string> = {
 	advanced: "上級",
 };
 
+function parseContentDate(value?: string): number {
+	if (!value) return 0;
+
+	const japaneseDate = value.match(/^(\d{4})年(\d{1,2})月(\d{1,2})日$/);
+	if (japaneseDate) {
+		const [, year, month, day] = japaneseDate;
+		return new Date(Number(year), Number(month) - 1, Number(day)).getTime();
+	}
+
+	const date = new Date(value);
+	return Number.isNaN(date.getTime()) ? 0 : date.getTime();
+}
+
 export default function ExperimentsIndexPage() {
 	const allExperiments = getDocs(experiments).sort((a, b) => {
-		const dateA = new Date(String(a.date || ""));
-		const dateB = new Date(String(b.date || ""));
-		return dateB.getTime() - dateA.getTime();
+		const dateA = parseContentDate(a.date);
+		const dateB = parseContentDate(b.date);
+		return dateB - dateA;
 	});
 	const hasExperiments = allExperiments.length > 0;
 
@@ -34,11 +49,26 @@ export default function ExperimentsIndexPage() {
 		<div className="max-w-6xl mx-auto px-6 md:px-8 py-16 md:py-20">
 			<header className="mb-12">
 				<h1 className="text-3xl font-black tracking-tight text-gray-950 mb-2">
-					WebXR デモ
+					WebXRデモ一覧
 				</h1>
-				<p className="text-base text-gray-500">
-					公開できる状態になったデモから順次追加しています
+				<p className="text-base text-gray-500 leading-relaxed max-w-3xl">
+					VR/AR/MRをブラウザで試せるWebXRデモをまとめています。Meta
+					Questでのimmersive-vr /
+					immersive-ar、スマートフォン向けAR、WebGPUやDepth
+					Occlusionの検証など、実装前に挙動を確認するためのサンプル集です。
 				</p>
+				<div className="mt-5 flex flex-wrap gap-2">
+					{["WebXR AR", "WebXR VR", "Meta Quest", "WebGPU", "MR"].map(
+						(label) => (
+							<span
+								key={label}
+								className="rounded-full bg-gray-100 px-3 py-1 text-xs font-bold text-gray-600"
+							>
+								{label}
+							</span>
+						),
+					)}
+				</div>
 			</header>
 
 			{hasExperiments ? (

@@ -2,9 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-	title: "WebXRとは",
+	title: "WebXRとは？使い方・対応ブラウザ・デモを日本語で解説",
 	description:
-		"WebXR Device API が生まれた背景、既存APIの不足点、対象ハードウェアやユースケースを日本語で俯瞰できるガイド。",
+		"WebXRの意味、使い方、対応ブラウザ、iPhoneやMeta Questでの注意点、AR/VRデモの始め方を日本語で解説します。",
+	openGraph: {
+		title: "WebXRとは？使い方・対応ブラウザ・デモを日本語で解説",
+		description:
+			"WebXRの意味、使い方、対応ブラウザ、AR/VRデモの始め方を日本語で解説します。",
+		type: "article",
+	},
 	alternates: { canonical: "/webxr-explainer" },
 };
 
@@ -39,11 +45,22 @@ export default function WebXRExplainerPage() {
 						</li>
 						<li>
 							<a
-								href="#goals"
+								href="#getting-started"
 								className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white hover:shadow-xs transition-all"
 							>
 								<span className="text-[10px] font-black text-[#e11d48]">
 									2.
+								</span>
+								WebXRの使い方
+							</a>
+						</li>
+						<li>
+							<a
+								href="#goals"
+								className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white hover:shadow-xs transition-all"
+							>
+								<span className="text-[10px] font-black text-[#e11d48]">
+									3.
 								</span>
 								目標と非目標
 							</a>
@@ -54,7 +71,7 @@ export default function WebXRExplainerPage() {
 								className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white hover:shadow-xs transition-all"
 							>
 								<span className="text-[10px] font-black text-[#e11d48]">
-									3.
+									4.
 								</span>
 								対象ハードウェア
 							</a>
@@ -65,7 +82,7 @@ export default function WebXRExplainerPage() {
 								className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white hover:shadow-xs transition-all"
 							>
 								<span className="text-[10px] font-black text-[#e11d48]">
-									4.
+									5.
 								</span>
 								XRの「X」とは？
 							</a>
@@ -76,7 +93,7 @@ export default function WebXRExplainerPage() {
 								className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white hover:shadow-xs transition-all"
 							>
 								<span className="text-[10px] font-black text-[#e11d48]">
-									5.
+									6.
 								</span>
 								ユースケース
 							</a>
@@ -87,7 +104,7 @@ export default function WebXRExplainerPage() {
 								className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white hover:shadow-xs transition-all"
 							>
 								<span className="text-[10px] font-black text-[#e11d48]">
-									6.
+									7.
 								</span>
 								なぜ新しいAPIが必要だったのか
 							</a>
@@ -98,7 +115,7 @@ export default function WebXRExplainerPage() {
 								className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white hover:shadow-xs transition-all"
 							>
 								<span className="text-[10px] font-black text-[#e11d48]">
-									7.
+									8.
 								</span>
 								WebVRとWebXRの違い
 							</a>
@@ -109,7 +126,7 @@ export default function WebXRExplainerPage() {
 								className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white hover:shadow-xs transition-all"
 							>
 								<span className="text-[10px] font-black text-[#e11d48]">
-									8.
+									9.
 								</span>
 								OpenXRとの関係
 							</a>
@@ -139,10 +156,62 @@ export default function WebXRExplainerPage() {
 					</div>
 				</section>
 
+				<section id="getting-started" className="space-y-6 scroll-mt-24">
+					<h2 className="text-3xl font-black text-gray-900 border-b-4 border-gray-100 pb-2">
+						2. WebXRの使い方
+					</h2>
+					<div className="grid md:grid-cols-3 gap-5">
+						<Link
+							href="/experiments"
+							className="block rounded-2xl border border-gray-100 bg-white p-6 hover:border-[#e11d48]/30 hover:shadow-lg transition-all"
+						>
+							<h3 className="font-black text-gray-950 mb-2">WebXRデモを試す</h3>
+							<p className="text-sm text-gray-600 leading-relaxed">
+								Meta
+								Quest、Android、PCブラウザで動くVR/ARデモをブラウザから開いて確認します。
+							</p>
+						</Link>
+						<Link
+							href="/devices"
+							className="block rounded-2xl border border-gray-100 bg-white p-6 hover:border-[#e11d48]/30 hover:shadow-lg transition-all"
+						>
+							<h3 className="font-black text-gray-950 mb-2">
+								対応デバイスを見る
+							</h3>
+							<p className="text-sm text-gray-600 leading-relaxed">
+								iPhone、Meta Quest、Android XR、PC
+								VRなど、WebXR対応状況を端末別に確認します。
+							</p>
+						</Link>
+						<Link
+							href="/libraries"
+							className="block rounded-2xl border border-gray-100 bg-white p-6 hover:border-[#e11d48]/30 hover:shadow-lg transition-all"
+						>
+							<h3 className="font-black text-gray-950 mb-2">
+								ライブラリを選ぶ
+							</h3>
+							<p className="text-sm text-gray-600 leading-relaxed">
+								Three.js、Babylon.js、PlayCanvasなど、WebXR実装に使うライブラリを比較します。
+							</p>
+						</Link>
+					</div>
+					<p className="text-gray-700 text-lg leading-relaxed">
+						はじめてWebXRを触る場合は、まずデモを実機で開き、次に対応ブラウザとデバイスを確認し、最後に使うライブラリを選ぶ順番が現実的です。iPhoneではSafari単体のWebXR
+						AR対応に制限があるため、iOS向けには
+						<Link
+							href="/tech-articles/ios-webxr-app-clip-guide"
+							className="font-bold text-[#e11d48] hover:underline"
+						>
+							App Clipを使う方法
+						</Link>
+						もあわせて確認してください。
+					</p>
+				</section>
+
 				{/* 2. 目標と非目標 */}
 				<section id="goals" className="space-y-6 scroll-mt-24">
 					<h2 className="text-3xl font-black text-gray-900 border-b-4 border-gray-100 pb-2">
-						2. 目標と非目標
+						3. 目標と非目標
 					</h2>
 					<div className="grid md:grid-cols-2 gap-8">
 						<div className="space-y-4">
@@ -197,7 +266,7 @@ export default function WebXRExplainerPage() {
 				{/* 3. 対象ハードウェア */}
 				<section id="hardware" className="space-y-6 scroll-mt-24">
 					<h2 className="text-3xl font-black text-gray-900 border-b-4 border-gray-100 pb-2">
-						3. 対象ハードウェア
+						4. 対象ハードウェア
 					</h2>
 					<div className="space-y-6">
 						<p className="text-gray-600">
@@ -228,7 +297,7 @@ export default function WebXRExplainerPage() {
 				{/* 4. XRの「X」とは */}
 				<section id="x-meaning" className="space-y-6 scroll-mt-24">
 					<h2 className="text-3xl font-black text-gray-900 border-b-4 border-gray-100 pb-2">
-						4. XRの「X」とは？
+						5. XRの「X」とは？
 					</h2>
 					<div className="space-y-6">
 						<p className="text-gray-700 text-lg leading-relaxed">
@@ -256,7 +325,7 @@ export default function WebXRExplainerPage() {
 				{/* 5. ユースケース */}
 				<section id="use-cases" className="space-y-6 scroll-mt-24">
 					<h2 className="text-3xl font-black text-gray-900 border-b-4 border-gray-100 pb-2">
-						5. ユースケース
+						6. ユースケース
 					</h2>
 					<div className="grid md:grid-cols-3 gap-8">
 						<div className="space-y-3">
@@ -283,7 +352,7 @@ export default function WebXRExplainerPage() {
 				{/* 6. なぜ新しいAPIが必要だったのか */}
 				<section id="why-new-api" className="space-y-8 scroll-mt-24">
 					<h2 className="text-3xl font-black text-gray-900 border-b-4 border-gray-100 pb-2">
-						6. なぜ新しいAPIが必要だったのか
+						7. なぜ新しいAPIが必要だったのか
 					</h2>
 					<div className="grid md:grid-cols-2 gap-8">
 						<div className="space-y-4">
@@ -307,7 +376,7 @@ export default function WebXRExplainerPage() {
 				{/* 7. WebVRとWebXRの違い */}
 				<section id="webvr-vs-webxr" className="space-y-6 scroll-mt-24">
 					<h2 className="text-3xl font-black text-gray-900 border-b-4 border-gray-100 pb-2">
-						7. WebVRとWebXRの違い
+						8. WebVRとWebXRの違い
 					</h2>
 					<div className="grid md:grid-cols-2 gap-8">
 						<div className="p-6 bg-gray-50 rounded-2xl">
@@ -332,7 +401,7 @@ export default function WebXRExplainerPage() {
 				{/* 8. OpenXRとの関係 */}
 				<section id="openxr" className="space-y-6 scroll-mt-24">
 					<h2 className="text-3xl font-black text-gray-900 border-b-4 border-gray-100 pb-2">
-						8. OpenXRとの関係
+						9. OpenXRとの関係
 					</h2>
 					<p className="text-gray-700 leading-relaxed">
 						<strong>OpenXR</strong>
