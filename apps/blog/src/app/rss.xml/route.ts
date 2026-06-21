@@ -1,12 +1,11 @@
-import { blog, experiments, podcast } from "fumadocs-mdx:collections/server";
+import { blog } from "fumadocs-mdx:collections/server";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
 import { SITE_URL } from "@/lib/site-url";
 
 export const dynamic = "force-static";
 
-const FEED_TITLE = "BANGEO 更新情報";
-const FEED_DESCRIPTION =
-	"BANGEO の WebXR 技術記事、デモ、ポッドキャストの更新情報";
+const FEED_TITLE = "BANGEO 技術記事";
+const FEED_DESCRIPTION = "BANGEO の WebXR 技術記事、ニュース、ガイドの更新情報";
 const FEED_PATH = "/rss.xml";
 const MAX_ITEMS = 50;
 
@@ -57,10 +56,7 @@ function absoluteUrl(path: string): string {
 	return new URL(path, SITE_URL).toString();
 }
 
-function collectionItems(
-	docs: DatedDoc[],
-	sectionPath: "tech-articles" | "experiments" | "podcast",
-): FeedItem[] {
+function articleItems(docs: DatedDoc[]): FeedItem[] {
 	return docs
 		.filter((doc) => !doc.draft)
 		.map((doc) => {
@@ -72,7 +68,7 @@ function collectionItems(
 			return {
 				title: doc.title,
 				description: doc.description,
-				url: absoluteUrl(`/${sectionPath}/${slug}`),
+				url: absoluteUrl(`/tech-articles/${slug}`),
 				date: parseDate(doc.pubDate ?? doc.date),
 				categories,
 			};
@@ -119,11 +115,7 @@ ${sortedItems
 }
 
 export function GET(): Response {
-	const items = [
-		...collectionItems(getDocs(blog) as DatedDoc[], "tech-articles"),
-		...collectionItems(getDocs(experiments) as DatedDoc[], "experiments"),
-		...collectionItems(getDocs(podcast) as DatedDoc[], "podcast"),
-	];
+	const items = articleItems(getDocs(blog) as DatedDoc[]);
 
 	return new Response(buildFeed(items), {
 		headers: {
