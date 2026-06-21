@@ -56,11 +56,77 @@ export default function WebXRExplainerPage() {
 						</li>
 						<li>
 							<a
-								href="#goals"
+								href="#browser-support"
 								className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white hover:shadow-xs transition-all"
 							>
 								<span className="text-[10px] font-black text-[#e11d48]">
 									3.
+								</span>
+								対応ブラウザ
+							</a>
+						</li>
+						<li>
+							<a
+								href="#core-concepts"
+								className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white hover:shadow-xs transition-all"
+							>
+								<span className="text-[10px] font-black text-[#e11d48]">
+									4.
+								</span>
+								基本用語
+							</a>
+						</li>
+						<li>
+							<a
+								href="#minimal-code"
+								className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white hover:shadow-xs transition-all"
+							>
+								<span className="text-[10px] font-black text-[#e11d48]">
+									5.
+								</span>
+								最小コード
+							</a>
+						</li>
+						<li>
+							<a
+								href="#modules"
+								className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white hover:shadow-xs transition-all"
+							>
+								<span className="text-[10px] font-black text-[#e11d48]">
+									6.
+								</span>
+								Module別機能
+							</a>
+						</li>
+						<li>
+							<a
+								href="#production-checklist"
+								className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white hover:shadow-xs transition-all"
+							>
+								<span className="text-[10px] font-black text-[#e11d48]">
+									7.
+								</span>
+								実装チェック
+							</a>
+						</li>
+						<li>
+							<a
+								href="#faq"
+								className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white hover:shadow-xs transition-all"
+							>
+								<span className="text-[10px] font-black text-[#e11d48]">
+									8.
+								</span>
+								FAQ
+							</a>
+						</li>
+						<li>
+							<a
+								href="#goals"
+								className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white hover:shadow-xs transition-all"
+							>
+								<span className="text-[10px] font-black text-[#e11d48]">
+									9.
 								</span>
 								目標と非目標
 							</a>
@@ -71,7 +137,7 @@ export default function WebXRExplainerPage() {
 								className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white hover:shadow-xs transition-all"
 							>
 								<span className="text-[10px] font-black text-[#e11d48]">
-									4.
+									10.
 								</span>
 								対象ハードウェア
 							</a>
@@ -82,7 +148,7 @@ export default function WebXRExplainerPage() {
 								className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white hover:shadow-xs transition-all"
 							>
 								<span className="text-[10px] font-black text-[#e11d48]">
-									5.
+									11.
 								</span>
 								XRの「X」とは？
 							</a>
@@ -93,7 +159,7 @@ export default function WebXRExplainerPage() {
 								className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white hover:shadow-xs transition-all"
 							>
 								<span className="text-[10px] font-black text-[#e11d48]">
-									6.
+									12.
 								</span>
 								ユースケース
 							</a>
@@ -104,7 +170,7 @@ export default function WebXRExplainerPage() {
 								className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white hover:shadow-xs transition-all"
 							>
 								<span className="text-[10px] font-black text-[#e11d48]">
-									7.
+									13.
 								</span>
 								なぜ新しいAPIが必要だったのか
 							</a>
@@ -115,7 +181,7 @@ export default function WebXRExplainerPage() {
 								className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white hover:shadow-xs transition-all"
 							>
 								<span className="text-[10px] font-black text-[#e11d48]">
-									8.
+									14.
 								</span>
 								WebVRとWebXRの違い
 							</a>
@@ -126,7 +192,7 @@ export default function WebXRExplainerPage() {
 								className="flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-white hover:shadow-xs transition-all"
 							>
 								<span className="text-[10px] font-black text-[#e11d48]">
-									9.
+									15.
 								</span>
 								OpenXRとの関係
 							</a>
@@ -208,10 +274,327 @@ export default function WebXRExplainerPage() {
 					</p>
 				</section>
 
+				<section id="browser-support" className="space-y-6 scroll-mt-24">
+					<h2 className="text-3xl font-black text-gray-900 border-b-4 border-gray-100 pb-2">
+						4. WebXR対応ブラウザ
+					</h2>
+					<p className="text-gray-700 text-lg leading-relaxed">
+						WebXRはHTTPSなどのsecure contextで動作する実験的なWeb
+						APIです。MDNではLimited
+						availabilityとして扱われており、本番導入ではブラウザ互換性とfallbackを確認する必要があります。
+					</p>
+					<div className="overflow-x-auto rounded-2xl border border-gray-100">
+						<table className="w-full min-w-[680px] text-left text-sm">
+							<thead className="bg-gray-50 text-gray-600">
+								<tr>
+									<th className="px-5 py-3 font-black">環境</th>
+									<th className="px-5 py-3 font-black">WebXRの見方</th>
+									<th className="px-5 py-3 font-black">BANGEOでの扱い</th>
+								</tr>
+							</thead>
+							<tbody className="divide-y divide-gray-100">
+								<tr>
+									<td className="px-5 py-4 font-bold text-gray-900">
+										Meta Quest Browser
+									</td>
+									<td className="px-5 py-4 text-gray-700">
+										`immersive-vr` / `immersive-ar` の主要検証環境
+									</td>
+									<td className="px-5 py-4 text-gray-700">
+										Quest実機デモとWebXR仕様更新を優先して追跡
+									</td>
+								</tr>
+								<tr>
+									<td className="px-5 py-4 font-bold text-gray-900">
+										Chrome / Edge
+									</td>
+									<td className="px-5 py-4 text-gray-700">
+										端末・OS・XR runtime によって利用可否が変わる
+									</td>
+									<td className="px-5 py-4 text-gray-700">
+										WebXR EmulatorやPC VR検証の入口として扱う
+									</td>
+								</tr>
+								<tr>
+									<td className="px-5 py-4 font-bold text-gray-900">
+										Android Chrome
+									</td>
+									<td className="px-5 py-4 text-gray-700">
+										ARCore対応端末で`immersive-ar`検証候補
+									</td>
+									<td className="px-5 py-4 text-gray-700">
+										Hit TestやスマートフォンARの検証対象
+									</td>
+								</tr>
+								<tr>
+									<td className="px-5 py-4 font-bold text-gray-900">
+										iOS Safari
+									</td>
+									<td className="px-5 py-4 text-gray-700">
+										WebXR Device APIは直接使えない前提で設計
+									</td>
+									<td className="px-5 py-4 text-gray-700">
+										App Clip、WebAR、AR Quick Lookなどの代替経路を検討
+									</td>
+								</tr>
+								<tr>
+									<td className="px-5 py-4 font-bold text-gray-900">
+										visionOS Safari
+									</td>
+									<td className="px-5 py-4 text-gray-700">
+										Apple Vision Pro向けWebXR検証環境
+									</td>
+									<td className="px-5 py-4 text-gray-700">
+										Spatial Web、immersive website、HTML model要素とあわせて追跡
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<p className="text-sm text-gray-500 leading-relaxed">
+						対応状況はブラウザ・OS・端末・feature
+						flagで変わります。最新の端末別メモは
+						<Link
+							href="/devices"
+							className="font-bold text-[#e11d48] hover:underline"
+						>
+							デバイスページ
+						</Link>
+						と
+						<Link
+							href="/webxr-status"
+							className="font-bold text-[#e11d48] hover:underline"
+						>
+							標準化・対応状況
+						</Link>
+						に分けて更新します。
+					</p>
+				</section>
+
+				<section id="core-concepts" className="space-y-6 scroll-mt-24">
+					<h2 className="text-3xl font-black text-gray-900 border-b-4 border-gray-100 pb-2">
+						5. WebXRの基本用語
+					</h2>
+					<div className="grid md:grid-cols-2 gap-5">
+						{[
+							{
+								term: "XRSession",
+								body: "WebXR体験の実行単位。inline、immersive-vr、immersive-ar の session mode を指定して開始します。",
+							},
+							{
+								term: "XRReferenceSpace",
+								body: "座標系の基準。viewer、local、local-floor、bounded-floor、unbounded などを使い分けます。",
+							},
+							{
+								term: "XRFrame",
+								body: "各フレームのpose、input source、hit test結果などを読むためのオブジェクトです。",
+							},
+							{
+								term: "XRInputSource",
+								body: "controller、hand tracking、gazeなど、ユーザー入力を表します。",
+							},
+							{
+								term: "requiredFeatures / optionalFeatures",
+								body: "hit-test、local-floor、dom-overlayなど、セッション開始時に要求または任意指定する機能です。",
+							},
+							{
+								term: "fallback",
+								body: "WebXRや特定featureが使えない場合に、通常3D表示、画像、WebARなどへ落とす設計です。",
+							},
+						].map((item) => (
+							<div
+								key={item.term}
+								className="rounded-2xl border border-gray-100 bg-white p-6"
+							>
+								<h3 className="font-black text-gray-950 mb-2">{item.term}</h3>
+								<p className="text-sm text-gray-600 leading-relaxed">
+									{item.body}
+								</p>
+							</div>
+						))}
+					</div>
+				</section>
+
+				<section id="minimal-code" className="space-y-6 scroll-mt-24">
+					<h2 className="text-3xl font-black text-gray-900 border-b-4 border-gray-100 pb-2">
+						6. 最小コードで見るWebXRの流れ
+					</h2>
+					<p className="text-gray-700 text-lg leading-relaxed">
+						WebXRアプリは、対応確認、セッション開始、reference
+						space取得、フレームループの順に組み立てます。実際の描画はThree.jsやBabylon.jsなどのライブラリに任せることが多いですが、APIの流れは次の形です。
+					</p>
+					<pre className="overflow-x-auto rounded-2xl bg-gray-950 p-5 text-sm text-gray-100">
+						<code>{`if (!navigator.xr) {
+  showFallback();
+}
+
+const supported = await navigator.xr.isSessionSupported("immersive-vr");
+if (!supported) {
+  showFallback();
+}
+
+const session = await navigator.xr.requestSession("immersive-vr", {
+  optionalFeatures: ["local-floor", "bounded-floor"],
+});
+
+const referenceSpace = await session.requestReferenceSpace("local-floor");
+session.requestAnimationFrame(function onFrame(time, frame) {
+  const pose = frame.getViewerPose(referenceSpace);
+  if (pose) {
+    renderSceneForXR(pose);
+  }
+  session.requestAnimationFrame(onFrame);
+});`}</code>
+					</pre>
+					<p className="text-sm text-gray-500 leading-relaxed">
+						本番では、HTTPS配信、ユーザー操作を起点にしたsession開始、権限エラー、feature未対応、WebGL/WebGPU
+						context loss、通常表示へのfallbackを必ず扱います。
+					</p>
+				</section>
+
+				<section id="modules" className="space-y-6 scroll-mt-24">
+					<h2 className="text-3xl font-black text-gray-900 border-b-4 border-gray-100 pb-2">
+						7. WebXRのModule別機能
+					</h2>
+					<p className="text-gray-700 text-lg leading-relaxed">
+						WebXR Device
+						APIは中核となるセッション・pose・入力・描画の仕組みを提供し、ARやhand
+						tracking、hit test、layers、depth
+						sensingなどは追加Moduleとして整理されています。実装時は「WebXR対応ブラウザか」だけでなく、「必要なModuleがその端末で使えるか」を分けて確認します。
+					</p>
+					<div className="grid md:grid-cols-2 gap-5">
+						{[
+							{
+								name: "Hit Test Module",
+								body: "現実空間の平面や特徴点に対してrayを飛ばし、ARオブジェクトを置く位置を求めます。スマートフォンARやQuestのpassthrough ARでよく使います。",
+								link: "/demos/hit-test-advanced",
+							},
+							{
+								name: "DOM Overlays Module",
+								body: "immersive-ar中にHTML UIを重ねるためのModuleです。開始/終了ボタン、設定パネル、フォームなどを通常のDOMで扱いやすくします。",
+								link: "/tech-articles/webxr-html-ui-dom-overlay-html-in-canvas-spatial-css",
+							},
+							{
+								name: "Hand Input Module",
+								body: "hand tracking（手の関節pose）を扱うModuleです。controllerがない環境でもpinchやdirect touchに近い入力設計を検討できます。",
+								link: "/demos/hand-tracking-advanced",
+							},
+							{
+								name: "Layers API",
+								body: "projection layer、quad layerなど、WebXR描画をlayer単位で扱うための仕様です。高解像度UI、動画、foveated renderingと関係します。",
+								link: "/tech-articles/threejs-r184-webxr-layers-hand-model-cache",
+							},
+							{
+								name: "Depth Sensing Module",
+								body: "現実空間のdepth情報を使い、depth occlusionやMR合成を行うためのModuleです。Quest Browser 146以降のdepth projection検証とも関係します。",
+								link: "/experiments/quest-depth-projection-box",
+							},
+							{
+								name: "WebXR/WebGPU Binding",
+								body: "WebGPUでWebXRセッションに描画するための接続仕様です。Quest BrowserのExperimental WebGPU supportとあわせて追跡しています。",
+								link: "/tech-articles/quest-browser-146-webgpu-webxr",
+							},
+						].map((item) => (
+							<Link
+								key={item.name}
+								href={item.link}
+								className="block rounded-2xl border border-gray-100 bg-white p-6 hover:border-[#e11d48]/30 hover:shadow-lg transition-all"
+							>
+								<h3 className="font-black text-gray-950 mb-2">{item.name}</h3>
+								<p className="text-sm text-gray-600 leading-relaxed">
+									{item.body}
+								</p>
+							</Link>
+						))}
+					</div>
+				</section>
+
+				<section id="production-checklist" className="space-y-6 scroll-mt-24">
+					<h2 className="text-3xl font-black text-gray-900 border-b-4 border-gray-100 pb-2">
+						8. WebXR実装チェックリスト
+					</h2>
+					<div className="grid md:grid-cols-2 gap-8">
+						<div className="space-y-4">
+							<h3 className="text-xl font-black text-gray-900">
+								公開前に確認すること
+							</h3>
+							<ul className="space-y-3 text-gray-700">
+								{[
+									"HTTPSで配信している",
+									"ユーザー操作からrequestSession()を呼んでいる",
+									"isSessionSupported()でsession modeを確認している",
+									"requiredFeaturesとoptionalFeaturesを分けている",
+									"WebXR不可の場合のfallbackを用意している",
+									"Meta Quest / Android / PC / iOSで分岐を確認している",
+								].map((item) => (
+									<li key={item} className="flex gap-3 items-start">
+										<span className="mt-2.5 h-1.5 w-1.5 rounded-full bg-[#e11d48]" />
+										<span>{item}</span>
+									</li>
+								))}
+							</ul>
+						</div>
+						<div className="space-y-4">
+							<h3 className="text-xl font-black text-gray-900">
+								失敗しやすいところ
+							</h3>
+							<ul className="space-y-3 text-gray-700">
+								{[
+									"iOS SafariでWebXR ARが直接動く前提にする",
+									"controllerのthumbstick axesが必ずある前提にする",
+									"local-floorとbounded-floorの違いを見落とす",
+									"depthやmeshが取れない時に画面が空になる",
+									"iframe内WebXRに必要なallow属性を忘れる",
+									"WebGPU対応とWebGPUが安定して使えることを混同する",
+								].map((item) => (
+									<li key={item} className="flex gap-3 items-start">
+										<span className="mt-2.5 h-1.5 w-1.5 rounded-full bg-gray-400" />
+										<span>{item}</span>
+									</li>
+								))}
+							</ul>
+						</div>
+					</div>
+				</section>
+
+				<section id="faq" className="space-y-6 scroll-mt-24">
+					<h2 className="text-3xl font-black text-gray-900 border-b-4 border-gray-100 pb-2">
+						9. WebXRのよくある質問
+					</h2>
+					<div className="space-y-4">
+						{[
+							{
+								q: "WebXRはiPhoneで使えますか？",
+								a: "iPhoneのiOS SafariではWebXR Device APIを直接使えない前提で考えます。iPhone向けARでは、App Clip、AR Quick Look、8th Wall、MindARなどのWebAR実装を検討します。",
+							},
+							{
+								q: "WebXRとWebARは同じですか？",
+								a: "同じではありません。WebXRはブラウザが提供する標準API群です。WebARはブラウザでARを見せる広い呼び方で、WebXR以外のカメラ合成、画像認識、AR Quick Lookなども含まれます。",
+							},
+							{
+								q: "WebXRを始めるならThree.jsとBabylon.jsのどちらがよいですか？",
+								a: "既存のThree.js資産やサンプルを使いたいならThree.js、WebXRの機能を高レベルに扱いたいならBabylon.jsも候補です。PlayCanvasはエディタや商用案件の運用で便利です。",
+							},
+							{
+								q: "WebXRはメタバース用の技術ですか？",
+								a: "WebXRはメタバース専用ではありません。Web上でVR/ARデバイスにアクセスするための低レベルAPIで、教育、製造、商品プレビュー、展示、可視化、ゲームなど幅広い用途に使えます。",
+							},
+						].map((item) => (
+							<div
+								key={item.q}
+								className="rounded-2xl border border-gray-100 bg-white p-6"
+							>
+								<h3 className="font-black text-gray-950 mb-2">{item.q}</h3>
+								<p className="text-gray-700 leading-relaxed">{item.a}</p>
+							</div>
+						))}
+					</div>
+				</section>
+
 				{/* 2. 目標と非目標 */}
 				<section id="goals" className="space-y-6 scroll-mt-24">
 					<h2 className="text-3xl font-black text-gray-900 border-b-4 border-gray-100 pb-2">
-						3. 目標と非目標
+						10. 目標と非目標
 					</h2>
 					<div className="grid md:grid-cols-2 gap-8">
 						<div className="space-y-4">
@@ -266,7 +649,7 @@ export default function WebXRExplainerPage() {
 				{/* 3. 対象ハードウェア */}
 				<section id="hardware" className="space-y-6 scroll-mt-24">
 					<h2 className="text-3xl font-black text-gray-900 border-b-4 border-gray-100 pb-2">
-						4. 対象ハードウェア
+						11. 対象ハードウェア
 					</h2>
 					<div className="space-y-6">
 						<p className="text-gray-600">
@@ -297,7 +680,7 @@ export default function WebXRExplainerPage() {
 				{/* 4. XRの「X」とは */}
 				<section id="x-meaning" className="space-y-6 scroll-mt-24">
 					<h2 className="text-3xl font-black text-gray-900 border-b-4 border-gray-100 pb-2">
-						5. XRの「X」とは？
+						12. XRの「X」とは？
 					</h2>
 					<div className="space-y-6">
 						<p className="text-gray-700 text-lg leading-relaxed">
@@ -325,7 +708,7 @@ export default function WebXRExplainerPage() {
 				{/* 5. ユースケース */}
 				<section id="use-cases" className="space-y-6 scroll-mt-24">
 					<h2 className="text-3xl font-black text-gray-900 border-b-4 border-gray-100 pb-2">
-						6. ユースケース
+						13. ユースケース
 					</h2>
 					<div className="grid md:grid-cols-3 gap-8">
 						<div className="space-y-3">
@@ -352,7 +735,7 @@ export default function WebXRExplainerPage() {
 				{/* 6. なぜ新しいAPIが必要だったのか */}
 				<section id="why-new-api" className="space-y-8 scroll-mt-24">
 					<h2 className="text-3xl font-black text-gray-900 border-b-4 border-gray-100 pb-2">
-						7. なぜ新しいAPIが必要だったのか
+						14. なぜ新しいAPIが必要だったのか
 					</h2>
 					<div className="grid md:grid-cols-2 gap-8">
 						<div className="space-y-4">
@@ -376,7 +759,7 @@ export default function WebXRExplainerPage() {
 				{/* 7. WebVRとWebXRの違い */}
 				<section id="webvr-vs-webxr" className="space-y-6 scroll-mt-24">
 					<h2 className="text-3xl font-black text-gray-900 border-b-4 border-gray-100 pb-2">
-						8. WebVRとWebXRの違い
+						15. WebVRとWebXRの違い
 					</h2>
 					<div className="grid md:grid-cols-2 gap-8">
 						<div className="p-6 bg-gray-50 rounded-2xl">
@@ -401,7 +784,7 @@ export default function WebXRExplainerPage() {
 				{/* 8. OpenXRとの関係 */}
 				<section id="openxr" className="space-y-6 scroll-mt-24">
 					<h2 className="text-3xl font-black text-gray-900 border-b-4 border-gray-100 pb-2">
-						9. OpenXRとの関係
+						16. OpenXRとの関係
 					</h2>
 					<p className="text-gray-700 leading-relaxed">
 						<strong>OpenXR</strong>
