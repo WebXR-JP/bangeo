@@ -23,7 +23,7 @@ WebXRの標準仕様まわりで、開発者が確認しておきたい更新が
 
 ## まず、inlineは「VRの小さい版」ではない
 
-`inline` は名前だけでは直感的に分かりにくいですが、BANGEOではまず「WebXRのページ内モード」と捉えると理解しやすいです。
+`inline` は名前だけでは直感的に分かりにくいですが、BANGEOではまず「WebXRのinline session」と捉えると理解しやすいです（inline session は WebXR XRSessionMode の inline。ページ内にXRを表示するモード）。
 
 `inline session` は、小さいVRではありません。ARの簡易版でもありません。ただの3D canvasの正式名称でもありません。
 
@@ -96,7 +96,7 @@ immersive-ar
 * three.jsなど = 3Dを描く道具
 * canvas = ページ内で3Dを描く部品
 * session = どの見せ方でXRを始めるか
-* inline session = XR体験に入る前のWebページ内モード
+* inline session = XR体験に入る前の、ページ内での表示状態
 
 ## inline-stereoとは何か
 
@@ -164,7 +164,7 @@ const session = await navigator.xr.requestSession("inline", {
 
 PRのレビューでは、一時的に `head-tracked` のようなfeature descriptorを追加する案も含まれていました。しかしレビューでは、「head trackingを得るために常に `head-tracked` featureを要求しなければならない」と誤解される可能性が指摘されました。その後、PR作者は `head-tracked` 関連の記述を削除し、trackingが必要な場合は既存のreference space、特に `local` の扱いに寄せる方向に整理しています。
 
-ここは実装者にとって大事なポイントです。`inline-stereo` は「ステレオ表示を要求する機能」であり、「head trackingを有効化する機能」ではありません。head trackingや空間トラッキングが必要な場合は、reference spaceの要求や権限の扱いを別に考える必要があります。
+ここは実装者にとって大事なポイントです。`inline-stereo` は「ステレオ表示を要求する機能」であり、「head trackingを有効化する機能」ではありません。head trackingやspatial trackingが必要な場合は、reference spaceの要求や権限の扱いを別に考える必要があります。
 
 仕様本文でも、`local` reference spaceはinline sessionでは同意が必要と整理されています。一方で、`inline-stereo` feature descriptorそのものは、inline presentationでstereo primary viewsを露出するためのものとして定義されています。（[WebXR Device API](https://www.w3.org/TR/webxr/)）
 
@@ -236,13 +236,13 @@ WebXRは、ブラウザやデバイスによって対応機能が変わりやす
 
 WebXR Layers API Level 1は、WebXRセッションで使われる複数のlayer typeを扱うための仕様です。2026年6月1日付けのワーキングドラフトとして公開されています。
 
-仕様内では、Space WarpはXR Compositorのreprojectionを改善する技術として説明されています。アプリが `motionVectorTexture` と `depthStencilTexture` を提出することで、XR Compositorがフレーム外挿や再投影を行い、ユーザーエージェント側が低いフレームレートで動作しながらも滑らかな体験を提供できる、とされています。
+仕様内では、Space WarpはXR Compositorのreprojectionを改善する技術として説明されています。アプリが `motionVectorTexture` と `depthStencilTexture` を提出することで、XR Compositorがreprojection / frame extrapolation（app space warp）や再投影を行い、ユーザーエージェント側が低いフレームレートで動作しながらも滑らかな体験を提供できる、とされています。app space warp は Meta のレイトレーシング負荷軽減機能で、motionVectorTexture と depthStencilTexture で前フレームから現在フレームを外挿する。
 
-[Meta for Developers](https://developers.meta.com/horizon/documentation/web/webxr-space-warp/)のドキュメントでも、WebXR Space WarpはWebXR Layers仕様へのドラフト追加であり、アプリが提供するmotion vectorとdepth dataを使ってXR Compositorがフレーム補間・再投影を行う仕組みとして説明されています。Quest Browserで[WebGPU in WebXRを試す](/tech-articles/quest-browser-146-webgpu-webxr)際にも、Layers関連の実験機能とあわせて検証対象になりやすい領域です。
+[Meta for Developers](https://developers.meta.com/horizon/documentation/web/webxr-space-warp/)のドキュメントでも、WebXR Space WarpはWebXR Layers仕様へのドラフト追加であり、アプリが提供するmotion vectorとdepth dataを使ってXR Compositorがreprojection / frame interpolation・再投影を行う仕組みとして説明されています。Quest Browserで[WebGPU in WebXRを試す](/tech-articles/quest-browser-146-webgpu-webxr)際にも、Layers関連の実験機能とあわせて検証対象になりやすい領域です。
 
 ## motion vectorとdepth dataが重要になる
 
-Space Warpを使う場合、アプリ側はただ描画するだけではなく、前フレームから現在フレームへの動きを表すmotion vectorと、シーンのdepth情報を用意する必要があります。
+Space Warpを使う場合、アプリ側はただ描画するだけではなく、motionVectorTextureと、シーンのdepth情報を用意する必要があります。
 
 仕様では、`space-warp` feature descriptorを有効にした場合、XR Compositorはdepth値を使う必要があり、`ignoreDepthValues` は `false`、`usesDepthValues` は `true` になると説明されています。また、`motionVectorTexture` または `depthStencilTexture` が提出されなかった場合、そのフレームはSpace Warpが有効でないものとして処理される、と明記されています。
 

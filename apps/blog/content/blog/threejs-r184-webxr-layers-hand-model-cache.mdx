@@ -19,7 +19,7 @@ three.js r184で、WebXRに関係する更新がいくつか入りました。
 
 [three.js r184](https://github.com/mrdoob/three.js/releases/tag/r184)は2026年4月16日に公開されたリリースです。リリースノートでは、WebXR関連として、WebXR sampling array-textureの修正、WebXR Layers向けフレームバッファキャッシュの簡素化、`XRHandModelFactory` へのモデルキャッシュ追加などが確認できます。
 
-three.jsでWebXRコンテンツを作っている場合、これは派手な新機能というより、レンダリング経路とハンドトラッキング表示の安定性に関わる更新として見ておきたい内容です。
+three.jsでWebXRコンテンツを作っている場合、これは派手な新機能というより、レンダリング経路と hand tracking 表示の安定性に関わる更新として見ておきたい内容です。
 
 ## WebXR sampling array-textureの修正
 
@@ -39,7 +39,7 @@ WebXR Layersは、通常のcanvas描画だけでなく、projection layerやquad
 
 WebXR Layersを使っているプロジェクトでは、r184へ更新したあと、次の点を確認しておきたいところです。
 
-- セッション開始直後に描画崩れがないか
+- セッション開始直後に rendering artifact がないか
 - layerを切り替えたときに古い描画が残らないか
 - フレーム時間が大きく変化していないか
 - セッション終了後にメモリが増え続けないか
@@ -51,9 +51,9 @@ WebXR Layersを使っているプロジェクトでは、r184へ更新したあ�
 
 r184では、WebXR項目として `XRHandModelFactory` にmodel cachingが追加されたことも記載されています。
 
-`XRHandModelFactory` は、three.jsでWebXRのハンドトラッキング表示を扱うときに使われるクラスです。ユーザーの手のjoint情報に合わせて、手のモデルを表示する場面で使われます。
+`XRHandModelFactory` は、three.jsでWebXRの hand tracking 表示を扱うときに使われるクラスです。hand tracking は WebXR Hand Input Module の機能で、three.js では XRHandModelFactory で hand model rendering を扱います。ユーザーの手のjoint情報に合わせて、手のモデルを表示する場面で使われます。
 
-モデルキャッシュが入ることで、手モデルの生成や再利用が効率化される可能性があります。WebXRセッションの開始・終了を繰り返すデモ、ハンドトラッキングをオン・オフする体験、左右の手モデルを頻繁に扱う実装では、初期化負荷やメモリの動きが変わるかもしれません。
+モデルキャッシュが入ることで、手モデルの生成や再利用が効率化される可能性があります。WebXRセッションの開始・終了を繰り返すデモ、hand tracking をオン・オフする体験、左右の手モデルを頻繁に扱う実装では、初期化負荷やメモリの動きが変わるかもしれません。
 
 一方で、キャッシュが入る更新では、既存実装との相性も確認しておく必要があります。
 
@@ -75,7 +75,7 @@ three.js r184でWebXRを使っている場合、次の3つを確認しておく�
 
 次に、WebGPU RendererとWebXRを組み合わせているシーンです。array textureのサンプリング修正が入っているため、projection layerや左右viewを使う構成で差が出る可能性があります。
 
-最後に、ハンドトラッキング表示です。`XRHandModelFactory` のモデルキャッシュ追加によって、手モデルの生成、再利用、セッション再開時の表示が変わる可能性があります。
+最後に、hand tracking 表示です。`XRHandModelFactory` のモデルキャッシュ追加によって、手モデルの生成、再利用、セッション再開時の表示が変わる可能性があります。
 
 ```javascript
 // 更新後に確認したい観点
@@ -88,11 +88,11 @@ three.js r184でWebXRを使っている場合、次の3つを確認しておく�
 
 ## ライブラリ更新は実機確認までセットで見る
 
-three.js r184のWebXR更新は、記事タイトルになるほど派手な新機能ではありません。しかし、WebXRコンテンツを運用している開発者にとっては、レンダリングの安定性やハンド表示の品質に関わる重要な更新です。
+three.js r184のWebXR更新は、記事タイトルになるほど派手な新機能ではありません。しかし、WebXRコンテンツを運用している開発者にとっては、レンダリングの安定性や hand model rendering の品質に関わる重要な更新です。
 
 WebXRは、ブラウザ、デバイス、レンダラー、ライブラリの組み合わせで挙動が変わります。three.jsを更新したら、通常のWebGL/WebGPU表示だけでなく、実際のWebXRセッションで動かして確認するのが安全です。
 
-特に、WebXR Layers、WebGPU Renderer、ハンドトラッキングを使っているプロジェクトでは、r184の更新内容と関係しやすいので、アップデート後の回帰確認リストに入れておくとよさそうです。
+特に、WebXR Layers、WebGPU Renderer、hand tracking を使っているプロジェクトでは、r184の更新内容と関係しやすいので、アップデート後の回帰確認リストに入れておくとよさそうです。
 
 ## 関連リンク
 

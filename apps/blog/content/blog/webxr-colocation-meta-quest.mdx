@@ -54,7 +54,7 @@ Meta QuestブラウザのHorizon OS v39以降で、同じ部屋にいる複数�
 
 ブラウザが自動的に：
 
-1. **物理空間を認識** - 部屋の形状をスキャン
+1. **spatial mapping / scene capture** - 部屋の形状をスキャン
 2. **共通座標系を確立** - 全員が同じ(0,0,0)を共有
 3. **一意のUUIDを発行** - 同じ空間にいる人だけが同じUUID
 
@@ -64,11 +64,11 @@ UUIDは**Metaのサーバーから取得するのではなく**、各デバイ�
 
 ### 仕組みの詳細
 
-Meta Questの**Spatial Anchors**（空間アンカー）技術がベースになっています：
+Meta Questの**Spatial Anchors**技術がベースになっています：
 
 | ステップ | 処理内容 |
 | --- | --- |
-| 1. 空間スキャン | Questのカメラ・センサーが部屋の壁、床、家具などの**3D特徴点**を検出 |
+| 1. scene capture | Questのカメラ・センサーが部屋の壁、床、家具などの**feature points（featurePointCloud）**を検出 |
 | 2. 空間ハッシュ生成 | 特徴点データから**一意のハッシュ値（=UUID）**を算出 |
 | 3. 座標系の確立 | 空間の特徴から**共通の原点(0,0,0)**を決定 |
 | 4. UUID一致 | 同じ部屋にいる全デバイスが同じ特徴を見るため、**同じUUIDが生成される** |
@@ -140,9 +140,9 @@ space.addEventListener('reset', () => {
 });
 ```
 
-## 弾丸とヒット判定の仕組み
+## 弾丸とhit testの仕組み
 
-マルチプレイヤーARでの弾丸発射とヒット判定は、以下の流れで実現しています。
+マルチプレイヤーARでの弾丸発射とhit testは、以下の流れで実現しています。
 
 ### 1. 弾丸の発射とアニメーション
 
@@ -184,7 +184,7 @@ connection.send({
 });
 ```
 
-### 3. ヒット判定（距離計算）
+### 3. hit test（距離計算）
 
 各プレイヤーのローカルで、受信した弾丸と自分の位置の距離を計算し、閾値以下ならヒットとして判定します：
 
@@ -210,6 +210,13 @@ function detectHits() {
 
 - **Quest専用** - 他社デバイス（Vision Proなど）では動作しません
 - **Browser v39以降** - 古いバージョンでは動作しません
+
+## 用語メモ
+
+- **Spatial Anchors** は Quest の空間アンカー機能。WebXR では Anchors Module に対応
+- **scene capture** は Quest の部屋形状取得機能。spatial mapping の一部
+- **feature points** は WebXR の featurePointCloud プロパティで取得する特徴点
+- **hit test** は WebXR Hit Test Module の機能
 
 ## 関連リンク
 

@@ -28,9 +28,9 @@ PlayCanvasでWebXRデモ、WebGPUデモ、HTML-in-Canvas UIデモを公開する
 
 1つ目は、特定GPUでWebGPUを一時的に無効化する対応です。リリースノートでは、Imagination PowerVR GPU、具体例として Pixel 10 が挙げられています。これは、WebGPU対応ブラウザであっても、実際の端末・GPU・ドライバの組み合わせによってはWebGPU経路を使わない判断が必要になることを示しています。([GitHub][1])
 
-2つ目は、`XrNavigation` の修正です。thumbstick axes を持たない gamepad で XR navigation rig が NaN に壊れる問題が修正されています。XRでは、コントローラー、ハンドトラッキング、ゲームパッド、OS側の仮想入力などが環境によって変わります。入力が「いつも左右スティックを持つ」と決め打ちされた実装は、実機で壊れやすくなります。([GitHub][1])
+2つ目は、`XrNavigation` の修正です。thumbstick axes を持たない gamepad で XR navigation rig が NaN に壊れる問題が修正されています。XRでは、コントローラー、hand tracking、ゲームパッド、OS側の仮想入力などが環境によって変わります。入力が「いつも左右スティックを持つ」と決め打ちされた実装は、実機で壊れやすくなります。([GitHub][1])
 
-3つ目は、scene depth decode の選択修正です。WebXRのAR表現では、現実空間との前後関係、オクルージョン、深度情報の扱いが重要になります。Quest Browser 146.0でも WebXR Depth Projection のサポートが追加されており、PlayCanvas側のscene depthまわりの安定化は、今後のMixed Realityデモで効いてくる可能性があります。([Meta for Developers][2])
+3つ目は、scene depth decode の選択修正です。WebXRのAR表現では、現実空間とのocclusion、深度情報の扱いが重要になります。occlusionはdepth projection（WebXR Depth Sensing Module）で実現する前後関係の合成です。Quest Browser 146.0でも WebXR Depth Projection のサポートが追加されており、PlayCanvas側のscene depthまわりの安定化は、今後のMixed Realityデモで効いてくる可能性があります。([Meta for Developers][2])
 
 ## なぜWebXR開発者に関係するのか
 
@@ -106,15 +106,15 @@ function readThumbstick(inputSource) {
 }
 ```
 
-PlayCanvasの移動システムやXRメニューを使う場合でも、**コントローラーあり、ハンドトラッキング、入力なし、モバイルAR**のように複数条件で確認しておくと、問題を切り分けやすくなります。
+PlayCanvasの移動システムやXRメニューを使う場合でも、**コントローラーあり、hand tracking、入力なし、モバイルAR**のように複数条件で確認しておくと、問題を切り分けやすくなります。
 
 ## scene depthを使うデモは特に実機検証が必要
 
-scene depthやWebXR Depth Projectionは、Mixed Reality系デモで重要になります。仮想オブジェクトが現実の机や壁の後ろに隠れる、現実空間の奥行きに合わせて合成する、といった表現に関係するためです。
+scene depthやWebXR Depth Projectionは、Mixed Reality系デモで重要になります。仮想オブジェクトが現実の机や壁の後ろに隠れる、depth-based occlusion で合成する、といった表現に関係するためです。
 
 Meta Quest Browser 146.0では、Experimental WebGPU in WebXRに加えて、in-browser WebXR depth projection supportが追加されています。([Meta for Developers][2])
 
-ただし、深度系の機能は、端末、ブラウザ、セッションモード、権限、AR/MR環境によって挙動が変わりやすい領域です。PlayCanvas v2.19.7でscene depth decodeの選択修正が入っていることからも、深度を使うデモでは「動いた／動かない」だけではなく、**前後関係が正しく出るか、左右目で破綻しないか、WebGPU / WebGLで差が出ないか**まで確認したほうがよいです。([GitHub][1])
+ただし、深度系の機能は、端末、ブラウザ、セッションモード、権限、AR/MR環境によって挙動が変わりやすい領域です。PlayCanvas v2.19.7でscene depth decodeの選択修正が入っていることからも、深度を使うデモでは「動いた／動かない」だけではなく、**occlusionが正しく出るか、左右目で破綻しないか、WebGPU / WebGLで差が出ないか**まで確認したほうがよいです。([GitHub][1])
 
 ## まとめ
 

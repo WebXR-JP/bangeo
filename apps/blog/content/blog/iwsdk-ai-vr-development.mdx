@@ -11,6 +11,8 @@ tags:
   - "Three.js"
   - "MCP"
   - "Claude Code"
+  - "hand tracking"
+  - "spatial UI"
 author: "BANGEO Team"
 thumbnail: "/assets/tech/iwsdk-gallery-detail-xr.webp"
 draft: true
@@ -20,7 +22,9 @@ draft: true
 
 Metaが公開した **Immersive Web SDK（IWSDK）** は、WebXRのVR体験を手早く構築するためのオープンソースフレームワークです。Meta Connect 2025で発表され、[GitHub](https://github.com/facebook/immersive-web-sdk)でMITライセンスとして公開されています。Metaによると、2026年2月時点でWebXRエコシステム全体の月間アクティブユーザーは100万人に達しています。
 
-物理演算・ハンドトラッキング・グラブ操作・移動・空間UIといったVR開発に必要な機能がすでに組み込まれていて、`npm create @iwsdk@latest` の1コマンドでプロジェクトが立ち上がります。さらに、Claude CodeやCodexなどのAIコーディングツールとの連携が最初から設計されており、プロンプトだけでVR体験を作り上げることもできます。
+物理演算・hand tracking・grab interaction・移動・spatial UIといったVR開発に必要な機能がすでに組み込まれていて、`npm create @iwsdk@latest` の1コマンドでプロジェクトが立ち上がります。さらに、Claude CodeやCodexなどのAIコーディングツールとの連携が最初から設計されており、プロンプトだけでVR体験を作り上げることもできます。
+
+> ※ hand trackingはWebXR Hand Input Moduleの機能で、IWSDKではgrab interactionと組み合わせて使います。spatial UIは空間に配置するUIで、IWSDKではUIKitMLが該当します。
 
 この記事では、実際にIWSDKをセットアップし、BANGEOの過去記事をVR空間内で閲覧できるギャラリーを作るところまでの流れを紹介します。
 
@@ -135,7 +139,7 @@ iwsdk-app/
 │   ├── audio/            # サウンドファイル
 │   └── ui/               # コンパイル済みUI
 ├── ui/
-│   └── *.uikitml         # 空間UIのマークアップ
+│   └── *.uikitml         # spatial UIのマークアップ
 ├── CLAUDE.md             # Claude Code用のプロジェクト設定
 ├── AGENTS.md             # AIエージェント向けのコンテキスト
 └── vite.config.ts        # Vite + IWSDK プラグイン設定
@@ -171,10 +175,10 @@ IWSDKは複数の技術レイヤーで構成されています。
 | --- | --- | --- |
 | レンダリング | Three.js | 3D描画とWebXRセッション管理 |
 | ゲームロジック | ELICS（ECS） | Entity Component Systemでオブジェクトの振る舞いを管理 |
-| 物理演算 | Havok（WASM） | 剛体シミュレーション、衝突判定 |
+| 物理演算 | Havok（WASM） | rigid body simulation、衝突判定 |
 | ビルド | Vite | HMRによる即時リロード |
 | XRエミュレーション | IWER | ヘッドセットなしでのXRセッション再現 |
-| 空間UI | UIKitML | VR空間内のパネルUI構築 |
+| spatial UI | UIKitML | VR空間内のパネルUI構築 |
 
 ### ECS（Entity Component System）パターン
 
@@ -199,7 +203,7 @@ class SpinSystem extends createSystem({ spinners: { required: [Spinner, Transfor
 
 ### IWER - ヘッドセットなしでの開発
 
-**IWER**（Immersive Web Emulation Runtime）はIWSDKに組み込まれたXRエミュレーターです。ヘッドセットの位置・回転、コントローラーのボタン入力、ハンドトラッキングのジェスチャーをすべてプログラムから操作できます。
+**IWER**（Immersive Web Emulation Runtime）はIWSDKに組み込まれたXRエミュレーターです。ヘッドセットの位置・回転、コントローラーのボタン入力、hand trackingのジェスチャーをすべてプログラムから操作できます。
 
 開発中はブラウザ上でVRセッションをエミュレートし、AIツールもこのエミュレーターを通じてVRシーンを操作・テストします。
 
@@ -236,7 +240,7 @@ AIはVRシーンのスクリーンショットを撮影し、Three.jsのシー�
 
 ### XR入力のシミュレート
 
-エミュレーター経由で、ヘッドセットの移動やコントローラーのボタン操作、ピンチジェスチャーなどをプログラム的に実行します。AIがオブジェクトを掴んだりボタンを押したりして、インタラクションの動作を確認します。
+エミュレーター経由で、ヘッドセットの移動やコントローラーのボタン操作、pinch gestureなどをプログラム的に実行します。AIがオブジェクトを掴んだりボタンを押したりして、インタラクションの動作を確認します。
 
 ### ECSのデバッグ
 
@@ -259,7 +263,7 @@ IWSDKは、VR開発の面倒な部分をフレームワークに任せ、AIと�
 - `npm create @iwsdk@latest` の1コマンドですぐに始められる
 - Claude CodeやCodexがコード生成からテストまでを自律的に実行
 - IWERエミュレーターでヘッドセットなしでも開発可能
-- プロンプトからVRギャラリーや空間UIが形になる
+- プロンプトからVRギャラリーやspatial UIが形になる
 - VR空間内で記事を閲覧できるインタラクティブなUIもAIが作れる
 
 今回は実際にBANGEOの記事ギャラリーをVR空間に作り、カードをクリックするとVR内で記事の内容を閲覧できるところまで実装しました（[デモはこちら](/demo/iwsdk-gallery/)）。プロンプトを投げ、フィードバックで調整していくだけでVRシーンが出来上がる体験は新鮮でした。WebXRに興味がある方は、ぜひ `npm create @iwsdk@latest` で試してみてください。

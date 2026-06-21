@@ -31,11 +31,11 @@ Meta Horizon OS Developers のリリースノートで、**Quest Browser 146.0�
 </blockquote>
 <script async src="https://platform.twitter.com/widgets.js" charSet="utf-8"></script>
 
-今回のポイントは、Quest Browser上のWebXRで、WebGLだけでなくWebGPUを使う道が開き始めたこと、さらにMRの奥行き表現を検証する depth projection がブラウザ側の実験対象に入ったことです。現時点では実験機能なので、通常のWebXRコンテンツが自動的にWebGPUへ切り替わるわけではありません。Quest Browserで `chrome://flags` を開き、`webXR experimental features` を有効にするとAPIが利用可能になります。
+今回のポイントは、Quest Browser上のWebXRで、WebGLだけでなくWebGPUを使う道が開き始めたこと、さらにMRの depth projection がブラウザ側の実験対象に入ったことです。depth projection は Quest Browser 146 で実装された WebXR Depth Sensing の実装名で、depth テクスチャで occlusion を実現します。現時点では実験機能なので、通常のWebXRコンテンツが自動的にWebGPUへ切り替わるわけではありません。Quest Browserで `chrome://flags` を開き、`webXR experimental features` を有効にするとAPIが利用可能になります。
 
 ## WebXRでWebGPUが使える意味
 
-WebXRは、ブラウザからVRやARのセッションを開始し、ヘッドセットの姿勢、コントローラー、ハンドトラッキング、空間認識などを扱うためのWeb APIです。これまでWebXRの描画はWebGLを前提にした実装が中心でした。
+WebXRは、ブラウザからVRやARのセッションを開始し、ヘッドセットの姿勢、コントローラー、hand tracking、spatial mapping / scene capture などを扱うためのWeb APIです。spatial mapping は空間形状取得で、Quest では scene capture で提供されます。これまでWebXRの描画はWebGLを前提にした実装が中心でした。
 
 一方でWebGPUは、Vulkan、Metal、Direct3D 12のような現代的なGPU APIに近い設計のWeb標準です。低レベルなGPU制御、計算処理、複雑なレンダリングパイプラインを扱いやすくするためのAPIで、WebXRと組み合わせることで、ブラウザ上のXR表現をさらに高性能化できる可能性があります。
 
@@ -51,16 +51,16 @@ WebXRは、ブラウザからVRやARのセッションを開始し、ヘッド�
 
 ## WebXR depth projection と bounded-floor 修正
 
-146.0では、in-browser WebXR depth projection support も追加されています。これは、QuestのMR環境で現実空間の奥行きと仮想オブジェクトの前後関係を検証するうえで重要です。ただし、depth projection は端末、権限、セッションモード、実験フラグ、ブラウザ実装の組み合わせに強く依存するため、BANGEOでは **Lab扱い** として追跡します。
+146.0では、in-browser WebXR depth projection support も追加されています。これは、QuestのMR環境で現実空間の奥行きと仮想オブジェクトの occlusion を検証するうえで重要です。ただし、depth projection は端末、権限、セッションモード、実験フラグ、ブラウザ実装の組み合わせに強く依存するため、BANGEOでは **Lab扱い** として追跡します。
 
-同じリリースで WebXR bounded floor space issues が修正された点も、ルームスケール系デモでは重要です。`bounded-floor` / `local-floor` を使うデモでは、boundsGeometry の取得、床高さ、再センタリング後の座標、左右目での破綻がないかを Quest Browser 146.x 以降で再確認する価値があります。
+同じリリースで WebXR bounded floor space issues が修正された点も、room-scale 系デモ（bounded-floor / local-floor）では重要です。`bounded-floor` / `local-floor` を使うデモでは、boundsGeometry の取得、床高さ、再センタリング後の座標、左右目での破綻がないかを Quest Browser 146.x 以降で再確認する価値があります。
 
 ## BANGEOで優先的に検証するページ
 
 - [WebXR標準化・対応状況](/webxr-status): WebGPU binding は Quest Browser 146.0+ Experimental、depth projection は Lab として表記
 - [WebXR Depth Occlusion デモ](/experiments/quest-depth-projection-box): depth projection の実機検証メモを追加
 - [WebGPUからWebGLへ切り替える実験](/experiments/webgpu-fallback-lab): WebGPU availability と WebGL fallback の確認
-- [WebXR Bounded Floor ビューア](/experiments/room-scale-bounds-viewer): bounded-floor 修正後の境界取得確認
+- [WebXR Bounded Floor ビューア](/experiments/room-scale-bounds-viewer): bounded-floor 修正後の boundsGeometry の取得確認
 
 ## 有効化方法
 
@@ -92,9 +92,9 @@ console.log({
 
 > **Richard Anaya氏:** HTML rendering to texture experimentもサポートされる予定ですか？
 
-それに対してCabanier氏は、Googleが進めている **HTML-in-Canvas** がChromeとQuest Browserで実験的に動作していると説明しています。HTMLを直接テクスチャへ描画できるようになる一方、WebXRでのヒットテストには追加対応が必要で、そこは後から対応していくとしています。
+それに対してCabanier氏は、Googleが進めている **HTML-in-Canvas** がChromeとQuest Browserで実験的に動作していると説明しています。HTMLを直接テクスチャへ描画できるようになる一方、WebXRでの hit test には追加対応が必要で、そこは後から対応していくとしています。
 
-> **Rik Cabanier氏:** GoogleがHTML-in-Canvasに取り組んでおり、ChromeとQuest Browserで実験的に動作しています。HTMLを直接テクスチャへ描画できるようになります。WebXRでのヒットテストには追加サポートが必要ですが、後で対応する予定です。
+> **Rik Cabanier氏:** GoogleがHTML-in-Canvasに取り組んでおり、ChromeとQuest Browserで実験的に動作しています。HTMLを直接テクスチャへ描画できるようになります。WebXRでの hit test には追加サポートが必要ですが、後で対応する予定です。
 
 [WICGのHTML-in-Canvas提案](https://github.com/WICG/html-in-canvas)では、Canvas内でHTMLコンテンツを描画するためのAPIが説明されています。Chromiumでは `chrome://flags/#canvas-draw-element` から有効化できる実験的APIとして紹介されており、WebGL/WebGPU向けにはHTML要素をテクスチャへコピーする方向も含まれています。
 
@@ -107,7 +107,7 @@ console.log({
 - Quest Browser 146.0時点では実験機能として提供されている
 - `chrome://flags` での有効化が必要
 - API仕様や実装挙動は今後変わる可能性がある
-- WebXR内でのHTML UIのヒットテストなど、周辺機能には未対応部分が残る
+- WebXR内でのHTML UIの hit test など、周辺機能には未対応部分が残る
 
 そのため、今すぐ一般ユーザー向け機能の必須要件にするより、検証環境やデモ、将来のレンダリング基盤の調査として触り始めるのがよい段階です。
 

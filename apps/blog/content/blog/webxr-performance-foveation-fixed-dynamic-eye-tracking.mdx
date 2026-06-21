@@ -22,7 +22,7 @@ XRでは、通常のWebページや2Dゲームよりも描画負荷が高くな�
 
 そこで重要になるのが、**foveated rendering** です。
 
-foveated renderingは、人間の視覚が中心視野で高解像度を感じ、周辺視野では細かい情報を感じにくいことを利用する最適化です。画面の中心や注視点の近くは高品質に描き、周辺は解像度やシェーディング密度を下げることで、見た目の劣化を抑えながらGPU負荷を下げます。
+foveated renderingは、人間の視覚が中心視野で高解像度を感じ、周辺視野では細かい情報を感じにくいことを利用する最適化です。画面の中心やfixation pointの近くは高品質に描き、周辺は解像度やshading rate（Variable Rate Shading）を下げることで、見た目の劣化を抑えながらGPU負荷を下げます。
 
 ## WebXRにはfixed foveationがある
 
@@ -52,7 +52,7 @@ const session = await navigator.xr.requestSession("immersive-vr", sessionInit);
 
 ## fixed foveationの向き不向き
 
-fixed foveationは、視線追跡を使わず、固定されたパターンで周辺品質を下げる方式です。中心付近を高品質に保ち、端の品質を下げるため、背景や低コントラストなシーンでは目立ちにくいことがあります。
+fixed foveationは、eye trackingを使わず、固定されたパターンで周辺品質を下げる方式です（eye tracking は視線追跡。WebXR/OpenXR で eye tracker extension として議論中）。中心付近を高品質に保ち、端の品質を下げるため、背景や低コントラストなシーンでは目立ちにくいことがあります。
 
 一方で、UI、細かい文字、高コントラストな線、ミニマップ、遠くの小さなオブジェクトなどでは、劣化が分かりやすくなることがあります。Metaのドキュメントでも、高コントラストまたはテキストの多いシーンではアーティファクトが目立つ可能性があるため、視覚品質への影響を評価する必要があると説明されています。
 
@@ -66,11 +66,11 @@ WebXRアプリでは、いったん自前のrender targetにシーンを描き�
 
 この点は[three.js r184のWebXR更新](/tech-articles/threejs-r184-webxr-layers-hand-model-cache)を使う場合にも重要です。レンダラーやポストプロセスの構成によって、ブラウザやデバイス側のfoveationがどこまで効くかが変わる可能性があります。
 
-## dynamic foveationは魅力的だが、視線データが問題になる
+## dynamic foveationは魅力的だが、gaze dataが問題になる
 
-より強力なのは、ユーザーが実際に見ている場所を高品質に描くdynamic foveationです。視線追跡対応デバイスでは、注視点の周辺だけを高品質にし、それ以外をより大胆に落とせるため、fixed foveationより大きな効果が期待できます。
+より強力なのは、ユーザーが実際に見ている場所を高品質に描くdynamic foveationです。eye tracking対応デバイスでは、fixation pointの周辺だけを高品質にし、それ以外をより大胆に落とせるため、fixed foveationより大きな効果が期待できます。
 
-しかしWebでは、視線データは非常にセンシティブです。どこを見ているかは、ユーザーの関心、認知状態、健康情報、意図の推測につながる可能性があります。
+しかしWebでは、gaze dataは非常にセンシティブです。どこを見ているかは、ユーザーの関心、認知状態、健康情報、意図の推測につながる可能性があります。
 
 [Immersive WebのGitHub issue](https://github.com/immersive-web/webxr/issues/1420)では、dynamic foveationはユーザーが見ている場所に応じて描画品質を調整する最適化であり、WebXRで対応するならWebコンテンツにgaze dataを露出しない形が必要だと提起されています。
 

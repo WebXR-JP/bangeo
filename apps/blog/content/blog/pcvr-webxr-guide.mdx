@@ -51,8 +51,8 @@ PCに接続したVRヘッドセット（PCVR）でWebXRを体験するための�
 
 1. **ブラウザ**がWebXR APIでVRセッションを開始。
 2. **OpenXRランタイム**（SteamVR/Oculus PC App）がリクエストを受ける。
-3. ランタイムがヘッドセットへ描画・トラッキング情報を転送。
-4. ブラウザがフレームごとにヘッドセットのポーズを取得し、ステレオレンダリングした結果を送信。
+3. ランタイムがヘッドセットへ描画・pose tracking情報を転送。
+4. ブラウザがフレームごとにヘッドセットのポーズを取得し、stereo renderingした結果を送信。
 
 OpenXRランタイムをどれにするかが最重要ポイントです。Meta QuestならOculus PC App、Valve Index/HTC Vive/Quest Air LinkならSteamVRが基本です。
 

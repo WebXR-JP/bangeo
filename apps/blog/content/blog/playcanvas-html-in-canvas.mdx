@@ -35,7 +35,7 @@ HTML-in-Canvasは、HTML要素のレイアウトと描画をブラウザに任�
 - フォーム
 - その他のDOMコンテンツを3Dシーン内の面に表示
 
-重要なのは「画像化」だけではない点です。ブラウザがHTML要素のレイアウト、ヒットテスト、アクセシビリティを把握したまま、描画結果だけをテクスチャ側へ渡すことを目指しています。詳しい背景は[WebXRでHTML UIを扱う未来](/tech-articles/webxr-html-ui-dom-overlay-html-in-canvas-spatial-css)で、DOM OverlayやSpatial CSSとの役割分担とあわせて整理しています。
+重要なのは「画像化」だけではない点です。ブラウザがHTML要素のレイアウト、hit test、アクセシビリティを把握したまま、描画結果だけをテクスチャ側へ渡すことを目指しています。詳しい背景は[WebXRでHTML UIを扱う未来](/tech-articles/webxr-html-ui-dom-overlay-html-in-canvas-spatial-css)で、DOM OverlayやSpatial CSSとの役割分担とあわせて整理しています。
 
 ### 現時点での注意
 
@@ -75,7 +75,7 @@ HTML-in-Canvas APIは、大きく3つのプリミティブで構成されます�
 
 ### 1. `layoutsubtree` 属性
 
-`<canvas>` に `layoutsubtree` を付けると、子HTML要素がレイアウトとヒットテストの対象になります。子要素はブラウザによってレイアウトされますが、canvasへ明示的に描画するまでは画面上には表示されません。
+`<canvas>` に `layoutsubtree` を付けると、子HTML要素がレイアウトとhit testの対象になります。子要素はブラウザによってレイアウトされますが、canvasへ明示的に描画するまでは画面上には表示されません。
 
 ```html
 <canvas id="application-canvas" layoutsubtree>
@@ -142,11 +142,11 @@ HTML要素には通常のCSSがそのまま使えます。アニメーション�
 
 3D空間では、薄い平面メッシュに `emissiveMap` として貼るのが定番です。商品カード、ゲーム内端末、説明ラベル、設定パネルなどに向きます。半透明のガラス風UIでは `BLEND_PREMULTIPLIED` と `opacityMap` の組み合わせが有効です。
 
-## インタラクティブなUI──ヒットテスト
+## インタラクティブなUI──hit test
 
-HTMLをテクスチャとして貼るだけなら「表示」はできます。クリックやホバーを有効にするには、**DOM要素のCSS transformを3D投影と同期**させる必要があります。ブラウザがヒットテストを行えるようにするためです。
+HTMLをテクスチャとして貼るだけなら「表示」はできます。クリックやホバーを有効にするには、**DOM要素のCSS transformを3D投影と同期**させる必要があります。ブラウザがhit testを行えるようにするためです。hit testはWebXR Hit Test Moduleの機能で、targetRaySpaceからレイを飛ばして交差判定します。
 
-PlayCanvasの `canvas.getElementTransform(element, drawTransform)` は、描画変換行列を渡すことで要素をヒットテスト対象に登録します。公式の [html-texture-configurator](https://github.com/playcanvas/engine/blob/main/examples/src/examples/misc/html-texture-configurator.example.mjs) サンプルでは、行列計算を担う `HtmlSync` クラスが紹介されています。
+PlayCanvasの `canvas.getElementTransform(element, drawTransform)` は、描画変換行列を渡すことで要素をhit test対象に登録します。公式の [html-texture-configurator](https://github.com/playcanvas/engine/blob/main/examples/src/examples/misc/html-texture-configurator.example.mjs) サンプルでは、行列計算を担う `HtmlSync` クラスが紹介されています。
 
 ```javascript
 // 同期ヘルパーを一度だけ作成
@@ -166,7 +166,7 @@ htmlElement.addEventListener("click", (e) => {
 });
 ```
 
-ブラウザがヒットテストを担うため、`:hover` 疑似クラス、フォーカス管理、アクセシビリティ機能が期待どおり動きます。WebXRとの接続はまだ議論段階ですが、デスクトップやARプレビューでは、この経路がHTML UIを3D空間に置く現実的な方法になります。
+ブラウザがhit testを担うため、`:hover` 疑似クラス、フォーカス管理、アクセシビリティ機能が期待どおり動きます。WebXRとの接続はまだ議論段階ですが、デスクトップやARプレビューでは、この経路がHTML UIを3D空間に置く現実的な方法になります。
 
 ## フォールバック戦略
 
@@ -200,7 +200,7 @@ HTML-in-Canvasが成熟すれば、PlayCanvasで次のような設計が現実�
 - HTML/CSSで商品カードや設定パネルを作る
 - PlayCanvasの3Dシーン内の板にテクスチャとして貼る
 - WebXRでは、その板をユーザーの前に配置する
-- 入力はレイ・ポインターとHTML側のヒットテストを接続する
+- 入力はray pointer（targetRaySpace）とHTML側のhit testを接続する
 
 ただし、現時点で最も難しいのは「表示」ではなく「入力」です。2026年5月の[Immersive Web face-to-face](https://www.w3.org/2026/05/19-immersive-web-minutes.html)では、同一オリジン制約、レイヤーとの関係、まずは空間内のquadとして扱う方向などが議論されています。
 
@@ -225,7 +225,7 @@ PlayCanvas HTML-in-Canvas を試すとき、BANGEOでは次のリソースを使
   title="PlayCanvas HTML-in-Canvas デモ"
   fullPageHref="/demos/playcanvas-html-in-canvas"
   height={520}
-  caption="パネル内のタブで CSS Layer / Texture Upload / Hit Test を切り替えられます。Chrome Canary では chrome://flags/#canvas-draw-element を有効にすると、3D平面へのテクスチャ貼り付けとヒットテストを体験できます。"
+  caption="パネル内のタブで CSS Layer / Texture Upload / Hit Test を切り替えられます。Chrome Canary では chrome://flags/#canvas-draw-element を有効にすると、3D平面へのテクスチャ貼り付けとhit testを体験できます。"
 />
 
 ## まとめ
@@ -234,7 +234,7 @@ PlayCanvasのHTML-in-Canvas対応は、3Dシーン内にHTML/CSSのUIを自然�
 
 - `supportsHtmlTextures` で対応を検出し、必ずフォールバックを用意する
 - `layoutsubtree` + `Texture.setSource()` + `paint` でテクスチャ連携する
-- インタラクションには `getElementTransform` と行列同期ヘルパーによるヒットテストが必要
+- インタラクションには `getElementTransform` と行列同期ヘルパーによるhit testが必要
 - v2.19.2 で WebGPU 経路の実験対応が追加されたが、本番採用はまだ早い
 
 まずはBANGEOのデモで動作を確認し、対応ブラウザとフォールバックの両方を見ながら、自分のプロジェクトに取り込むのがよいでしょう。

@@ -18,23 +18,23 @@ draft: false
 
 [WebKit公式ブログ](https://webkit.org/blog/17967/news-from-wwdc26-webkit-in-safari-27-beta/)で公開された「News from WWDC26: WebKit in Safari 27 beta」に、visionOS向けのImmersive Webに関係する重要な更新が含まれています。
 
-Safari 27 beta in visionOS 27では、immersive website environmentsがサポートされます。WebKitの記事では、開発者が `<model>` 要素と1つのJavaScript API呼び出しで没入型体験を提供できるようになると説明されています。さらに、同じ記事の修正項目では、WebXR viewportが `getViewport()` を呼ぶまで初期値を持たない問題の修正も確認できます。
+Safari 27 beta in visionOS 27では、immersive website environmentsがサポートされます。WebKitの記事では、開発者が `<model>` 要素と1つのJavaScript API呼び出しで immersive experience を提供できるようになると説明されています。さらに、同じ記事の修正項目では、WebXR viewportが `getViewport()` を呼ぶまで初期値を持たない問題の修正も確認できます。
 
 これは、[Apple Vision Pro](/devices)でWebベースの空間体験を作りたい開発者にとって、かなり大きな動きです。
 
 ## immersive website environmentsとは何か
 
-immersive website environmentsは、Webページから没入型の空間体験に入るための仕組みです。
+immersive website environmentsは、Webページから没入型の空間体験に入るための仕組みです。ここでいう immersive は WebXR の immersive-vr / immersive-ar session mode に対応する概念で、Apple は immersive website environments と呼びます。
 
-WebKit公式ブログでは、Safari 27 beta in visionOS 27でimmersive website environmentsが追加され、`<model>` 要素とJavaScript API呼び出しによって、ブラウザ内から没入型体験を提供できると説明されています。例として、チケット販売サイトで購入前に座席からの眺めを確認したり、ホテルの部屋を歩いて体験したりする用途が挙げられています。
+WebKit公式ブログでは、Safari 27 beta in visionOS 27でimmersive website environmentsが追加され、`<model>` 要素とJavaScript API呼び出しによって、ブラウザ内から immersive experience を提供できると説明されています。例として、チケット販売サイトで購入前に座席からの眺めを確認したり、ホテルの部屋を歩いて体験したりする用途が挙げられています。
 
-[Apple DeveloperのWWDC26セッション「Explore immersive website environments in visionOS」](https://developer.apple.com/videos/play/wwdc2026/320/)でも、Webページから劇場の座席視点に入る例や、visionOS向けゲームのプロモーションページから没入型環境に入る例が紹介されています。
+[Apple DeveloperのWWDC26セッション「Explore immersive website environments in visionOS」](https://developer.apple.com/videos/play/wwdc2026/320/)でも、Webページから劇場の座席視点に入る例や、visionOS向けゲームのプロモーションページから immersive environment に入る例が紹介されています。
 
 BANGEO的に見ると、これは「WebXR Device APIそのものの新機能」というより、Safari/visionOSがWeb上の空間体験をよりネイティブに扱おうとしている流れとして見るのがよさそうです。
 
 ## requestImmersiveはFullscreen APIに近い考え方
 
-WWDC26のセッションでは、immersive APIはFullscreen APIに近いパターンだと説明されています。動画を `requestFullscreen()` でフルスクリーンにするように、model要素に対して `requestImmersive()` を呼ぶことで、没入型表示に入る流れです。
+WWDC26のセッションでは、immersive APIはFullscreen APIに近いパターンだと説明されています。動画を `requestFullscreen()` でフルスクリーンにするように、model要素に対して `requestImmersive()` を呼ぶことで、immersive session に入る流れです。
 
 イメージとしては、次のような使い方です。
 
@@ -59,7 +59,7 @@ button.addEventListener("click", async () => {
 
 実際のAPI名や利用条件は、Safari 27 beta/visionOS 27の実装と公式資料を確認しながら扱う必要があります。ただ、考え方としては、Webページ内にある3Dモデルや環境を、ユーザー操作をきっかけに没入空間へ移すものです。
 
-セッションでは、没入型表示に入るだけでなく、feature availabilityの確認、現在immersive状態にある要素の確認、変更イベントやエラーイベントの監視、CSS pseudo-classによるスタイル調整にも触れられています。
+セッションでは、immersive session に入るだけでなく、feature availabilityの確認、現在immersive状態にある要素の確認、変更イベントやエラーイベントの監視、CSS pseudo-classによるスタイル調整にも触れられています。
 
 ## HTML model要素の対応範囲も広がる
 
@@ -69,7 +69,7 @@ WebKitの記事では、`<model>` 要素がiOS、iPadOS、macOSのSafariでも�
 
 これは、WebXRとは別軸ですが、Web上の3D/Spatial Web体験としてはかなり重要です。
 
-従来、Web上で3Dを扱う場合は、three.js、Babylon.js、model-viewer、独自WebGL実装などを使うことが多くありました。`<model>` 要素がSafariで広がることで、HTMLだけで3Dコンテンツを埋め込み、必要に応じて没入型表示へつなげる流れが作りやすくなります。
+従来、Web上で3Dを扱う場合は、three.js、Babylon.js、model-viewer、独自WebGL実装などを使うことが多くありました。`<model>` 要素がSafariで広がることで、HTMLだけで3Dコンテンツを埋め込み、必要に応じて immersive session へつなげる流れが作りやすくなります。
 
 ## WebXR viewportの初期化修正も重要
 

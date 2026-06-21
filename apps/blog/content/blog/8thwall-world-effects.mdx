@@ -16,7 +16,7 @@ draft: false
 
 ## World Effectsとは
 
-8th Wallの**World Effects**は、SLAMによるワールドトラッキングを活用し、現実の地面や空間に仮想オブジェクトを配置するAR機能です。`xrweb`コンポーネントの`defaultEnvironment`系プロパティで空と地面を構成し、カメラ映像と3Dシーンを統合します。
+8th Wallの**World Effects**は、world tracking（SLAM）を活用し、現実の地面や空間に仮想オブジェクトを配置するAR機能です。world tracking（SLAM）は8th Wallのワールドトラッキング機能で、カメラ映像と3Dシーンをcompositingします。`xrweb`コンポーネントの`defaultEnvironment`系プロパティで空と地面を構成し、カメラ映像と3Dシーンを統合します。
 
 この記事では、**地面をタップしてサボテンを配置する**インタラクティブなARデモを例に、World Effectsの基本的な実装パターンを解説します。
 
@@ -26,7 +26,7 @@ draft: false
 
 ## 前提：配布バイナリが必要
 
-World EffectsはSLAM（ワールドトラッキング）に依存するため、**OSS版エンジンだけでは動作しません**。配布バイナリ（[8thwall/engine](https://github.com/8thwall/engine)の`xr-standalone.zip`）が必要です。
+World EffectsはSLAM（world tracking）に依存するため、**OSS版エンジンだけでは動作しません**。配布バイナリ（[8thwall/engine](https://github.com/8thwall/engine)の`xr-standalone.zip`）が必要です。
 
 | 機能 | OSS版 | 配布バイナリ |
 |------|:---:|:---:|

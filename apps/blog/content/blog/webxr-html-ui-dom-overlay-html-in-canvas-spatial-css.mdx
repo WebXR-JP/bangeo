@@ -18,7 +18,7 @@ draft: false
 
 WebXRでUIを作るとき、多くの開発者が最初にぶつかるのは「ボタン、テキスト、フォーム、メニューをどう作るか」という問題です。
 
-three.jsやBabylon.js、PlayCanvasなどで3D空間を作る場合、UIもメッシュ、テクスチャ、レイキャスト、独自イベント処理で実装できます。これは今でも有効な方法です。VR空間内のボタン、3Dメニュー、手やコントローラーで触るパネルなどは、この方法で作られることが多いです。
+three.jsやBabylon.js、PlayCanvasなどで3D空間を作る場合、UIもメッシュ、テクスチャ、raycasting、独自イベント処理で実装できます。これは今でも有効な方法です。VR空間内のボタン、3Dメニュー、手やコントローラーで触るパネルなどは、この方法で作られることが多いです。
 
 ただし、HTML/CSSがもともと得意なことをWebGL側で再実装するのは大変です。複数行テキスト、フォーム入力、アクセシビリティ、翻訳、コピー＆ペースト、右クリック、フォーカス管理、スクリーンリーダー対応などを、3Dエンジン側だけで自然に扱うのは簡単ではありません。
 
@@ -59,7 +59,7 @@ document
 
 [Chrome for Developersの記事](https://developer.chrome.com/blog/html-in-canvas-origin-trial)では、HTML-in-Canvas APIはChrome 148〜150のOrigin Trialで提供され、Chrome Canary 149以降では `chrome://flags/#canvas-draw-element` を有効化して試せると説明されています。また、DOMコンテンツを2D canvasやWebGL/WebGPUテクスチャに描画しつつ、インタラクションやアクセシビリティを保つことを狙っています。
 
-HTML-in-Canvasの重要な点は、単に「HTMLを画像化する」だけではないことです。ブラウザがHTML要素のレイアウト、ヒットテスト、アクセシビリティツリーを把握したまま、描画だけをcanvasやテクスチャ側に渡すことを目指しています。
+HTML-in-Canvasの重要な点は、単に「HTMLを画像化する」だけではないことです。ブラウザがHTML要素のレイアウト、hit test、アクセシビリティツリーを把握したまま、描画だけをcanvasやテクスチャ側に渡すことを目指しています（hit test は WebXR Hit Test Module の機能で、ここではDOMのhit test一般も同じ用語で扱う）。
 
 ```html
 <canvas id="scene" layoutsubtree>
@@ -77,11 +77,11 @@ HTML-in-Canvasの重要な点は、単に「HTMLを画像化する」だけで�
 
 つまり、HTML-in-CanvasはWebXR UIの大きな候補ですが、現時点では「本番WebXRでどこでも使える標準機能」ではありません。実験用・将来設計用として追いかける段階です。PlayCanvas での具体的な実装は、[PlayCanvasでHTML-in-Canvasを使う](/tech-articles/playcanvas-html-in-canvas)で整理しています。
 
-## Spatial CSSはWebXRとは別レイヤーの「空間化されたWebページ」
+## Spatial CSSはWebXRとは別レイヤーの「spatialized web page」
 
 もう一つの大きな流れがSpatial CSSです。
 
-[WebKitのCSS Spatial Layout explainer](https://github.com/WebKit/explainers/blob/main/css-spatial/explainer.md)では、CSS Spatial Layoutを、relative/absolute positioning、inset、anchor positioning、box alignmentのような既存のCSS概念をz軸方向にも拡張し、ページ内の要素を実際の奥行きに配置できる仕組みとして説明しています。そこでは、WebXRの置き換えではなく、通常のWebページの中で奥行き表現や空間的なレイアウトを扱うことが目的だと明記されています。
+[WebKitのCSS Spatial Layout explainer](https://github.com/WebKit/explainers/blob/main/css-spatial/explainer.md)では、CSS Spatial Layoutを、relative/absolute positioning、inset、anchor positioning、box alignmentのような既存のCSS概念をz軸方向にも拡張し、ページ内の要素を実際の奥行きに配置できる仕組みとして説明しています。そこでは、WebXRの置き換えではなく、通常のWebページの中でdepth representationや空間的なレイアウトを扱うことが目的だと明記されています。
 
 たとえば、Spatial CSSが目指す世界では、通常のカードや見出しをCSSだけで少し前に浮かせたり、ページの一部に3Dポータルを作ったり、3DモデルにDOMラベルをアンカーしたりする発想が出てきます。
 
@@ -114,7 +114,7 @@ Spatial CSSと近い話題として、`background-material` も議論されて�
 
 今WebXRアプリを作るなら、まずは用途ごとにUIの作り方を分けるのが現実的です。
 
-ARの上に説明や設定UIを重ねるならDOM Overlayを検討します。3D空間の中で完全に没入型のUIを作るなら、three.jsやPlayCanvasなどの3D UI、テクスチャ、レイキャストを使うのが安定しています。
+ARの上に説明や設定UIを重ねるならDOM Overlayを検討します。3D空間の中で完全に没入型のUIを作るなら、three.jsやPlayCanvasなどの3D UI、テクスチャ、raycastingを使うのが安定しています。
 
 HTML-in-Canvasは、HTML/CSSのUIを3D空間内のテクスチャとして扱う将来候補です。Chrome CanaryやOrigin Trialで実験する価値はありますが、本番前提にするにはブラウザ対応とAPI変更リスクを見ておく必要があります。
 

@@ -11,7 +11,7 @@ tags:
   - "ARKit"
   - "入門"
   - "Safari"
-  - "ポリフィル"
+  - "polyfill"
 author: "BANGEO Team"
 thumbnail: "/assets/tech/ios-webxr-app-clip.webp"
 draft: false
@@ -35,7 +35,7 @@ Appleは[WWDC24のWebXRセッション](https://developer.apple.com/videos/play/
 | App Clip経由でARKit + WebViewを使う | Safari単体ではない | 可能 | インストール不要に近いAR体験を配布したい |
 | EyeJack Play ARを使う | App Clip経由 | 可能 | まず無料でWebXR ARを試したい |
 | Variant Launchを使う | App Clip経由 | 可能 | 商用案件でブランド管理やサポートが必要 |
-| WebXRではないWebARを使う | 場合による | WebXR APIではない | 画像認識ARやカメラ合成で十分な場合 |
+| WebXRではないWebARを使う | 場合による | WebXR APIではない | 画像認識ARやcompositing（カメラ合成）で十分な場合 |
 
 iPhone向けに「ブラウザでARを見せたい」だけなら、WebXRにこだわらず、8th Wall、MindAR、AR Quick Look、独自WebARなども候補になります。WebXR APIとして既存のThree.js / PlayCanvas / Babylon.js実装を動かしたい場合は、App Clip型の回避策を検討するのが現実的です。
 
@@ -56,9 +56,11 @@ App Clipを使ったWebXR実現の基本的なアーキテクチャは以下の�
 
 ![App ClipによるWebXRアーキテクチャ](/images/tech-articles/app-clip-architecture.png)
 
-1. **ARKit（ネイティブAR機能）が背景で動作** - カメラ映像の取得、平面検出、ヒットテストなどを担当
+1. **ARKit（ネイティブAR機能）が背景で動作** - カメラ映像の取得、plane detection、hit testなどを担当
 2. **その上に透明なWKWebView（ブラウザ画面）を重ねる** - WebXRコンテンツを表示
-3. **`window.xr`にポリフィルを注入** - カメラ画像、ヒットテスト結果、デバイスの位置情報などをJavaScriptから利用可能に
+3. **`window.xr`にポリフィルを注入** - カメラ画像、hit test結果、デバイスの位置情報などをJavaScriptから利用可能に
+
+> ※ hit testはWebXR Hit Test Moduleの機能で、レイと現実環境の交差判定を行います。plane detectionはWebXRの平面検出機能で、床や壁などの平面を認識します。
 
 つまり、App Clip自体は非常に軽量なままで、実質的にWebXRコンテンツをARKit上で動かすことができます。
 
@@ -144,11 +146,11 @@ Variant Launchは、商用向けにApp Clip経由のWebXR AR配信を整えた�
 
 ### Safari WebXRとApp Clip WebXRは同じですか？
 
-同じではありません。Safari WebXRはブラウザがWebXR APIを直接実装している状態を指します。App Clipを使う方法は、ARKitでカメラやトラッキングを処理し、その上にWebViewとWebXR風のAPIを組み合わせる回避策です。
+同じではありません。Safari WebXRはブラウザがWebXR APIを直接実装している状態を指します。App Clipを使う方法は、ARKitでカメラやトラッキングを処理し、その上にWebViewとWebXR polyfillを組み合わせる回避策です。
 
 ### iPhone向けARはWebXRで作るべきですか？
 
-既存のWebXRコンテンツをiPhoneでも見せたいなら、App Clip型の方法を検討する価値があります。一方で、商品プレビュー、画像認識、簡単なカメラ合成で十分なら、WebXR以外のWebARやAR Quick Lookの方が運用しやすい場合もあります。
+既存のWebXRコンテンツをiPhoneでも見せたいなら、App Clip型の方法を検討する価値があります。一方で、商品プレビュー、画像認識、簡単なcompositingで十分なら、WebXR以外のWebARやAR Quick Lookの方が運用しやすい場合もあります。
 
 ## まとめ
 
