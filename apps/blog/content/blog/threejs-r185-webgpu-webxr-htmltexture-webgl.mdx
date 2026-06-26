@@ -1,0 +1,196 @@
+---
+title: "three.js r185を読む：WebGPUでWebXRをサポート、HTMLTextureやWebGLも更新"
+description: "three.js r185で追加されたWebGPURendererのWebXR対応を中心に、WebGPU基盤、XRManagerのfoveation、HTMLTexture、WebGLRenderer、TSL、サンプル、移行時の注意点を整理します。"
+date: "2026年6月25日"
+category: "NEWS"
+tags:
+  - "three.js"
+  - "WebGPU"
+  - "WebXR"
+  - "WebGL"
+  - "JavaScript"
+  - "Web3D"
+  - "XR"
+author: "BANGEO Team"
+thumbnail: "/assets/tech/webgpu-webxr-quest-browser.webp"
+draft: false
+---
+
+2026年6月25日、three.js r185が公開されました。
+
+今回のリリースは、単なる不具合修正だけではありません。WebGPURendererに「WebGPUを使ったWebXR」のサポートが追加され、WebGPUの描画基盤、HTMLTexture、WebGLRenderer、TSL、サンプルまで広い範囲が更新されています。
+
+特にWebXRを追っている開発者にとって重要なのは、リリースノートに **Add support for WebXR with WebGPU** と明記されたことです。これまでthree.jsでWebXRを扱う場合はWebGLを前提にする場面が中心でしたが、r185ではWebGPUとWebXRを組み合わせるための実装が本体に入りました。
+
+この記事では、[three.js r185の公式リリース](https://github.com/mrdoob/three.js/releases/tag/r185)をもとに、WebGPU、WebXR、WebGL、HTMLTexture、サンプル、移行時の注意点を整理します。
+
+## r185で注目したい更新
+
+今回の主な変更を先にまとめると、次のとおりです。
+
+- WebGPURendererがWebXRをサポート
+- XRManagerでfoveationを有効にする処理を更新
+- WebGPUでtexture arrayへのレンダリングをサポート
+- WebGPUのエラーやWGSL診断を取得しやすく改善
+- HTMLTextureが新しいHTML-in-Canvas APIシグネチャに対応
+- WebGLRendererのcontext restore、法線マップ、UBO更新などを修正
+- TSL、compute、render bundle、ExternalTextureを継続強化
+- WebGPU compute rasterizer、volumetric fire、procedural cityなどのサンプルを追加・更新
+- 非推奨コードを削除し、複数のAPIを整理
+
+r185は「WebXRのためだけのリリース」ではありません。ただし、WebGPUとWebXRを接続する変更が入ったことで、Web 3Dの次の描画基盤を考えるうえでは重要な節目になっています。
+
+## 最大の注目点はWebGPUによるWebXRサポート
+
+three.js r185のリリースノートでは、WebGPURendererの変更としてWebXR with WebGPUのサポートが追加されています。
+
+これは、three.jsのWebXR管理機構とWebGPURendererを組み合わせ、WebGPU経由で没入型コンテンツを描画するための対応です。同じリリースにはtexture arrayへのレンダリング対応や、WebXRで使う描画先との連携に関係する修正も含まれています。
+
+XRでは通常、左右の目に対応する複数のビューを扱います。そのため、通常の1画面向けレンダリングとは異なり、XRランタイムが提供する描画先、ビューごとのカメラ、フレーム更新を正しく接続する必要があります。r185での対応は、この経路をWebGPURenderer側に実装したものと理解できます。
+
+ただし、three.jsが対応したからといって、すべてのブラウザとヘッドセットですぐ利用できるわけではありません。実行には、ブラウザ側がWebGPUとWebXRの組み合わせを提供している必要があります。現時点では実験的な実装を含む領域なので、通常のWebGL版WebXRを直ちに置き換えるというより、対応環境で検証を始められる段階として見るのが適切です。
+
+実際のプロジェクトでは、少なくとも次を確認する必要があります。
+
+- 利用するブラウザがWebGPU in WebXRに対応しているか
+- WebGPUアダプターとXRセッションを正常に初期化できるか
+- WebGLへのフォールバックを用意するか
+- Questなどの実機でフレームレートと描画品質を維持できるか
+- WebXR Layers、深度、ポストプロセスなど既存機能との差分がないか
+
+「three.js r185でWebGPU + WebXRが利用可能になった」というより、正確には「three.js側にWebGPU + WebXRを扱うための実装が入った」と表現するのが安全です。
+
+## XRManagerではfoveation対応も更新
+
+r185ではXRManagerに、`foveateBoundTexture()`を使ってfoveationを有効にする変更も入っています。
+
+Foveated renderingは、視野の中心付近を高品質に保ちながら、周辺部分の描画負荷を抑える最適化です。高いフレームレートが要求されるXRでは重要な技術で、特にスタンドアロン型ヘッドセットではGPU負荷の削減に関係します。
+
+今回の変更だけで、すべての端末に同じfoveation設定が適用できるわけではありません。対応はXRランタイムやGPU、ブラウザ実装にも依存します。それでも、WebGPUによるWebXR対応と同じリリースにXR向け最適化が入っている点は注目できます。
+
+## WebGPU基盤は広い範囲で更新
+
+WebXR以外にも、WebGPURendererには多数の変更が入っています。
+
+### texture arrayへのレンダリング
+
+texture arrayへのレンダリングがサポートされました。複数レイヤーを持つテクスチャを扱えるため、XRの複数ビューだけでなく、高度なレンダリング処理でも重要になる基盤機能です。
+
+### WGSL診断とGPUエラーの改善
+
+捕捉されなかったGPUエラーとWGSLの診断情報を表面化する変更も入っています。WebGPU開発では、シェーダーやバインディングの不整合が発生したとき、原因を追いにくいことがあります。診断情報が改善されることで、TSLや独自シェーダーを使う開発のデバッグ性が上がります。
+
+### ExternalTextureの完全サポート
+
+`ExternalTexture`のサポートも強化されました。これは動画など、ブラウザ外部のメディアソースをGPUで効率よく扱う処理に関係します。XR空間内で動画を表示する用途や、リアルタイムメディアと3D表現を組み合わせる用途にもつながる更新です。
+
+### render bundleとInstancedMesh
+
+render bundleで`InstancedMesh`を完全に扱うための改善や、render list処理の最適化も含まれています。同じ形状を大量に描画するシーンでは、CPU側の描画命令を減らすことが重要です。XRでは片目あたりの描画負荷だけでなく、安定したフレーム時間が必要になるため、こうした基盤改善も無視できません。
+
+### TSLとcomputeの継続強化
+
+TSLでは`storageTexture3D`、`textureGather`、`textureGatherCompare`の追加・対応などが行われました。compute関連ではバインディングの`needsUpdate`修正も入っています。
+
+three.jsのWebGPU対応は、単にWebGLRendererをWebGPUへ置き換えるだけではありません。TSL、compute、storage texture、render bundleを含む新しい描画基盤として整備が続いています。r185のWebXR対応も、この流れの上に追加された機能です。
+
+## HTMLTextureはHTML-in-Canvas APIの変更に追従
+
+r184で追加されたHTMLTextureは、r185でWICGのHTML-in-Canvas APIの新しいシグネチャに対応しました。Chromeのバージョンごとに異なるAPI経路を判別するための注記も追加されています。
+
+HTMLTextureは、HTML要素の見た目を3Dシーン内のテクスチャとして利用するための機能です。従来、3D空間にWeb UIを持ち込む場合は、Canvasへ独自描画する、DOMを別レイヤーとして重ねる、HTMLを画像化するといった方法が必要でした。HTML-in-Canvasが実用化されれば、既存のHTML/CSSを3DやXRの表示へ接続しやすくなる可能性があります。
+
+一方で、これは標準化・ブラウザ実装ともに変化が続いている領域です。r185でAPI変更への追従が入ったこと自体が、HTMLTextureを使うコードではブラウザバージョン差を意識する必要があることを示しています。
+
+WebXRとの関係では、DOM Overlayとは別の技術である点に注意が必要です。DOM OverlayはXRセッション上にDOMを重ねる仕組みですが、HTMLTextureはHTMLの表示結果を3Dシーン内のテクスチャとして扱う方向です。見た目が似ていても、入力、アクセシビリティ、解像度、レンダリングコストは異なります。
+
+## WebGLRendererも着実に修正
+
+r185はWebGPUだけの更新ではありません。従来のWebGLRendererにも、実運用に関係する修正が含まれています。
+
+- WebGLコンテキスト復元後に古いframebufferが残る問題を修正
+- `DoubleSide`とflat shadingを組み合わせた法線マップを修正
+- `BackSide`と頂点タンジェントを使う法線マップを修正
+- shader stageの検索処理を改善
+- UBO更新時の不要なGC負荷を削減
+- `copyTextureToTexture()`の利用時に発生する問題を修正
+
+WebGPUに注目が集まりやすい状況でも、実際のWeb 3DプロジェクトではWebGLが主要な描画経路であるケースが多くあります。端末やブラウザの対応範囲を考えると、当面はWebGPUとWebGLの両方を見ておく必要があります。
+
+r185の内容からも、three.jsがWebGPUへ移行しながらWebGLを放置しているわけではなく、既存レンダラーの安定性と互換性も並行して整備していることが分かります。
+
+## サンプルから見えるthree.jsの方向性
+
+three.jsはサンプルの量と質が、ライブラリ本体と同じくらい重要です。r185でもWebGPU関連のサンプルが大きく更新されています。
+
+特に目を引くのは次の項目です。
+
+- WebGPU furnace testの追加
+- computeを使うrasterizerサンプルの追加・整理
+- rasterizerへのIBL対応サンプル追加
+- WebGPU AOサンプルの改善
+- clustered lightsサンプルの再構成
+- volumetric fireの追加
+- procedural city generatorの追加
+- custom fogとterrain、forest generatorの統合
+- skinningとinstancingを組み合わせたサンプル追加
+
+これらを見ると、three.jsのWebGPU対応が「WebGLと同じ絵を出せるようにする」段階から、computeや新しいライティング、プロシージャル生成を活用する段階へ進んでいることが分かります。
+
+WebXR with WebGPUも、単にレンダラーのバックエンドを交換するだけでは終わりません。将来的にはcompute、GPU駆動のカリング、大量インスタンス、ボリューメトリック表現などをXRへ持ち込むことが期待されます。ただし、XRではフレームレートとレイテンシーの制約が厳しいため、デスクトップ向けWebGPUデモをそのまま投入するのではなく、実機での計測が必要です。
+
+## r184から更新するときの注意点
+
+[公式Migration Guide](https://github.com/mrdoob/three.js/wiki/Migration-Guide#184--185)には、r184からr185へ移行する際の変更点がまとまっています。
+
+特に確認したいのは、WebGPURendererのpremultiplied alphaの実装変更です。更新後にブレンディングの見え方が変わった場合は、`Scene.background`または`renderer.setClearColor()`で不透明な背景色を設定することが推奨されています。HTML背景と合成する必要がある場合に限り、透明な背景やclear colorを利用します。
+
+このほか、次の変更にも注意が必要です。
+
+- `SSAAPassNode`の`clearColor`と`clearAlpha`を削除
+- `AnamorphicNode`を削除し、`BloomNode`を利用
+- `TiledLighting`を削除し、`ClusteredLighting`へ移行
+- `DRACOExporter.parse()`を`parseAsync()`へ変更
+- `SVGLoader.createShapes()`を非推奨化
+- `DRACOLoader.setDecoderConfig()`を非推奨化
+- PLYのデータ型をより忠実に扱うよう変更
+- `Object3D.updateWorldMatrix()`が`matrixWorldNeedsUpdate`を考慮
+- TSLの一部関数名と座標の扱いを変更
+
+特にPLYLoaderでは、PLYに`float64`や`double`が含まれる場合、`Float64Array`のbuffer attributeが生成されるようになりました。描画に使う場合は`Float32BufferAttribute`への変換が必要です。点群やスキャンデータを扱うプロジェクトでは確認しておきたい変更です。
+
+## three.js r185をどう見るか
+
+r185で最も重要なのは、three.jsのWebGPU対応がWebXRへつながったことです。
+
+これまでもWebGPURenderer、TSL、compute、post-processingの整備は続いていました。そこへWebXR対応が加わったことで、通常のWeb 3Dと没入型Webを同じWebGPU基盤で扱うための道筋が見え始めました。
+
+ただし、現段階でWebGL版WebXRから全面移行する判断は早いでしょう。three.js側の対応だけでなく、ブラウザ、XRランタイム、デバイス、各WebXR機能の組み合わせを検証する必要があります。実プロジェクトではWebGLを安定経路として残し、WebGPU + WebXRを対応環境向けの実験経路として追加する進め方が現実的です。
+
+一方で、新しいWebXRデモや技術検証を作るなら、r185は試す価値の高いリリースです。WebGPUでのXR描画、foveation、texture array、TSL、computeがどこまで実機で動くのか。ここから先は、リリースノートを読むだけでなく、Questなどの実機で確かめる段階に入っています。
+
+## まとめ
+
+three.js r185は、WebGPU、WebGL、HTMLTexture、TSL、サンプル、移行APIまで広く更新されたリリースです。その中でも、WebGPURendererへのWebXRサポート追加は、Web 3DとImmersive Webの今後を考えるうえで重要です。
+
+今回のポイントをまとめます。
+
+- three.js本体にWebGPU + WebXRの対応が入った
+- XRManagerではfoveation関連の変更も追加された
+- texture array、WGSL診断、ExternalTextureなどWebGPU基盤が強化された
+- HTMLTextureは変化中のHTML-in-Canvas APIへ追従した
+- WebGLRendererにも安定性と性能に関する修正が続いている
+- 移行時はpremultiplied alphaや削除・非推奨APIに注意が必要
+- 実利用可否はブラウザとXRデバイス側の対応にも依存する
+
+[BANGEO](https://bangeo.net)では、WebXRの仕様だけでなく、three.js、PlayCanvas、WebGPUなど、ブラウザで3D体験を作るための実装基盤も継続して追っています。今後はthree.js r185のWebGPU + WebXR対応について、実機での動作やWebGL版との差も確認していきたいと思います。
+
+## 参照
+
+- [three.js r185 release](https://github.com/mrdoob/three.js/releases/tag/r185)
+- [three.js Migration Guide: 184 to 185](https://github.com/mrdoob/three.js/wiki/Migration-Guide#184--185)
+- [WebGPU + WebXR support pull request #33583](https://github.com/mrdoob/three.js/pull/33583)
+
+## note用タグ候補
+
+`#threejs` `#WebGPU` `#WebXR` `#WebGL` `#JavaScript` `#Web3D` `#XR` `#BANGEO`
