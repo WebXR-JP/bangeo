@@ -1,0 +1,134 @@
+---
+title: "PlayCanvas Engine v2.20.0を読む：WebGL / WebGPU / GSplat / サンプル更新"
+description: "PlayCanvas Engine v2.20.0の更新を、Gaussian Splatting / GSplat、WebGPU、WebGL、XR、サンプル、APIリファレンス、コンポーネント設計の観点で整理します。"
+date: "2026年6月25日"
+category: "NEWS"
+tags:
+  - "PlayCanvas"
+  - "WebGL"
+  - "WebGPU"
+  - "GSplat"
+  - "Gaussian Splatting"
+  - "WebXR"
+  - "Vite"
+author: "BANGEO Team"
+thumbnail: "/assets/tech/playcanvas-engine-2-19-7-webgpu-xr-stability.webp"
+draft: false
+---
+
+PlayCanvas Engine v2.20.0 が公開されました。
+
+今回のリリースは、Gaussian Splatting / GSplat 関連の更新がかなり目立ちます。ただ、それだけを見ると少しもったいないアップデートだと思いました。リリースノートを読むと、WebGPU、WebGL、XR、サンプル、APIリファレンス、コンポーネント設計まで、PlayCanvas Engine全体に広く手が入っています。([GitHub][1])
+
+昔からPlayCanvasを追っている人にとっては、今回のv2.20.0は「PlayCanvasがWeb 3Dエンジンとしてどこへ向かっているのか」を見るうえで、かなり面白いリリースだと思います。
+
+## GSplatまわりの更新がかなり大きい
+
+まず目立つのは、Gaussian Splatting / GSplat関連です。
+
+v2.20.0では、hybrid GSplat rendererまわりに多くの更新が入っています。`GSPLAT_AA`対応、GPU sort / cull pipelineの整理、foveated contribution culling、GSplat shader customization、SOG spherical harmonics更新、directional shadow対応などです。([GitHub][1])
+
+Gaussian Splattingは、普通のポリゴンメッシュとは違う描画の難しさがあります。
+大量のsplatをどうソートするか、どう間引くか、どう軽くするか、どう見た目を調整するか。そこにエンジン側でかなり手が入ってきています。
+
+特に気になったのは、WebGPUでGPU sortを自動選択し、stable扱いにしている点です。
+Splatの描画ではソート処理がかなり重要なので、ここが安定してくると、大きなGaussian SplattingシーンをWebで扱う現実味が増してきます。
+
+また、`lodRangeMin` / `lodRangeMax` が `GSplatComponent` 側へ移動するbreaking changeも入っています。([GitHub][1]) 既存コードには影響が出る可能性がありますが、GSplatをPlayCanvasのコンポーネントとして整理していく流れにも見えます。
+
+## WebGPU対応も地味に進んでいる
+
+今回のアップデートは、GSplatだけでなくWebGPUまわりも見どころがあります。
+
+HTML-in-Canvas textures、transient attachments、compute shader向けのbind-group reflection、`@webgpu/types`更新、WebGPU profiler修正など、エンジン内部の基盤に近い更新が多く入っています。([GitHub][1])
+
+こういう項目は派手なデモには見えにくいですが、WebGPUを実用的に使っていくうえではかなり大事です。
+
+WebGPUは単に「WebGLより新しいAPI」というだけではなく、リソース管理、compute shader、型定義、デバッグ、プロファイリングまで含めて、エンジン側の対応力が問われます。PlayCanvasがそのあたりを継続的に整備しているのは、Web 3Dエンジンとしてかなり重要な動きです。
+
+## WebGLの現実も見ている
+
+一方で、PlayCanvasはWebGPUだけに寄っているわけではありません。
+
+v2.20.0では、WebGL側の状態管理や古い処理の整理も含まれています。たとえば、fragileなWebGL mipmap-based radix sortの削除や、再利用されたWebGL contextでのactive texture unitリセットなど、WebGL環境での安定性に関わる修正もあります。([GitHub][1])
+
+ここがPlayCanvasらしいところだと思います。
+
+WebGPUは今後の重要技術ですが、実際のWeb制作ではまだWebGLが重要です。
+ブラウザやGPU、スマートフォン環境によって、使える機能や安定性は変わります。
+
+PlayCanvasはWebGPUへ進みながらも、WebGLの実用性を捨てていない。
+このバランスは、Webで3Dコンテンツを作るうえでかなり大事です。
+
+## サンプル更新がうれしい
+
+今回のリリースでは、サンプル周りの改善もかなり気になります。
+
+state付きURL共有、JSXコンポーネントとしてのcontrols作成、サンプルをスタンドアロンのViteプロジェクトとしてダウンロードする機能、コードエディタの補完や定義ジャンプ、サイドバーのフィルタ改善などが入っています。([GitHub][1])
+
+追加・改善されたExamplesを、リリースノートから拾うと次のようになります。([GitHub][1])
+
+- Share dialog with state-encoded URLs
+- Author controls as JSX components
+- Download example as a standalone Vite project
+- Code editor autocomplete / go-to-definition / peekの解決
+- `category:` / `example:` tagsによるsidebar filter
+- GSplat streaming test example
+- Gaussian Splatting Depth of Field example
+- Depth of Field exampleのsplat budget / WebGPU向け調整
+- Depth of Field exampleへのSpAItial AI attribution追加
+- examples lintからalphabetical import-order requirementを削除
+- `vr-lod` XR exampleの改善とhand-tracking devicesでのXR menu / navigation修正
+- Gaussian Splat downtown streaming example
+- GSplat example dataのCDN配信
+- `gsplatModifyPS` hookを使うgsplat shader rings example
+- Gaussian splats向けnoise-based dissolve shader effect
+- hot reload後のMiniStats panel復元
+- UI element masking example
+- 起動時にresolved gsplat rendererをdropdownへ表示
+- GSplat VR LOD exampleをGaussian Splatting sectionに表示
+
+このリストを見ると、今回のExamples更新は「サンプルサイトの使い勝手改善」と「GSplatを実際に試すためのサンプル増強」の両方に分かれていることが分かります。特に、Viteプロジェクトとして持ち出せる導線と、GSplat streaming / Depth of Field / shader customization / dissolve / VR LODのようなサンプルが同時に増えている点は、学習用途にも検証用途にも効きそうです。
+
+PlayCanvasはサンプルを見ながら学べるのが良いところです。
+
+新しい描画機能やエンジン機能が、サンプルとして触れる形で出てくる。
+それを少し変えて試せる。
+さらにローカルのViteプロジェクトとして持ち出せる。
+
+この流れが強くなると、PlayCanvasを学ぶ人にも、検証用に使う人にもかなり便利です。
+
+GSplat関連でも、streaming test example、Gaussian Splatting Depth of Field example、Depth of FieldのWebGPU / splat budget調整などが追加・改善されています。([GitHub][1])
+
+## APIやコンポーネント整理も見逃せない
+
+v2.20.0では、API referenceやコンポーネント設計の整理も多く入っています。
+
+Entity class referenceの改善、型情報の整理、ComponentData classesの削除、ButtonComponent / CollisionComponent / ParticleSystemComponentなどの構造整理、JointComponentのpublic API化などです。([GitHub][1])
+
+これは一見地味ですが、長く使うエンジンではかなり重要です。
+
+PlayCanvasはEditorから触れるだけでなく、コードで細かく制御する場面もあります。
+そのとき、APIリファレンスや型、コンポーネント構造が整理されているかどうかは、開発体験に大きく効いてきます。
+
+## PlayCanvasをWeb 3Dエンジンとして見る
+
+今回のv2.20.0は、Gaussian Splattingのアップデートとしても面白いです。
+
+でもそれ以上に、PlayCanvasをWeb 3Dエンジンとして見たときに面白いリリースだと思います。
+
+WebGLで積み上げてきた実用性。
+WebGPUへの対応。
+GSplat / SOG / Gaussian Splattingのような新しい表現。
+サンプルや開発体験の改善。
+APIやコンポーネントの整理。
+
+これらが同時に進んでいます。
+
+PlayCanvasは、単なるWebXRフレームワークではなく、Web上で3Dコンテンツを作るための総合的なエンジンとして追う価値があります。
+
+BANGEOでも、PlayCanvasをWebXRの文脈だけに閉じず、WebGL / WebGPU / Gaussian Splatting / サンプル更新まで含めたWeb 3Dエンジンとして扱っていきたいと思っています。
+
+[PlayCanvas Engine v2.20.0 release](https://github.com/playcanvas/engine/releases/tag/v2.20.0)
+
+[1]: https://github.com/playcanvas/engine/releases/tag/v2.20.0 "Release v2.20.0 · playcanvas/engine"
