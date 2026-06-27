@@ -254,6 +254,33 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
 				</p>
 			</header>
 
+			<section className="mb-6 rounded-3xl border border-amber-100 bg-amber-50/70 p-5">
+				<div className="grid gap-5 md:grid-cols-[1.2fr_0.8fr]">
+					<div className="space-y-3">
+						<p className="text-xs font-black uppercase tracking-[0.25em] text-amber-700">
+							2026-06-27 priority
+						</p>
+						<h2 className="text-xl font-black tracking-tight text-gray-950">
+							イベント後の発表回収に切り替え
+						</h2>
+						<p className="text-sm leading-7 text-gray-700">
+							AWE USA 2026、Google I/O 2026、WWDC26、XR・メタバース総合展
+							夏は「発表回収」として扱います。IVS2026とManufacturing World Tokyo
+							2026は7月1日開始の開催直前イベントとして、XR / Spatial AI / Web 3D
+							/ デジタルツインに絞って確認します。
+						</p>
+					</div>
+					<div className="rounded-2xl bg-white/80 p-4 text-sm shadow-xs">
+						<p className="font-black text-gray-950">次に重点確認</p>
+						<ul className="mt-2 space-y-2 text-gray-700">
+							<li>2026-06-30: IVS / Manufacturing World 直前確認</li>
+							<li>2026-07-04: IVS / Manufacturing World 発表回収</li>
+							<li>2026-07-15: Meta Connect / TPAC / CEATEC / TGS 確認</li>
+						</ul>
+					</div>
+				</div>
+			</section>
+
 			<nav className="sticky top-0 z-20 -mx-4 mb-6 overflow-x-auto bg-white/90 px-4 py-2 backdrop-blur md:-mx-8 md:px-8">
 				<div className="flex min-w-max gap-2 pb-1">
 					{filters.map((filter) => (

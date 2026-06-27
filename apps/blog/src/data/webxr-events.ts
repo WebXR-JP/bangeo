@@ -63,7 +63,7 @@ export const WEBXR_EVENT_STATUS_LABELS: Record<WebXREventStatus, string> = {
 	upcoming: "開催予定",
 	"schedule-live": "セッション公開",
 	live: "開催中",
-	"live-soon": "まもなく開催",
+	"live-soon": "開催直前",
 	"recap-needed": "発表回収",
 	archived: "反映済み",
 };
@@ -77,7 +77,7 @@ export const WEBXR_EVENT_IMPORTANCE_LABELS: Record<
 	low: "低",
 };
 
-export const WEBXR_EVENTS_LAST_UPDATED = "2026-06-21";
+export const WEBXR_EVENTS_LAST_UPDATED = "2026-06-27";
 
 export const WEBXR_DEVICE_WATCH_TARGETS = [
 	"Meta / Quest / Quest Browser / Horizon OS",
@@ -159,7 +159,7 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		status: "recap-needed",
 		importance: "medium",
 		confidence: "high",
-		sourceUrl: "https://www.awexr.com/",
+		sourceUrl: "https://www.awexr.com/usa-2026",
 		sourceType: "primary",
 		entityTags: ["AWE", "XR", "Spatial AI", "WebAR", "Spatial Web"],
 		watchTopics: [
@@ -170,11 +170,11 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		],
 		affectedBangeoPages: ["/webxr-status", "/tech-articles", "/experiments"],
 		recommendedAction:
-			"開催後7日間（〜6月25日）は公式セッション資料、出展者発表、XR/Spatial AI関連の一次情報を確認し、WebARやブラウザ実装に関係する発表を回収する。",
-		lastCheckedAt: "2026-06-21",
-		nextCheckAt: "2026-06-25",
+			"録画・出展社発表を回収中。WebXR直結に限定せず、Spatial AI、WebAR、デバイス展示、ブラウザ実装に関係する一次情報を確認する。",
+		lastCheckedAt: "2026-06-27",
+		nextCheckAt: "2026-07-04",
 		notes:
-			"AWE 2026は6月15〜18日にLong Beachで開催済み。開催後7日間（〜6月25日）は出展者発表・セッション資料を重点回収する。",
+			"AWE USA 2026は6月15〜18日にLong Beachで開催済み。公式ページの録画導線、出展社発表、Spatial AI/WebAR/デバイス展示の一次情報を回収中。",
 	},
 	{
 		title: "Meta Connect 2026",
@@ -260,10 +260,10 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		endDate: "2026-05-20",
 		timezone: "America/Los_Angeles",
 		location: "Online / Mountain View",
-		status: "archived",
+		status: "recap-needed",
 		importance: "high",
 		confidence: "high",
-		sourceUrl: "https://io.google/",
+		sourceUrl: "https://io.google/2026/",
 		sourceType: "primary",
 		entityTags: [
 			"Google I/O",
@@ -287,11 +287,11 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 			"/experiments",
 		],
 		recommendedAction:
-			"Chrome公式ブログ、Google Developers Blog、セッション動画を確認済み。HTML-in-Canvas系の内容は既存記事へ反映済みのため、今後はAndroid XRやWebGPUの追加発表のみ継続追跡する。",
-		lastCheckedAt: "2026-06-15",
+			"オンデマンド動画と発表資料を継続確認し、Chrome、Web Platform、WebGPU、Android XRに接続できる更新を回収する。記事候補は「Google I/O 2026後にWebXR開発者が見るべきWeb Platform更新」。",
+		lastCheckedAt: "2026-06-27",
 		nextCheckAt: "2026-07-15",
 		notes:
-			"Google I/O 2026は開催済み。Chrome公式ブログで紹介されたHTML-in-CanvasなどのWeb Platform更新はBANGEOのHTML UI/HTML-in-Canvas関連記事へ反映済み。Google I/O単体記事は作らず、追加発表が出た場合のみ継続追跡する。",
+			"Google I/O 2026は開催済み。公式ページのCatch up導線からKeynote、Developer keynote、AI/Android/Chrome/Cloudのオンデマンド資料を回収し、Web Platform/WebGPU/Android XR観点で継続確認する。",
 	},
 	{
 		title: "WWDC26",
@@ -301,11 +301,10 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		endDate: "2026-06-12",
 		timezone: "America/Los_Angeles",
 		location: "Online / Apple Park",
-		status: "archived",
+		status: "recap-needed",
 		importance: "high",
 		confidence: "high",
-		sourceUrl:
-			"https://www.apple.com/newsroom/2026/05/apple-kicks-off-worldwide-developers-conference-on-june-8/",
+		sourceUrl: "https://developer.apple.com/wwdc26/",
 		sourceType: "official_blog",
 		entityTags: [
 			"WWDC",
@@ -329,11 +328,11 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 			"/devices",
 		],
 		recommendedAction:
-			"Apple Developerのセッション動画、Safari/WebKitリリースノート、visionOS 27関連資料を確認済み。Spatial Web、HTML model要素、WebXR viewport修正はSafari 27関連記事へ反映済み。",
-		lastCheckedAt: "2026-06-15",
+			"Apple DeveloperのRecaps、What’s New、visionOS 27関連セッションを継続確認する。WebXR対応として短絡せず、Safari / WebKit / visionOS / Spatial Webの別枠で整理する。",
+		lastCheckedAt: "2026-06-27",
 		nextCheckAt: "2026-07-15",
 		notes:
-			"WWDC26は開催済み。WebKit公式のSafari 27 beta記事でSpatial Web、HTML model要素、WebXR viewport修正を確認し、BANGEOのSafari 27関連記事2本へ反映済み。",
+			"WWDC26は開催済み。Apple DeveloperのRecaps、What’s New、100以上のセッション、visionOS 27関連セッションを回収し、Safari / visionOSのSpatial WebとWebXRの違いを整理する。",
 	},
 	{
 		title: "XR・メタバース総合展 夏 / ∞mugen",
@@ -376,9 +375,9 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 			"/notes/device-watch",
 		],
 		recommendedAction:
-			"開催後7日間（〜6月26日）は出展社ニュース、体験レポート、デバイス仕様、ブラウザ/WebView/WebXR/OpenXR対応を確認する。",
-		lastCheckedAt: "2026-06-21",
-		nextCheckAt: "2026-06-26",
+			"夏展は開催終了として扱い、国内デバイス発表、体験レポート、産業XR、WebAR転用可能な事例を回収する。秋展（2026年11月11〜13日）は別イベントとして継続確認する。",
+		lastCheckedAt: "2026-06-27",
+		nextCheckAt: "2026-07-04",
 		notes:
 			"2026年6月17〜19日に東京ビッグサイトで開催済み。∞mugen出展社（HTC NIPPON、XREAL、Shiftall、NTTコノキューデバイス、Even Realities、PICO等）の発表・体験レポートを回収中。",
 		region: "japan",
@@ -407,7 +406,7 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		endDate: "2026-07-03",
 		timezone: "Asia/Tokyo",
 		location: "Kyoto, Japan",
-		status: "upcoming",
+		status: "live-soon",
 		importance: "medium",
 		confidence: "high",
 		sourceUrl: "https://www.ivs.events/en/",
@@ -421,11 +420,11 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		],
 		affectedBangeoPages: ["/tech-articles", "/libraries", "/platforms"],
 		recommendedAction:
-			"開催前はXR/AI/デバイス系セッションと出展企業を確認。開催後は国内スタートアップやデバイスメーカー由来のWebXR/WebAR活用事例を回収する。",
-		lastCheckedAt: "2026-06-15",
-		nextCheckAt: "2026-06-22",
+			"開催直前。スタートアップ全般ではなく、XR / Spatial AI / WebAR / 3Dコマース / デバイス系の登壇・展示に絞って確認する。",
+		lastCheckedAt: "2026-06-27",
+		nextCheckAt: "2026-06-30",
 		notes:
-			"IVS公式ページでは2026年7月1〜3日に京都で開催予定と案内されている。WebXRそのもののイベントではないが、国内XR/AIスタートアップやデバイス周辺の発表を拾う候補にする。",
+			"IVS公式ページでは2026年7月1〜3日に京都みやこめっせ / ホテルオークラ京都で開催予定。6月25日にノースホールのコンテンツラインナップが公開されており、XR / Spatial AI / WebAR / 3Dコマース / デバイス系出展に絞って確認する。",
 	},
 	{
 		title: "XR Kaigi Hub 2026 Nagoya",
@@ -575,10 +574,10 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		endDate: "2026-07-03",
 		timezone: "Asia/Tokyo",
 		location: "Tokyo Big Sight",
-		status: "upcoming",
+		status: "live-soon",
 		importance: "medium",
 		confidence: "high",
-		sourceUrl: "https://www.manufacturing-world.jp/tokyo/en-gb.html",
+		sourceUrl: "https://www.manufacturing-world.jp/tokyo/ja-jp.html",
 		sourceType: "primary",
 		entityTags: [
 			"Manufacturing World",
@@ -597,11 +596,11 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		],
 		affectedBangeoPages: ["/platforms", "/devices", "/tech-articles"],
 		recommendedAction:
-			"製造業向けXR、3Dデータ活用、CAD/デジタルツイン、MREAL系ソリューションの出展を確認し、WebXR/WebAR学習に転用できる業務事例を拾う。",
-		lastCheckedAt: "2026-06-15",
-		nextCheckAt: "2026-06-22",
+			"開催直前。WebXR単体ではなく、Web 3D / デジタルツイン / CAD / 製造業AR / フィジカルAIの題材回収イベントとして確認する。",
+		lastCheckedAt: "2026-06-27",
+		nextCheckAt: "2026-06-30",
 		notes:
-			"公式ページでは2026年7月1〜3日に東京ビッグサイトで開催予定と案内されている。",
+			"公式ページでは2026年7月1〜3日に東京ビッグサイトで開催予定。CAD、3Dプリンタ、製造業DX、フィジカルAIなどを含むため、Web 3D / デジタルツイン / 製造業ARの題材として回収する。",
 		region: "japan",
 		organizerType: "expo",
 		watchMode: "discovery",
