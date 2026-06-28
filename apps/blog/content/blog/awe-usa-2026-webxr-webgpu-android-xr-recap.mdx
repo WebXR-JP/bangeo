@@ -148,6 +148,244 @@ WebXRそのものではありませんが、WebARやブラウザ上のAR体験�
 
 Snap関連は、BANGEOでは「WebXRの代替」ではなく、「AR体験の配信プラットフォーム比較」として扱うのが安全です。
 
+
+## OMBIとSneezeを読む：Web BrowserからMetaverse Browserへ
+
+AWE USA 2026の中で、BANGEO向けにかなり重要な話題がありました。
+
+それが、RP1とMetaverse Standards Forumによる**Open Metaverse Browser Initiative（OMBI）**と、その実装として発表された**Sneeze**です。
+
+関連動画はこちらです。
+
+<iframe
+  width="560"
+  height="315"
+  src="https://www.youtube.com/embed/SnzBw4PkBL0"
+  title="From Web Browser to Metaverse Browser with RP1 and Metaverse Standards Forum"
+  frameBorder="0"
+  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+  allowFullScreen>
+</iframe>
+
+この動画と関連する公式情報をもとに、OMBI / SneezeをWebXR開発者目線で整理します。
+
+注意点として、これはWebXR Device APIの新機能紹介ではありません。WebXRよりも一段広い、「空間Webにブラウザエンジンは必要なのか」という話です。
+
+BANGEOでは、WebXR、WebGPU、PlayCanvas、three.js、Gaussian SplattingのようなWeb 3D技術を追っています。OMBI / Sneezeは、その周辺にある「空間コンテンツをどう配信・合成・実行するか」というテーマとして見る価値があります。
+
+### まずOMBIとは何か
+
+OMBIは**Open Metaverse Browser Initiative**の略です。
+
+PlexやEmby向けのメディアリクエストアプリのOmbiとは別物です。
+
+AWE USA 2026文脈のOMBIは、Metaverse Standards ForumとRP1が進める、オープンなmetaverse browserを作るための取り組みです。
+
+公式発表では、OMBIは特定企業に所有されない、オープンで相互運用可能な空間Webブラウザ基盤を作る活動として説明されています。
+
+つまり、狙いはこうです。
+
+```txt
+2D Web:
+  Webサイトを誰でもホストできる
+  標準準拠ブラウザなら表示できる
+  単一企業がWeb全体を所有しない
+
+Spatial Web:
+  空間サービスを誰でもホストできる
+  標準準拠の空間ブラウザなら体験できる
+  単一企業のXRプラットフォームに閉じない
+```
+
+この構図が、OMBIの一番重要なポイントです。
+
+### Sneezeとは何か
+
+Sneezeは、OMBIの中で発表された**metaverse browser engine**です。
+
+Webブラウザでいうと、ChromeのBlink、SafariのWebKit、FirefoxのGeckoに相当するものを、空間コンピューティング向けに作ろうとしている、という理解が近いです。
+
+ただし、SneezeはHTML / CSS / DOMをそのまま置き換える話ではありません。
+
+公式発表を見る限り、Sneezeが扱おうとしているのは、次のような問題です。
+
+- 空間サービスをどう発見するか
+- 複数の事業者が提供する3Dコンテンツを同じ空間にどう合成するか
+- 各サービスのセキュリティ境界をどう守るか
+- WASM sandboxをどう使うか
+- OpenXR、glTF、SPIR-V、WebAssembly、GeoPoseなどの既存標準をどう接続するか
+- ARグラス、VR、デスクトップ、モバイルをどう横断するか
+
+WebXRのように「ブラウザでXRセッションを開始するAPI」とはレイヤーが違います。
+
+Sneezeは、空間Web全体の実行基盤や合成基盤を狙っているように見えます。
+
+### なぜ通常のWebブラウザだけでは足りないと言っているのか
+
+OMBI / Sneezeの主張を要約すると、現在のWebブラウザは2Dドキュメントを中心に設計されていて、空間コンピューティングには足りない部分がある、ということです。
+
+具体的には、次のような課題です。
+
+#### 1. 空間コンテンツは「URLを開く」だけでは足りない
+
+通常のWebでは、ユーザーはURLを開きます。
+
+しかし、ARグラスや空間コンピューティングでは、ユーザーがいる場所、向いている方向、周囲の物理空間、近くにあるサービスが意味を持ちます。
+
+つまり、空間Webでは「ページを開く」だけでなく、「その場所で使える空間サービスを発見する」仕組みが必要になります。
+
+ここでOMBI / Sneezeは、proximity-based service discoveryのような考え方を出しています。
+
+#### 2. 1つの空間に複数のサービスが同時に存在する
+
+通常のWebページは、多くの場合、1つのoriginが中心です。
+
+もちろんiframeや外部スクリプトはありますが、基本的にはページという単位があります。
+
+空間Webでは、同じ物理空間や仮想空間の中に、複数の事業者の3Dサービスが同時に存在する可能性があります。
+
+たとえば、駅の空間に次のようなサービスが同時に出るかもしれません。
+
+- 鉄道会社の案内
+- 店舗のクーポン
+- 自治体の防災情報
+- 友人のアバター
+- AIエージェント
+- 広告
+- ナビゲーション
+
+これらを1つの空間に合成しながら、互いのデータや権限を混ぜない仕組みが必要になります。
+
+ここで出てくるのが、Scene Object Modelやmulti-origin 3D scene compositionの考え方です。
+
+### WebXRとはどう違うのか
+
+ここはBANGEOで必ず整理した方がよいです。
+
+OMBI / SneezeはWebXRの代替として紹介しない方が安全です。
+
+役割を分けるなら、こうです。
+
+```txt
+WebXR:
+  WebアプリがXRデバイスに描画するためのブラウザAPI
+  セッション、入力、pose、reference space、WebGL/WebGPU連携などを扱う
+
+OMBI / Sneeze:
+  空間サービスをホスト、発見、合成、実行するためのブラウザエンジン構想
+  複数originの3Dサービス、空間インフラ、WASM sandbox、標準群の接続を扱う
+```
+
+つまり、WebXRは「XR表示に入るためのAPI」で、OMBI / Sneezeは「空間Webをどう成立させるか」という基盤構想です。
+
+将来的には重なる可能性があります。
+
+たとえば、Sneezeのようなmetaverse browser engineが、内部でWebXR、OpenXR、WebGPU、glTF、WebAssemblyを使うことは十分あり得ます。
+
+ただし、現時点で「OMBI = WebXRの次」と書くのは強すぎます。
+
+正確には、次のように書くのがよさそうです。
+
+> OMBI / Sneezeは、WebXRの直接アップデートではない。ただし、空間コンテンツをWebのように配信・合成・実行するための基盤を目指しており、WebXR、OpenXR、glTF、WebAssembly、GeoPoseなどの周辺標準と合わせて追う価値がある。
+
+### WebGPUやGaussian Splattingとは関係するのか
+
+直接の関係はまだ限定的です。
+
+ただし、方向性としては関係します。
+
+空間Webで扱うコンテンツは、2Dページより重くなります。
+
+たとえば次のようなものです。
+
+- 大量の3Dモデル
+- Gaussian Splattingの空間スキャン
+- リアルタイムアバター
+- 空間アンカー
+- AIエージェント
+- 物理空間に重なるUI
+- 複数ユーザーの同期
+
+これらを扱うなら、WebGPU、WebAssembly、glTF、OpenXR、Gaussian Splatting、ストリーミング、LOD、セキュリティ境界が重要になります。
+
+OMBI / Sneezeは、そうした技術を個別に置き換えるのではなく、空間サービスとして統合するための基盤を狙っているように見えます。
+
+### BANGEOでの評価
+
+BANGEOでは、OMBI / Sneezeを次のように扱うのがよいです。
+
+#### 重要度
+
+中から高。
+
+WebXR APIの直接更新ではないため、`/webxr-status` の主項目にはしない方がよいです。
+
+一方で、`/events`、`/platforms`、`/tech-articles`、`/web3d`、`/standards-watch` では扱う価値があります。
+
+#### 記事カテゴリ
+
+```yaml
+title: OMBIとSneezeを読む：空間Webにブラウザエンジンは必要なのか
+category: article-candidate / standards / spatial-web
+importance: high
+confidence: medium
+source_type: primary / AWE session + Metaverse Standards Forum + RP1 announcement
+entity_tags:
+  - OMBI
+  - Sneeze
+  - Metaverse Standards Forum
+  - RP1
+  - OpenXR
+  - WebXR
+  - WebAssembly
+  - glTF
+  - GeoPose
+  - Spatial Web
+```
+
+#### BANGEO内の置き場所
+
+候補は次です。
+
+- `/events`
+- `/tech-articles`
+- `/platforms`
+- `/spatial-web`
+- `/webxr-standards-watch`
+
+WebXR本体ページではなく、Spatial Web / Standards Watchに置くのが自然です。
+
+### 読者に伝えるべき結論
+
+OMBI / Sneezeは、すぐにWebXR開発者がnpm installして使う種類の話ではありません。
+
+むしろ、長期的に重要な問いを投げています。
+
+```txt
+空間コンテンツは、アプリストアに閉じるのか。
+それともWebのように、誰でもホストでき、標準準拠クライアントで見られるものになるのか。
+```
+
+WebXRは、この問いの一部です。
+
+WebGPUも一部です。
+
+glTFやOpenXRやWebAssemblyも一部です。
+
+OMBI / Sneezeは、それらを組み合わせて「空間版ブラウザ」を作ろうとする動きとして見ると理解しやすいです。
+
+BANGEOでは、この話題を追うことで、WebXRの仕様更新だけでは見えない、空間Web全体の設計思想を整理できます。
+
+### この記事から派生できる記事
+
+次の記事に展開できます。
+
+- WebXRとOMBIは何が違うのか
+- Sneezeとは何か：BlinkやWebKitと何が違うのか
+- 空間WebにScene Object Modelは必要なのか
+- OpenXR / WebXR / glTF / WebAssemblyを空間Webのレイヤーで整理する
+- WebGPU時代の空間ブラウザ：描画APIだけでは足りない理由
+
 ## Android XR関連で見たいセッション
 
 AWE USA 2026のセッション一覧には、Android XRやProject Auraに関係するセッションがあります。
@@ -204,4 +442,7 @@ BANGEOでは、AWE全体を広く追うのではなく、Webで3D体験を作る
 - [AWE USA 2026 Day 3 Recap](https://www.awexr.com/blog/AWE-USA-2026-Day-3-Recap)
 - [AWE USA 2026 agenda: Android XR and Project Aura: Enterprise XR Gets Real](https://www.awexr.com/usa-2026/agenda/1961)
 - [Google Blog: XREAL AURA and more Android XR news from AWE 2026](https://blog.google/innovation-and-ai/technology/xr-ar/awe-2026/)
+- [Open Metaverse Browser Initiative (OMBI)](https://metaverse-standards.org/open-metaverse-browser-initative/)
+- [Metaverse Standards Forum: Introducing Sneeze: The Browser Engine for Spatial Computing](https://metaverse-standards.org/news/)
+- [Open Standards for the Metaverse](https://omb.wiki/standards)
 - [AWE公式YouTubeチャンネル](https://www.youtube.com/@AWEXR/videos)
