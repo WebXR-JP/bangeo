@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 interface DemoIframeProps {
 	src: string;
 	title: string;
@@ -24,7 +22,9 @@ export function DemoIframe({
 					src={src}
 					title={title}
 					loading="lazy"
-					allow="fullscreen"
+					allow="xr-spatial-tracking; fullscreen; autoplay; camera; microphone"
+					allowFullScreen
+					referrerPolicy="strict-origin-when-cross-origin"
 					className="demo-embed-iframe"
 				/>
 			</div>
@@ -32,8 +32,11 @@ export function DemoIframe({
 				<figcaption className="demo-embed-caption">
 					{caption && <p>{caption}</p>}
 					{fullHref && (
-						<p>
-							<Link href={fullHref}>全画面でデモを開く →</Link>
+						<p className="demo-embed-actions">
+							<a href={fullHref}>全画面でデモを開く →</a>
+							<span>
+								Meta Quest / PICO では全画面リンクから開くと権限確認が安定します。
+							</span>
 						</p>
 					)}
 				</figcaption>
