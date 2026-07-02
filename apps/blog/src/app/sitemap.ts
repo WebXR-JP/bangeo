@@ -76,6 +76,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
 			priority: 0.9,
 		},
 		{
+			url: `${SITE_URL}/experimentals`,
+			lastModified: SITE_STRUCTURE_UPDATED,
+			changeFrequency: "weekly",
+			priority: 0.9,
+		},
+		{
 			url: `${SITE_URL}/podcast`,
 			lastModified: latestContentDate(
 				podcastEntries.map(
@@ -122,16 +128,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
 			url: `${SITE_URL}/devices`,
 			lastModified: SITE_STRUCTURE_UPDATED,
 			changeFrequency: "monthly",
-			priority: 0.9,
+			priority: 0.8,
 		},
 		{
 			url: `${SITE_URL}/libraries`,
 			lastModified: SITE_STRUCTURE_UPDATED,
 			changeFrequency: "monthly",
-			priority: 0.6,
+			priority: 0.7,
 		},
 		{
-			url: `${SITE_URL}/consulting`,
+			url: `${SITE_URL}/faq`,
 			lastModified: SITE_STRUCTURE_UPDATED,
 			changeFrequency: "monthly",
 			priority: 0.6,
@@ -141,18 +147,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
 			lastModified: SITE_STRUCTURE_UPDATED,
 			changeFrequency: "monthly",
 			priority: 0.5,
-		},
-		{
-			url: `${SITE_URL}/faq`,
-			lastModified: SITE_STRUCTURE_UPDATED,
-			changeFrequency: "monthly",
-			priority: 0.5,
-		},
-		{
-			url: `${SITE_URL}/privacy-policy`,
-			lastModified: SITE_STRUCTURE_UPDATED,
-			changeFrequency: "yearly",
-			priority: 0.3,
 		},
 		...techArticleDocs,
 		...experimentDocs,
