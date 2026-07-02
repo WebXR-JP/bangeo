@@ -1,0 +1,39 @@
+---
+title: "Body Tracking — WebXR proposal で全身スケルトンを扱う検証"
+description: "WebXR Body Tracking proposal の body-tracking feature descriptor と XRFrame.body / XRBody を前提に、全身スケルトン取得とアバター駆動の入口を確認する実験デモ。"
+date: "2026-07-03"
+category: "VR"
+tags:
+  - "WebXR"
+  - "Body Tracking"
+  - "Full Body Tracking"
+  - "Avatar"
+  - "Meta Quest"
+  - "PICO"
+frameworks:
+  - "Three.js"
+devices:
+  - "Meta Quest"
+  - "PICO"
+  - "PC VR"
+difficulty: "advanced"
+estimatedTime: 5
+link: "/demos/body-tracking/"
+---
+
+WebXR Body Tracking proposal を前提に、全身スケルトンの取得とアバター駆動を検証するための実験ページです。
+
+現在のデモは、Body Tracking API の有無やセッション起動までの導線を確認するための最小構成です。対応ブラウザ・対応デバイスでは、`body-tracking` feature descriptor と `XRFrame.body` / `XRBody` を使って、各 body joint の姿勢をフレームごとに参照する想定です。
+
+## 用語メモ
+
+| 用語 | このページでの意味 |
+| --- | --- |
+| Body Tracking | 頭部・手・コントローラーなどのトラッキング情報から、全身スケルトンや各関節の姿勢を扱う機能 |
+| `body-tracking` | WebXR Body Tracking proposal で追加される feature descriptor |
+| `XRFrame.body` | Body Tracking が許可されたセッションで、現在フレームの body 情報にアクセスする入口 |
+| XRBody | body joints とそれぞれの `XRBodySpace` を持つオブジェクト |
+
+## 注意点
+
+Body Tracking は WebXR 本体の安定機能ではなく、提案段階の API です。ブラウザやデバイスによって実装状況が大きく異なるため、実装時は `/devices/submit` の対応状況チェックと、実機でのセッション起動確認を併用してください。

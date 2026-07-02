@@ -7,14 +7,39 @@ interface ModuleResult {
 	supported: boolean;
 }
 
+type XRSessionMode = "inline" | "immersive-vr" | "immersive-ar";
+
 interface SessionResult {
-	id: string;
+	id: XRSessionMode;
 	name: string;
 	available: boolean;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const nav = typeof navigator !== "undefined" ? (navigator as any) : null;
+interface MinimalXRSession extends EventTarget {}
+
+interface MinimalXRSystem {
+	isSessionSupported(mode: XRSessionMode): Promise<boolean>;
+	requestSession(mode: XRSessionMode): Promise<MinimalXRSession>;
+}
+
+type NavigatorWithXR = Navigator & { xr?: MinimalXRSystem };
+
+type XRWindow = Window &
+	typeof globalThis & {
+		XRInputSource?: unknown;
+		XRHitTestSource?: unknown;
+		XRWebGLLayer?: unknown;
+		XRMediaBinding?: unknown;
+		XRAnchor?: unknown;
+		XRLightEstimate?: unknown;
+		XRHand?: unknown;
+		XRFrame?: { prototype: object };
+		XRBody?: unknown;
+		XRGPUBinding?: unknown;
+	};
+
+const nav =
+	typeof navigator !== "undefined" ? (navigator as NavigatorWithXR) : null;
 
 function getXR() {
 	return nav?.xr ?? null;
@@ -48,8 +73,7 @@ export function WebXRChecker() {
 			setHasWebXR(xrSupported);
 			setUserAgent(navigator.userAgent);
 
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const win = window as any;
+			const win = window as XRWindow;
 
 			const moduleChecks: {
 				name: string;
@@ -101,6 +125,13 @@ export function WebXRChecker() {
 					check: () => typeof win.XRHand !== "undefined",
 				},
 				{
+					name: "WebXR Body Tracking (proposal)",
+					check: () =>
+						(typeof win.XRFrame !== "undefined" &&
+							"body" in win.XRFrame.prototype) ||
+						typeof win.XRBody !== "undefined",
+				},
+				{
 					name: "WebXR/WebGPU bindings",
 					check: () => typeof win.XRGPUBinding !== "undefined",
 				},
@@ -120,7 +151,11 @@ export function WebXRChecker() {
 			setModules(moduleResults);
 
 			// Check session modes
-			const sessionModes = ["inline", "immersive-vr", "immersive-ar"];
+			const sessionModes: XRSessionMode[] = [
+				"inline",
+				"immersive-vr",
+				"immersive-ar",
+			];
 			const sessionResults: SessionResult[] = [];
 			for (const mode of sessionModes) {
 				let available = false;
@@ -141,7 +176,7 @@ export function WebXRChecker() {
 		init();
 	}, []);
 
-	async function startSession(mode: string) {
+	async function startSession(mode: XRSessionMode) {
 		const xr = getXR();
 		if (!xr) return;
 		try {
@@ -191,6 +226,19 @@ export function WebXRChecker() {
 						</h2>
 						<p className="text-gray-500 text-sm">
 							WebXRの各機能は仕様上「モジュール」として分割されています。ここで「対応」と表示されても、ハードウェアが機能を公開していない場合は利用できないことがあります。
+						</p>
+						<p className="text-gray-400 text-xs leading-relaxed">
+							Body Tracking は提案段階の API です。ここでは{" "}
+							<code className="bg-gray-100 px-1.5 py-0.5 rounded">
+								XRFrame.body
+							</code>{" "}
+							または{" "}
+							<code className="bg-gray-100 px-1.5 py-0.5 rounded">XRBody</code>{" "}
+							の実装有無を確認します。実際に利用するには、セッション側で{" "}
+							<code className="bg-gray-100 px-1.5 py-0.5 rounded">
+								body-tracking
+							</code>{" "}
+							feature descriptor が許可される必要があります。
 						</p>
 					</div>
 					<div className="space-y-3">
