@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>WebXR Body Tracking Sample</title>
+    <link rel="stylesheet" href="./style.css">
+  </head>
+  <body>
+    <canvas id="xr-canvas"></canvas>
+
+    <main class="panel">
+      <h1>WebXR Body Tracking</h1>
+      <p>
+        WebXR Body Tracking proposal の <code>body-tracking</code> feature を要求し、
+        <code>XRFrame.body</code> から取得した関節を点と線で表示します。
+      </p>
+
+      <div class="controls">
+        <label>
+          Session mode
+          <select id="mode">
+            <option value="immersive-vr">immersive-vr</option>
+            <option value="immersive-ar">immersive-ar</option>
+          </select>
+        </label>
+        <button id="check">対応チェック</button>
+        <button id="start">XR開始</button>
+        <button id="end" disabled>終了</button>
+      </div>
+
+      <pre id="log" aria-live="polite">起動待ち...</pre>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

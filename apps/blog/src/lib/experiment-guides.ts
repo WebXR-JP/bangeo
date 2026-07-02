@@ -216,6 +216,42 @@ const experimentGuides: Record<string, ExperimentGuide> = {
 		qualityCheck:
 			"合格ラインは「bounded-floorが取れる、またはlocal-floor fallbackが明示される」「境界頂点数が表示される」「終了後に説明ページへ戻れる」です。",
 	},
+	"webxr-body-tracking": {
+		statusLabel: "WebXR Body Tracking検証Lab",
+		statusReadiness: "lab",
+		summary: "XRFrame.bodyの全身関節が取得できるかを見る",
+		intent:
+			"WebXR Body Tracking proposalのbody-tracking featureを要求し、取得できた関節を点と線で可視化する検証デモです。PICOなど対応ブラウザで、アバター制御の前にセッション開始、frame.body、関節pose取得を切り分けます。",
+		primaryDevice: "PICO + Motion Tracker / WebXR対応ヘッドセット",
+		track: "vr-basics",
+		launchHref: "/demos/webxr-body-tracking",
+		deviceChecks: [
+			{
+				label: "PICO",
+				readiness: "lab",
+				note: "PICO Browser / PICO Web AppとMotion Tracker設定でbody-tracking featureを確認。",
+			},
+			{
+				label: "その他XR",
+				readiness: "unknown",
+				note: "WebXR Body Tracking proposal対応の有無をrequestSession結果で確認。",
+			},
+			{
+				label: "Desktop",
+				readiness: "preview",
+				note: "UIとWebGLプレビューのみ。実際のbody-tracking評価は対応ヘッドセットが必要。",
+			},
+		],
+		flow: [
+			"対応ヘッドセットで必要なトラッカー設定を済ませ、HTTPSで配信されたデモURLをブラウザで開く。",
+			"「対応チェック」でimmersive-vr / immersive-arの対応を見て、まずimmersive-vrでXR開始する。",
+			"HUDのframe.body、body.size、tracked jointsを見ながら、体を動かして関節点とボーン線が更新されるか確認する。",
+		],
+		fallback:
+			"body-trackingが使えない場合はrequestSessionのエラー、frame.body: null、tracked joints: 0のどこで止まったかを記録します。デスクトップではWebGL表示の確認までを正規のプレビュー扱いにします。",
+		qualityCheck:
+			"合格ラインは「XRセッションが開始する」「frame.bodyがavailableになる」「主要関節の点と線が動く」「失敗時にエラー名やnull状態がログで読める」です。",
+	},
 	"hit-test-advanced": {
 		statusLabel: "AR配置の実機テスト",
 		statusReadiness: "limited",
