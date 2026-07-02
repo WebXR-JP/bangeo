@@ -35,7 +35,8 @@ export function DemoIframe({
 						<p className="demo-embed-actions">
 							<a href={fullHref}>全画面でデモを開く →</a>
 							<span>
-								Meta Quest / PICO では全画面リンクから開くと権限確認が安定します。
+								Meta Quest / PICO
+								では全画面リンクから開くと権限確認が安定します。
 							</span>
 						</p>
 					)}

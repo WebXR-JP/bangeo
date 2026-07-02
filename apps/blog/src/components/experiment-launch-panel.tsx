@@ -1,11 +1,14 @@
 import Link from "next/link";
+import { SendToHeadset } from "@/components/send-to-headset";
 import {
+	type DeviceCheck,
 	getExperimentGuideOrDefault,
+	type Readiness,
 	readinessClassName,
 	readinessLabel,
-	type DeviceCheck,
-	type Readiness,
+	trackLabel,
 } from "@/lib/experiment-guides";
+import { SITE_URL } from "@/lib/site-url";
 
 interface ExperimentLaunchPanelProps {
 	slug: string;
@@ -44,6 +47,11 @@ export function ExperimentLaunchPanel({
 }: ExperimentLaunchPanelProps) {
 	const guide = getExperimentGuideOrDefault(slug, { href, devices });
 	const launchHref = guide.launchHref ?? href;
+	const absoluteLaunchUrl = launchHref
+		? launchHref.startsWith("http")
+			? launchHref
+			: `${SITE_URL}${launchHref}`
+		: undefined;
 
 	return (
 		<section className="not-prose mb-12 overflow-hidden rounded-[2rem] border border-rose-100 bg-gradient-to-br from-rose-50 via-white to-sky-50 shadow-xl shadow-rose-100/40">
@@ -52,13 +60,16 @@ export function ExperimentLaunchPanel({
 					<div className="mb-4 flex flex-wrap items-center gap-2">
 						<ReadinessBadge readiness={guide.statusReadiness} />
 						<span className="rounded-full bg-gray-950 px-3 py-1 text-[10px] font-black tracking-[0.16em] text-white uppercase">
-							Demo Flow
+							{trackLabel[guide.track]}
 						</span>
 					</div>
 					<h2 className="text-2xl font-black tracking-tight text-gray-950 md:text-3xl">
 						{guide.statusLabel}
 					</h2>
-					<p className="mt-4 text-sm leading-relaxed text-gray-600">
+					<p className="mt-3 text-sm font-bold leading-relaxed text-gray-800">
+						このデモですること: {guide.summary}
+					</p>
+					<p className="mt-3 text-sm leading-relaxed text-gray-600">
 						{guide.intent}
 					</p>
 					<div className="mt-5 rounded-2xl border border-white bg-white/80 p-4">
@@ -86,7 +97,7 @@ export function ExperimentLaunchPanel({
 						</div>
 					)}
 					<p className="mt-4 text-xs leading-relaxed text-gray-500">
-						ヘッドセットでは、説明ページ内のiframeよりも全画面リンクから開く方がWebXR権限と入力の切り分けが簡単です。
+						デモを開くと、Immersiveセッションに入る前に「対応チェックの事前判定パネル」が表示されます。非対応の環境では理由が表示されて停止するため、サイレントに失敗することはありません。
 					</p>
 				</div>
 
@@ -97,14 +108,17 @@ export function ExperimentLaunchPanel({
 						))}
 					</div>
 
-					<div className="grid gap-4 md:grid-cols-2">
+					<div className="mb-6 grid gap-4 md:grid-cols-2">
 						<div className="rounded-2xl border border-gray-100 bg-white/85 p-5">
 							<h3 className="mb-3 text-sm font-black text-gray-950">
 								体験フロー
 							</h3>
 							<ol className="space-y-3">
 								{guide.flow.map((step, index) => (
-									<li key={step} className="flex gap-3 text-xs leading-relaxed text-gray-600">
+									<li
+										key={step}
+										className="flex gap-3 text-xs leading-relaxed text-gray-600"
+									>
 										<span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gray-950 text-[10px] font-black text-white">
 											{index + 1}
 										</span>
@@ -131,6 +145,8 @@ export function ExperimentLaunchPanel({
 							</div>
 						</div>
 					</div>
+
+					{absoluteLaunchUrl && <SendToHeadset url={absoluteLaunchUrl} />}
 				</div>
 			</div>
 		</section>

@@ -21,7 +21,6 @@ const APP_HTML_DEMOS = new Set([
 	"hand-tracking-advanced",
 	"haptics-pulse",
 	"head-tracking",
-	"hit-test-advanced",
 	"immersive-ar-basic",
 	"inline-session",
 	"layers-api",
@@ -33,7 +32,6 @@ const APP_HTML_DEMOS = new Set([
 	"real-world-mesh-occlusion",
 	"reference-space",
 	"render-optimization",
-	"room-tracking",
 	"session-end-events",
 	"session-features",
 	"session-lifecycle",
@@ -46,7 +44,6 @@ const APP_HTML_DEMOS = new Set([
 	"webgl-xr-integration",
 	"webgpu-fallback-lab",
 	"webgpu-xr-integration",
-	"webxr-audio-space",
 	"world-effects",
 	"xr-frame-loop",
 ]);
@@ -79,6 +76,7 @@ export function middleware(request: NextRequest) {
 	// /demos/:slug は壊れやすいラッパーではなく実体HTMLへ直行させる。
 	// WebXR は iframe 内だと Permission Policy の影響を受けやすいため、
 	// Meta Quest / PICO では app.html / demo.html の全画面起動を正規ルートにする。
+	// 事前判定ゲート（bangeo-xr.js）を組み込んだ再実装デモは index.html が正規ルート。
 	const demoMatch = pathname.match(/^\/demos\/([^/.]+)\/?$/);
 	if (demoMatch) {
 		const slug = demoMatch[1];
