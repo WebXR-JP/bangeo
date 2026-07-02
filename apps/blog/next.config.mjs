@@ -27,6 +27,10 @@ export default withMDX({
 					source: "/demos/:slug",
 					destination: "/demos/:slug/index.html",
 				},
+				{
+					source: "/demo/:slug",
+					destination: "/demo/:slug/index.html",
+				},
 			],
 		};
 	},

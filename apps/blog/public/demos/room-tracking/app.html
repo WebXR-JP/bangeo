@@ -1,82 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Room Tracking</title>
-    <style>
-        body { margin: 0; overflow: hidden; background-color: #222; font-family: sans-serif; }
-        #info {
-            position: absolute; top: 10px; width: 100%; text-align: center; color: white;
-            pointer-events: none; z-index: 100; text-shadow: 0 1px 2px black;
-        }
-        #info a { color: #f4a83a; pointer-events: auto; }
-        .desc { font-size: 0.8em; opacity: 0.8; margin-top: 4px; padding: 0 10px; }
-    </style>
+  <meta charset="utf-8">
+  <meta http-equiv="refresh" content="0; url=./index.html">
+  <title>Redirecting…</title>
 </head>
 <body>
-    <div id="info">
-        <h3>Room Tracking</h3>
-        <div class="desc">bounded-floor/stageリファレンススペースでプレイエリア境界を取得し、空間を可視化するデモ。</div>
-        <div style="margin-top: 10px;">
-            <a href="/">Back to Demos</a>
-        </div>
-    </div>
-    <script type="module">
-        import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
-        import { VRButton } from 'https://unpkg.com/three@0.160.0/examples/jsm/webxr/VRButton.js';
-
-        // --- Demo Implementation ---
-        
-        let camera, scene, renderer;
-
-        init();
-        animate();
-
-        function init() {
-            const container = document.createElement('div');
-            document.body.appendChild(container);
-
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x222222);
-
-            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 10);
-            camera.position.set(0, 1.6, 3);
-
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setPixelRatio(window.devicePixelRatio);
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.xr.enabled = true;
-            container.appendChild(renderer.domElement);
-            
-            // Request bounded-floor to get bounds
-            document.body.appendChild(VRButton.createButton(renderer, {
-                requiredFeatures: ['bounded-floor']
-            }));
-            
-            renderer.xr.addEventListener('sessionstart', () => {
-                // Bounds are usually handled by the XR system and retrievable from reference space
-                // In Three.js, we can try to get reference space from manager
-                // Visualizing bounds manually usually involves getting referenceSpace.boundsGeometry
-            });
-
-            window.addEventListener('resize', onWindowResize);
-        }
-
-        function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        }
-
-        function animate() {
-            renderer.setAnimationLoop(render);
-        }
-
-        function render() {
-            renderer.render(scene, camera);
-        }
-    
-    </script>
+  <p><a href="./index.html">デモはこちらに移動しました</a></p>
 </body>
 </html>

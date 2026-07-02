@@ -224,19 +224,6 @@ export default async function ExperimentPage({ params }: PageProps) {
 				<MDX components={mdxComponents} />
 			</article>
 
-			{doc.link && (
-				<div className="mt-12 pt-8 border-t border-gray-100">
-					<a
-						href={String(doc.link)}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="inline-flex items-center gap-2 px-6 py-3 bg-[#e11d48] text-white text-sm font-bold rounded-xl hover:bg-[#be1b3e] transition-colors"
-					>
-						デモを試す
-					</a>
-				</div>
-			)}
-
 			<footer className="mt-12 pt-8 border-t border-gray-100">
 				<Link
 					href="/experiments"

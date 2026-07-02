@@ -1,258 +1,196 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Room Tracking | BANGEO WebXR Demo</title>
-    <link rel="icon" type="image/png" href="https://bangeo.net/favicon.png">
-    <style>
-        :root {
-            --bg: #ffffff;
-            --ink: #030712;
-            --accent: #e11d48;
-            --muted: #6b7280;
-            --border: #f3f4f6;
-            --rose-50: #fff1f2;
-        }
-        * { box-sizing: border-box; }
-        body {
-            font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", sans-serif;
-            margin: 0;
-            background-color: var(--bg);
-            color: var(--ink);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            -webkit-font-smoothing: antialiased;
-        }
-        .nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 50;
-            padding: 12px 16px;
-        }
-        @media (min-width: 768px) {
-            .nav { padding: 20px 40px; }
-        }
-        .nav-inner {
-            max-width: 1280px;
-            margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: white;
-            border-radius: 9999px;
-            padding: 12px 20px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border: 1px solid var(--border);
-        }
-        @media (min-width: 768px) {
-            .nav-inner { padding: 12px 32px; }
-        }
-        .nav-logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            text-decoration: none;
-            transition: transform 0.2s;
-        }
-        .nav-logo:hover { transform: scale(1.02); }
-        .nav-logo img { width: 32px; height: 32px; }
-        @media (min-width: 768px) {
-            .nav-logo img { width: 36px; height: 36px; }
-        }
-        .nav-logo span {
-            font-weight: 900;
-            font-size: 16px;
-            letter-spacing: -0.025em;
-            color: var(--ink);
-        }
-        @media (min-width: 768px) {
-            .nav-logo span { font-size: 18px; }
-        }
-        .back-link {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.18em;
-            color: #374151;
-            text-decoration: none;
-            padding: 8px 16px;
-            border-radius: 9999px;
-            background: rgba(255,255,255,0.8);
-            border: 1px solid rgba(244,63,94,0.1);
-            transition: all 0.2s;
-        }
-        .back-link:hover {
-            color: var(--accent);
-            background: var(--rose-50);
-        }
-        main {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 120px 24px 48px;
-            position: relative;
-        }
-        @media (min-width: 768px) {
-            main { padding: 140px 48px 64px; }
-        }
-        .content-info {
-            text-align: center;
-            max-width: 640px;
-            margin-bottom: 2rem;
-            background: white;
-            border: 1px solid var(--border);
-            border-radius: 2rem;
-            padding: 40px 32px;
-            transition: all 0.5s;
-        }
-        @media (min-width: 768px) {
-            .content-info { padding: 48px 56px; }
-        }
-        .content-info:hover {
-            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.08);
-        }
-        h2 {
-            font-size: 28px;
-            font-weight: 900;
-            margin: 0 0 16px;
-            letter-spacing: -0.025em;
-            color: var(--ink);
-        }
-        @media (min-width: 768px) {
-            h2 { font-size: 36px; }
-        }
-        .desc {
-            color: var(--muted);
-            line-height: 1.7;
-            margin-bottom: 32px;
-            font-size: 15px;
-            font-weight: 500;
-        }
-        @media (min-width: 768px) {
-            .desc { font-size: 16px; }
-        }
-        .run-button {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 16px 32px;
-            background-color: var(--ink);
-            color: white;
-            text-decoration: none;
-            border-radius: 9999px;
-            font-weight: 900;
-            font-size: 14px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
-        }
-        .run-button:hover {
-            background-color: var(--accent);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(225, 29, 72, 0.3);
-        }
-        .run-button:active { transform: translateY(0); }
-        .note {
-            font-size: 12px;
-            color: #9ca3af;
-            margin-top: 20px;
-            font-weight: 500;
-        }
-
-        #demo-container {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-            background: #111;
-            display: none;
-            z-index: 100;
-        }
-        iframe { width: 100%; height: 100%; border: none; }
-
-        .close-demo {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            background: rgba(0,0,0,0.6);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 50%;
-            width: 44px;
-            height: 44px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 20px;
-            transition: all 0.2s;
-        }
-        .close-demo:hover {
-            background: var(--accent);
-            border-color: var(--accent);
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WebXR Bounded Floor Viewer | BANGEO WebXR Lab</title>
+  <link rel="icon" type="image/png" href="https://www.bangeo.net/favicon.png">
+  <style>
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #0b0b16; }
+    canvas { display: block; }
+    .hud {
+      position: fixed; top: 12px; left: 12px; right: 12px; z-index: 10;
+      pointer-events: none;
+      font-family: "Hiragino Sans", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+    }
+    .hud .card {
+      width: min(480px, 100%);
+      background: rgba(17, 24, 39, 0.85);
+      border: 1px solid rgba(255,255,255,0.14);
+      border-radius: 14px; padding: 12px 14px; color: #e5e7eb;
+    }
+    .hud h1 { margin: 0 0 4px; font-size: 14px; }
+    .hud p { margin: 0; font-size: 11.5px; line-height: 1.6; color: #9ca3af; }
+    .hud .state { margin-top: 6px; font-size: 11px; font-weight: 900; color: #fda4af; white-space: pre-line; }
+  </style>
 </head>
 <body>
-    <nav class="nav">
-        <div class="nav-inner">
-            <a href="https://bangeo.net/" class="nav-logo">
-                <img src="https://bangeo.net/favicon.png" alt="BANGEO Mascot">
-                <span>BANGEO WebXR</span>
-            </a>
-            <a href="/" class="back-link">← デモ一覧</a>
-        </div>
-    </nav>
-    <main id="main-content">
-        <div class="content-info">
-            <h2>Room Tracking</h2>
-            <p class="desc">bounded-floor/stageリファレンススペースでプレイエリア境界を取得し、空間を可視化するデモ。</p>
-            <button class="run-button" onclick="runDemo()">
-                ▶ コンテンツを実行
-            </button>
-            <p class="note">
-                ※ WebXR 対応デバイス（Meta Questなど）またはエミュレータが必要です
-            </p>
-        </div>
-    </main>
-
-    <div id="demo-container">
-        <button class="close-demo" onclick="closeDemo()" title="デモを終了">×</button>
-        <iframe id="demo-frame"></iframe>
+  <div class="hud">
+    <div class="card">
+      <h1>WebXR Bounded Floor Viewer</h1>
+      <p>bounded-floor の boundsGeometry（プレイエリア境界）を床に描画します。bounded-floor が取れない場合は local-floor にフォールバックし、その事実を明示します。</p>
+      <p class="state" id="state">VR開始前</p>
     </div>
+  </div>
 
-    <script>
-        function _runDemo() {
-            const container = document.getElementById('demo-container');
-            const frame = document.getElementById('demo-frame');
-            const closeBtn = document.querySelector('.close-demo');
+  <script type="module">
+    import * as THREE from "https://unpkg.com/three@0.160.0/build/three.module.js";
+    import { createXRGate } from "../_shared/bangeo-xr.js";
 
-            frame.src = "./app.html";
+    const stateEl = document.getElementById("state");
 
-            container.style.display = 'block';
-            closeBtn.style.display = 'flex';
-        }
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0b0b16);
 
-        function _closeDemo() {
-            const container = document.getElementById('demo-container');
-            const frame = document.getElementById('demo-frame');
-            const closeBtn = document.querySelector('.close-demo');
+    const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.05, 40);
+    camera.position.set(0, 1.6, 2.5);
 
-            frame.src = "";
+    scene.add(new THREE.HemisphereLight(0x8888ff, 0x223344, 1.4));
 
-            container.style.display = 'none';
-            closeBtn.style.display = 'none';
-        }
-    </script>
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(devicePixelRatio);
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.xr.enabled = true;
+    document.body.appendChild(renderer.domElement);
+
+    // 床グリッド（local-floor基準の視覚アンカー）
+    scene.add(new THREE.GridHelper(8, 32, 0x475569, 0x1e293b));
+    const originMarker = new THREE.Mesh(
+      new THREE.RingGeometry(0.1, 0.14, 32).rotateX(-Math.PI / 2),
+      new THREE.MeshBasicMaterial({ color: 0x60a5fa }),
+    );
+    originMarker.position.y = 0.005;
+    scene.add(originMarker);
+
+    // 境界表示用グループ
+    const boundsGroup = new THREE.Group();
+    scene.add(boundsGroup);
+
+    function clearBounds() {
+      while (boundsGroup.children.length) {
+        boundsGroup.remove(boundsGroup.children[0]);
+      }
+    }
+
+    function drawBounds(boundsGeometry) {
+      clearBounds();
+      if (!boundsGeometry || boundsGeometry.length === 0) return 0;
+
+      const points = boundsGeometry.map(
+        (p) => new THREE.Vector3(p.x, 0.01, p.z),
+      );
+      points.push(points[0].clone()); // ループを閉じる
+
+      const line = new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints(points),
+        new THREE.LineBasicMaterial({ color: 0xfb7185, linewidth: 2 }),
+      );
+      boundsGroup.add(line);
+
+      // 頂点マーカーと、境界に沿った薄い壁
+      for (let i = 0; i < boundsGeometry.length; i++) {
+        const p = boundsGeometry[i];
+        const post = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.02, 0.02, 0.4, 8).translate(0, 0.2, 0),
+          new THREE.MeshBasicMaterial({ color: 0xfda4af }),
+        );
+        post.position.set(p.x, 0, p.z);
+        boundsGroup.add(post);
+      }
+
+      const wallShape = points.slice(0, -1);
+      for (let i = 0; i < wallShape.length; i++) {
+        const a = wallShape[i];
+        const b = wallShape[(i + 1) % wallShape.length];
+        const len = a.distanceTo(b);
+        const wall = new THREE.Mesh(
+          new THREE.PlaneGeometry(len, 0.4),
+          new THREE.MeshBasicMaterial({
+            color: 0xfb7185, transparent: true, opacity: 0.12, side: THREE.DoubleSide,
+          }),
+        );
+        wall.position.copy(a).add(b).multiplyScalar(0.5);
+        wall.position.y = 0.2;
+        wall.lookAt(new THREE.Vector3(b.x, 0.2, b.z));
+        wall.rotateY(Math.PI / 2);
+        boundsGroup.add(wall);
+      }
+      return boundsGeometry.length;
+    }
+
+    let activeSpaceType = null;
+
+    async function setupReferenceSpace(session) {
+      // 1. bounded-floor を試す
+      try {
+        const bounded = await session.requestReferenceSpace("bounded-floor");
+        activeSpaceType = "bounded-floor";
+        renderer.xr.setReferenceSpace(bounded);
+
+        const apply = () => {
+          const count = drawBounds(bounded.boundsGeometry);
+          stateEl.textContent =
+            `reference space: bounded-floor\n境界頂点数: ${count}` +
+            (count === 0 ? "（boundsGeometryが空です。プレイエリアを設定してください）" : "");
+        };
+        apply();
+        bounded.addEventListener("reset", () => {
+          gate.log("bounded-floorがreset（再センタリング等）されました。再描画します。");
+          apply();
+        });
+        return;
+      } catch (err) {
+        gate.log(
+          `bounded-floorは取得できませんでした（${err?.name ?? "Error"}）。local-floorにフォールバックします。`,
+        );
+      }
+
+      // 2. local-floor フォールバック
+      try {
+        const local = await session.requestReferenceSpace("local-floor");
+        activeSpaceType = "local-floor";
+        renderer.xr.setReferenceSpace(local);
+        clearBounds();
+        stateEl.textContent =
+          "reference space: local-floor（フォールバック）\n境界は取得できません。床原点マーカー（青リング）のずれのみ確認できます。";
+      } catch (err) {
+        activeSpaceType = null;
+        gate.error(
+          `local-floorも取得できませんでした: ${err?.message ?? err}`,
+        );
+        stateEl.textContent = "床基準のreference spaceを取得できませんでした";
+      }
+    }
+
+    const gate = createXRGate({
+      title: "WebXR Bounded Floor Viewer",
+      subtitle:
+        "プレイエリア境界（boundsGeometry）の形状・頂点数・床基準のずれを実機で確認します。事前にヘッドセット側でプレイエリア（静止／ルームスケール）を設定してください。",
+      mode: "immersive-vr",
+      // bounded-floorは必須にせず、セッション内でフォールバックを明示する
+      optionalFeatures: ["bounded-floor", "local-floor"],
+      backHref: "/experiments/room-scale-bounds-viewer",
+      deviceHint:
+        "Meta Quest（Quest Browser 146以降推奨）または PICO のブラウザでこのURLを開いてください。境界の評価には実機とプレイエリア設定が必須です。",
+      async onSessionStarted(session) {
+        await renderer.xr.setSession(session);
+        await setupReferenceSpace(session);
+      },
+      onSessionEnded() {
+        clearBounds();
+        stateEl.textContent = "VR終了。もう一度開始できます";
+      },
+    });
+
+    renderer.setAnimationLoop(() => {
+      renderer.render(scene, camera);
+    });
+
+    addEventListener("resize", () => {
+      camera.aspect = innerWidth / innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+    });
+  </script>
 </body>
 </html>
