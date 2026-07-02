@@ -1,6 +1,7 @@
 import { experiments } from "fumadocs-mdx:collections/server";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { WebXRChecker } from "@/app/devices/submit/webxr-checker";
 import { CollectionStructuredData } from "@/components/collection-structured-data";
 import { OptimizedImage } from "@/components/optimized-image";
 import { contentDateTime, contentDateValue } from "@/lib/content-dates";
@@ -82,6 +83,10 @@ export default function ExperimentsIndexPage() {
 					)}
 				</div>
 			</header>
+
+			<section className="mb-12">
+				<WebXRChecker />
+			</section>
 
 			{hasExperiments ? (
 				<div className="grid gap-6 md:gap-8 md:grid-cols-2 lg:grid-cols-3">
