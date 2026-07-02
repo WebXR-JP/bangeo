@@ -23,7 +23,7 @@ export const NAV_CATEGORIES: NavCategory[] = [
 	{
 		label: "作る・学ぶ",
 		items: [
-			{ name: "デモ", href: "/experiments" },
+			{ name: "実験室", href: "/experimentals" },
 			{ name: "技術記事", href: "/tech-articles" },
 			{ name: "ポッドキャスト", href: "/podcast" },
 			{ name: "ライブラリ", href: "/libraries" },
@@ -62,7 +62,7 @@ export const NAV_CATEGORIES: NavCategory[] = [
 ];
 
 export const FOOTER_MAIN_LINKS = [
-	{ name: "デモ", href: "/experiments" },
+	{ name: "実験室", href: "/experimentals" },
 	{ name: "技術記事", href: "/tech-articles" },
 	{ name: "ポッドキャスト", href: "/podcast" },
 	{ name: "標準化状況", href: "/webxr-status" },
