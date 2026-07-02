@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArticleStructuredData } from "@/components/article-structured-data";
+import { ExperimentLaunchPanel } from "@/components/experiment-launch-panel";
 import { mdxComponents } from "@/components/mdx-components";
 import { OptimizedImage } from "@/components/optimized-image";
 import { SocialShare } from "@/components/social-share";
@@ -111,7 +112,7 @@ export default async function ExperimentPage({ params }: PageProps) {
 				categoryPath="/experiments"
 				tags={tags}
 			/>
-			{/* Hero: thumbnail + header side-by-side */}
+
 			<header className="mb-8">
 				<div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
 					{doc.thumbnail && (
@@ -175,7 +176,6 @@ export default async function ExperimentPage({ params }: PageProps) {
 				</div>
 			</header>
 
-			{/* Meta info bar */}
 			{metaItems.length > 0 && (
 				<div className="mb-10 rounded-xl border border-gray-100 bg-gray-50/50 overflow-hidden">
 					<div
@@ -213,22 +213,16 @@ export default async function ExperimentPage({ params }: PageProps) {
 
 			<SocialShare url={shareUrl} title={doc.title} className="mb-10" />
 
+			<ExperimentLaunchPanel
+				slug={slug}
+				title={doc.title}
+				href={doc.link ? String(doc.link) : undefined}
+				devices={devices}
+			/>
+
 			<article className="tech-article-content max-w-none">
 				<MDX components={mdxComponents} />
 			</article>
-
-			{doc.link && (
-				<div className="mt-12 pt-8 border-t border-gray-100">
-					<a
-						href={String(doc.link)}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="inline-flex items-center gap-2 px-6 py-3 bg-[#e11d48] text-white text-sm font-bold rounded-xl hover:bg-[#be1b3e] transition-colors"
-					>
-						デモを試す
-					</a>
-				</div>
-			)}
 
 			<footer className="mt-12 pt-8 border-t border-gray-100">
 				<Link
