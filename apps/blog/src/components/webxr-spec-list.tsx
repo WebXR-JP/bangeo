@@ -182,6 +182,19 @@ export function WebXRSpecList() {
 	}, []);
 
 	const loaded = Object.keys(results).length > 0;
+	const supportRank: Record<SpecSupport, number> = {
+		supported: 0,
+		unknown: 1,
+		checking: 2,
+		unsupported: 3,
+	};
+	const sortedEntries = loaded
+		? [...webxrSpecCatalog].sort(
+				(a, b) =>
+					supportRank[results[a.id] ?? "checking"] -
+					supportRank[results[b.id] ?? "checking"],
+			)
+		: webxrSpecCatalog;
 	const supportedNames = webxrSpecCatalog
 		.filter((entry) => results[entry.id] === "supported")
 		.map((entry) => entry.name);
@@ -256,7 +269,7 @@ export function WebXRSpecList() {
 			</div>
 
 			<ul className="mt-6 divide-y divide-gray-100 rounded-2xl border border-gray-100">
-				{webxrSpecCatalog.map((entry) => {
+				{sortedEntries.map((entry) => {
 					const support = results[entry.id] ?? "checking";
 					const badge = supportBadge[support];
 					return (
