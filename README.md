@@ -2,7 +2,7 @@
 
 WebXR・VR/AR に関する日本語リソースサイトです。
 
-**サイト**: [https://bangeo.net](https://bangeo.net)
+**サイト**: [https://www.bangeo.net](https://www.bangeo.net)
 
 ## リポジトリ構成
 
