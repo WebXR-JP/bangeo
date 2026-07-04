@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SITE_URL } from "@/lib/site-url";
 import {
-	maturityLabel,
 	maturityTitle,
 	type SpecCheckId,
 	type SpecSupport,
@@ -115,12 +114,25 @@ const supportMark: Record<SpecSupport, string> = {
 	checking: "…",
 };
 
-const supportMarkClass: Record<SpecSupport, string> = {
-	supported: "text-emerald-600",
-	unsupported: "text-gray-300",
-	unknown: "text-gray-400",
-	checking: "text-gray-300",
-};
+const supportBadge: Record<SpecSupport, { label: string; className: string }> =
+	{
+		supported: {
+			label: "対応",
+			className: "bg-emerald-50 text-emerald-700",
+		},
+		unsupported: {
+			label: "未対応",
+			className: "bg-gray-100 text-gray-400",
+		},
+		unknown: {
+			label: "実機",
+			className: "bg-gray-100 text-gray-500",
+		},
+		checking: {
+			label: "…",
+			className: "animate-pulse bg-gray-100 text-gray-300",
+		},
+	};
 
 const supportTitle: Record<SpecSupport, string> = {
 	supported: "このブラウザで利用できます",
@@ -130,6 +142,9 @@ const supportTitle: Record<SpecSupport, string> = {
 };
 
 const PAGE_URL = `${SITE_URL}/experiments`;
+
+const demoLinkClass =
+	"inline-flex items-center justify-center rounded-full border border-gray-200 bg-white px-3 py-1 text-[11px] font-bold text-gray-700 transition hover:border-gray-950 hover:text-gray-950";
 
 export function WebXRSpecList() {
 	const [results, setResults] = useState<
@@ -207,21 +222,24 @@ export function WebXRSpecList() {
 
 	return (
 		<div>
-			<div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-gray-500">
-				<span className="font-bold text-gray-800">
-					{envLabel ?? "環境を確認中…"}
-				</span>
+			<div className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl bg-gray-50 px-5 py-4">
+				<div className="min-w-0">
+					<p className="text-sm font-bold text-gray-950">
+						{envLabel ?? "環境を確認中…"}
+					</p>
+					{loaded && (
+						<p className="mt-0.5 text-xs text-gray-400">
+							{supportedNames.length} / {webxrSpecCatalog.length}{" "}
+							の仕様がこのブラウザで利用できます
+						</p>
+					)}
+				</div>
 				{loaded && (
-					<span className="text-xs text-gray-400">
-						{supportedNames.length} / {webxrSpecCatalog.length} 仕様が利用可
-					</span>
-				)}
-				{loaded && (
-					<span className="flex items-center gap-1.5">
+					<div className="ml-auto flex items-center gap-2">
 						<button
 							type="button"
 							onClick={copyResult}
-							className="rounded-full border border-gray-200 px-3 py-1 text-xs font-bold text-gray-600 transition hover:border-gray-300 hover:text-gray-950"
+							className="rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-xs font-bold text-gray-600 transition hover:border-gray-950 hover:text-gray-950"
 						>
 							{copied ? "コピーしました" : "結果をコピー"}
 						</button>
@@ -229,98 +247,89 @@ export function WebXRSpecList() {
 							href={shareHref}
 							target="_blank"
 							rel="noopener noreferrer"
-							className="rounded-full border border-gray-200 px-3 py-1 text-xs font-bold text-gray-600 transition hover:border-gray-300 hover:text-gray-950"
+							className="rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-xs font-bold text-gray-600 transition hover:border-gray-950 hover:text-gray-950"
 						>
-							#bangeo_webxr でシェア
+							Xでシェア
 						</a>
-					</span>
+					</div>
 				)}
 			</div>
 
-			<ul className="mt-5 border-t border-gray-100">
+			<ul className="mt-6 divide-y divide-gray-100 rounded-2xl border border-gray-100">
 				{webxrSpecCatalog.map((entry) => {
 					const support = results[entry.id] ?? "checking";
+					const badge = supportBadge[support];
 					return (
 						<li
 							key={entry.id}
-							className="flex items-center gap-4 border-b border-gray-100 py-3.5"
+							className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:gap-5"
 						>
-							<span
-								className={`w-4 shrink-0 text-center text-sm font-bold ${supportMarkClass[support]}`}
-								title={supportTitle[support]}
-							>
-								<span aria-hidden="true">{supportMark[support]}</span>
-								<span className="sr-only">{supportTitle[support]}</span>
+							<span className="w-14 shrink-0" title={supportTitle[support]}>
+								<span
+									className={`inline-flex w-full justify-center rounded-full px-2 py-1 text-[11px] font-bold ${badge.className}`}
+								>
+									{badge.label}
+								</span>
 							</span>
 							<div className="min-w-0 flex-1">
 								<p className="text-sm leading-snug">
 									<span className="font-bold text-gray-950">{entry.name}</span>
-									<span className="ml-2 text-xs text-gray-500">
-										{entry.description}
-									</span>
+									{entry.specUrl ? (
+										<a
+											href={entry.specUrl}
+											target="_blank"
+											rel="noopener noreferrer"
+											title={`${entry.specName}（${maturityTitle[entry.maturity]}）`}
+											className="ml-2 text-[11px] text-gray-400 transition hover:text-gray-600 hover:underline"
+										>
+											{entry.specName}
+										</a>
+									) : (
+										<span
+											className="ml-2 text-[11px] text-gray-400"
+											title={maturityTitle[entry.maturity]}
+										>
+											{entry.specName}
+										</span>
+									)}
+								</p>
+								<p className="mt-1 text-xs leading-relaxed text-gray-500">
+									{entry.description}
 									{entry.articleSlug && (
 										<Link
 											href={`/experiments/${entry.articleSlug}`}
-											className="ml-2 text-xs text-gray-400 underline decoration-gray-200 underline-offset-2 transition hover:text-[#e11d48]"
+											className="ml-2 text-gray-400 underline decoration-gray-200 underline-offset-2 transition hover:text-[#e11d48]"
 										>
 											解説
 										</Link>
 									)}
 								</p>
-								{entry.specUrl ? (
-									<a
-										href={entry.specUrl}
-										target="_blank"
-										rel="noopener noreferrer"
-										className="text-[11px] text-gray-400 transition hover:text-gray-600 hover:underline"
-									>
-										{entry.specName}
-									</a>
-								) : (
-									<span className="text-[11px] text-gray-400">
-										{entry.specName}
-									</span>
-								)}
 							</div>
-							<span
-								className="hidden shrink-0 rounded-full border border-gray-200 px-2 py-0.5 text-[10px] font-bold text-gray-400 sm:inline"
-								title={maturityTitle[entry.maturity]}
-							>
-								{maturityLabel[entry.maturity]}
-							</span>
-							<span className="flex shrink-0 items-center justify-end gap-1.5">
+							<div className="flex shrink-0 flex-wrap items-center gap-1.5 sm:w-52 sm:justify-end">
 								{entry.demos && entry.demos.length > 0 ? (
-									support === "unsupported" ? (
-										<span className="text-xs text-gray-300">未対応</span>
-									) : (
-										entry.demos.map((demo, index) => (
-											<a
-												key={demo.href}
-												href={demo.href}
-												target="_blank"
-												rel="noopener noreferrer"
-												title={`${demo.label}のデモページを開く`}
-												className={
-													index === 0 && support === "supported"
-														? "inline-flex items-center justify-center rounded-full bg-gray-950 px-3 py-1 text-[11px] font-bold text-white transition hover:bg-[#e11d48]"
-														: "inline-flex items-center justify-center rounded-full border border-gray-300 px-3 py-1 text-[11px] font-bold text-gray-600 transition hover:border-gray-950 hover:text-gray-950"
-												}
-											>
-												{demo.label === "公式サンプル" ? "公式" : demo.label}
-											</a>
-										))
-									)
+									entry.demos.map((demo) => (
+										<a
+											key={demo.href}
+											href={demo.href}
+											target="_blank"
+											rel="noopener noreferrer"
+											title={`${demo.label}のデモページを開く`}
+											className={demoLinkClass}
+										>
+											{demo.label}
+										</a>
+									))
 								) : (
 									<span className="text-xs text-gray-300">近日</span>
 								)}
-							</span>
+							</div>
 						</li>
 					);
 				})}
 			</ul>
 
 			<p className="mt-4 text-xs leading-relaxed text-gray-400">
-				判定はブラウザのAPI実装有無に基づく簡易チェックです。「?」の項目は実機のXRセッション内でのみ確認できます。最終的な動作は各デモでご確認ください。
+				対応表示はブラウザのAPI実装有無に基づく簡易チェックです。「実機」の項目はXRセッション内でのみ確認できます。最終的な動作は各デモページでご確認ください。
 			</p>
 		</div>
 	);

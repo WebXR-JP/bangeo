@@ -32,7 +32,7 @@ export type SpecCheckId =
 export interface SpecDemoLink {
 	/** リンクの表示ラベル（提供元） */
 	label:
-		| "公式サンプル"
+		| "WebXR Samples"
 		| "Three.js"
 		| "Babylon.js"
 		| "A-Frame"
@@ -85,7 +85,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		description: "ヘッドセットでVR表示をはじめる",
 		demos: [
 			{
-				label: "公式サンプル",
+				label: "WebXR Samples",
 				href: `${OFFICIAL_SAMPLES}/immersive-vr-session.html`,
 			},
 			{
@@ -104,7 +104,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		description: "現実の風景に映像を重ねるARをはじめる",
 		demos: [
 			{
-				label: "公式サンプル",
+				label: "WebXR Samples",
 				href: `${OFFICIAL_SAMPLES}/immersive-ar-session.html`,
 			},
 			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webxr_ar_cones.html` },
@@ -119,7 +119,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		maturity: "cr",
 		description: "安全に動けるプレイエリアの境界を知る",
 		demos: [
-			{ label: "公式サンプル", href: `${OFFICIAL_SAMPLES}/room-scale.html` },
+			{ label: "WebXR Samples", href: `${OFFICIAL_SAMPLES}/room-scale.html` },
 		],
 		articleSlug: "room-scale-bounds-viewer",
 	},
@@ -132,7 +132,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		description: "コントローラーのボタンやスティックを扱う",
 		demos: [
 			{
-				label: "公式サンプル",
+				label: "WebXR Samples",
 				href: `${OFFICIAL_SAMPLES}/controller-state.html`,
 			},
 			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webxr_xr_haptics.html` },
@@ -148,7 +148,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		description: "コントローラーなしで手の動きを使う",
 		demos: [
 			{
-				label: "公式サンプル",
+				label: "WebXR Samples",
 				href: `${OFFICIAL_SAMPLES}/immersive-hands.html`,
 			},
 			{
@@ -165,7 +165,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		maturity: "wd",
 		description: "床や机を見つけてものを置く",
 		demos: [
-			{ label: "公式サンプル", href: `${OFFICIAL_SAMPLES}/hit-test.html` },
+			{ label: "WebXR Samples", href: `${OFFICIAL_SAMPLES}/hit-test.html` },
 			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webxr_ar_hittest.html` },
 		],
 		articleSlug: "hit-test-advanced",
@@ -178,7 +178,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		maturity: "draft",
 		description: "置いたものの位置を現実空間に固定する",
 		demos: [
-			{ label: "公式サンプル", href: `${OFFICIAL_SAMPLES}/anchors.html` },
+			{ label: "WebXR Samples", href: `${OFFICIAL_SAMPLES}/anchors.html` },
 		],
 	},
 	{
@@ -198,7 +198,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		description: "現実の奥行きを読み取って前後を正しく合成する",
 		demos: [
 			{
-				label: "公式サンプル",
+				label: "WebXR Samples",
 				href: `${OFFICIAL_SAMPLES}/proposals/phone-ar-depth.html`,
 			},
 		],
@@ -213,7 +213,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		description: "部屋の形をメッシュとして読み取る",
 		demos: [
 			{
-				label: "公式サンプル",
+				label: "WebXR Samples",
 				href: `${OFFICIAL_SAMPLES}/proposals/mesh-detection.html`,
 			},
 		],
@@ -238,7 +238,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		maturity: "wd",
 		description: "文字や動画をくっきり表示する",
 		demos: [
-			{ label: "公式サンプル", href: `${OFFICIAL_SAMPLES}/layers-samples/` },
+			{ label: "WebXR Samples", href: `${OFFICIAL_SAMPLES}/layers-samples/` },
 			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webxr_vr_layers.html` },
 		],
 	},
@@ -250,7 +250,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		maturity: "draft",
 		description: "WebGPUでXRを描画する",
 		demos: [
-			{ label: "公式サンプル", href: `${OFFICIAL_SAMPLES}/webgpu/` },
+			{ label: "WebXR Samples", href: `${OFFICIAL_SAMPLES}/webgpu/` },
 			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webgpu_xr_cubes.html` },
 		],
 		articleSlug: "webgpu-fallback-lab",
