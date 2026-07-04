@@ -74,6 +74,10 @@ export const maturityTitle: Record<SpecMaturity, string> = {
 
 const OFFICIAL_SAMPLES = "https://immersive-web.github.io/webxr-samples";
 const THREEJS_EXAMPLES = "https://threejs.org/examples";
+const PLAYCANVAS_DEMOS = "https://playcanv.as/p";
+const PLAYCANVAS_TUTORIALS = "https://developer.playcanvas.com/tutorials";
+const AFRAME_EXAMPLES = "https://aframe.io/aframe/examples";
+const BABYLONJS_PLAYGROUND = "https://playground.babylonjs.com";
 
 export const webxrSpecCatalog: WebXRSpecEntry[] = [
 	{
@@ -92,6 +96,9 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 				label: "Three.js",
 				href: `${THREEJS_EXAMPLES}/webxr_xr_ballshooter.html`,
 			},
+			{ label: "PlayCanvas", href: `${PLAYCANVAS_DEMOS}/z7myUkHP/` },
+			{ label: "A-Frame", href: `${AFRAME_EXAMPLES}/boilerplate/hello-world/` },
+			{ label: "Babylon.js", href: `${BABYLONJS_PLAYGROUND}/#F41V6N#134` },
 		],
 		articleSlug: "webxr-audio-space",
 	},
@@ -108,6 +115,12 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 				href: `${OFFICIAL_SAMPLES}/immersive-ar-session.html`,
 			},
 			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webxr_ar_cones.html` },
+			{ label: "PlayCanvas", href: `${PLAYCANVAS_DEMOS}/AOYF3YyG/` },
+			{
+				label: "A-Frame",
+				href: `${AFRAME_EXAMPLES}/boilerplate/ar-hello-world/`,
+			},
+			{ label: "Babylon.js", href: `${BABYLONJS_PLAYGROUND}/#F41V6N#32` },
 		],
 		articleSlug: "hit-test-advanced",
 	},
@@ -136,6 +149,12 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 				href: `${OFFICIAL_SAMPLES}/controller-state.html`,
 			},
 			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webxr_xr_haptics.html` },
+			{ label: "PlayCanvas", href: `${PLAYCANVAS_DEMOS}/TUBZkBEl/` },
+			{
+				label: "A-Frame",
+				href: `${AFRAME_EXAMPLES}/showcase/tracked-controls/`,
+			},
+			{ label: "Babylon.js", href: `${BABYLONJS_PLAYGROUND}/#F41V6N#134` },
 		],
 		articleSlug: "iwsdk-gallery",
 	},
@@ -155,6 +174,12 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 				label: "Three.js",
 				href: `${THREEJS_EXAMPLES}/webxr_vr_handinput.html`,
 			},
+			{ label: "PlayCanvas", href: `${PLAYCANVAS_DEMOS}/VmHVW3Wb/` },
+			{
+				label: "A-Frame",
+				href: `${AFRAME_EXAMPLES}/showcase/hand-tracking/`,
+			},
+			{ label: "Babylon.js", href: `${BABYLONJS_PLAYGROUND}/#X7Y4H8#16` },
 		],
 	},
 	{
@@ -167,6 +192,8 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		demos: [
 			{ label: "WebXR Samples", href: `${OFFICIAL_SAMPLES}/hit-test.html` },
 			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webxr_ar_hittest.html` },
+			{ label: "PlayCanvas", href: `${PLAYCANVAS_DEMOS}/Kjol3uRS/` },
+			{ label: "Babylon.js", href: `${BABYLONJS_PLAYGROUND}/#F41V6N#32` },
 		],
 		articleSlug: "hit-test-advanced",
 	},
@@ -179,6 +206,12 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		description: "置いたものの位置を現実空間に固定する",
 		demos: [
 			{ label: "WebXR Samples", href: `${OFFICIAL_SAMPLES}/anchors.html` },
+			{ label: "PlayCanvas", href: `${PLAYCANVAS_DEMOS}/Skq3Ry1K/` },
+			{
+				label: "A-Frame",
+				href: `${AFRAME_EXAMPLES}/mixed-reality/anchor/`,
+			},
+			{ label: "Babylon.js", href: `${BABYLONJS_PLAYGROUND}/#KDWCZY` },
 		],
 	},
 	{
@@ -188,6 +221,17 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://www.w3.org/TR/webxr-dom-overlays-1/",
 		maturity: "wd",
 		description: "AR画面の上にHTMLのUIを重ねる",
+		demos: [
+			{ label: "WebXR Samples", href: `${OFFICIAL_SAMPLES}/ar-barebones.html` },
+			{
+				label: "PlayCanvas",
+				href: `${PLAYCANVAS_TUTORIALS}/webxr-ar-dom-overlay/`,
+			},
+			{
+				label: "A-Frame",
+				href: `${AFRAME_EXAMPLES}/boilerplate/webxr-dom-overlay/`,
+			},
+		],
 	},
 	{
 		id: "depth-sensing",
@@ -201,6 +245,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 				label: "WebXR Samples",
 				href: `${OFFICIAL_SAMPLES}/proposals/phone-ar-depth.html`,
 			},
+			{ label: "PlayCanvas", href: `${PLAYCANVAS_DEMOS}/UN0z1XE2/` },
 		],
 		articleSlug: "quest-depth-projection-box",
 	},
@@ -216,6 +261,10 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 				label: "WebXR Samples",
 				href: `${OFFICIAL_SAMPLES}/proposals/mesh-detection.html`,
 			},
+			{
+				label: "A-Frame",
+				href: `${AFRAME_EXAMPLES}/mixed-reality/real-world-meshing/`,
+			},
 		],
 		articleSlug: "xr-mesh-export",
 	},
@@ -228,6 +277,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		description: "現実の光に合わせて3Dの見た目をなじませる",
 		demos: [
 			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webxr_ar_lighting.html` },
+			{ label: "PlayCanvas", href: `${PLAYCANVAS_DEMOS}/AOYF3YyG/` },
 		],
 	},
 	{
@@ -240,6 +290,10 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		demos: [
 			{ label: "WebXR Samples", href: `${OFFICIAL_SAMPLES}/layers-samples/` },
 			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webxr_vr_layers.html` },
+			{
+				label: "A-Frame",
+				href: `${AFRAME_EXAMPLES}/showcase/layer-cubemap/`,
+			},
 		],
 	},
 	{
@@ -261,6 +315,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specName: "WebXR Body Tracking（ベンダー拡張）",
 		maturity: "vendor",
 		description: "全身の動きを読み取る",
+		demos: [{ label: "Babylon.js", href: `${BABYLONJS_PLAYGROUND}/#0FOISU#2` }],
 		articleSlug: "webxr-body-tracking",
 	},
 ];
