@@ -65,7 +65,7 @@ export function middleware(request: NextRequest) {
 
 	// クエリ付き URL の重複を防ぐ（?author=, ?q= など）
 	if (
-		(pathname === "/tech-articles" || pathname === "/experiments") &&
+		["/tech-articles", "/experiments", "/experimentals"].includes(pathname) &&
 		searchParams.size > 0
 	) {
 		const url = request.nextUrl.clone();
@@ -100,5 +100,10 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-	matcher: ["/tech-articles", "/experiments", "/demos/:path*"],
+	matcher: [
+		"/tech-articles",
+		"/experiments",
+		"/experimentals",
+		"/demos/:path*",
+	],
 };

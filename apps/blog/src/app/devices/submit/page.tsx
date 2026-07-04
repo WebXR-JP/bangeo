@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { WebXRChecker } from "./webxr-checker";
+import { WebXRChecker } from "@/components/webxr-checker";
 
 export const metadata: Metadata = {
 	title: "WebXR対応状況チェック",

@@ -3,11 +3,25 @@
 import { useEffect, useState } from "react";
 
 interface ModuleResult {
+	id: WebXRModuleId;
 	name: string;
 	supported: boolean;
 }
 
-type XRSessionMode = "inline" | "immersive-vr" | "immersive-ar";
+export type XRSessionMode = "inline" | "immersive-vr" | "immersive-ar";
+
+export type WebXRModuleId =
+	| "webxr-core"
+	| "webxr-gamepads"
+	| "webxr-ar"
+	| "webxr-hit-test"
+	| "webxr-dom-overlays"
+	| "webxr-layers"
+	| "webxr-anchors"
+	| "webxr-lighting-estimation"
+	| "webxr-hand-input"
+	| "webxr-body-tracking"
+	| "webxr-webgpu-bindings";
 
 interface SessionResult {
 	id: XRSessionMode;
@@ -15,7 +29,17 @@ interface SessionResult {
 	available: boolean;
 }
 
-interface MinimalXRSession extends EventTarget {}
+export interface WebXRCheckerDemoLink {
+	href?: string;
+	label?: string;
+	note?: string;
+}
+
+export type WebXRCheckerDemoLinks = Partial<
+	Record<XRSessionMode | WebXRModuleId, WebXRCheckerDemoLink>
+>;
+
+type MinimalXRSession = EventTarget;
 
 interface MinimalXRSystem {
 	isSessionSupported(mode: XRSessionMode): Promise<boolean>;
@@ -57,7 +81,39 @@ function Badge({ supported, text }: { supported: boolean; text: string }) {
 	);
 }
 
-export function WebXRChecker() {
+function DemoLink({ demo }: { demo?: WebXRCheckerDemoLink }) {
+	if (!demo?.href) {
+		return (
+			<span
+				className="inline-flex min-h-9 items-center justify-center rounded-full border border-dashed border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-black text-gray-400"
+				aria-disabled="true"
+				title={demo?.note}
+			>
+				デモ準備中
+			</span>
+		);
+	}
+
+	return (
+		<a
+			href={demo.href}
+			className="inline-flex min-h-9 items-center justify-center rounded-full bg-gray-950 px-3 py-1.5 text-xs font-black text-white transition-colors hover:bg-[#e11d48]"
+			title={demo.note}
+		>
+			{demo.label ?? "デモ"} ↗
+		</a>
+	);
+}
+
+interface WebXRCheckerProps {
+	demoLinks?: WebXRCheckerDemoLinks;
+	showDemoLinks?: boolean;
+}
+
+export function WebXRChecker({
+	demoLinks,
+	showDemoLinks = false,
+}: WebXRCheckerProps = {}) {
 	const [loading, setLoading] = useState(true);
 	const [hasWebXR, setHasWebXR] = useState(false);
 	const [modules, setModules] = useState<ModuleResult[]>([]);
@@ -76,18 +132,22 @@ export function WebXRChecker() {
 			const win = window as XRWindow;
 
 			const moduleChecks: {
+				id: WebXRModuleId;
 				name: string;
 				check: () => boolean | Promise<boolean>;
 			}[] = [
 				{
+					id: "webxr-core",
 					name: "WebXR Device API (core)",
 					check: () => xr != null,
 				},
 				{
+					id: "webxr-gamepads",
 					name: "WebXR Gamepads",
 					check: () => typeof win.XRInputSource !== "undefined",
 				},
 				{
+					id: "webxr-ar",
 					name: "WebXR Augmented Reality",
 					check: async () => {
 						if (!xr) return false;
@@ -99,32 +159,39 @@ export function WebXRChecker() {
 					},
 				},
 				{
+					id: "webxr-hit-test",
 					name: "WebXR Hit Test",
 					check: () => typeof win.XRHitTestSource !== "undefined",
 				},
 				{
+					id: "webxr-dom-overlays",
 					name: "WebXR DOM Overlays",
 					check: () => xr != null,
 				},
 				{
+					id: "webxr-layers",
 					name: "WebXR Layers",
 					check: () =>
 						typeof win.XRWebGLLayer !== "undefined" &&
 						typeof win.XRMediaBinding !== "undefined",
 				},
 				{
+					id: "webxr-anchors",
 					name: "WebXR Anchors",
 					check: () => typeof win.XRAnchor !== "undefined",
 				},
 				{
+					id: "webxr-lighting-estimation",
 					name: "WebXR Lighting Estimation",
 					check: () => typeof win.XRLightEstimate !== "undefined",
 				},
 				{
+					id: "webxr-hand-input",
 					name: "WebXR Hand Input",
 					check: () => typeof win.XRHand !== "undefined",
 				},
 				{
+					id: "webxr-body-tracking",
 					name: "WebXR Body Tracking (proposal)",
 					check: () =>
 						(typeof win.XRFrame !== "undefined" &&
@@ -132,6 +199,7 @@ export function WebXRChecker() {
 						typeof win.XRBody !== "undefined",
 				},
 				{
+					id: "webxr-webgpu-bindings",
 					name: "WebXR/WebGPU bindings",
 					check: () => typeof win.XRGPUBinding !== "undefined",
 				},
@@ -146,7 +214,7 @@ export function WebXRChecker() {
 				} catch {
 					supported = false;
 				}
-				moduleResults.push({ name: mod.name, supported });
+				moduleResults.push({ id: mod.id, name: mod.name, supported });
 			}
 			setModules(moduleResults);
 
@@ -244,16 +312,19 @@ export function WebXRChecker() {
 					<div className="space-y-3">
 						{modules.map((mod) => (
 							<div
-								key={mod.name}
-								className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 shadow-xs"
+								key={mod.id}
+								className="flex flex-col gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-xs sm:flex-row sm:items-center sm:justify-between"
 							>
 								<span className="text-sm font-bold text-gray-700">
 									{mod.name}
 								</span>
-								<Badge
-									supported={mod.supported}
-									text={mod.supported ? "対応" : "未対応"}
-								/>
+								<div className="flex flex-wrap items-center gap-2">
+									<Badge
+										supported={mod.supported}
+										text={mod.supported ? "対応" : "未対応"}
+									/>
+									{showDemoLinks && <DemoLink demo={demoLinks?.[mod.id]} />}
+								</div>
 							</div>
 						))}
 					</div>
@@ -275,23 +346,24 @@ export function WebXRChecker() {
 						{sessions.map((s) => (
 							<div
 								key={s.id}
-								className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-100 shadow-xs"
+								className="flex flex-col gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-xs sm:flex-row sm:items-center sm:justify-between"
 							>
 								<div className="flex items-center gap-3">
 									<span className="text-sm font-bold text-gray-700">
 										{s.name}
 									</span>
 								</div>
-								<div className="flex items-center gap-3">
+								<div className="flex flex-wrap items-center gap-2">
 									<Badge
 										supported={s.available}
 										text={s.available ? "利用可" : "未対応"}
 									/>
+									{showDemoLinks && <DemoLink demo={demoLinks?.[s.id]} />}
 									{s.available && (
 										<button
 											type="button"
 											onClick={() => startSession(s.id)}
-											className="px-5 py-2 bg-gray-950 text-white rounded-full text-sm font-bold hover:bg-[#e11d48] transition-colors shadow-xs"
+											className="rounded-full bg-gray-950 px-5 py-2 text-sm font-bold text-white shadow-xs transition-colors hover:bg-[#e11d48]"
 										>
 											セッション開始
 										</button>

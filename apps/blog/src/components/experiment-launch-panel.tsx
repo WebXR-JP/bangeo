@@ -54,7 +54,10 @@ export function ExperimentLaunchPanel({
 		: undefined;
 
 	return (
-		<section className="not-prose mb-12 overflow-hidden rounded-[2rem] border border-rose-100 bg-gradient-to-br from-rose-50 via-white to-sky-50 shadow-xl shadow-rose-100/40">
+		<section
+			id="status"
+			className="not-prose mb-12 scroll-mt-32 overflow-hidden rounded-[2rem] border border-rose-100 bg-gradient-to-br from-rose-50 via-white to-sky-50 shadow-xl shadow-rose-100/40"
+		>
 			<div className="grid gap-0 lg:grid-cols-[1.05fr_1.2fr]">
 				<div className="border-b border-rose-100 bg-white/70 p-6 md:p-8 lg:border-r lg:border-b-0">
 					<div className="mb-4 flex flex-wrap items-center gap-2">
