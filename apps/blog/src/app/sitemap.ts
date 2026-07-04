@@ -8,10 +8,11 @@ type SitemapDoc = {
 	date?: string;
 	pubDate?: string;
 	updated?: string;
+	draft?: boolean;
 	info: { path: string };
 };
 
-const SITE_STRUCTURE_UPDATED = new Date("2026-07-02T00:00:00Z");
+const SITE_STRUCTURE_UPDATED = new Date("2026-07-04T00:00:00Z");
 
 export default function sitemap(): MetadataRoute.Sitemap {
 	const blogDocs = getDocs(blog);

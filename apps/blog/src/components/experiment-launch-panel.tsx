@@ -70,14 +70,14 @@ export function ExperimentLaunchPanel({
 						{guide.statusLabel}
 					</h2>
 					<p className="mt-3 text-sm font-bold leading-relaxed text-gray-800">
-						このデモですること: {guide.summary}
+						このデモで体験できること: {guide.summary}
 					</p>
 					<p className="mt-3 text-sm leading-relaxed text-gray-600">
 						{guide.intent}
 					</p>
 					<div className="mt-5 rounded-2xl border border-white bg-white/80 p-4">
 						<p className="text-[11px] font-black tracking-[0.18em] text-gray-400 uppercase">
-							まず試す端末
+							おすすめの環境
 						</p>
 						<p className="mt-1 text-base font-black text-gray-950">
 							{guide.primaryDevice}
@@ -89,18 +89,18 @@ export function ExperimentLaunchPanel({
 								href={launchHref}
 								className="inline-flex items-center justify-center rounded-full bg-[#e11d48] px-6 py-3 text-sm font-black text-white shadow-lg shadow-rose-200 transition hover:bg-[#be123c]"
 							>
-								デモを全画面で開く
+								デモを開く
 							</a>
 							<Link
 								href="/experiments"
 								className="inline-flex items-center justify-center rounded-full border border-gray-200 bg-white px-6 py-3 text-sm font-black text-gray-700 transition hover:border-rose-200 hover:text-[#e11d48]"
 							>
-								一覧に戻る
+								デモ一覧に戻る
 							</Link>
 						</div>
 					)}
 					<p className="mt-4 text-xs leading-relaxed text-gray-500">
-						デモを開くと、Immersiveセッションに入る前に「対応チェックの事前判定パネル」が表示されます。非対応の環境では理由が表示されて停止するため、サイレントに失敗することはありません。
+						XRを開始できない場合は、ブラウザや端末の対応状況をご確認ください。対応デバイスで開くと、より正確に体験を確認できます。
 					</p>
 				</div>
 
@@ -133,14 +133,14 @@ export function ExperimentLaunchPanel({
 
 						<div className="rounded-2xl border border-gray-100 bg-white/85 p-5">
 							<h3 className="mb-3 text-sm font-black text-gray-950">
-								動かなかった時の見方
+								うまく動かない場合
 							</h3>
 							<p className="text-xs leading-relaxed text-gray-600">
 								{guide.fallback}
 							</p>
 							<div className="mt-4 rounded-xl bg-gray-950 p-4 text-white">
 								<p className="text-[11px] font-black tracking-[0.16em] text-rose-200 uppercase">
-									合格ライン
+									確認ポイント
 								</p>
 								<p className="mt-2 text-xs leading-relaxed text-gray-100">
 									{guide.qualityCheck}

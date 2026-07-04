@@ -31,12 +31,12 @@ export interface ExperimentGuide {
 }
 
 export const readinessLabel: Record<Readiness, string> = {
-	ready: "動作確認済",
-	lab: "Lab",
-	preview: "プレビュー可",
-	limited: "条件付き",
-	unsupported: "非対応",
-	unknown: "要実機確認",
+	ready: "体験可",
+	lab: "検証中",
+	preview: "通常表示可",
+	limited: "条件あり",
+	unsupported: "対象外",
+	unknown: "確認中",
 };
 
 export const readinessClassName: Record<Readiness, string> = {
@@ -49,36 +49,36 @@ export const readinessClassName: Record<Readiness, string> = {
 };
 
 export const trackLabel: Record<Track, string> = {
-	"vr-basics": "VR動作チェック",
-	"mr-lab": "MR / AR Lab",
-	"smartphone-ar": "スマホWebAR",
+	"vr-basics": "VRで体験する",
+	"mr-lab": "MR / ARで体験する",
+	"smartphone-ar": "スマホで体験する",
 };
 
 export const trackDescription: Record<Track, string> = {
 	"vr-basics":
-		"新しいMeta QuestやPICOで最初に回す基本チェック。VR入室 → 音・入力 → 描画fallback → 境界の順で、端末の素性を切り分けます。",
+		"Meta QuestやPICOなどのヘッドセットで試しやすいVRデモです。空間音響、VRギャラリー、描画確認、プレイエリア表示などをブラウザから体験できます。",
 	"mr-lab":
-		"パススルーAR、hit-test、depth、room meshなど端末依存が強い機能のLab。事前判定パネルで対応可否を確認してから入ります。",
+		"パススルーAR、現実空間への配置、Depth表示、部屋メッシュなど、対応端末で体験できるMR / ARデモです。デモの前に現在の端末で利用できる機能を確認できます。",
 	"smartphone-ar":
-		"WebXRではなくカメラベースWebARの枠。iPhone / Androidのブラウザで動かします。",
+		"iPhoneやAndroidのブラウザで試せるカメラベースのWebARです。ヘッドセットなしで、スマートフォンからすぐに体験できます。",
 };
 
 export const trackOrder: Track[] = ["vr-basics", "mr-lab", "smartphone-ar"];
 
 const commonVrFlow = [
-	"Meta Quest / PICO のブラウザでこのページを開く。PCで見ている場合は「ヘッドセットに送る」のQRコードかURLコピーを使う。",
-	"「デモを全画面で開く」から開き、事前判定パネルで対応チェックがすべて✓になっているのを確認して開始する。",
-	"入室できたら、頭を左右に振る・コントローラーで選択する・終了して戻れるかを確認する。",
+	"Meta QuestやPICOなどのヘッドセット、またはPCブラウザでデモページを開く。",
+	"画面の案内に沿って、VRセッションの開始や音声・入力の許可を行う。",
+	"表示、音、入力、終了ボタンの動作を確認し、環境に合うデモかを判断する。",
 ];
 
 const experimentGuides: Record<string, ExperimentGuide> = {
 	"webxr-audio-space": {
-		statusLabel: "Quest / PICO のVR入門テスト向き",
+		statusLabel: "空間音響をVRで体験",
 		statusReadiness: "ready",
-		summary: "VRに入って、頭を動かすと音の定位が変わるかを確かめる",
+		summary: "頭の向きや距離によって、音の聞こえ方が変わる様子を確認できます",
 		intent:
-			"まず新しいVRデバイスで WebXR のセッション開始、視点更新、音の定位が最低限成立するかを見る入口デモです。開始ボタンを押すと音が鳴り、頭の向きで左右・前後・距離が変わります。",
-		primaryDevice: "Meta Quest / PICO / PC Browser",
+			"WebXRとWeb Audio APIを組み合わせた空間音響デモです。ヘッドセットで開くと、視点の向きや音源との距離に合わせて音の定位が変わる様子を体験できます。PCブラウザでも、イヤホンやヘッドホンを使うと違いが分かりやすくなります。",
+		primaryDevice: "Meta Quest / PICO / PCブラウザ",
 		track: "vr-basics",
 		launchHref: "/demos/webxr-audio-space",
 		featuredOrder: 1,
@@ -86,35 +86,35 @@ const experimentGuides: Record<string, ExperimentGuide> = {
 			{
 				label: "Meta Quest",
 				readiness: "ready",
-				note: "Quest Browserで immersive-vr と空間音響の体感確認。",
+				note: "Quest BrowserでVR入室と空間音響を体験できます。",
 			},
 			{
 				label: "PICO",
 				readiness: "unknown",
-				note: "PICO BrowserでまずVR入室と音の左右差を確認。事前判定パネルで失敗理由が表示される。",
+				note: "PICO Browserでは、まずVR入室と音の定位をご確認ください。",
 			},
 			{
 				label: "PC",
 				readiness: "preview",
-				note: "ドラッグ視点＋イヤホンでWeb Audioの定位を確認。PC VRは環境依存。",
+				note: "ブラウザ上で音の定位や画面表示を確認できます。PC VRは環境により異なります。",
 			},
 		],
 		flow: [
-			"デモを開くと事前判定パネルが出る。すべて✓なら「VRを開始する」を押す（同時に音が鳴る）。",
-			"前後左右の音源（4色の球体）に頭を向けて、定位が変わるか確認する。",
-			"PICOでは、音が鳴る / 鳴らない、定位が左右だけか、頭向きに追従するかを記録する。",
+			"デモを開き、音声の再生とVRセッションの開始を許可する。",
+			"表示された音源に顔を向け、左右・前後で聞こえ方が変わるか確認する。",
+			"ヘッドセットを外す前に、終了操作でページへ戻れるか確認する。",
 		],
 		fallback:
-			"VRに入れない環境では、事前判定パネルにどのチェックで止まったかが表示されます。PCブラウザでは背景クリックで音を開始し、ドラッグ視点で定位を確認できます。",
+			"VRに入れない場合でも、PCブラウザでは通常表示で音の定位を確認できます。音が鳴らない場合は、ブラウザの自動再生制限や音量設定をご確認ください。",
 		qualityCheck:
-			"合格ラインは「VRに入れる」「開始と同時に音が鳴る」「頭の向きで定位が変わる」「終了してページに戻れる」の4点です。",
+			"確認ポイントは、VRに入れること、音が再生されること、頭の向きに合わせて音の位置が変わること、終了してページに戻れることです。",
 	},
 	"iwsdk-gallery": {
-		statusLabel: "Quest中心のVR体験デモ",
+		statusLabel: "VR空間で記事カードを読む",
 		statusReadiness: "ready",
-		summary: "VR空間内で記事カードを選び、遷移なしで本文まで読む",
+		summary: "VR空間内でカードを選び、ブラウザ遷移なしで本文まで閲覧できます",
 		intent:
-			"記事カードをVR空間内で選び、遷移せずに本文まで読む導線を確認するデモです。BANGEOの“体験として見える”代表枠に置きます。",
+			"BANGEOの記事カードをVR空間に並べ、選択するとその場で本文を読めるデモです。VR内で情報コンテンツをどう見せるか、距離感・文字サイズ・操作感を確認できます。",
 		primaryDevice: "Meta Quest / PC VR",
 		track: "vr-basics",
 		launchHref: "/demo/iwsdk-gallery",
@@ -123,31 +123,32 @@ const experimentGuides: Record<string, ExperimentGuide> = {
 			{
 				label: "Meta Quest",
 				readiness: "ready",
-				note: "本命。カード選択、本文パネル、戻る操作を確認。",
+				note: "カード選択、本文表示、戻る操作をヘッドセットで体験できます。",
 			},
 			{
 				label: "PICO",
 				readiness: "unknown",
-				note: "IWSDK依存部分があるため、まず起動可否とコントローラー選択を実機確認。",
+				note: "起動可否とコントローラー選択の動作をご確認ください。",
 			},
 			{
 				label: "デスクトップ",
 				readiness: "preview",
-				note: "通常表示でレイアウトとカード内容を確認。",
+				note: "通常表示でカードの内容とレイアウトを確認できます。",
 			},
 		],
 		flow: commonVrFlow,
 		fallback:
-			"VRに入れない端末では、通常ブラウザでカードの見た目だけを確認します。コントローラー入力が取れない場合は、ポインタークリックで最低限の選択導線を検証します。",
+			"VRに入れない場合は、通常ブラウザでカードの見た目を確認できます。ヘッドセットでは、カードが読みやすい距離に表示されるかをご確認ください。",
 		qualityCheck:
-			"合格ラインは「カードが読める距離に出る」「選択時に本文が出る」「VR内で迷子にならない」「フレーム落ちで酔わない」です。",
+			"確認ポイントは、カードが読める距離に表示されること、選択時に本文が開くこと、戻る操作で迷わないことです。",
 	},
 	"webgpu-fallback-lab": {
-		statusLabel: "描画経路の診断デモ",
+		statusLabel: "WebGPU / WebGLの描画確認",
 		statusReadiness: "lab",
-		summary: "WebGPUが使えるか、WebGLに落ちるかを画面上で診断する",
+		summary:
+			"現在のブラウザでWebGPUが使えるか、WebGL表示に切り替わるかを確認できます",
 		intent:
-			"新しいVRデバイスで WebGPU を前提にしてよいか、WebGL fallback に落とすべきかを判断する検査デモです。",
+			"WebGPU対応の有無を画面上で確認し、対応していない環境でもWebGL表示へ切り替えてコンテンツを表示する考え方を体験できます。端末ごとに描画経路が変わるXRコンテンツの確認に向いています。",
 		primaryDevice: "Meta Quest / PICO / Desktop",
 		track: "vr-basics",
 		launchHref: "/demos/webgpu-fallback-lab/xr.html",
@@ -156,35 +157,35 @@ const experimentGuides: Record<string, ExperimentGuide> = {
 			{
 				label: "Meta Quest",
 				readiness: "lab",
-				note: "WebGPU有無とWebXR表示を分けて確認。",
+				note: "WebGPU対応の有無とWebXR表示を分けて確認できます。",
 			},
 			{
 				label: "PICO",
 				readiness: "unknown",
-				note: "navigator.gpu / requestAdapter の結果とWebGL fallbackを記録。",
+				note: "WebGPU対応と通常描画への切り替えをご確認ください。",
 			},
 			{
 				label: "Desktop",
 				readiness: "ready",
-				note: "Chrome / EdgeでWebGPUまたはWebGL fallbackを確認。",
+				note: "ChromeやEdgeでWebGPUまたはWebGL表示を確認できます。",
 			},
 		],
 		flow: [
-			"通常プレビューで navigator.gpu と adapter 取得結果を見る。",
-			"WebGPU優先 / WebGL固定を切り替え、fallbackの表示が破綻しないか確認する。",
-			"VRデモで、WebXR表示はWebGLで成立しつつ、WebGPUの可否を画面上に出す。",
+			"通常プレビューで、現在のブラウザがWebGPUに対応しているか確認する。",
+			"WebGPU優先表示とWebGL表示を切り替え、見え方の違いを確認する。",
+			"ヘッドセットでは、XR表示が問題なく開けるかを確認する。",
 		],
 		fallback:
-			"WebGPUが使えない端末ではWebGL表示を正解扱いにします。重要なのは“失敗”ではなく、ユーザーに落ちた理由が見えることです。",
+			"WebGPUが使えない端末でも、WebGL表示へ切り替わればコンテンツを見続けられます。対応していないこと自体よりも、画面が空白にならないことを重視しています。",
 		qualityCheck:
-			"合格ラインは「対応検出が表示される」「WebGPU不可でも描画が残る」「XRに入れない時も診断結果が読める」です。",
+			"確認ポイントは、対応状況が画面で分かること、WebGPU非対応でも表示が残ること、XRに入れない時も案内が読めることです。",
 	},
 	"room-scale-bounds-viewer": {
-		statusLabel: "Questの境界確認Lab",
+		statusLabel: "プレイエリア境界を確認",
 		statusReadiness: "lab",
-		summary: "プレイエリア境界（boundsGeometry）を床に描画して確認する",
+		summary: "VRで移動できる範囲や床の基準を、ヘッドセット内で可視化します",
 		intent:
-			"ルームスケール境界、床基準、再センタリング後のずれを確認するための実機検査デモです。bounded-floorが取れない場合はlocal-floorへのフォールバックを明示します。",
+			"ヘッドセットのプレイエリア境界や床基準を確認するデモです。ルームスケールのVR体験で、ユーザーがどの範囲を安全に動けるかを把握するために使えます。",
 		primaryDevice: "Meta Quest",
 		track: "vr-basics",
 		launchHref: "/demos/room-tracking",
@@ -193,35 +194,72 @@ const experimentGuides: Record<string, ExperimentGuide> = {
 			{
 				label: "Meta Quest",
 				readiness: "lab",
-				note: "bounded-floor / local-floor と境界形状を確認。Quest Browser 146以降推奨。",
+				note: "プレイエリア境界と床基準の見え方を確認できます。",
 			},
 			{
 				label: "PICO",
 				readiness: "unknown",
-				note: "bounded-floorが取れない場合はlocal-floor fallbackの見え方を確認。",
+				note: "境界表示の取得可否と代替表示をご確認ください。",
 			},
 			{
 				label: "Desktop",
 				readiness: "preview",
-				note: "概念プレビュー。実境界の評価はヘッドセット必須。",
+				note: "概念プレビューとして表示内容を確認できます。実際の境界確認にはヘッドセットが必要です。",
 			},
 		],
 		flow: [
-			"プレイエリアを設定済みのMeta Questで開く。",
-			"事前判定パネルからVRを開始し、境界線・頂点マーカー・床高さを確認する。",
-			"再センタリング後に境界表示がどれだけずれるか（resetイベント）を見る。",
+			"プレイエリアを設定済みのヘッドセットでデモを開く。",
+			"VRを開始し、床面に表示される境界線やマーカーを確認する。",
+			"向きを変えたり再センタリングしたりして、表示が大きくずれないか確認する。",
 		],
 		fallback:
-			"bounded-floorが使えない場合はlocal-floorに自動で落とし、画面上に“フォールバック中”と明示します。境界なしでも床基準のずれが見える状態を最低ラインにします。",
+			"プレイエリア境界が取得できない場合でも、床基準の表示に切り替えて確認できます。境界情報がない環境では、デモ内の表示と案内をご確認ください。",
 		qualityCheck:
-			"合格ラインは「bounded-floorが取れる、またはlocal-floor fallbackが明示される」「境界頂点数が表示される」「終了後に説明ページへ戻れる」です。",
+			"確認ポイントは、境界線が表示されること、床の高さが自然に見えること、終了後にページへ戻れることです。",
+	},
+	"body-tracking": {
+		statusLabel: "全身トラッキングの入口",
+		statusReadiness: "lab",
+		summary:
+			"対応デバイスで、全身トラッキング用のセッション開始可否を確認できます",
+		intent:
+			"Body Tracking対応ブラウザで、全身トラッキング機能を使う前の基本確認を行うデモです。アバター表現に進む前に、対象端末で機能が利用できるかを確認します。",
+		primaryDevice: "PICO / WebXR対応ヘッドセット",
+		track: "vr-basics",
+		launchHref: "/demos/body-tracking/",
+		deviceChecks: [
+			{
+				label: "PICO",
+				readiness: "lab",
+				note: "対応ブラウザとトラッカー設定が必要です。",
+			},
+			{
+				label: "その他XR",
+				readiness: "unknown",
+				note: "ブラウザや端末の実装状況によって利用可否が変わります。",
+			},
+			{
+				label: "Desktop",
+				readiness: "preview",
+				note: "画面表示の確認のみ可能です。実際のトラッキングには対応ヘッドセットが必要です。",
+			},
+		],
+		flow: [
+			"対応ヘッドセットで必要なトラッカー設定を行い、デモページを開く。",
+			"画面の案内に沿ってXRセッションを開始する。",
+			"表示される状態やログを見ながら、Body Trackingが利用できるか確認する。",
+		],
+		fallback:
+			"Body Trackingが利用できない場合でも、画面上の案内からどの状態で止まったかを確認できます。通常のVRデモとは対応条件が異なります。",
+		qualityCheck:
+			"確認ポイントは、XRセッションが開始できること、Body Trackingの状態が画面で分かること、未対応時にも案内が表示されることです。",
 	},
 	"webxr-body-tracking": {
-		statusLabel: "WebXR Body Tracking検証Lab",
+		statusLabel: "全身トラッキングを可視化",
 		statusReadiness: "lab",
-		summary: "XRFrame.bodyの全身関節が取得できるかを見る",
+		summary: "対応ヘッドセットで、取得できた関節を点と線で表示します",
 		intent:
-			"WebXR Body Tracking proposalのbody-tracking featureを要求し、取得できた関節を点と線で可視化する検証デモです。PICOなど対応ブラウザで、アバター制御の前にセッション開始、frame.body、関節pose取得を切り分けます。",
+			"Body Tracking対応ブラウザで、取得できた全身関節をシンプルな点と線で可視化するデモです。アバター表現の前段階として、どの関節が取得できるかを確認できます。",
 		primaryDevice: "PICO + Motion Tracker / WebXR対応ヘッドセット",
 		track: "vr-basics",
 		launchHref: "/demos/webxr-body-tracking",
@@ -229,35 +267,35 @@ const experimentGuides: Record<string, ExperimentGuide> = {
 			{
 				label: "PICO",
 				readiness: "lab",
-				note: "PICO Browser / PICO Web AppとMotion Tracker設定でbody-tracking featureを確認。",
+				note: "PICO BrowserやPICO Web App、Motion Tracker設定での確認に向いています。",
 			},
 			{
 				label: "その他XR",
 				readiness: "unknown",
-				note: "WebXR Body Tracking proposal対応の有無をrequestSession結果で確認。",
+				note: "Body Tracking対応の有無は端末とブラウザによって異なります。",
 			},
 			{
 				label: "Desktop",
 				readiness: "preview",
-				note: "UIとWebGLプレビューのみ。実際のbody-tracking評価は対応ヘッドセットが必要。",
+				note: "UI表示の確認のみ可能です。実際のトラッキングには対応ヘッドセットが必要です。",
 			},
 		],
 		flow: [
-			"対応ヘッドセットで必要なトラッカー設定を済ませ、HTTPSで配信されたデモURLをブラウザで開く。",
-			"「対応チェック」でimmersive-vr / immersive-arの対応を見て、まずimmersive-vrでXR開始する。",
-			"HUDのframe.body、body.size、tracked jointsを見ながら、体を動かして関節点とボーン線が更新されるか確認する。",
+			"対応ヘッドセットで必要なトラッカー設定を行い、デモページを開く。",
+			"XR開始後、画面上の状態表示を確認する。",
+			"体を動かして、点や線が追従するか確認する。",
 		],
 		fallback:
-			"body-trackingが使えない場合はrequestSessionのエラー、frame.body: null、tracked joints: 0のどこで止まったかを記録します。デスクトップではWebGL表示の確認までを正規のプレビュー扱いにします。",
+			"Body Trackingが使えない場合は、未対応状態が画面に表示されます。通常のVR入室とは別の対応条件が必要です。",
 		qualityCheck:
-			"合格ラインは「XRセッションが開始する」「frame.bodyがavailableになる」「主要関節の点と線が動く」「失敗時にエラー名やnull状態がログで読める」です。",
+			"確認ポイントは、XRセッションが始まること、関節の状態が画面に出ること、体の動きに合わせて表示が更新されることです。",
 	},
 	"hit-test-advanced": {
-		statusLabel: "AR配置の実機テスト",
+		statusLabel: "現実空間へのAR配置を試す",
 		statusReadiness: "limited",
-		summary: "現実の床や机にreticleを吸着させ、オブジェクトを置く",
+		summary: "床や机などの面を検出し、3Dオブジェクトを現実空間に配置します",
 		intent:
-			"現実空間の床・机・壁を検出し、reticleと配置操作が安定するかを見るARデモです。immersive-ar非対応の環境では、事前判定パネルが理由を表示して停止します。",
+			"現実空間の床や机を検出し、目印に合わせて3Dオブジェクトを置くARデモです。商品プレビュー、展示、教育向けARなどで必要になる配置の安定感を確認できます。",
 		primaryDevice: "Meta Quest 3系 / Android Chrome",
 		track: "mr-lab",
 		launchHref: "/demos/hit-test-advanced",
@@ -265,35 +303,35 @@ const experimentGuides: Record<string, ExperimentGuide> = {
 			{
 				label: "Meta Quest",
 				readiness: "limited",
-				note: "パススルーARとHit Testの実機確認向け（Quest 3 / 3S / Pro）。",
+				note: "パススルーAR対応モデルでの確認に向いています。",
 			},
 			{
 				label: "PICO",
 				readiness: "unknown",
-				note: "PICOでimmersive-ar / hit-testが使えるかをまず事前判定パネルで確認。使えなければVR系へ。",
+				note: "ARセッションと面検出の利用可否をご確認ください。",
 			},
 			{
 				label: "Android",
 				readiness: "limited",
-				note: "Chrome + ARCore対応端末で確認。",
+				note: "ChromeとARCore対応端末でご確認ください。",
 			},
 		],
 		flow: [
-			"明るく特徴点のある床や机の前で開き、事前判定パネルの結果を見る。",
-			"AR開始後、reticle（リング）が面に吸着するまでゆっくり頭や端末を動かす。",
-			"トリガー / タップでオブジェクトを置き、数秒後に位置が大きく漂わないか見る。",
+			"明るく特徴のある床や机の前でデモを開く。",
+			"ARを開始し、目印が面に合うまでゆっくり端末を動かす。",
+			"タップや選択操作でオブジェクトを置き、位置が大きくずれないか確認する。",
 		],
 		fallback:
-			"ARに入れない端末では、事前判定パネルの表示そのものが“非対応の判定結果”です。VRヘッドセットではAudio SpaceやGalleryへ戻る導線を使ってください。",
+			"ARが開始できない端末では、対応状況の表示をご確認ください。VRヘッドセットの場合は、まずVR向けデモから試すと状態を確認しやすくなります。",
 		qualityCheck:
-			"合格ラインは「AR開始」「reticle追従」「配置」「漂いが少ない」の4点です。",
+			"確認ポイントは、AR開始、面の検出、オブジェクト配置、配置後の安定性です。",
 	},
 	"quest-depth-projection-box": {
-		statusLabel: "Quest MR専用Lab",
+		statusLabel: "QuestでMR合成を確認",
 		statusReadiness: "lab",
-		summary: "現実物体と仮想物体の前後関係（depth）の差を見る",
+		summary: "現実の物体と仮想オブジェクトの前後関係を確認できます",
 		intent:
-			"現実物体と仮想物体の前後関係を、depthが使える時 / 使えない時の両方で確認するMR合成デモです。",
+			"Questのパススルー環境で、仮想オブジェクトが現実の物体に隠れる・手前に見えるといったMR合成の前後関係を確認するデモです。",
 		primaryDevice: "Meta Quest 3 / 3S / Pro",
 		track: "mr-lab",
 		launchHref: "/demos/quest-depth-projection-box/xr.html",
@@ -301,35 +339,35 @@ const experimentGuides: Record<string, ExperimentGuide> = {
 			{
 				label: "Meta Quest",
 				readiness: "lab",
-				note: "depth projection / MR合成の検証向け。",
+				note: "Quest 3系でのMR表示確認に向いています。",
 			},
 			{
 				label: "PICO",
 				readiness: "unsupported",
-				note: "Questのdepth projection検証として扱い、PICOは代替プレビューのみ。",
+				note: "Quest向けのMR表示確認として扱います。",
 			},
 			{
 				label: "Desktop",
 				readiness: "preview",
-				note: "depth occlusionの概念プレビュー。",
+				note: "通常表示で前後関係の概念を確認できます。",
 			},
 		],
 		flow: [
-			"通常プレビューで、箱と机エッジの前後関係を先に理解する。",
-			"QuestでWebXRデモを開き、depthの有無と表示差分を確認する。",
-			"depthが取れない場合でも、オクルージョンなし表示として破綻しないか見る。",
+			"通常プレビューで、箱と机エッジの前後関係を確認する。",
+			"QuestでWebXRデモを開き、MR表示の差を確認する。",
+			"Depth表示が使えない場合でも、通常の3D表示として内容が伝わるか確認する。",
 		],
 		fallback:
-			"depth情報が取れない時は通常3D合成に落とし、ユーザーには“depthなし表示”として明示します。",
+			"Depth情報が使えない場合は、通常の3D合成として表示します。非対応環境でも、どのような見え方になるかを確認できます。",
 		qualityCheck:
-			"合格ラインは「depthあり / なしの差が説明できる」「depth不可でも絵が残る」「Quest以外ではLab扱いが明確」です。",
+			"確認ポイントは、Depthあり・なしの違いが分かること、非対応時も表示が崩れないこと、Quest向けデモであることが明確なことです。",
 	},
 	"xr-mesh-export": {
-		statusLabel: "Quest部屋メッシュ専用",
+		statusLabel: "Questの部屋形状を書き出す",
 		statusReadiness: "lab",
-		summary: "部屋のroom meshを取得してGLBに書き出す",
+		summary: "Questで取得した部屋の形状を確認し、GLBファイルとして保存できます",
 		intent:
-			"Meta Questのscene captureからroom meshを取得し、GLBとして書き出せるか確認する上級デモです。",
+			"Meta Questの部屋スキャン情報を使い、壁・床・天井などの形状を可視化してGLBとして書き出すデモです。空間データを使った制作や検証の入口として利用できます。",
 		primaryDevice: "Meta Quest 3 / 3S / Pro",
 		track: "mr-lab",
 		launchHref: "/demo/xr-mesh-export",
@@ -337,35 +375,35 @@ const experimentGuides: Record<string, ExperimentGuide> = {
 			{
 				label: "Meta Quest 3系",
 				readiness: "lab",
-				note: "scene capture / mesh detection / GLB export確認。",
+				note: "部屋スキャン情報とメッシュ表示を確認できます。",
 			},
 			{
 				label: "PICO",
 				readiness: "unsupported",
-				note: "Quest固有のroom mesh検証として扱う。",
+				note: "Quest向けの機能確認として扱います。",
 			},
 			{
 				label: "Desktop",
 				readiness: "unsupported",
-				note: "実機専用。説明ページで手順確認のみ。",
+				note: "実機専用です。説明ページで手順を確認できます。",
 			},
 		],
 		flow: [
-			"Questで部屋のscene capture / 空間設定を済ませる。",
-			"デモを開いてメッシュと平面数が増えるかを見る。",
-			"EXPORT GLBを押し、保存されたGLBを後でビューワで開く。",
+			"Questで部屋のスキャン設定を済ませてからデモを開く。",
+			"メッシュや平面が表示されるか確認する。",
+			"書き出しボタンを押し、保存されたGLBをあとで確認する。",
 		],
 		fallback:
-			"mesh detectionが使えない場合は非対応として扱い、VR一般デモへ戻します。無理に疑似メッシュを成功扱いにしません。",
+			"部屋メッシュが取得できない環境では、Quest向け機能として案内します。一般的なVRデモとは対応条件が異なります。",
 		qualityCheck:
-			"合格ラインは「メッシュ数が増える」「semantic labelが視認できる」「GLBが保存できる」です。",
+			"確認ポイントは、部屋形状が表示されること、分類ラベルが確認できること、GLBを書き出せることです。",
 	},
 	"spatial-model-preview": {
-		statusLabel: "通常Web + 空間表示の入口",
+		statusLabel: "ページ内3Dモデルを確認",
 		statusReadiness: "preview",
-		summary: "3Dモデルのfallback（native / polyfill / 画像）を切り替えて見る",
+		summary: "通常のWebページで3Dモデル表示や代替表示の見え方を確認できます",
 		intent:
-			"Webページ内3Dモデルのfallback設計を確認し、空間表示へ持ち込む前の見え方を整理するデモです。",
+			"Webページ内で3Dモデルを表示する時の見え方と、3D表示が使えない環境での代替表示を確認するデモです。商品ビューアや空間Webの入口として、PCやスマートフォンでも試せます。",
 		primaryDevice: "Desktop / Mobile / Vision Pro",
 		track: "mr-lab",
 		launchHref: "/demos/spatial-model-preview/xr.html",
@@ -373,35 +411,35 @@ const experimentGuides: Record<string, ExperimentGuide> = {
 			{
 				label: "Desktop",
 				readiness: "ready",
-				note: "fallbackプレビューと回転操作を確認。",
+				note: "3Dプレビューと回転操作を確認できます。",
 			},
 			{
 				label: "Meta Quest / PICO",
 				readiness: "preview",
-				note: "WebXR版で空間内カードの大きさだけ確認。",
+				note: "空間内に置いた時の大きさや距離感を確認できます。",
 			},
 			{
 				label: "iOS / visionOS",
 				readiness: "preview",
-				note: "model要素・空間Webの検証候補。",
+				note: "対応状況に応じて通常表示または空間表示の確認ができます。",
 			},
 		],
 		flow: [
-			"通常プレビューでnative / polyfill / image fallbackを切り替える。",
-			"3Dが使えない環境でも商品やモデルの意味が伝わるか確認する。",
-			"WebXR版では空間内に置いた時の距離感を確認する。",
+			"通常プレビューで3D表示と代替表示を切り替える。",
+			"3D表示が使えない環境でも内容が伝わるか確認する。",
+			"対応ヘッドセットでは、空間内での大きさや距離感を確認する。",
 		],
 		fallback:
-			"3D表示に失敗してもimage fallbackを正規ルートにします。非対応環境で空白にしないことを優先します。",
+			"3D表示に対応していない環境でも、画像や通常表示で内容が伝わるようにしています。空白のままにしないことを重視しています。",
 		qualityCheck:
-			"合格ラインは「fallbackの違いが分かる」「非対応でも内容が読める」「空間表示は補助扱い」です。",
+			"確認ポイントは、3D表示の有無が分かること、非対応でも内容が読めること、空間表示が補助的に使えることです。",
 	},
 	"8thwall-face-glasses": {
-		statusLabel: "スマホWebAR向け",
+		statusLabel: "スマホで顔ARを体験",
 		statusReadiness: "ready",
-		summary: "スマホのカメラで顔にサングラスを重ねる",
+		summary: "スマートフォンのカメラで、顔にサングラスを重ねて表示します",
 		intent:
-			"iPhone / AndroidのカメラベースWebARで顔追従と装飾切り替えを確認するデモです。VRヘッドセットの本命枠ではなく、スマホWebAR枠として見ます。",
+			"iPhoneやAndroidのブラウザで、顔に3Dサングラスを重ねるWebARデモです。カメラ許可後、顔の動きに合わせてサングラスが追従します。",
 		primaryDevice: "iPhone / Android",
 		track: "smartphone-ar",
 		launchHref: "/demos/8thwall-face-glasses/demo.html",
@@ -409,28 +447,28 @@ const experimentGuides: Record<string, ExperimentGuide> = {
 			{
 				label: "iPhone",
 				readiness: "ready",
-				note: "WebXRではなくカメラベースWebARとして確認。",
+				note: "SafariなどのブラウザでカメラベースのWebARを体験できます。",
 			},
 			{
 				label: "Android",
 				readiness: "ready",
-				note: "カメラ許可後、顔追従と色切替を確認。",
+				note: "カメラ許可後、顔追従と色の切り替えを確認できます。",
 			},
 			{
 				label: "Meta Quest / PICO",
 				readiness: "unsupported",
-				note: "VRデバイス検証の本命からは外す。",
+				note: "スマートフォン向けの顔ARデモです。",
 			},
 		],
 		flow: [
-			"スマホブラウザで開き、カメラ許可を出す。",
-			"顔を正面に入れ、サングラスが目元に追従するか見る。",
-			"色切替ボタンが押せるか、照明が暗い時に崩れないか確認する。",
+			"スマートフォンのブラウザでデモを開き、カメラを許可する。",
+			"顔を正面に入れ、サングラスが目元に追従するか確認する。",
+			"色の切り替えや、明るさの違う場所での見え方を確認する。",
 		],
 		fallback:
-			"カメラが使えない端末では説明ページで止め、WebXRデモとは別枠として案内します。",
+			"カメラが利用できない環境では、デモを開始できません。ブラウザのカメラ権限や別の端末をご確認ください。",
 		qualityCheck:
-			"合格ラインは「カメラ許可」「顔追従」「色切替」「暗所や横向きでの崩れ具合が分かる」です。",
+			"確認ポイントは、カメラ許可、顔追従、色の切り替え、暗い場所や横向きでの見え方です。",
 	},
 };
 
@@ -450,11 +488,11 @@ export function getExperimentGuideOrDefault(
 		: "Meta Quest / PICO / Desktop";
 
 	return {
-		statusLabel: "要実機確認",
+		statusLabel: "対応状況を確認して体験",
 		statusReadiness: "unknown",
-		summary: "起動可否・入力・終了導線をまず確認する",
+		summary: "現在の端末で起動できるかを確認してからデモへ進めます",
 		intent:
-			"このデモは端末ごとの対応差が出やすいため、まず起動可否・入力・終了導線を確認します。",
+			"このデモは端末やブラウザによって体験できる範囲が変わります。まずページ内の対応状況を確認し、利用できる環境でデモをお試しください。",
 		primaryDevice: deviceList,
 		track: "vr-basics",
 		launchHref: options.href,
@@ -462,23 +500,23 @@ export function getExperimentGuideOrDefault(
 			{
 				label: "Meta Quest",
 				readiness: "unknown",
-				note: "WebXRセッション開始とコントローラー入力を確認。",
+				note: "WebXRセッション開始と入力の動作をご確認ください。",
 			},
 			{
 				label: "PICO",
 				readiness: "unknown",
-				note: "起動可否とfallback表示を実機確認。",
+				note: "ブラウザでの起動可否をご確認ください。",
 			},
 			{
 				label: "Desktop",
 				readiness: "preview",
-				note: "概念プレビューまたはWebXR Emulatorで確認。",
+				note: "通常表示またはプレビューとして確認できます。",
 			},
 		],
 		flow: commonVrFlow,
 		fallback:
-			"動かない場合は“非対応”ではなく、どの段階で止まったかを記録します。入口、権限、XR開始、入力、描画の順に切り分けます。",
+			"うまく動かない場合は、現在のブラウザや端末が必要なWebXR機能に対応しているかをご確認ください。",
 		qualityCheck:
-			"合格ラインは「起動」「入力」「終了」「失敗時の説明が見える」の4点です。",
+			"確認ポイントは、デモを開けること、操作できること、終了してページに戻れることです。",
 	};
 }

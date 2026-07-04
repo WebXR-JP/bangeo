@@ -76,7 +76,7 @@ function Badge({ supported, text }: { supported: boolean; text: string }) {
 				supported ? "bg-gray-100 text-gray-950" : "bg-gray-50 text-gray-400"
 			}`}
 		>
-			{supported ? "\u3007" : "\u2014"} {text}
+			{supported ? "○" : "—"} {text}
 		</span>
 	);
 }
@@ -89,7 +89,7 @@ function DemoLink({ demo }: { demo?: WebXRCheckerDemoLink }) {
 				aria-disabled="true"
 				title={demo?.note}
 			>
-				デモ準備中
+				近日公開
 			</span>
 		);
 	}
@@ -138,17 +138,17 @@ export function WebXRChecker({
 			}[] = [
 				{
 					id: "webxr-core",
-					name: "WebXR Device API (core)",
+					name: "WebXR基本機能",
 					check: () => xr != null,
 				},
 				{
 					id: "webxr-gamepads",
-					name: "WebXR Gamepads",
+					name: "コントローラー入力",
 					check: () => typeof win.XRInputSource !== "undefined",
 				},
 				{
 					id: "webxr-ar",
-					name: "WebXR Augmented Reality",
+					name: "AR表示",
 					check: async () => {
 						if (!xr) return false;
 						try {
@@ -160,39 +160,39 @@ export function WebXRChecker({
 				},
 				{
 					id: "webxr-hit-test",
-					name: "WebXR Hit Test",
+					name: "床・机などの面検出",
 					check: () => typeof win.XRHitTestSource !== "undefined",
 				},
 				{
 					id: "webxr-dom-overlays",
-					name: "WebXR DOM Overlays",
+					name: "AR中の画面UI表示",
 					check: () => xr != null,
 				},
 				{
 					id: "webxr-layers",
-					name: "WebXR Layers",
+					name: "高品質なレイヤー表示",
 					check: () =>
 						typeof win.XRWebGLLayer !== "undefined" &&
 						typeof win.XRMediaBinding !== "undefined",
 				},
 				{
 					id: "webxr-anchors",
-					name: "WebXR Anchors",
+					name: "空間アンカー",
 					check: () => typeof win.XRAnchor !== "undefined",
 				},
 				{
 					id: "webxr-lighting-estimation",
-					name: "WebXR Lighting Estimation",
+					name: "照明推定",
 					check: () => typeof win.XRLightEstimate !== "undefined",
 				},
 				{
 					id: "webxr-hand-input",
-					name: "WebXR Hand Input",
+					name: "ハンドトラッキング",
 					check: () => typeof win.XRHand !== "undefined",
 				},
 				{
 					id: "webxr-body-tracking",
-					name: "WebXR Body Tracking (proposal)",
+					name: "ボディトラッキング",
 					check: () =>
 						(typeof win.XRFrame !== "undefined" &&
 							"body" in win.XRFrame.prototype) ||
@@ -200,7 +200,7 @@ export function WebXRChecker({
 				},
 				{
 					id: "webxr-webgpu-bindings",
-					name: "WebXR/WebGPU bindings",
+					name: "WebGPU連携",
 					check: () => typeof win.XRGPUBinding !== "undefined",
 				},
 			];
@@ -218,7 +218,6 @@ export function WebXRChecker({
 			}
 			setModules(moduleResults);
 
-			// Check session modes
 			const sessionModes: XRSessionMode[] = [
 				"inline",
 				"immersive-vr",
@@ -261,52 +260,40 @@ export function WebXRChecker({
 
 	return (
 		<>
-			{/* WebXR基本対応チェック */}
-			<div className="bg-white border-2 border-gray-100 rounded-[3rem] p-8 md:p-12 shadow-xs">
+			<div className="rounded-[3rem] border-2 border-gray-100 bg-white p-8 shadow-xs md:p-12">
 				{loading ? (
 					<div className="flex items-center justify-center p-12">
-						<div className="animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-gray-900" />
+						<div className="h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-gray-900" />
 					</div>
 				) : (
-					<div className="flex items-center justify-center gap-4 p-8">
+					<div className="flex items-center justify-center gap-4 p-8 text-center">
 						<div>
 							<p
 								className={`text-2xl font-black ${hasWebXR ? "text-gray-950" : "text-gray-400"}`}
 							>
-								WebXR {hasWebXR ? "対応" : "非対応"}
+								WebXR {hasWebXR ? "利用できます" : "利用できません"}
 							</p>
-							<p className="text-gray-400 text-sm">
+							<p className="text-sm text-gray-400">
 								{hasWebXR
-									? "お使いのブラウザはWebXRをサポートしています"
-									: "お使いのブラウザはWebXRをサポートしていません"}
+									? "このブラウザではWebXRを利用できます。"
+									: "現在のブラウザではWebXRを利用できません。対応ヘッドセットのブラウザやAndroid Chromeなどでお試しください。"}
 							</p>
 						</div>
 					</div>
 				)}
 			</div>
 
-			{/* WebXRモジュール対応状況 */}
 			{!loading && (
-				<div className="bg-white border-2 border-gray-100 rounded-[3rem] p-8 md:p-12 shadow-xs space-y-6">
+				<div className="space-y-6 rounded-[3rem] border-2 border-gray-100 bg-white p-8 shadow-xs md:p-12">
 					<div className="space-y-2">
 						<h2 className="text-2xl font-black text-gray-800">
-							WebXR モジュール
+							このブラウザで使える機能
 						</h2>
-						<p className="text-gray-500 text-sm">
-							WebXRの各機能は仕様上「モジュール」として分割されています。ここで「対応」と表示されても、ハードウェアが機能を公開していない場合は利用できないことがあります。
+						<p className="text-sm text-gray-500">
+							主なWebXR機能の対応状況です。対応している項目は、横のデモから実際の見え方や操作感を確認できます。
 						</p>
-						<p className="text-gray-400 text-xs leading-relaxed">
-							Body Tracking は提案段階の API です。ここでは{" "}
-							<code className="bg-gray-100 px-1.5 py-0.5 rounded">
-								XRFrame.body
-							</code>{" "}
-							または{" "}
-							<code className="bg-gray-100 px-1.5 py-0.5 rounded">XRBody</code>{" "}
-							の実装有無を確認します。実際に利用するには、セッション側で{" "}
-							<code className="bg-gray-100 px-1.5 py-0.5 rounded">
-								body-tracking
-							</code>{" "}
-							feature descriptor が許可される必要があります。
+						<p className="text-xs leading-relaxed text-gray-400">
+							一部の機能は端末やブラウザの設定によって利用可否が変わります。対応表示が出た場合も、最終的には各デモでの体験確認をおすすめします。
 						</p>
 					</div>
 					<div className="space-y-3">
@@ -331,15 +318,14 @@ export function WebXRChecker({
 				</div>
 			)}
 
-			{/* セッションモード */}
 			{!loading && (
-				<div className="bg-white border-2 border-gray-100 rounded-[3rem] p-8 md:p-12 shadow-xs space-y-6">
+				<div className="space-y-6 rounded-[3rem] border-2 border-gray-100 bg-white p-8 shadow-xs md:p-12">
 					<div className="space-y-2">
 						<h2 className="text-2xl font-black text-gray-800">
-							セッションモード
+							VR / ARの開始可否
 						</h2>
-						<p className="text-gray-500 text-sm">
-							セッションモードはWebXRセッションの種類を決定します。ブラウザとハードウェアの両方がサポートしている場合のみ利用可能と表示されます。
+						<p className="text-sm text-gray-500">
+							現在のブラウザと端末で、ブラウザ内表示・VR表示・AR表示を開始できるかを確認します。
 						</p>
 					</div>
 					<div className="space-y-3">
@@ -348,11 +334,9 @@ export function WebXRChecker({
 								key={s.id}
 								className="flex flex-col gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-xs sm:flex-row sm:items-center sm:justify-between"
 							>
-								<div className="flex items-center gap-3">
-									<span className="text-sm font-bold text-gray-700">
-										{s.name}
-									</span>
-								</div>
+								<span className="text-sm font-bold text-gray-700">
+									{s.name}
+								</span>
 								<div className="flex flex-wrap items-center gap-2">
 									<Badge
 										supported={s.available}
@@ -365,7 +349,7 @@ export function WebXRChecker({
 											onClick={() => startSession(s.id)}
 											className="rounded-full bg-gray-950 px-5 py-2 text-sm font-bold text-white shadow-xs transition-colors hover:bg-[#e11d48]"
 										>
-											セッション開始
+											開始を試す
 										</button>
 									)}
 								</div>
@@ -373,73 +357,61 @@ export function WebXRChecker({
 						))}
 					</div>
 
-					{/* セッションモードの説明 */}
-					<div className="mt-8 p-6 bg-gray-50 rounded-2xl border border-gray-100">
-						<div className="flex items-start gap-3">
-							<div className="space-y-2">
-								<p className="font-bold text-gray-800">
-									「inline」だけが利用可能な場合
-								</p>
-								<p className="text-gray-600 text-sm leading-relaxed">
-									<code className="bg-gray-200 px-1.5 py-0.5 rounded text-xs">
-										inline
-									</code>{" "}
-									セッションはブラウザ内で3Dコンテンツを表示するモードで、
-									<strong>VR/AR体験ではありません</strong>。 本格的なVR/AR体験（
-									<code className="bg-gray-200 px-1.5 py-0.5 rounded text-xs">
-										immersive-vr
-									</code>
-									,{" "}
-									<code className="bg-gray-200 px-1.5 py-0.5 rounded text-xs">
-										immersive-ar
-									</code>
-									）には、VRヘッドセットやAR対応デバイスの接続が必要です。
-								</p>
-							</div>
-						</div>
+					<div className="mt-8 rounded-2xl border border-gray-100 bg-gray-50 p-6">
+						<p className="font-bold text-gray-800">
+							「inline」だけが利用できる場合
+						</p>
+						<p className="mt-2 text-sm leading-relaxed text-gray-600">
+							<code className="rounded bg-gray-200 px-1.5 py-0.5 text-xs">
+								inline
+							</code>{" "}
+							はブラウザ内で3Dコンテンツを表示するモードです。ヘッドセットでのVRや、カメラを使ったARを開始するには、
+							<code className="rounded bg-gray-200 px-1.5 py-0.5 text-xs">
+								immersive-vr
+							</code>
+							、
+							<code className="rounded bg-gray-200 px-1.5 py-0.5 text-xs">
+								immersive-ar
+							</code>
+							に対応するデバイスとブラウザが必要です。
+						</p>
 					</div>
 				</div>
 			)}
 
-			{/* XRセッションビューアー */}
 			{(sessionActive || sessionError) && (
-				<div className="bg-white border-2 border-gray-100 rounded-[3rem] p-8 md:p-12 shadow-xs space-y-6">
+				<div className="space-y-6 rounded-[3rem] border-2 border-gray-100 bg-white p-8 shadow-xs md:p-12">
 					<div className="space-y-2">
-						<h2 className="text-2xl font-black text-gray-800">XRセッション</h2>
-						<p className="text-gray-500 text-sm">
-							アクティブなXRセッションの情報がここに表示されます。
+						<h2 className="text-2xl font-black text-gray-800">確認結果</h2>
+						<p className="text-sm text-gray-500">
+							セッション開始の結果がここに表示されます。
 						</p>
 					</div>
 					{sessionActive && (
-						<div className="p-6 bg-gray-50 rounded-2xl border border-gray-100">
-							<p className="text-gray-900 font-bold">
-								{sessionActive} セッションがアクティブです
+						<div className="rounded-2xl border border-gray-100 bg-gray-50 p-6">
+							<p className="font-bold text-gray-900">
+								{sessionActive} を開始しました
 							</p>
 						</div>
 					)}
 					{sessionError && (
-						<div className="p-6 bg-gray-50 rounded-2xl border border-gray-100">
-							<p className="text-gray-400 font-bold">
-								セッションの開始に失敗しました
-							</p>
-							<p className="text-gray-400 text-sm mt-2">{sessionError}</p>
+						<div className="rounded-2xl border border-gray-100 bg-gray-50 p-6">
+							<p className="font-bold text-gray-500">開始できませんでした</p>
+							<p className="mt-2 text-sm text-gray-400">{sessionError}</p>
 						</div>
 					)}
 				</div>
 			)}
 
-			{/* ブラウザ情報 */}
 			{!loading && (
-				<div className="bg-white border-2 border-gray-100 rounded-[3rem] p-8 md:p-12 shadow-xs space-y-6">
-					<div className="space-y-2">
-						<h2 className="text-2xl font-black text-gray-800">ブラウザ情報</h2>
-					</div>
-					<div className="p-6 bg-gray-50 rounded-2xl border border-gray-100">
-						<p className="text-xs font-mono break-all text-gray-400 leading-relaxed">
-							{userAgent}
-						</p>
-					</div>
-				</div>
+				<details className="rounded-[2rem] border border-gray-100 bg-white p-5 text-sm text-gray-500 shadow-xs">
+					<summary className="cursor-pointer font-black text-gray-700">
+						ブラウザ情報を表示
+					</summary>
+					<p className="mt-4 break-all rounded-2xl bg-gray-50 p-4 font-mono text-xs leading-relaxed text-gray-400">
+						{userAgent}
+					</p>
+				</details>
 			)}
 		</>
 	);

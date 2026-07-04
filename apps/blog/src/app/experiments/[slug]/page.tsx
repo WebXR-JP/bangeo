@@ -18,14 +18,16 @@ interface PageProps {
 
 function findDoc(slug: string) {
 	return getDocs(experiments).find(
-		(d) => getSlugFromPath(d.info.path) === slug,
+		(d) => !d.draft && getSlugFromPath(d.info.path) === slug,
 	);
 }
 
 export async function generateStaticParams(): Promise<{ slug: string }[]> {
-	return getDocs(experiments).map((doc) => ({
-		slug: getSlugFromPath(doc.info.path),
-	}));
+	return getDocs(experiments)
+		.filter((doc) => !doc.draft)
+		.map((doc) => ({
+			slug: getSlugFromPath(doc.info.path),
+		}));
 }
 
 export async function generateMetadata({

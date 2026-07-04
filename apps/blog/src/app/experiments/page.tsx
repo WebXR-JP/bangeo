@@ -21,13 +21,13 @@ import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
 import { CARD_IMAGE_SIZES } from "@/lib/image-defaults";
 
 export const metadata: Metadata = {
-	title: "WebXRデモ実験室｜対応チェックとデモを1ページで試すDemo Hub",
+	title: "WebXRデモ｜対応状況を確認してブラウザで体験",
 	description:
-		"Meta Quest・PICO・PCブラウザで、WebXR対応状況の診断と各VR/AR/MRデモへの起動を1ページにまとめた実験室。実機で開いて、その場で確認して試せます。",
+		"Meta Quest・PICO・スマートフォン・PCブラウザで、現在のWebXR対応状況を確認しながら、VR/AR/MRデモをその場で体験できます。",
 	openGraph: {
-		title: "WebXRデモ実験室｜対応チェックとデモを1ページで試すDemo Hub",
+		title: "WebXRデモ｜対応状況を確認してブラウザで体験",
 		description:
-			"Meta Quest・PICO・PCブラウザで、WebXR対応状況の診断と各VR/AR/MRデモへの起動を1ページにまとめた実験室。実機で開いて、その場で確認して試せます。",
+			"Meta Quest・PICO・スマートフォン・PCブラウザで、現在のWebXR対応状況を確認しながら、VR/AR/MRデモをその場で体験できます。",
 		type: "website",
 	},
 	alternates: { canonical: "/experiments" },
@@ -44,21 +44,21 @@ const difficultyLabel: Record<string, string> = {
 const experienceSteps = [
 	{
 		label: "01",
-		title: "対応状況を先に見る",
+		title: "対応デバイスで開く",
 		description:
-			"WebXR対応デバイスでこのページを開いたら、ページ内の診断パネルでVR/ARセッションの可否とブラウザ機能を確認します。",
+			"Meta Quest、PICO、Androidなどのブラウザでこのページを開くと、現在の環境で利用できるXR機能を確認できます。",
 	},
 	{
 		label: "02",
-		title: "横のデモから入る",
+		title: "対応状況を確認する",
 		description:
-			"診断パネルもカードも「対応状況」と「デモ」を並べています。別ページを挟まず、その場で確認して試せます。",
+			"VR/ARの開始可否や主要なWebXR機能を確認し、体験できるデモを見つけやすくしています。",
 	},
 	{
 		label: "03",
-		title: "結果を切り分ける",
+		title: "デモを体験する",
 		description:
-			"失敗時は端末・ブラウザ・XRモード・fallbackのどこで止まったかをページ内で見て、次の制作メモへつなげます。",
+			"各項目の「デモ」から、対応デバイスでそのまま体験へ進めます。未対応の環境では、別のデモや通常表示をご確認ください。",
 	},
 ] as const;
 
@@ -95,7 +95,7 @@ function StatusDemoLinks({
 				<span className="text-[10px] font-black tracking-[0.18em] text-gray-400 uppercase">
 					対応状況
 				</span>
-				<span className="text-xs font-black">この端末</span>
+				<span className="text-xs font-black">確認する</span>
 			</a>
 			{demoHref ? (
 				<a
@@ -106,7 +106,7 @@ function StatusDemoLinks({
 					<span className="text-[10px] font-black tracking-[0.18em] text-white/60 uppercase">
 						デモ
 					</span>
-					<span className="text-xs font-black">開く ↗</span>
+					<span className="text-xs font-black">体験する ↗</span>
 				</a>
 			) : (
 				<span
@@ -116,7 +116,7 @@ function StatusDemoLinks({
 					<span className="text-[10px] font-black tracking-[0.18em] uppercase">
 						デモ
 					</span>
-					<span className="text-xs font-black">準備中</span>
+					<span className="text-xs font-black">近日公開</span>
 				</span>
 			)}
 		</div>
@@ -261,7 +261,7 @@ function ExperimentCard({ exp, slug, guide }: ExperimentEntry) {
 						href={`/experiments/${slug}`}
 						className="inline-flex text-xs font-black text-gray-400 underline decoration-gray-200 underline-offset-4 transition hover:text-[#e11d48] hover:decoration-rose-300"
 					>
-						体験ガイドを見る
+						詳細を見る
 					</Link>
 				</div>
 			</div>
@@ -303,67 +303,67 @@ export default function ExperimentsIndexPage() {
 		inline: demoFor(
 			"spatial-model-preview",
 			"プレビュー",
-			"inline表示や通常ブラウザでの3Dプレビュー確認に使うデモ",
+			"ブラウザ内で3Dプレビューを確認できます",
 		),
 		"immersive-vr": demoFor(
 			"webxr-audio-space",
 			"VR入室",
-			"immersive-vr の開始、視点追従、空間音響をまとめて確認するデモ",
+			"VR入室、視点追従、空間音響を確認できます",
 		),
 		"immersive-ar": demoFor(
 			"hit-test-advanced",
 			"AR配置",
-			"immersive-ar と hit-test を使って現実空間への配置を確認するデモ",
+			"現実空間へのAR配置を確認できます",
 		),
 		"webxr-core": demoFor(
 			"webxr-audio-space",
 			"Core",
-			"WebXR Device API の基本セッション開始を確認するデモ",
+			"WebXRの基本セッション開始を確認できます",
 		),
 		"webxr-gamepads": demoFor(
 			"iwsdk-gallery",
 			"入力",
-			"VR空間内でカード選択とコントローラー入力を確認するデモ",
+			"VR空間でカード選択と入力を確認できます",
 		),
 		"webxr-ar": demoFor(
 			"hit-test-advanced",
 			"AR",
-			"WebXR AR セッションの開始可否を確認するデモ",
+			"ARセッションの開始可否を確認できます",
 		),
 		"webxr-hit-test": demoFor(
 			"hit-test-advanced",
 			"Hit Test",
-			"床や机への reticle 吸着と配置操作を確認するデモ",
+			"床や机への配置操作を確認できます",
 		),
 		"webxr-dom-overlays": demoPlaceholder(
 			"Overlay",
-			"DOM Overlay 用デモを制作したらここにリンクを差し込みます。",
+			"対応デモを準備しています。公開後、この行から直接開けます。",
 		),
 		"webxr-layers": demoPlaceholder(
 			"Layers",
-			"Layers 用デモを制作したらここにリンクを差し込みます。",
+			"対応デモを準備しています。公開後、この行から直接開けます。",
 		),
 		"webxr-anchors": demoPlaceholder(
 			"Anchors",
-			"Anchors 用デモを制作したらここにリンクを差し込みます。",
+			"対応デモを準備しています。公開後、この行から直接開けます。",
 		),
 		"webxr-lighting-estimation": demoPlaceholder(
 			"Lighting",
-			"Lighting Estimation 用デモを制作したらここにリンクを差し込みます。",
+			"対応デモを準備しています。公開後、この行から直接開けます。",
 		),
 		"webxr-hand-input": demoPlaceholder(
 			"Hand",
-			"Hand Input 用デモを制作したらここにリンクを差し込みます。",
+			"対応デモを準備しています。公開後、この行から直接開けます。",
 		),
 		"webxr-body-tracking": demoFor(
 			"webxr-body-tracking",
 			"Body",
-			"body-tracking feature と関節pose取得を確認するデモ",
+			"全身トラッキングの状態を確認できます",
 		),
 		"webxr-webgpu-bindings": demoFor(
 			"webgpu-fallback-lab",
 			"WebGPU",
-			"WebGPU と WebGL fallback の分岐を確認するデモ",
+			"WebGPU対応とWebGL表示の切り替えを確認できます",
 		),
 	};
 
@@ -387,9 +387,9 @@ export default function ExperimentsIndexPage() {
 	return (
 		<div className="max-w-6xl mx-auto px-6 md:px-8 py-16 md:py-20">
 			<CollectionStructuredData
-				name="BANGEO WebXRデモ実験室"
+				name="BANGEO WebXRデモ"
 				path="/experiments"
-				description="Meta Quest、PICO、Android、PCブラウザで対応状況の診断とデモ起動を1ページで試せるWebXRデモ一覧。"
+				description="Meta Quest、PICO、Android、PCブラウザで対応状況を確認しながら体験できるWebXRデモ一覧。"
 				breadcrumbs={[{ name: "デモ", path: "/experiments" }]}
 				items={allExperiments.map(({ exp, slug }) => ({
 					name: exp.title,
@@ -411,26 +411,28 @@ export default function ExperimentsIndexPage() {
 						<div className="absolute -right-24 -top-24 h-56 w-56 rounded-full bg-rose-500/20 blur-3xl" />
 						<div className="relative z-10">
 							<p className="mb-3 text-xs font-black tracking-[0.26em] text-rose-200 uppercase">
-								XR Demo Gateway
+								WebXR Demos
 							</p>
 							<h1 className="text-3xl font-black tracking-tight md:text-5xl">
-								対応状況から、すぐデモへ
+								ブラウザで、XRをそのまま体験する
 							</h1>
 							<p className="mt-4 max-w-2xl text-sm leading-relaxed text-gray-300 md:text-base">
-								WebXR対応デバイスでこのページを開いたら、ページ内で今のブラウザ・端末が使えるXR機能を確認し、そのまま各デモを起動できます。記事を読み込む前に「この環境で動くか」を試すための入口です。
+								WebXR対応ヘッドセットやスマートフォンで開くと、現在の環境で利用できる機能を確認しながら、そのままVR
+								/ AR /
+								MRデモへ進めます。読むだけで終わらない、ブラウザ体験の入口です。
 							</p>
 							<div className="mt-6 flex flex-col gap-3 sm:flex-row">
 								<a
 									href={SUPPORT_CHECK_HREF}
 									className="inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-black text-gray-950 transition hover:bg-rose-50 hover:text-[#e11d48]"
 								>
-									ページ内で対応状況を見る
+									対応状況を確認する
 								</a>
 								<a
 									href="#demo-catalog"
 									className="inline-flex items-center justify-center rounded-full border border-white/20 px-5 py-3 text-sm font-black text-white transition hover:bg-white/10"
 								>
-									デモ一覧へ
+									デモ一覧を見る
 								</a>
 							</div>
 						</div>
@@ -466,20 +468,20 @@ export default function ExperimentsIndexPage() {
 					<div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
 						<div>
 							<p className="mb-2 text-xs font-black tracking-[0.24em] text-rose-600 uppercase">
-								Device Status
+								Device Check
 							</p>
 							<h2 className="text-2xl font-black tracking-tight text-gray-950 md:text-3xl">
-								この端末の対応状況を、デモ一覧の前で確認
+								現在の環境で利用できる機能を確認
 							</h2>
 							<p className="mt-3 max-w-3xl text-sm leading-relaxed text-gray-500">
-								対応状況チェックの体験をこのページ内に置きました。WebXR対応デバイスで開くと、VR/ARセッションや主要モジュールの可否を確認でき、各判定行の横から関連デモへ進めます。
+								このページを開いているブラウザで、VR/ARセッションや主要なWebXR機能が利用できるかを確認できます。各項目の横にあるデモリンクから、対応する体験へ進めます。
 							</p>
 						</div>
 						<a
 							href="#demo-catalog"
 							className="inline-flex shrink-0 items-center justify-center rounded-full bg-gray-950 px-5 py-3 text-sm font-black text-white transition hover:bg-[#e11d48]"
 						>
-							対応結果を見たらデモへ
+							デモ一覧を見る
 						</a>
 					</div>
 				</div>
@@ -493,15 +495,13 @@ export default function ExperimentsIndexPage() {
 					<div className="grid gap-0 lg:grid-cols-[0.75fr_1.5fr]">
 						<div className="border-b border-white/10 p-6 md:p-8 lg:border-r lg:border-b-0">
 							<p className="text-xs font-black tracking-[0.24em] text-rose-200 uppercase">
-								Recommended Flow
+								Recommended Demos
 							</p>
 							<h2 className="mt-3 text-2xl font-black tracking-tight md:text-3xl">
-								新しいXRデバイスで試す順番
+								はじめて試す方におすすめのデモ
 							</h2>
 							<p className="mt-4 text-sm leading-relaxed text-gray-300">
-								最初から尖ったMR機能へ進まず、VR入室 → 音と入力 → 描画fallback →
-								境界確認の順に見ると、Meta
-								QuestとPICOの差分を安全に切り分けられます。
+								まずは動作の分かりやすいデモから試すと、端末やブラウザの状態をつかみやすくなります。VR入室、空間音響、描画確認、プレイエリア表示の順に見るのがおすすめです。
 							</p>
 						</div>
 						<div className="space-y-3 p-4 md:p-6">
@@ -513,39 +513,24 @@ export default function ExperimentsIndexPage() {
 				</section>
 			)}
 
-			<section className="mb-12">
-				<div className="mb-5">
-					<p className="mb-1 text-[11px] font-black tracking-[0.22em] text-rose-600 uppercase">
-						Device Check
-					</p>
-					<h2 className="text-2xl font-black tracking-tight text-gray-950 mb-2">
-						このブラウザのWebXR対応状況
-					</h2>
-					<p className="max-w-3xl text-sm leading-relaxed text-gray-500">
-						デモを開く前に、今使っているブラウザ・デバイスでWebXRセッションや各モジュールが利用できるか確認できます。
-					</p>
-				</div>
-				<WebXRChecker />
-			</section>
-
 			<section className="mb-12 rounded-2xl border border-gray-100 bg-gray-50/60 p-5 md:p-6">
 				<div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
 					<div>
 						<h2 className="text-sm font-black text-gray-950 mb-2">
-							バッジと導線の見方
+							表示ラベルと使い方
 						</h2>
 						<p className="mb-3 max-w-3xl text-xs font-bold leading-relaxed text-gray-500">
-							各カードの下部に「対応状況」と「デモ」を横並びで配置しています。「対応状況」はこのページ内の診断パネルへ戻り、「デモ」は実体験へ直接進みます。デモ未実装の項目は、今後リンクを差し替えるだけで同じ導線に乗せられます。
+							各カードの「対応状況」から現在の環境を確認し、「デモ」から体験を開けます。近日公開のデモは、公開され次第このページから直接体験できるようになります。
 						</p>
 						<div className="flex flex-wrap gap-2">
 							{(
 								[
-									["ready", "実機で動作確認済み"],
-									["lab", "実機検証用のLab（結果の記録が目的）"],
-									["preview", "非XR環境でもプレビュー可"],
-									["limited", "対応端末・条件が限定される"],
-									["unknown", "実機での確認待ち"],
-									["unsupported", "その端末では非対応"],
+									["ready", "対応環境で体験できます"],
+									["lab", "対応端末で検証中のデモです"],
+									["preview", "通常ブラウザでも確認できます"],
+									["limited", "対応条件があります"],
+									["unknown", "対応状況を確認中です"],
+									["unsupported", "この環境では対象外です"],
 								] as const
 							).map(([key, desc]) => (
 								<span
@@ -563,13 +548,13 @@ export default function ExperimentsIndexPage() {
 							href={SUPPORT_CHECK_HREF}
 							className="rounded-full border border-gray-200 bg-white px-4 py-2 text-gray-700 transition hover:border-rose-200 hover:text-[#e11d48]"
 						>
-							ページ内の対応状況へ →
+							対応状況を確認 →
 						</a>
 						<Link
 							href="/webxr-status"
 							className="rounded-full border border-gray-200 bg-white px-4 py-2 text-gray-700 transition hover:border-rose-200 hover:text-[#e11d48]"
 						>
-							標準化・ブラウザ対応状況 →
+							WebXRの対応状況を見る →
 						</Link>
 					</div>
 				</div>
@@ -582,7 +567,7 @@ export default function ExperimentsIndexPage() {
 							<section key={track}>
 								<div className="mb-6">
 									<p className="mb-1 text-[11px] font-black tracking-[0.22em] text-rose-600 uppercase">
-										Track {sectionIndex + 1}
+										カテゴリ {sectionIndex + 1}
 									</p>
 									<h2 className="text-2xl font-black tracking-tight text-gray-950 mb-2">
 										{trackLabel[track]}
@@ -602,7 +587,7 @@ export default function ExperimentsIndexPage() {
 				) : (
 					<section className="rounded-[2rem] border border-dashed border-rose-200 bg-rose-50/50 px-8 py-16 text-center">
 						<p className="text-xs font-black tracking-[0.3em] text-rose-500">
-							準備中
+							近日公開
 						</p>
 						<h2 className="mt-4 text-2xl font-black tracking-tight text-gray-950">
 							公開中のデモはまだありません
