@@ -195,6 +195,31 @@ export function WebXRSpecList() {
 					supportRank[results[b.id] ?? "checking"],
 			)
 		: webxrSpecCatalog;
+	const rows: (
+		| { kind: "header"; label: string }
+		| { kind: "entry"; entry: (typeof webxrSpecCatalog)[number] }
+	)[] = [];
+	if (loaded) {
+		const groupDefs: { label: string; match: SpecSupport[] }[] = [
+			{ label: "このブラウザで使える", match: ["supported"] },
+			{ label: "実機で確認", match: ["unknown", "checking"] },
+			{ label: "このブラウザでは未対応", match: ["unsupported"] },
+		];
+		for (const group of groupDefs) {
+			const items = sortedEntries.filter((entry) =>
+				group.match.includes(results[entry.id] ?? "checking"),
+			);
+			if (items.length === 0) continue;
+			rows.push({ kind: "header", label: group.label });
+			for (const entry of items) {
+				rows.push({ kind: "entry", entry });
+			}
+		}
+	} else {
+		for (const entry of webxrSpecCatalog) {
+			rows.push({ kind: "entry", entry });
+		}
+	}
 	const supportedNames = webxrSpecCatalog
 		.filter((entry) => results[entry.id] === "supported")
 		.map((entry) => entry.name);
@@ -269,7 +294,18 @@ export function WebXRSpecList() {
 			</div>
 
 			<ul className="mt-6 divide-y divide-gray-100 rounded-2xl border border-gray-100">
-				{sortedEntries.map((entry) => {
+				{rows.map((row) => {
+					if (row.kind === "header") {
+						return (
+							<li
+								key={`header-${row.label}`}
+								className="bg-gray-50/60 px-5 py-2 text-[11px] font-bold tracking-wide text-gray-400"
+							>
+								{row.label}
+							</li>
+						);
+					}
+					const entry = row.entry;
 					const support = results[entry.id] ?? "checking";
 					const badge = supportBadge[support];
 					return (
