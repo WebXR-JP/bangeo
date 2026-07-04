@@ -288,21 +288,27 @@ export function WebXRSpecList() {
 							>
 								{maturityLabel[entry.maturity]}
 							</span>
-							<span className="w-16 shrink-0 text-right">
-								{entry.demoHref ? (
+							<span className="flex shrink-0 items-center justify-end gap-1.5">
+								{entry.demos && entry.demos.length > 0 ? (
 									support === "unsupported" ? (
 										<span className="text-xs text-gray-300">未対応</span>
 									) : (
-										<a
-											href={entry.demoHref}
-											className={
-												support === "supported"
-													? "inline-flex items-center justify-center rounded-full bg-gray-950 px-4 py-1.5 text-xs font-bold text-white transition hover:bg-[#e11d48]"
-													: "inline-flex items-center justify-center rounded-full border border-gray-300 px-4 py-1.5 text-xs font-bold text-gray-600 transition hover:border-gray-950 hover:text-gray-950"
-											}
-										>
-											試す
-										</a>
+										entry.demos.map((demo, index) => (
+											<a
+												key={demo.href}
+												href={demo.href}
+												target="_blank"
+												rel="noopener noreferrer"
+												title={`${demo.label}のデモページを開く`}
+												className={
+													index === 0 && support === "supported"
+														? "inline-flex items-center justify-center rounded-full bg-gray-950 px-3 py-1 text-[11px] font-bold text-white transition hover:bg-[#e11d48]"
+														: "inline-flex items-center justify-center rounded-full border border-gray-300 px-3 py-1 text-[11px] font-bold text-gray-600 transition hover:border-gray-950 hover:text-gray-950"
+												}
+											>
+												{demo.label === "公式サンプル" ? "公式" : demo.label}
+											</a>
+										))
 									)
 								) : (
 									<span className="text-xs text-gray-300">近日</span>

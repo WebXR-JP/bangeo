@@ -4,6 +4,9 @@
  * デモは仕様を検証するための従属物として扱い、
  * 公式仕様名・成熟度・仕様URLを一次情報として持つ。
  * 成熟度は W3C Immersive Web WG の公開情報で確認する（最終確認: 2026-07-04）。
+ *
+ * demos には実在を確認したデモページのみを載せる（URL検証日: 2026-07-04）。
+ * BANGEO自前デモが公開されたら、同じ配列に label: "BANGEO" で追加する。
  */
 
 export type SpecMaturity = "cr" | "wd" | "draft" | "vendor";
@@ -26,6 +29,18 @@ export type SpecCheckId =
 	| "webgpu-binding"
 	| "body-tracking";
 
+export interface SpecDemoLink {
+	/** リンクの表示ラベル（提供元） */
+	label:
+		| "公式サンプル"
+		| "Three.js"
+		| "Babylon.js"
+		| "A-Frame"
+		| "PlayCanvas"
+		| "BANGEO";
+	href: string;
+}
+
 export interface WebXRSpecEntry {
 	id: SpecCheckId;
 	/** リストの見出しに使う短い名称（機能名） */
@@ -37,8 +52,8 @@ export interface WebXRSpecEntry {
 	maturity: SpecMaturity;
 	/** 何ができる仕様かの1行説明 */
 	description: string;
-	/** 仕様を検証できるデモ。未実装なら undefined（「近日」表示） */
-	demoHref?: string;
+	/** 仕様を動かして確かめられるデモ。空なら「近日」表示 */
+	demos?: SpecDemoLink[];
 	/** 解説記事（/experiments/[slug]） */
 	articleSlug?: string;
 }
@@ -57,6 +72,9 @@ export const maturityTitle: Record<SpecMaturity, string> = {
 	vendor: "ベンダー拡張（標準仕様ではありません）",
 };
 
+const OFFICIAL_SAMPLES = "https://immersive-web.github.io/webxr-samples";
+const THREEJS_EXAMPLES = "https://threejs.org/examples";
+
 export const webxrSpecCatalog: WebXRSpecEntry[] = [
 	{
 		id: "immersive-vr",
@@ -64,8 +82,17 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specName: "WebXR Device API",
 		specUrl: "https://www.w3.org/TR/webxr/",
 		maturity: "cr",
-		description: "VRセッションの開始",
-		demoHref: "/demos/webxr-audio-space",
+		description: "ヘッドセットでVR表示をはじめる",
+		demos: [
+			{
+				label: "公式サンプル",
+				href: `${OFFICIAL_SAMPLES}/immersive-vr-session.html`,
+			},
+			{
+				label: "Three.js",
+				href: `${THREEJS_EXAMPLES}/webxr_xr_ballshooter.html`,
+			},
+		],
 		articleSlug: "webxr-audio-space",
 	},
 	{
@@ -74,8 +101,14 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specName: "WebXR Augmented Reality Module - Level 1",
 		specUrl: "https://www.w3.org/TR/webxr-ar-module-1/",
 		maturity: "cr",
-		description: "ARセッションの開始",
-		demoHref: "/demos/hit-test-advanced",
+		description: "現実の風景に映像を重ねるARをはじめる",
+		demos: [
+			{
+				label: "公式サンプル",
+				href: `${OFFICIAL_SAMPLES}/immersive-ar-session.html`,
+			},
+			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webxr_ar_cones.html` },
+		],
 		articleSlug: "hit-test-advanced",
 	},
 	{
@@ -84,8 +117,10 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specName: "WebXR Device API（Reference Spaces）",
 		specUrl: "https://www.w3.org/TR/webxr/#xrreferencespace",
 		maturity: "cr",
-		description: "プレイエリア境界の取得",
-		demoHref: "/demos/room-tracking",
+		description: "安全に動けるプレイエリアの境界を知る",
+		demos: [
+			{ label: "公式サンプル", href: `${OFFICIAL_SAMPLES}/room-scale.html` },
+		],
 		articleSlug: "room-scale-bounds-viewer",
 	},
 	{
@@ -94,8 +129,14 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specName: "WebXR Gamepads Module - Level 1",
 		specUrl: "https://www.w3.org/TR/webxr-gamepads-module-1/",
 		maturity: "wd",
-		description: "コントローラー入力",
-		demoHref: "/demo/iwsdk-gallery",
+		description: "コントローラーのボタンやスティックを扱う",
+		demos: [
+			{
+				label: "公式サンプル",
+				href: `${OFFICIAL_SAMPLES}/controller-state.html`,
+			},
+			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webxr_xr_haptics.html` },
+		],
 		articleSlug: "iwsdk-gallery",
 	},
 	{
@@ -104,7 +145,17 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specName: "WebXR Hand Input Module - Level 1",
 		specUrl: "https://www.w3.org/TR/webxr-hand-input-1/",
 		maturity: "wd",
-		description: "ハンドトラッキング",
+		description: "コントローラーなしで手の動きを使う",
+		demos: [
+			{
+				label: "公式サンプル",
+				href: `${OFFICIAL_SAMPLES}/immersive-hands.html`,
+			},
+			{
+				label: "Three.js",
+				href: `${THREEJS_EXAMPLES}/webxr_vr_handinput.html`,
+			},
+		],
 	},
 	{
 		id: "hit-test",
@@ -112,8 +163,11 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specName: "WebXR Hit Test Module",
 		specUrl: "https://www.w3.org/TR/webxr-hit-test-1/",
 		maturity: "wd",
-		description: "面の検出と配置",
-		demoHref: "/demos/hit-test-advanced",
+		description: "床や机を見つけてものを置く",
+		demos: [
+			{ label: "公式サンプル", href: `${OFFICIAL_SAMPLES}/hit-test.html` },
+			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webxr_ar_hittest.html` },
+		],
 		articleSlug: "hit-test-advanced",
 	},
 	{
@@ -122,7 +176,10 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specName: "WebXR Anchors Module",
 		specUrl: "https://immersive-web.github.io/anchors/",
 		maturity: "draft",
-		description: "空間アンカー",
+		description: "置いたものの位置を現実空間に固定する",
+		demos: [
+			{ label: "公式サンプル", href: `${OFFICIAL_SAMPLES}/anchors.html` },
+		],
 	},
 	{
 		id: "dom-overlays",
@@ -130,7 +187,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specName: "WebXR DOM Overlays Module",
 		specUrl: "https://www.w3.org/TR/webxr-dom-overlays-1/",
 		maturity: "wd",
-		description: "XR中のHTML UI表示",
+		description: "AR画面の上にHTMLのUIを重ねる",
 	},
 	{
 		id: "depth-sensing",
@@ -138,8 +195,13 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specName: "WebXR Depth Sensing Module",
 		specUrl: "https://www.w3.org/TR/webxr-depth-sensing-1/",
 		maturity: "wd",
-		description: "深度による前後合成",
-		demoHref: "/demos/quest-depth-projection-box/xr.html",
+		description: "現実の奥行きを読み取って前後を正しく合成する",
+		demos: [
+			{
+				label: "公式サンプル",
+				href: `${OFFICIAL_SAMPLES}/proposals/phone-ar-depth.html`,
+			},
+		],
 		articleSlug: "quest-depth-projection-box",
 	},
 	{
@@ -148,8 +210,13 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specName: "WebXR Mesh Detection Module",
 		specUrl: "https://immersive-web.github.io/real-world-meshing/",
 		maturity: "draft",
-		description: "部屋メッシュの取得",
-		demoHref: "/demo/xr-mesh-export",
+		description: "部屋の形をメッシュとして読み取る",
+		demos: [
+			{
+				label: "公式サンプル",
+				href: `${OFFICIAL_SAMPLES}/proposals/mesh-detection.html`,
+			},
+		],
 		articleSlug: "xr-mesh-export",
 	},
 	{
@@ -158,7 +225,10 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specName: "WebXR Lighting Estimation API Level 1",
 		specUrl: "https://www.w3.org/TR/webxr-lighting-estimation-1/",
 		maturity: "wd",
-		description: "照明推定",
+		description: "現実の光に合わせて3Dの見た目をなじませる",
+		demos: [
+			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webxr_ar_lighting.html` },
+		],
 	},
 	{
 		id: "layers",
@@ -166,7 +236,11 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specName: "WebXR Layers API Level 1",
 		specUrl: "https://www.w3.org/TR/webxrlayers-1/",
 		maturity: "wd",
-		description: "高品質なレイヤー合成",
+		description: "文字や動画をくっきり表示する",
+		demos: [
+			{ label: "公式サンプル", href: `${OFFICIAL_SAMPLES}/layers-samples/` },
+			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webxr_vr_layers.html` },
+		],
 	},
 	{
 		id: "webgpu-binding",
@@ -174,8 +248,11 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specName: "WebXR/WebGPU Binding",
 		specUrl: "https://immersive-web.github.io/WebXR-WebGPU-Binding/",
 		maturity: "draft",
-		description: "WebGPUでのXR描画",
-		demoHref: "/demos/webgpu-fallback-lab/xr.html",
+		description: "WebGPUでXRを描画する",
+		demos: [
+			{ label: "公式サンプル", href: `${OFFICIAL_SAMPLES}/webgpu/` },
+			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webgpu_xr_cubes.html` },
+		],
 		articleSlug: "webgpu-fallback-lab",
 	},
 	{
@@ -183,8 +260,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		name: "Body Tracking",
 		specName: "WebXR Body Tracking（ベンダー拡張）",
 		maturity: "vendor",
-		description: "全身トラッキング",
-		demoHref: "/demos/webxr-body-tracking",
+		description: "全身の動きを読み取る",
 		articleSlug: "webxr-body-tracking",
 	},
 ];

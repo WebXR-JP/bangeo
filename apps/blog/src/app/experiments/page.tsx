@@ -55,10 +55,10 @@ export default function ExperimentsIndexPage() {
 
 			<header className="mb-10">
 				<h1 className="text-3xl font-black tracking-tight text-gray-950 md:text-4xl">
-					WebXR Demos
+					WebXR デモ
 				</h1>
 				<p className="mt-3 text-sm leading-relaxed text-gray-500">
-					WebXRの各仕様を、この端末でそのまま動かして確かめる。
+					WebXRの各仕様を、いま開いている端末でそのまま動かして確かめられます。
 				</p>
 			</header>
 
