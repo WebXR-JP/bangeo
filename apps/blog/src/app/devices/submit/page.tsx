@@ -6,6 +6,7 @@ export const metadata: Metadata = {
 	description:
 		"お使いのブラウザ・デバイスがWebXRに対応しているか確認できます。VR/ARモードの利用可否、対応モジュールを診断します。",
 	alternates: { canonical: "/devices/submit" },
+	robots: { index: false, follow: true },
 };
 
 export default function DeviceSubmitPage() {

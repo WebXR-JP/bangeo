@@ -6,6 +6,7 @@ export const metadata: Metadata = {
 	description:
 		"BANGEO における OSS 公開サイトとしての情報の取り扱い方針と、アクセス解析・広告配信に関するご案内。",
 	alternates: { canonical: "/privacy-policy" },
+	robots: { index: false, follow: true },
 };
 
 export default function PrivacyPolicyPage() {

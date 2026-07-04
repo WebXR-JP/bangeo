@@ -60,6 +60,7 @@ export async function generateMetadata({
 			images: [ogImage],
 		},
 		alternates: { canonical: `/experiments/${slug}` },
+		robots: { index: false, follow: true },
 	};
 }
 

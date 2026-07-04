@@ -54,6 +54,7 @@ export async function generateMetadata({
 			images: ["/ogp.png"],
 		},
 		alternates: { canonical: `/podcast/${slug}` },
+		robots: { index: false, follow: true },
 	};
 }
 

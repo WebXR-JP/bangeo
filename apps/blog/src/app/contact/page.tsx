@@ -7,6 +7,7 @@ export const metadata: Metadata = {
 	description:
 		"BANGEO は OSS として公開しています。質問、改善提案、不具合報告、記事寄稿、WebXRデモや企画の相談窓口をまとめています。",
 	alternates: { canonical: "/contact" },
+	robots: { index: false, follow: true },
 };
 
 const welcomeTopics = [

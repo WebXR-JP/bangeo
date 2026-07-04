@@ -11,6 +11,7 @@ export const metadata: Metadata = {
 	description:
 		"WebXR JPコミュニティのメンバーがXR・WebXR・VR/ARの話題を気軽に語るポッドキャストのエピソード一覧です。",
 	alternates: { canonical: "/podcast" },
+	robots: { index: false, follow: true },
 };
 
 function toEmbedUrl(spotifyUrl: string) {
