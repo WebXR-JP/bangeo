@@ -181,6 +181,9 @@ const runnerVisualized = new Set([
 	"body-tracking",
 ]);
 
+/** スターター体験で実際に requestSession へ渡してよいfeature */
+const runnerEnabledFeatures = runnerVisualized;
+
 const demoButtonClass =
 	"flex min-h-10 items-center justify-between gap-2 rounded-xl border border-gray-200 bg-white px-3.5 py-2 text-xs font-bold text-gray-700 transition hover:border-gray-950 hover:bg-gray-950 hover:text-white";
 
@@ -439,10 +442,17 @@ export function WebXRSpecList() {
 					: []),
 				...features.filter((f) => {
 					const entry = featureOptions.find((o) => o.featureName === f);
+					if (!runnerEnabledFeatures.has(f)) return false;
 					return entry ? results[entry.id] === "unsupported" : false;
 				}),
 			]
 		: [];
+	const starterFeatures = features.filter((feature) =>
+		runnerEnabledFeatures.has(feature),
+	);
+	const skippedStarterFeatures = features.filter(
+		(feature) => !runnerEnabledFeatures.has(feature),
+	);
 
 	async function startExperience() {
 		setXrError(null);
@@ -455,7 +465,12 @@ export function WebXRSpecList() {
 		try {
 			setXrRunning(true);
 			xrSessionRef.current = await startStarterSession(
-				{ mode, refSpace, features, skyboxUrl: "/assets/starter-skybox.jpg" },
+				{
+					mode,
+					refSpace,
+					features: starterFeatures,
+					skyboxUrl: "/assets/starter-skybox.jpg",
+				},
 				(message) => {
 					setXrRunning(false);
 					xrSessionRef.current = null;
@@ -794,7 +809,7 @@ export function WebXRSpecList() {
 							{entry.featureName &&
 								!runnerVisualized.has(entry.featureName) && (
 									<span
-										title="BANGEOのスターター体験ではまだ可視化されません（セッションへの要求のみ行われます）"
+										title="BANGEOのスターター体験ではまだ可視化されず、体験開始時のセッション要求にも入れません"
 										className="shrink-0 rounded bg-gray-100 px-1.5 py-0.5 text-[10px] text-gray-400"
 									>
 										可視化なし
@@ -855,8 +870,14 @@ export function WebXRSpecList() {
 					</div>
 				</div>
 				<p className="mt-3 text-[11px] leading-relaxed text-gray-400">
-					体験を開始すると、VRでは360°スカイボックス、ARではパススルーを背景に、hit-test（面マーカー）・anchors（選択操作で固定キューブを設置）・hand-tracking（関節の点表示）・bounded-floor（境界線）・mesh-detection（部屋メッシュの点群）・depth-sensing（視線の先の実測距離マーカー）・light-estimation（主光源の方向線）・body-tracking（全身関節の点表示）がセッションの中で確認できます。残りの機能の確認モジュールは順次追加していきます。
+					体験を開始すると、VRでは安定性を優先した暗背景、ARではパススルーを背景に、hit-test（面マーカー）・anchors（選択操作で固定キューブを設置）・hand-tracking（関節の点表示）・bounded-floor（境界線）・mesh-detection（部屋メッシュの点群）・depth-sensing（視線の先の実測距離マーカー）・light-estimation（主光源の方向線）・body-tracking（全身関節の点表示）がセッションの中で確認できます。Layersなど「可視化なし」の機能は、体験開始時のセッション要求には入れません。
 				</p>
+				{skippedStarterFeatures.length > 0 && (
+					<p className="mt-3 rounded-xl bg-gray-50 px-3 py-2 text-xs leading-relaxed text-gray-500">
+						BANGEOのスターター体験では未実装のため、開始時には{" "}
+						{skippedStarterFeatures.join("・")} をセッション要求から外します。
+					</p>
+				)}
 				{selectedUnsupported.length > 0 && (
 					<p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-700">
 						この構成には、この端末では未対応のものが含まれます（
