@@ -175,6 +175,10 @@ export function WebXRSpecList() {
 	const [envLabel, setEnvLabel] = useState<string | null>(null);
 	const [userAgent, setUserAgent] = useState("");
 	const [copied, setCopied] = useState(false);
+	const [mode, setMode] = useState<XRSessionMode>("immersive-vr");
+	const [refSpace, setRefSpace] = useState<string>("local-floor");
+	const [features, setFeatures] = useState<string[]>([]);
+	const [codeCopied, setCodeCopied] = useState(false);
 
 	useEffect(() => {
 		let cancelled = false;
@@ -238,6 +242,100 @@ export function WebXRSpecList() {
 					supportRank[results[b.id] ?? "checking"],
 			)
 		: moduleEntries;
+	const featureOptions = moduleEntries.filter((entry) =>
+		Boolean(entry.featureName),
+	);
+
+	function toggleFeature(name: string) {
+		setFeatures((prev) =>
+			prev.includes(name) ? prev.filter((f) => f !== name) : [...prev, name],
+		);
+	}
+
+	function buildForDevice() {
+		const modes: XRSessionMode[] = ["immersive-vr", "immersive-ar", "inline"];
+		const bestMode = modes.find((m) => results[m] === "supported") ?? "inline";
+		setMode(bestMode);
+		const refCandidates =
+			bestMode === "inline"
+				? ["viewer"]
+				: ["bounded-floor", "local-floor", "local"];
+		const bestRef =
+			refCandidates.find((r) => results[r as SpecCheckId] === "supported") ??
+			(bestMode === "inline" ? "viewer" : "local");
+		setRefSpace(bestRef);
+		setFeatures(
+			featureOptions.flatMap((entry) =>
+				entry.featureName && results[entry.id] === "supported"
+					? [entry.featureName]
+					: [],
+			),
+		);
+	}
+
+	const builderLines: string[] = [
+		`const supported = await navigator.xr.isSessionSupported("${mode}");`,
+		"",
+	];
+	const builderOpts: string[] = [];
+	if (refSpace !== "viewer") {
+		builderOpts.push(`  requiredFeatures: ["${refSpace}"],`);
+	}
+	if (features.length > 0) {
+		builderOpts.push(
+			`  optionalFeatures: [${features.map((f) => `"${f}"`).join(", ")}],`,
+		);
+	}
+	if (builderOpts.length > 0) {
+		builderLines.push(
+			`const session = await navigator.xr.requestSession("${mode}", {`,
+			...builderOpts,
+			"});",
+		);
+	} else {
+		builderLines.push(
+			`const session = await navigator.xr.requestSession("${mode}");`,
+		);
+	}
+	builderLines.push(
+		"",
+		`const refSpace = await session.requestReferenceSpace("${refSpace}");`,
+	);
+	const builderCode = builderLines.join("\n");
+
+	const selectedUnsupported = loaded
+		? [
+				...(results[mode] !== "supported" ? [mode] : []),
+				...(results[refSpace as SpecCheckId] === "unsupported"
+					? [refSpace]
+					: []),
+				...features.filter((f) => {
+					const entry = featureOptions.find((o) => o.featureName === f);
+					return entry ? results[entry.id] === "unsupported" : false;
+				}),
+			]
+		: [];
+
+	async function copyBuilderCode() {
+		try {
+			await navigator.clipboard.writeText(builderCode);
+			setCodeCopied(true);
+			setTimeout(() => setCodeCopied(false), 2000);
+		} catch {
+			// クリップボードが使えない環境では何もしない
+		}
+	}
+
+	function supportDot(id: SpecCheckId) {
+		const ok = results[id] === "supported";
+		return (
+			<span
+				aria-hidden="true"
+				className={`inline-block h-1.5 w-1.5 shrink-0 rounded-full ${ok ? "bg-emerald-500" : "bg-gray-300"}`}
+				title={ok ? "この端末で利用できます" : "この端末では未対応です"}
+			/>
+		);
+	}
 	const supportedNames = webxrSpecCatalog
 		.filter((entry) => results[entry.id] === "supported")
 		.map((entry) => entry.name);
@@ -455,6 +553,106 @@ export function WebXRSpecList() {
 				</>,
 				referenceSpaceEntries,
 			)}
+
+			<p className={sectionLabelClass}>スターターコードを組み立てる</p>
+			<p className="mt-1.5 text-xs leading-relaxed text-gray-500">
+				モード・機能・体験スペースを選ぶと、WebXRを開始するコードがその場で組み上がります。未対応の端末でも、実装の形をそのまま確認できます。
+			</p>
+			<div className="mt-3 rounded-2xl border border-gray-100 p-5">
+				{loaded && (
+					<button
+						type="button"
+						onClick={buildForDevice}
+						className="rounded-full bg-gray-950 px-4 py-2 text-xs font-bold text-white transition hover:bg-[#e11d48]"
+					>
+						この端末向けに構成する
+					</button>
+				)}
+				<p className="mt-4 text-[11px] font-bold text-gray-400">モード</p>
+				<div className="mt-2 flex flex-wrap gap-2">
+					{sessionEntries.map((entry) => (
+						<button
+							key={entry.id}
+							type="button"
+							onClick={() => setMode(entry.id as XRSessionMode)}
+							className={`flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-bold transition ${
+								mode === entry.id
+									? "border-gray-950 bg-gray-950 text-white"
+									: "border-gray-200 bg-white text-gray-700 hover:border-gray-400"
+							}`}
+						>
+							{supportDot(entry.id)}
+							{entry.name}
+						</button>
+					))}
+				</div>
+				<p className="mt-4 text-[11px] font-bold text-gray-400">
+					機能（optionalFeatures）
+				</p>
+				<div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2 md:grid-cols-3">
+					{featureOptions.map((entry) => (
+						<label
+							key={entry.id}
+							className="flex cursor-pointer items-center gap-2 rounded-xl border border-gray-100 px-3 py-2 text-xs text-gray-700 transition hover:border-gray-300"
+						>
+							<input
+								type="checkbox"
+								checked={
+									entry.featureName
+										? features.includes(entry.featureName)
+										: false
+								}
+								onChange={() =>
+									entry.featureName && toggleFeature(entry.featureName)
+								}
+								className="h-3.5 w-3.5 accent-gray-950"
+							/>
+							{supportDot(entry.id)}
+							<span className="min-w-0 truncate font-bold">{entry.name}</span>
+							<code className="ml-auto shrink-0 font-mono text-[10px] text-gray-400">
+								{entry.featureName}
+							</code>
+						</label>
+					))}
+				</div>
+				<p className="mt-4 text-[11px] font-bold text-gray-400">体験スペース</p>
+				<div className="mt-2 flex flex-wrap gap-2">
+					{referenceSpaceEntries.map((entry) => (
+						<button
+							key={entry.id}
+							type="button"
+							onClick={() => setRefSpace(entry.id)}
+							className={`flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-bold transition ${
+								refSpace === entry.id
+									? "border-gray-950 bg-gray-950 text-white"
+									: "border-gray-200 bg-white text-gray-700 hover:border-gray-400"
+							}`}
+						>
+							{supportDot(entry.id)}
+							{entry.name}
+						</button>
+					))}
+				</div>
+				<div className="relative mt-5">
+					<pre className="overflow-x-auto rounded-xl bg-gray-950 p-4 text-xs leading-relaxed text-gray-100">
+						<code>{builderCode}</code>
+					</pre>
+					<button
+						type="button"
+						onClick={copyBuilderCode}
+						className="absolute top-3 right-3 rounded-full border border-white/20 px-3 py-1 text-[11px] font-bold text-white/80 transition hover:bg-white/10"
+					>
+						{codeCopied ? "コピーしました" : "コピー"}
+					</button>
+				</div>
+				{selectedUnsupported.length > 0 && (
+					<p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-700">
+						この構成には、この端末では未対応のものが含まれます（
+						{selectedUnsupported.join("・")}
+						）。コードの形はそのまま学べます。
+					</p>
+				)}
+			</div>
 
 			<p className="mt-4 text-xs leading-relaxed text-gray-400">
 				対応表示はブラウザのAPI実装有無に基づく簡易チェックです。各行のコードは、requestSession
