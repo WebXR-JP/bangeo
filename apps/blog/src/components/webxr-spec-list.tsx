@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { SITE_URL } from "@/lib/site-url";
 import {
 	maturityTitle,
@@ -9,6 +9,10 @@ import {
 	type WebXRSpecEntry,
 	webxrSpecCatalog,
 } from "@/lib/webxr-spec-catalog";
+import {
+	type StarterSessionHandle,
+	startStarterSession,
+} from "@/lib/webxr-starter-session";
 
 type XRSessionMode = "inline" | "immersive-vr" | "immersive-ar";
 
@@ -179,6 +183,9 @@ export function WebXRSpecList() {
 	const [refSpace, setRefSpace] = useState<string>("local-floor");
 	const [features, setFeatures] = useState<string[]>([]);
 	const [codeCopied, setCodeCopied] = useState(false);
+	const [xrRunning, setXrRunning] = useState(false);
+	const [xrError, setXrError] = useState<string | null>(null);
+	const xrSessionRef = useRef<StarterSessionHandle | null>(null);
 
 	useEffect(() => {
 		let cancelled = false;
@@ -425,6 +432,30 @@ export function WebXRSpecList() {
 			]
 		: [];
 
+	async function startExperience() {
+		setXrError(null);
+		try {
+			setXrRunning(true);
+			xrSessionRef.current = await startStarterSession(
+				{ mode, refSpace, features },
+				() => {
+					setXrRunning(false);
+					xrSessionRef.current = null;
+				},
+			);
+		} catch (err) {
+			setXrRunning(false);
+			xrSessionRef.current = null;
+			setXrError(
+				err instanceof Error ? err.message : "体験を開始できませんでした",
+			);
+		}
+	}
+
+	function endExperience() {
+		xrSessionRef.current?.end();
+	}
+
 	async function copyBuilderCode() {
 		try {
 			await navigator.clipboard.writeText(builderCode);
@@ -668,14 +699,30 @@ export function WebXRSpecList() {
 				モード・機能・体験スペースを選ぶと、WebXRを開始するコードがその場で組み上がります。未対応の端末でも、実装の形をそのまま確認できます。
 			</p>
 			<div className="mt-3 rounded-2xl border border-gray-100 p-5">
-				{loaded && (
-					<button
-						type="button"
-						onClick={buildForDevice}
-						className="rounded-full bg-gray-950 px-4 py-2 text-xs font-bold text-white transition hover:bg-[#e11d48]"
-					>
-						この端末向けに構成する
-					</button>
+				<div className="flex flex-wrap items-center gap-2">
+					{loaded && (
+						<button
+							type="button"
+							onClick={buildForDevice}
+							className="rounded-full bg-gray-950 px-4 py-2 text-xs font-bold text-white transition hover:bg-[#e11d48]"
+						>
+							この端末向けに構成する
+						</button>
+					)}
+					{loaded && results[mode] === "supported" && (
+						<button
+							type="button"
+							onClick={xrRunning ? endExperience : startExperience}
+							className="rounded-full bg-emerald-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-emerald-700"
+						>
+							{xrRunning ? "体験を終了する" : "この構成で体験を開始"}
+						</button>
+					)}
+				</div>
+				{xrError && (
+					<p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-xs leading-relaxed text-red-600">
+						{xrError}
+					</p>
 				)}
 				<p className="mt-4 text-[11px] font-bold text-gray-400">モード</p>
 				<div className="mt-2 flex flex-wrap gap-2">
@@ -775,6 +822,9 @@ export function WebXRSpecList() {
 						</pre>
 					</div>
 				</div>
+				<p className="mt-3 text-[11px] leading-relaxed text-gray-400">
+					体験を開始すると、hit-test（面マーカー）・hand-tracking（関節の点表示）・bounded-floor（境界線）はセッションの中で動きを確認できます。ほかの機能は要求のみで、確認モジュールは順次追加していきます。
+				</p>
 				{selectedUnsupported.length > 0 && (
 					<p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-700">
 						この構成には、この端末では未対応のものが含まれます（
