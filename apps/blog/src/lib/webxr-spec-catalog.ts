@@ -44,6 +44,8 @@ export interface SpecDemoLink {
 
 export interface WebXRSpecEntry {
 	id: SpecCheckId;
+	/** requestSession に渡すモード名、または requiredFeatures / optionalFeatures に渡す機能名 */
+	featureName?: string;
 	/** リストの見出しに使う短い名称（機能名） */
 	name: string;
 	/** 公式仕様名 */
@@ -83,6 +85,7 @@ const BABYLONJS_PLAYGROUND = "https://playground.babylonjs.com";
 export const webxrSpecCatalog: WebXRSpecEntry[] = [
 	{
 		id: "inline",
+		featureName: "inline",
 		name: "inline",
 		specName: "WebXR Device API",
 		specUrl: "https://www.w3.org/TR/webxr/#xrsessionmode-enum",
@@ -97,6 +100,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 	},
 	{
 		id: "immersive-vr",
+		featureName: "immersive-vr",
 		name: "immersive-vr",
 		specName: "WebXR Device API",
 		specUrl: "https://www.w3.org/TR/webxr/",
@@ -119,6 +123,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 	},
 	{
 		id: "immersive-ar",
+		featureName: "immersive-ar",
 		name: "immersive-ar",
 		specName: "WebXR Augmented Reality Module - Level 1",
 		specUrl: "https://www.w3.org/TR/webxr-ar-module-1/",
@@ -141,6 +146,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 	},
 	{
 		id: "bounded-floor",
+		featureName: "bounded-floor",
 		name: "bounded-floor",
 		specName: "WebXR Device API（Reference Spaces）",
 		specUrl: "https://www.w3.org/TR/webxr/#xrreferencespace",
@@ -175,6 +181,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 	},
 	{
 		id: "hand-input",
+		featureName: "hand-tracking",
 		name: "Hand Input",
 		specName: "WebXR Hand Input Module - Level 1",
 		specUrl: "https://www.w3.org/TR/webxr-hand-input-1/",
@@ -199,6 +206,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 	},
 	{
 		id: "hit-test",
+		featureName: "hit-test",
 		name: "Hit Test",
 		specName: "WebXR Hit Test Module",
 		specUrl: "https://www.w3.org/TR/webxr-hit-test-1/",
@@ -214,6 +222,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 	},
 	{
 		id: "anchors",
+		featureName: "anchors",
 		name: "Anchors",
 		specName: "WebXR Anchors Module",
 		specUrl: "https://immersive-web.github.io/anchors/",
@@ -231,6 +240,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 	},
 	{
 		id: "dom-overlays",
+		featureName: "dom-overlay",
 		name: "DOM Overlays",
 		specName: "WebXR DOM Overlays Module",
 		specUrl: "https://www.w3.org/TR/webxr-dom-overlays-1/",
@@ -250,6 +260,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 	},
 	{
 		id: "depth-sensing",
+		featureName: "depth-sensing",
 		name: "Depth Sensing",
 		specName: "WebXR Depth Sensing Module",
 		specUrl: "https://www.w3.org/TR/webxr-depth-sensing-1/",
@@ -266,6 +277,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 	},
 	{
 		id: "mesh-detection",
+		featureName: "mesh-detection",
 		name: "Mesh Detection",
 		specName: "WebXR Mesh Detection Module",
 		specUrl: "https://immersive-web.github.io/real-world-meshing/",
@@ -285,6 +297,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 	},
 	{
 		id: "lighting-estimation",
+		featureName: "light-estimation",
 		name: "Lighting Estimation",
 		specName: "WebXR Lighting Estimation API Level 1",
 		specUrl: "https://www.w3.org/TR/webxr-lighting-estimation-1/",
@@ -297,6 +310,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 	},
 	{
 		id: "layers",
+		featureName: "layers",
 		name: "Layers",
 		specName: "WebXR Layers API Level 1",
 		specUrl: "https://www.w3.org/TR/webxrlayers-1/",
@@ -313,6 +327,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 	},
 	{
 		id: "webgpu-binding",
+		featureName: "webgpu",
 		name: "WebGPU Binding",
 		specName: "WebXR/WebGPU Binding",
 		specUrl: "https://immersive-web.github.io/WebXR-WebGPU-Binding/",
@@ -326,6 +341,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 	},
 	{
 		id: "body-tracking",
+		featureName: "body-tracking",
 		name: "Body Tracking",
 		specName: "WebXR Body Tracking（ベンダー拡張）",
 		maturity: "vendor",

@@ -151,8 +151,6 @@ const listClass =
 	"mt-3 divide-y divide-gray-100 rounded-2xl border border-gray-100";
 const sectionLabelClass =
 	"mt-10 text-[11px] font-black tracking-[0.14em] text-gray-400";
-const demoLinkClass =
-	"inline-flex items-center gap-1 rounded-full border border-gray-300 bg-white px-3.5 py-1.5 text-xs font-bold text-gray-800 transition hover:border-gray-950 hover:bg-gray-950 hover:text-white";
 
 export function WebXRSpecList() {
 	const [results, setResults] = useState<
@@ -275,16 +273,20 @@ export function WebXRSpecList() {
 	function renderEntry(entry: WebXRSpecEntry) {
 		const support = results[entry.id] ?? "checking";
 		const badge = supportBadge[support];
+		const isSession = sessionIds.includes(entry.id);
 		return (
-			<li key={entry.id} className="flex gap-4 px-5 py-4 sm:gap-5">
-				<span className="w-14 shrink-0 pt-0.5" title={supportTitle[support]}>
+			<li
+				key={entry.id}
+				className="grid grid-cols-[3.5rem_minmax(0,1fr)] gap-x-4 gap-y-3 px-5 py-4 sm:grid-cols-[3.5rem_minmax(0,1fr)_10rem] sm:gap-x-5"
+			>
+				<span className="pt-0.5" title={supportTitle[support]}>
 					<span
 						className={`inline-flex w-full justify-center rounded-full px-2 py-1 text-[11px] font-bold ${badge.className}`}
 					>
 						{badge.label}
 					</span>
 				</span>
-				<div className="min-w-0 flex-1">
+				<div className="min-w-0">
 					<p className="text-sm leading-snug">
 						<span className="font-bold text-gray-950">{entry.name}</span>
 						{entry.specUrl ? (
@@ -317,27 +319,38 @@ export function WebXRSpecList() {
 							</Link>
 						)}
 					</p>
-					<div className="mt-2.5 flex flex-wrap items-center gap-2">
-						{entry.demos && entry.demos.length > 0 ? (
-							entry.demos.map((demo) => (
-								<a
-									key={demo.href}
-									href={demo.href}
-									target="_blank"
-									rel="noopener noreferrer"
-									title={`${demo.label}のデモページを開く`}
-									className={demoLinkClass}
-								>
-									{demo.label}
-									<span aria-hidden="true" className="text-[10px]">
-										↗
-									</span>
-								</a>
-							))
-						) : (
-							<span className="text-xs text-gray-300">デモは近日公開</span>
-						)}
-					</div>
+					{entry.featureName && (
+						<p className="mt-1.5">
+							<code
+								title={
+									isSession
+										? "requestSession に渡すセッションモード名"
+										: "requestSession の requiredFeatures / optionalFeatures に渡す機能名"
+								}
+								className="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-[11px] text-gray-600"
+							>
+								{isSession ? "mode" : "feature"}: {entry.featureName}
+							</code>
+						</p>
+					)}
+				</div>
+				<div className="col-span-2 flex flex-row flex-wrap gap-x-4 gap-y-1.5 border-t border-gray-50 pt-3 sm:col-span-1 sm:flex-col sm:items-end sm:gap-1.5 sm:border-t-0 sm:pt-0">
+					{entry.demos && entry.demos.length > 0 ? (
+						entry.demos.map((demo) => (
+							<a
+								key={demo.href}
+								href={demo.href}
+								target="_blank"
+								rel="noopener noreferrer"
+								title={`${demo.label}のデモページを開く`}
+								className="text-xs font-bold text-gray-700 underline decoration-gray-300 underline-offset-4 transition hover:text-[#e11d48] hover:decoration-rose-300"
+							>
+								{demo.label} <span aria-hidden="true">↗</span>
+							</a>
+						))
+					) : (
+						<span className="text-xs text-gray-300">デモは近日公開</span>
+					)}
 				</div>
 			</li>
 		);
@@ -399,7 +412,9 @@ export function WebXRSpecList() {
 			</ul>
 
 			<p className="mt-4 text-xs leading-relaxed text-gray-400">
-				対応表示はブラウザのAPI実装有無に基づく簡易チェックです。「実機」の項目はXRセッション内でのみ確認できます。最終的な動作は各デモページでご確認ください。
+				対応表示はブラウザのAPI実装有無に基づく簡易チェックです。「実機」の項目は、featureに示した機能名を
+				requestSession の optionalFeatures
+				に渡し、実機のXRセッション内で確認できます。最終的な動作は各デモページでご確認ください。
 			</p>
 		</div>
 	);
