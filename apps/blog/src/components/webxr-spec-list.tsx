@@ -59,7 +59,11 @@ const specChecks: Record<
 	inline: async () => asSupport(await sessionSupported("inline")),
 	"immersive-vr": async () => asSupport(await sessionSupported("immersive-vr")),
 	"immersive-ar": async () => asSupport(await sessionSupported("immersive-ar")),
+	viewer: () => (getXR() ? "supported" : "unsupported"),
+	local: () => (getXR() ? "supported" : "unsupported"),
+	"local-floor": () => (getXR() ? "unknown" : "unsupported"),
 	"bounded-floor": () => (getXR() ? "unknown" : "unsupported"),
+	unbounded: () => (getXR() ? "unknown" : "unsupported"),
 	gamepads: () => asSupport(hasInterface("XRInputSource")),
 	"hand-input": () => asSupport(hasInterface("XRHand")),
 	"hit-test": () => asSupport(hasInterface("XRHitTestSource")),
@@ -86,6 +90,15 @@ const specChecks: Record<
 };
 
 const sessionIds: SpecCheckId[] = ["inline", "immersive-vr", "immersive-ar"];
+
+/** 体験スペース（Reference Spaces）として別セクションに出す仕様 */
+const referenceSpaceIds: SpecCheckId[] = [
+	"viewer",
+	"local",
+	"local-floor",
+	"bounded-floor",
+	"unbounded",
+];
 
 /** デモ提供元の列順。増えたらここに追加する */
 const providerOrder: SpecDemoLink["label"][] = [
@@ -196,6 +209,17 @@ export function WebXRSpecList() {
 				}
 				next[entry.id] = support;
 			}
+			const immersiveReady =
+				next["immersive-vr"] === "supported" ||
+				next["immersive-ar"] === "supported";
+			const sessionDependentIds: SpecCheckId[] = [
+				"local-floor",
+				"bounded-floor",
+				"unbounded",
+			];
+			for (const id of sessionDependentIds) {
+				next[id] = immersiveReady ? "supported" : "unsupported";
+			}
 			if (!cancelled) setResults(next);
 		}
 
@@ -209,8 +233,12 @@ export function WebXRSpecList() {
 	const sessionEntries = webxrSpecCatalog.filter((entry) =>
 		sessionIds.includes(entry.id),
 	);
+	const referenceSpaceEntries = webxrSpecCatalog.filter((entry) =>
+		referenceSpaceIds.includes(entry.id),
+	);
 	const moduleEntries = webxrSpecCatalog.filter(
-		(entry) => !sessionIds.includes(entry.id),
+		(entry) =>
+			!sessionIds.includes(entry.id) && !referenceSpaceIds.includes(entry.id),
 	);
 	const supportRank: Record<SpecSupport, number> = {
 		supported: 0,
@@ -436,13 +464,16 @@ export function WebXRSpecList() {
 			<p className={sectionLabelClass}>セッションモード</p>
 			{renderTable(sessionEntries)}
 
+			<p className={sectionLabelClass}>体験スペース</p>
+			{renderTable(referenceSpaceEntries)}
+
 			<p className={sectionLabelClass}>モジュール</p>
 			{renderTable(sortedModules)}
 
 			<p className="mt-4 text-xs leading-relaxed text-gray-400">
-				対応表示はブラウザのAPI実装有無に基づく簡易チェックです。「実機」の項目は、コードの機能名を
-				requestSession の optionalFeatures
-				に渡し、実機のXRセッション内で確認できます。最終的な動作は各デモページでご確認ください。
+				対応表示はブラウザのAPI実装有無に基づく簡易チェックです。各行のコードは、requestSession
+				のモード名または requiredFeatures / optionalFeatures
+				に渡す機能名です。最終的な動作は各デモページでご確認ください。
 			</p>
 		</div>
 	);

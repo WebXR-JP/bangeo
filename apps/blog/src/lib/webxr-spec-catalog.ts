@@ -17,7 +17,11 @@ export type SpecCheckId =
 	| "inline"
 	| "immersive-vr"
 	| "immersive-ar"
+	| "viewer"
+	| "local"
+	| "local-floor"
 	| "bounded-floor"
+	| "unbounded"
 	| "gamepads"
 	| "hand-input"
 	| "hit-test"
@@ -91,7 +95,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://www.w3.org/TR/webxr/#xrsessionmode-enum",
 		maturity: "cr",
 		description:
-			"通常のページ内のcanvasでXRの描画ループとポーズ追跡を動かすモード。没入せずに内容をプレビューできる",
+			"ヘッドセットをかぶらずに、ふつうのWebページの中で3Dシーンを動かして表示するモード",
 		demos: [
 			{
 				label: "WebXR Samples",
@@ -106,8 +110,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specName: "WebXR Device API",
 		specUrl: "https://www.w3.org/TR/webxr/",
 		maturity: "cr",
-		description:
-			"描画をヘッドセットのステレオ表示に切り替えるセッション。すべてのVR体験の入口になる",
+		description: "ヘッドセットをかぶって、視界全体をVRの世界に切り替えるモード",
 		demos: [
 			{
 				label: "WebXR Samples",
@@ -130,7 +133,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://www.w3.org/TR/webxr-ar-module-1/",
 		maturity: "cr",
 		description:
-			"カメラ映像やパススルーの上に3D描画を合成するセッション。AR系モジュールの前提になる",
+			"デバイスのカメラで映した現実の風景に、3Dオブジェクトを重ねて表示するモード",
 		demos: [
 			{
 				label: "WebXR Samples",
@@ -146,6 +149,36 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		],
 	},
 	{
+		id: "viewer",
+		featureName: "viewer",
+		name: "viewer",
+		specName: "WebXR Device API（Reference Spaces）",
+		specUrl: "https://www.w3.org/TR/webxr/#xrreferencespace",
+		maturity: "cr",
+		description:
+			"座標の原点が頭（視点）そのものになる。どこを向いてもオブジェクトが視界の同じ位置に居続けるので、メニューや照準の固定に使う",
+	},
+	{
+		id: "local",
+		featureName: "local",
+		name: "local",
+		specName: "WebXR Device API（Reference Spaces）",
+		specUrl: "https://www.w3.org/TR/webxr/#xrreferencespace",
+		maturity: "cr",
+		description:
+			"体験を始めた瞬間の頭の位置が原点になる。床の高さは分からないので、椅子に座ったまま・立ち止まったままの体験に向く",
+	},
+	{
+		id: "local-floor",
+		featureName: "local-floor",
+		name: "local-floor",
+		specName: "WebXR Device API（Reference Spaces）",
+		specUrl: "https://www.w3.org/TR/webxr/#xrreferencespace",
+		maturity: "cr",
+		description:
+			"原点が足元の床（y=0）になり、床の高さが現実と一致する。地面にものを置いたり、立って見下ろすコンテンツがつくれる",
+	},
+	{
 		id: "bounded-floor",
 		featureName: "bounded-floor",
 		name: "bounded-floor",
@@ -153,10 +186,20 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://www.w3.org/TR/webxr/#xrreferencespace",
 		maturity: "cr",
 		description:
-			"ユーザーが設定したプレイエリアの境界ポリゴンを座標系として取得する。ルームスケール体験で安全に歩ける範囲が分かる",
+			"原点は床のままで、さらにヘッドセットに設定した「安全に歩ける範囲」の境界線が取れる。境界の中を実際に歩き回る前提のコンテンツに使う",
 		demos: [
 			{ label: "WebXR Samples", href: `${OFFICIAL_SAMPLES}/room-scale.html` },
 		],
+	},
+	{
+		id: "unbounded",
+		featureName: "unbounded",
+		name: "unbounded",
+		specName: "WebXR Device API（Reference Spaces）",
+		specUrl: "https://www.w3.org/TR/webxr/#xrreferencespace",
+		maturity: "cr",
+		description:
+			"どこまで移動してもトラッキングが破綻しないように座標を調整し続ける空間。建物や屋外など、広い場所を歩き回るARに使う",
 	},
 	{
 		id: "gamepads",
@@ -165,7 +208,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://www.w3.org/TR/webxr-gamepads-module-1/",
 		maturity: "wd",
 		description:
-			"XRコントローラーのボタン・スティック入力をGamepad APIの形式で読み取る。入力ソースごとにgamepadが付与される",
+			"コントローラーのボタンやスティックが、いまどう押されているかを読み取る",
 		demos: [
 			{
 				label: "WebXR Samples",
@@ -188,7 +231,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://www.w3.org/TR/webxr-hand-input-1/",
 		maturity: "wd",
 		description:
-			"手の25関節のポーズを毎フレーム取得する。コントローラーの代わりに素手での選択・つかみ操作を実装できる",
+			"デバイスのカメラで手を認識して、指の関節の位置や動きを取得する。素手での選択やつかむ操作がつくれる",
 		demos: [
 			{
 				label: "WebXR Samples",
@@ -214,7 +257,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://www.w3.org/TR/webxr-hit-test-1/",
 		maturity: "wd",
 		description:
-			"現実の面（床・机・壁）にレイを飛ばして交点を取得する。ARでオブジェクトを現実に沿って配置する基本手段",
+			"デバイスのカメラで現実の床や机を見つけて、3Dオブジェクトを置ける位置を教えてくれる",
 		demos: [
 			{ label: "WebXR Samples", href: `${OFFICIAL_SAMPLES}/hit-test.html` },
 			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webxr_ar_hittest.html` },
@@ -230,7 +273,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://immersive-web.github.io/anchors/",
 		maturity: "draft",
 		description:
-			"空間上の点をトラッキングへ追従する固定点として登録する。時間が経ってもオブジェクトの位置が現実からずれにくくなる",
+			"現実の空間に目印を打ち込んで、置いたオブジェクトが時間が経ってもずれないように固定する",
 		demos: [
 			{ label: "WebXR Samples", href: `${OFFICIAL_SAMPLES}/anchors.html` },
 			{ label: "PlayCanvas", href: `${PLAYCANVAS_DEMOS}/Skq3Ry1K/` },
@@ -249,7 +292,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://www.w3.org/TR/webxr-dom-overlays-1/",
 		maturity: "wd",
 		description:
-			"没入セッション中は通常のHTMLが見えなくなるため、指定したDOM要素をAR表示の上に合成する。UIをWebGLで描かずHTML/CSSのまま使える",
+			"XR中はふつうのHTMLが見えなくなるので、ボタンやメニューなどのHTMLをAR映像の上に重ねて表示する",
 		demos: [
 			{ label: "WebXR Samples", href: `${OFFICIAL_SAMPLES}/ar-barebones.html` },
 			{
@@ -270,7 +313,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://www.w3.org/TR/webxr-depth-sensing-1/",
 		maturity: "wd",
 		description:
-			"カメラから見た現実の深度マップを毎フレーム取得する。仮想オブジェクトが現実の物に隠れるオクルージョン表現に使う",
+			"デバイスのカメラで現実の物までの距離を測って、3Dオブジェクトが現実の物の後ろに隠れる表現をつくる",
 		demos: [
 			{
 				label: "WebXR Samples",
@@ -287,7 +330,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://immersive-web.github.io/real-world-meshing/",
 		maturity: "draft",
 		description:
-			"端末が空間スキャンで生成した部屋のメッシュ（壁・床・家具）を取得する。現実の形状に沿った衝突判定や配置ができる",
+			"デバイスが部屋をスキャンして作った、壁・床・家具の立体データを受け取る",
 		demos: [
 			{
 				label: "WebXR Samples",
@@ -307,7 +350,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://www.w3.org/TR/webxr-lighting-estimation-1/",
 		maturity: "wd",
 		description:
-			"現実の環境光の強さ・向き・環境マップを推定して取得する。3Dオブジェクトの陰影を現実の光と揃えて違和感を減らす",
+			"デバイスのカメラで部屋の明るさや光の向きを読み取って、3Dオブジェクトの影や色を現実の光に合わせる",
 		demos: [
 			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webxr_ar_lighting.html` },
 			{ label: "PlayCanvas", href: `${PLAYCANVAS_DEMOS}/AOYF3YyG/` },
@@ -321,7 +364,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://www.w3.org/TR/webxrlayers-1/",
 		maturity: "wd",
 		description:
-			"通常は毎フレーム1枚のWebGLへ全てを描くが、動画や文字をコンポジターへ直接渡す専用レイヤーに分離できる。再サンプリングが減り高解像度でくっきり表示される",
+			"動画や文字を専用のレイヤーに分けてヘッドセットに直接渡して、にじみを減らしてくっきり表示する",
 		demos: [
 			{ label: "WebXR Samples", href: `${OFFICIAL_SAMPLES}/layers-samples/` },
 			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webxr_vr_layers.html` },
@@ -339,7 +382,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://immersive-web.github.io/WebXR-WebGPU-Binding/",
 		maturity: "draft",
 		description:
-			"XRの描画をWebGLではなくWebGPUで行うための接続層。コンピュートシェーダーなどWebGPUの機能をXR描画に使える",
+			"XRの映像を、WebGLよりあたらしく高速なWebGPUで描けるようにする",
 		demos: [
 			{ label: "WebXR Samples", href: `${OFFICIAL_SAMPLES}/webgpu/` },
 			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webgpu_xr_cubes.html` },
@@ -352,7 +395,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specName: "WebXR Body Tracking（ベンダー拡張）",
 		maturity: "vendor",
 		description:
-			"ヘッドセットやトラッカーから全身の関節ポーズを取得するベンダー拡張。アバターの全身表現に使う",
+			"ヘッドセットやトラッカーで体の動きを読み取って、全身のポーズを取得する。アバターを動かすのに使う",
 		demos: [{ label: "Babylon.js", href: `${BABYLONJS_PLAYGROUND}/#0FOISU#2` }],
 	},
 ];
