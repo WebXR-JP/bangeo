@@ -6,6 +6,7 @@ import { SITE_URL } from "@/lib/site-url";
 import {
 	maturityTitle,
 	type SpecCheckId,
+	type SpecDemoLink,
 	type SpecSupport,
 	type WebXRSpecEntry,
 	webxrSpecCatalog,
@@ -86,6 +87,25 @@ const specChecks: Record<
 
 const sessionIds: SpecCheckId[] = ["inline", "immersive-vr", "immersive-ar"];
 
+/** デモ提供元の列順。増えたらここに追加する */
+const providerOrder: SpecDemoLink["label"][] = [
+	"WebXR Samples",
+	"Three.js",
+	"Babylon.js",
+	"A-Frame",
+	"PlayCanvas",
+	"BANGEO",
+];
+
+const providerShortLabel: Record<SpecDemoLink["label"], string> = {
+	"WebXR Samples": "Samples",
+	"Three.js": "Three.js",
+	"Babylon.js": "Babylon",
+	"A-Frame": "A-Frame",
+	PlayCanvas: "PlayCanvas",
+	BANGEO: "BANGEO",
+};
+
 function describeEnvironment(ua: string): string {
 	if (/OculusBrowser/i.test(ua)) return "Meta Quest / Quest Browser";
 	if (/PicoBrowser|Pico\s?Browser/i.test(ua)) return "PICO / PICO Browser";
@@ -147,8 +167,6 @@ const supportTitle: Record<SpecSupport, string> = {
 
 const PAGE_URL = `${SITE_URL}/experiments`;
 
-const listClass =
-	"mt-3 divide-y divide-gray-100 rounded-2xl border border-gray-100";
 const sectionLabelClass =
 	"mt-10 text-[11px] font-black tracking-[0.14em] text-gray-400";
 
@@ -207,31 +225,11 @@ export function WebXRSpecList() {
 					supportRank[results[b.id] ?? "checking"],
 			)
 		: moduleEntries;
-	const rows: (
-		| { kind: "header"; label: string }
-		| { kind: "entry"; entry: WebXRSpecEntry }
-	)[] = [];
-	if (loaded) {
-		const groupDefs: { label: string; match: SpecSupport[] }[] = [
-			{ label: "このブラウザで使える", match: ["supported"] },
-			{ label: "実機で確認", match: ["unknown", "checking"] },
-			{ label: "このブラウザでは未対応", match: ["unsupported"] },
-		];
-		for (const group of groupDefs) {
-			const items = sortedModules.filter((entry) =>
-				group.match.includes(results[entry.id] ?? "checking"),
-			);
-			if (items.length === 0) continue;
-			rows.push({ kind: "header", label: group.label });
-			for (const entry of items) {
-				rows.push({ kind: "entry", entry });
-			}
-		}
-	} else {
-		for (const entry of moduleEntries) {
-			rows.push({ kind: "entry", entry });
-		}
-	}
+	const providers = providerOrder.filter((provider) =>
+		webxrSpecCatalog.some((entry) =>
+			entry.demos?.some((demo) => demo.label === provider),
+		),
+	);
 	const supportedNames = webxrSpecCatalog
 		.filter((entry) => results[entry.id] === "supported")
 		.map((entry) => entry.name);
@@ -270,89 +268,133 @@ export function WebXRSpecList() {
 		}
 	}
 
-	function renderEntry(entry: WebXRSpecEntry) {
-		const support = results[entry.id] ?? "checking";
-		const badge = supportBadge[support];
-		const isSession = sessionIds.includes(entry.id);
+	function renderTable(entries: WebXRSpecEntry[]) {
 		return (
-			<li
-				key={entry.id}
-				className="grid grid-cols-[3.5rem_minmax(0,1fr)] gap-x-4 gap-y-3 px-5 py-4 sm:grid-cols-[3.5rem_minmax(0,1fr)_10rem] sm:gap-x-5"
-			>
-				<span className="pt-0.5" title={supportTitle[support]}>
-					<span
-						className={`inline-flex w-full justify-center rounded-full px-2 py-1 text-[11px] font-bold ${badge.className}`}
-					>
-						{badge.label}
-					</span>
-				</span>
-				<div className="min-w-0">
-					<p className="text-sm leading-snug">
-						<span className="font-bold text-gray-950">{entry.name}</span>
-						{entry.specUrl ? (
-							<a
-								href={entry.specUrl}
-								target="_blank"
-								rel="noopener noreferrer"
-								title={`${entry.specName}（${maturityTitle[entry.maturity]}）`}
-								className="ml-2 text-[11px] text-gray-400 transition hover:text-gray-600 hover:underline"
-							>
-								{entry.specName}
-							</a>
-						) : (
-							<span
-								className="ml-2 text-[11px] text-gray-400"
-								title={maturityTitle[entry.maturity]}
-							>
-								{entry.specName}
-							</span>
-						)}
-					</p>
-					<p className="mt-1 text-xs leading-relaxed text-gray-500">
-						{entry.description}
-						{entry.articleSlug && (
-							<Link
-								href={`/experiments/${entry.articleSlug}`}
-								className="ml-2 text-gray-400 underline decoration-gray-200 underline-offset-2 transition hover:text-[#e11d48]"
-							>
-								解説
-							</Link>
-						)}
-					</p>
-					{entry.featureName && (
-						<p className="mt-1.5">
-							<code
-								title={
-									isSession
-										? "requestSession に渡すセッションモード名"
-										: "requestSession の requiredFeatures / optionalFeatures に渡す機能名"
-								}
-								className="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-[11px] text-gray-600"
-							>
-								{isSession ? "mode" : "feature"}: {entry.featureName}
-							</code>
-						</p>
-					)}
-				</div>
-				<div className="col-span-2 flex flex-row flex-wrap gap-x-4 gap-y-1.5 border-t border-gray-50 pt-3 sm:col-span-1 sm:flex-col sm:items-end sm:gap-1.5 sm:border-t-0 sm:pt-0">
-					{entry.demos && entry.demos.length > 0 ? (
-						entry.demos.map((demo) => (
-							<a
-								key={demo.href}
-								href={demo.href}
-								target="_blank"
-								rel="noopener noreferrer"
-								title={`${demo.label}のデモページを開く`}
-								className="text-xs font-bold text-gray-700 underline decoration-gray-300 underline-offset-4 transition hover:text-[#e11d48] hover:decoration-rose-300"
-							>
-								{demo.label} <span aria-hidden="true">↗</span>
-							</a>
-						))
-					) : (
-						<span className="text-xs text-gray-300">デモは近日公開</span>
-					)}
-				</div>
-			</li>
+			<div className="mt-3 overflow-x-auto rounded-2xl border border-gray-100">
+				<table className="w-full min-w-[640px] border-collapse text-left">
+					<thead>
+						<tr className="border-b border-gray-100 bg-gray-50/60">
+							<th className="w-16 px-4 py-2.5 text-[11px] font-bold text-gray-400">
+								状態
+							</th>
+							<th className="px-2 py-2.5 text-[11px] font-bold text-gray-400">
+								仕様
+							</th>
+							{providers.map((provider) => (
+								<th
+									key={provider}
+									title={provider}
+									className="w-20 whitespace-nowrap px-2 py-2.5 text-center text-[11px] font-bold text-gray-400"
+								>
+									{providerShortLabel[provider]}
+								</th>
+							))}
+						</tr>
+					</thead>
+					<tbody className="divide-y divide-gray-100">
+						{entries.map((entry) => {
+							const support = results[entry.id] ?? "checking";
+							const badge = supportBadge[support];
+							const isSession = sessionIds.includes(entry.id);
+							return (
+								<tr key={entry.id}>
+									<td
+										className="px-4 py-4 align-top"
+										title={supportTitle[support]}
+									>
+										<span
+											className={`inline-flex w-12 justify-center rounded-full px-2 py-1 text-[11px] font-bold ${badge.className}`}
+										>
+											{badge.label}
+										</span>
+									</td>
+									<td className="min-w-56 px-2 py-4 align-top">
+										<p className="text-sm leading-snug">
+											<span className="font-bold text-gray-950">
+												{entry.name}
+											</span>
+											{entry.specUrl ? (
+												<a
+													href={entry.specUrl}
+													target="_blank"
+													rel="noopener noreferrer"
+													title={`${entry.specName}（${maturityTitle[entry.maturity]}）`}
+													className="ml-2 text-[11px] text-gray-400 transition hover:text-gray-600 hover:underline"
+												>
+													{entry.specName}
+												</a>
+											) : (
+												<span
+													className="ml-2 text-[11px] text-gray-400"
+													title={maturityTitle[entry.maturity]}
+												>
+													{entry.specName}
+												</span>
+											)}
+										</p>
+										<p className="mt-1 text-xs leading-relaxed text-gray-500">
+											{entry.description}
+											{entry.articleSlug && (
+												<Link
+													href={`/experiments/${entry.articleSlug}`}
+													className="ml-2 text-gray-400 underline decoration-gray-200 underline-offset-2 transition hover:text-[#e11d48]"
+												>
+													解説
+												</Link>
+											)}
+										</p>
+										{entry.featureName && (
+											<p className="mt-1.5">
+												<code
+													title={
+														isSession
+															? "requestSession に渡すセッションモード名"
+															: "requestSession の requiredFeatures / optionalFeatures に渡す機能名"
+													}
+													className="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-[11px] text-gray-600"
+												>
+													{entry.featureName}
+												</code>
+											</p>
+										)}
+									</td>
+									{providers.map((provider) => {
+										const demo = entry.demos?.find(
+											(item) => item.label === provider,
+										);
+										return (
+											<td
+												key={provider}
+												className="px-2 py-4 text-center align-middle"
+											>
+												{demo ? (
+													<a
+														href={demo.href}
+														target="_blank"
+														rel="noopener noreferrer"
+														title={`${provider}の${entry.name}デモを開く`}
+														aria-label={`${provider}の${entry.name}デモを開く`}
+														className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-xs font-bold text-gray-600 transition hover:border-gray-950 hover:bg-gray-950 hover:text-white"
+													>
+														↗
+													</a>
+												) : (
+													<span
+														aria-hidden="true"
+														className="text-xs text-gray-200"
+													>
+														–
+													</span>
+												)}
+											</td>
+										);
+									})}
+								</tr>
+							);
+						})}
+					</tbody>
+				</table>
+			</div>
 		);
 	}
 
@@ -392,27 +434,13 @@ export function WebXRSpecList() {
 			</div>
 
 			<p className={sectionLabelClass}>セッションモード</p>
-			<ul className={listClass}>{sessionEntries.map(renderEntry)}</ul>
+			{renderTable(sessionEntries)}
 
 			<p className={sectionLabelClass}>モジュール</p>
-			<ul className={listClass}>
-				{rows.map((row) => {
-					if (row.kind === "header") {
-						return (
-							<li
-								key={`header-${row.label}`}
-								className="bg-gray-50/60 px-5 py-2 text-[11px] font-bold tracking-wide text-gray-400"
-							>
-								{row.label}
-							</li>
-						);
-					}
-					return renderEntry(row.entry);
-				})}
-			</ul>
+			{renderTable(sortedModules)}
 
 			<p className="mt-4 text-xs leading-relaxed text-gray-400">
-				対応表示はブラウザのAPI実装有無に基づく簡易チェックです。「実機」の項目は、featureに示した機能名を
+				対応表示はブラウザのAPI実装有無に基づく簡易チェックです。「実機」の項目は、コードの機能名を
 				requestSession の optionalFeatures
 				に渡し、実機のXRセッション内で確認できます。最終的な動作は各デモページでご確認ください。
 			</p>
