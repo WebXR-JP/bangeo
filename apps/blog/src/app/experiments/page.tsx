@@ -37,7 +37,7 @@ export default function ExperimentsIndexPage() {
 		}));
 
 	return (
-		<div className="mx-auto max-w-3xl px-6 py-16 md:px-8 md:py-20">
+		<div className="mx-auto max-w-4xl px-6 py-16 md:px-8 md:py-20">
 			<CollectionStructuredData
 				name="BANGEO WebXRデモ"
 				path="/experiments"

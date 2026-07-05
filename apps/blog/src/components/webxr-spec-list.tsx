@@ -1,12 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SITE_URL } from "@/lib/site-url";
 import {
 	maturityTitle,
 	type SpecCheckId,
-	type SpecDemoLink,
 	type SpecSupport,
 	type WebXRSpecEntry,
 	webxrSpecCatalog,
@@ -100,25 +98,6 @@ const referenceSpaceIds: SpecCheckId[] = [
 	"unbounded",
 ];
 
-/** デモ提供元の列順。増えたらここに追加する */
-const providerOrder: SpecDemoLink["label"][] = [
-	"WebXR Samples",
-	"Three.js",
-	"Babylon.js",
-	"A-Frame",
-	"PlayCanvas",
-	"BANGEO",
-];
-
-const providerShortLabel: Record<SpecDemoLink["label"], string> = {
-	"WebXR Samples": "Samples",
-	"Three.js": "Three.js",
-	"Babylon.js": "Babylon",
-	"A-Frame": "A-Frame",
-	PlayCanvas: "PlayCanvas",
-	BANGEO: "BANGEO",
-};
-
 function describeEnvironment(ua: string): string {
 	if (/OculusBrowser/i.test(ua)) return "Meta Quest / Quest Browser";
 	if (/PicoBrowser|Pico\s?Browser/i.test(ua)) return "PICO / PICO Browser";
@@ -162,8 +141,8 @@ const supportBadge: Record<SpecSupport, { label: string; className: string }> =
 			className: "bg-gray-100 text-gray-400",
 		},
 		unknown: {
-			label: "実機",
-			className: "bg-gray-100 text-gray-500",
+			label: "対応",
+			className: "bg-emerald-50 text-emerald-700",
 		},
 		checking: {
 			label: "…",
@@ -174,7 +153,7 @@ const supportBadge: Record<SpecSupport, { label: string; className: string }> =
 const supportTitle: Record<SpecSupport, string> = {
 	supported: "このブラウザで利用できます",
 	unsupported: "このブラウザでは利用できません",
-	unknown: "実機のXRセッション内でのみ確認できます",
+	unknown: "このブラウザで利用できます",
 	checking: "確認中",
 };
 
@@ -182,6 +161,9 @@ const PAGE_URL = `${SITE_URL}/experiments`;
 
 const sectionLabelClass =
 	"mt-10 text-[11px] font-black tracking-[0.14em] text-gray-400";
+
+const demoButtonClass =
+	"flex min-h-10 items-center justify-between gap-2 rounded-xl border border-gray-200 bg-white px-3.5 py-2 text-xs font-bold text-gray-700 transition hover:border-gray-950 hover:bg-gray-950 hover:text-white";
 
 export function WebXRSpecList() {
 	const [results, setResults] = useState<
@@ -253,11 +235,6 @@ export function WebXRSpecList() {
 					supportRank[results[b.id] ?? "checking"],
 			)
 		: moduleEntries;
-	const providers = providerOrder.filter((provider) =>
-		webxrSpecCatalog.some((entry) =>
-			entry.demos?.some((demo) => demo.label === provider),
-		),
-	);
 	const supportedNames = webxrSpecCatalog
 		.filter((entry) => results[entry.id] === "supported")
 		.map((entry) => entry.name);
@@ -296,133 +273,97 @@ export function WebXRSpecList() {
 		}
 	}
 
-	function renderTable(entries: WebXRSpecEntry[]) {
+	function renderEntry(entry: WebXRSpecEntry) {
+		const support = results[entry.id] ?? "checking";
+		const badge = supportBadge[support];
+		const isSession = sessionIds.includes(entry.id);
 		return (
-			<div className="mt-3 overflow-x-auto rounded-2xl border border-gray-100">
-				<table className="w-full min-w-[640px] border-collapse text-left">
-					<thead>
-						<tr className="border-b border-gray-100 bg-gray-50/60">
-							<th className="w-16 px-4 py-2.5 text-[11px] font-bold text-gray-400">
-								状態
-							</th>
-							<th className="px-2 py-2.5 text-[11px] font-bold text-gray-400">
-								仕様
-							</th>
-							{providers.map((provider) => (
-								<th
-									key={provider}
-									title={provider}
-									className="w-20 whitespace-nowrap px-2 py-2.5 text-center text-[11px] font-bold text-gray-400"
+			<li
+				key={entry.id}
+				className="grid grid-cols-[3.5rem_minmax(0,1fr)] gap-x-4 gap-y-4 px-5 py-6 md:grid-cols-[3.5rem_minmax(0,1fr)_17rem] md:gap-x-6"
+			>
+				<span className="pt-0.5" title={supportTitle[support]}>
+					<span
+						className={`inline-flex w-full justify-center rounded-full px-2 py-1 text-[11px] font-bold ${badge.className}`}
+					>
+						{badge.label}
+					</span>
+				</span>
+				<div className="min-w-0">
+					<p className="text-base font-bold leading-snug text-gray-950">
+						{entry.name}
+						{entry.featureName && (
+							<code
+								title={
+									isSession
+										? "requestSession に渡すセッションモード名"
+										: "requestSession の requiredFeatures / optionalFeatures に渡す機能名"
+								}
+								className="ml-2.5 rounded bg-gray-100 px-1.5 py-0.5 font-mono text-[11px] font-normal text-gray-600"
+							>
+								{entry.featureName}
+							</code>
+						)}
+					</p>
+					<p className="mt-1.5 text-sm leading-relaxed text-gray-600">
+						{entry.description}
+					</p>
+					{entry.specUrl ? (
+						<a
+							href={entry.specUrl}
+							target="_blank"
+							rel="noopener noreferrer"
+							title={maturityTitle[entry.maturity]}
+							className="mt-1.5 inline-block text-xs text-gray-400 transition hover:text-gray-600 hover:underline"
+						>
+							{entry.specName}
+						</a>
+					) : (
+						<span
+							className="mt-1.5 inline-block text-xs text-gray-400"
+							title={maturityTitle[entry.maturity]}
+						>
+							{entry.specName}
+						</span>
+					)}
+				</div>
+				<div className="col-span-2 md:col-span-1">
+					{entry.demos && entry.demos.length > 0 ? (
+						<div className="grid grid-cols-2 gap-2">
+							{entry.demos.map((demo) => (
+								<a
+									key={demo.href}
+									href={demo.href}
+									target="_blank"
+									rel="noopener noreferrer"
+									title={`${demo.label}の${entry.name}デモを開く`}
+									className={demoButtonClass}
 								>
-									{providerShortLabel[provider]}
-								</th>
+									<span className="truncate">{demo.label}</span>
+									<span aria-hidden="true" className="shrink-0 text-[10px]">
+										↗
+									</span>
+								</a>
 							))}
-						</tr>
-					</thead>
-					<tbody className="divide-y divide-gray-100">
-						{entries.map((entry) => {
-							const support = results[entry.id] ?? "checking";
-							const badge = supportBadge[support];
-							const isSession = sessionIds.includes(entry.id);
-							return (
-								<tr key={entry.id}>
-									<td
-										className="px-4 py-4 align-top"
-										title={supportTitle[support]}
-									>
-										<span
-											className={`inline-flex w-12 justify-center rounded-full px-2 py-1 text-[11px] font-bold ${badge.className}`}
-										>
-											{badge.label}
-										</span>
-									</td>
-									<td className="min-w-56 px-2 py-4 align-top">
-										<p className="text-sm leading-snug">
-											<span className="font-bold text-gray-950">
-												{entry.name}
-											</span>
-											{entry.specUrl ? (
-												<a
-													href={entry.specUrl}
-													target="_blank"
-													rel="noopener noreferrer"
-													title={`${entry.specName}（${maturityTitle[entry.maturity]}）`}
-													className="ml-2 text-[11px] text-gray-400 transition hover:text-gray-600 hover:underline"
-												>
-													{entry.specName}
-												</a>
-											) : (
-												<span
-													className="ml-2 text-[11px] text-gray-400"
-													title={maturityTitle[entry.maturity]}
-												>
-													{entry.specName}
-												</span>
-											)}
-										</p>
-										<p className="mt-1 text-xs leading-relaxed text-gray-500">
-											{entry.description}
-											{entry.articleSlug && (
-												<Link
-													href={`/experiments/${entry.articleSlug}`}
-													className="ml-2 text-gray-400 underline decoration-gray-200 underline-offset-2 transition hover:text-[#e11d48]"
-												>
-													解説
-												</Link>
-											)}
-										</p>
-										{entry.featureName && (
-											<p className="mt-1.5">
-												<code
-													title={
-														isSession
-															? "requestSession に渡すセッションモード名"
-															: "requestSession の requiredFeatures / optionalFeatures に渡す機能名"
-													}
-													className="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-[11px] text-gray-600"
-												>
-													{entry.featureName}
-												</code>
-											</p>
-										)}
-									</td>
-									{providers.map((provider) => {
-										const demo = entry.demos?.find(
-											(item) => item.label === provider,
-										);
-										return (
-											<td
-												key={provider}
-												className="px-2 py-4 text-center align-middle"
-											>
-												{demo ? (
-													<a
-														href={demo.href}
-														target="_blank"
-														rel="noopener noreferrer"
-														title={`${provider}の${entry.name}デモを開く`}
-														aria-label={`${provider}の${entry.name}デモを開く`}
-														className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-xs font-bold text-gray-600 transition hover:border-gray-950 hover:bg-gray-950 hover:text-white"
-													>
-														↗
-													</a>
-												) : (
-													<span
-														aria-hidden="true"
-														className="text-xs text-gray-200"
-													>
-														–
-													</span>
-												)}
-											</td>
-										);
-									})}
-								</tr>
-							);
-						})}
-					</tbody>
-				</table>
-			</div>
+						</div>
+					) : (
+						<p className="flex min-h-10 items-center justify-center rounded-xl border border-dashed border-gray-200 text-xs text-gray-300">
+							デモは近日公開
+						</p>
+					)}
+				</div>
+			</li>
+		);
+	}
+
+	function renderSection(label: string, entries: WebXRSpecEntry[]) {
+		return (
+			<>
+				<p className={sectionLabelClass}>{label}</p>
+				<ul className="mt-3 divide-y divide-gray-100 rounded-2xl border border-gray-100">
+					{entries.map(renderEntry)}
+				</ul>
+			</>
 		);
 	}
 
@@ -461,14 +402,9 @@ export function WebXRSpecList() {
 				)}
 			</div>
 
-			<p className={sectionLabelClass}>セッションモード</p>
-			{renderTable(sessionEntries)}
-
-			<p className={sectionLabelClass}>体験スペース</p>
-			{renderTable(referenceSpaceEntries)}
-
-			<p className={sectionLabelClass}>モジュール</p>
-			{renderTable(sortedModules)}
+			{renderSection("セッションモード", sessionEntries)}
+			{renderSection("体験スペース", referenceSpaceEntries)}
+			{renderSection("モジュール", sortedModules)}
 
 			<p className="mt-4 text-xs leading-relaxed text-gray-400">
 				対応表示はブラウザのAPI実装有無に基づく簡易チェックです。各行のコードは、requestSession
