@@ -122,19 +122,6 @@ export async function startStarterSession(
 		"position:absolute;top:16px;right:16px;padding:8px 20px;border-radius:9999px;border:1px solid rgba(255,255,255,0.3);background:rgba(0,0,0,0.4);color:#fff;font-size:13px;font-weight:700;cursor:pointer;";
 	overlay.appendChild(closeButton);
 
-	const gl = canvas.getContext("webgl2", {
-		xrCompatible: true,
-		alpha: true,
-		antialias: true,
-	}) as WebGL2RenderingContext | null;
-	if (!gl) throw new Error("WebGL2を利用できません");
-	const glCompat = gl as WebGL2RenderingContext & {
-		makeXRCompatible?: () => Promise<void>;
-	};
-	if (glCompat.makeXRCompatible) {
-		await glCompat.makeXRCompatible();
-	}
-
 	const isAR = config.mode === "immersive-ar";
 	const featureModules = createFeatureModules();
 	const runtimeFeatureIds = expandFeatureIds(config.features, featureModules);
@@ -196,6 +183,21 @@ export async function startStarterSession(
 			const dpr = window.devicePixelRatio || 1;
 			canvas.width = Math.floor(canvas.clientWidth * dpr);
 			canvas.height = Math.floor(canvas.clientHeight * dpr);
+		}
+
+		diagPhase = "WebGL2作成";
+		const gl = canvas.getContext("webgl2", {
+			xrCompatible: true,
+			alpha: true,
+			antialias: true,
+		}) as WebGL2RenderingContext | null;
+		if (!gl) throw new Error("WebGL2を利用できません");
+		const glCompat = gl as WebGL2RenderingContext & {
+			makeXRCompatible?: () => Promise<void>;
+		};
+		if (glCompat.makeXRCompatible) {
+			diagPhase = "makeXRCompatible";
+			await glCompat.makeXRCompatible();
 		}
 
 		diagPhase = "XRWebGLLayer作成前";
