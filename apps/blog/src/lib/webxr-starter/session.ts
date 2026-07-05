@@ -118,11 +118,17 @@ export async function startStarterSession(
 
 	let ended = false;
 	let fatalMessage: string | null = null;
+	let frameCount = 0;
+	let poseCount = 0;
+	let diagRefSpace = config.refSpace;
 	function handleEnd() {
 		if (ended) return;
 		ended = true;
 		overlay.remove();
-		onEnd(fatalMessage ?? undefined);
+		onEnd(
+			fatalMessage ??
+				`診断: フレーム${frameCount}回 / ポーズ取得${poseCount}回 / 空間 ${diagRefSpace}`,
+		);
 	}
 	session.addEventListener("end", handleEnd);
 	closeButton.addEventListener("click", () => {
@@ -161,6 +167,7 @@ export async function startStarterSession(
 			}
 		}
 		if (!refSpace) throw new Error("体験スペースを取得できませんでした");
+		diagRefSpace = refSpaceName;
 
 		const kit = createDrawKit(gl);
 		const isFloorBased =
@@ -211,8 +218,10 @@ export async function startStarterSession(
 			>[1],
 		) {
 			if (!gl) return;
+			frameCount++;
 			const pose = frame.getViewerPose(ctx.space);
 			if (!pose) return;
+			poseCount++;
 
 			gl.bindFramebuffer(gl.FRAMEBUFFER, baseLayer.framebuffer);
 			gl.enable(gl.DEPTH_TEST);

@@ -169,6 +169,18 @@ const sectionLabelClass =
 const noteCodeClass =
 	"rounded bg-gray-100 px-1 py-0.5 font-mono text-[11px] text-gray-600";
 
+/** スターター体験（ランナー）でセッション内可視化があるfeature */
+const runnerVisualized = new Set([
+	"hit-test",
+	"anchors",
+	"hand-tracking",
+	"bounded-floor",
+	"mesh-detection",
+	"depth-sensing",
+	"light-estimation",
+	"body-tracking",
+]);
+
 const demoButtonClass =
 	"flex min-h-10 items-center justify-between gap-2 rounded-xl border border-gray-200 bg-white px-3.5 py-2 text-xs font-bold text-gray-700 transition hover:border-gray-950 hover:bg-gray-950 hover:text-white";
 
@@ -779,6 +791,15 @@ export function WebXRSpecList() {
 							<code className="ml-auto shrink-0 font-mono text-[10px] text-gray-400">
 								{entry.featureName}
 							</code>
+							{entry.featureName &&
+								!runnerVisualized.has(entry.featureName) && (
+									<span
+										title="BANGEOのスターター体験ではまだ可視化されません（セッションへの要求のみ行われます）"
+										className="shrink-0 rounded bg-gray-100 px-1.5 py-0.5 text-[10px] text-gray-400"
+									>
+										可視化なし
+									</span>
+								)}
 						</label>
 					))}
 				</div>
