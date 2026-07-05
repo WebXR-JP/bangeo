@@ -207,9 +207,16 @@ export async function startStarterSession(
 		const skyPositionLoc = gl.getAttribLocation(skyProgram, "a_position");
 		const skyMvpLoc = gl.getUniformLocation(skyProgram, "u_mvp");
 		const skyBuffer = kit.makeBuffer(buildSphere(40, 16, 24));
-		const skyTexture = isAR
-			? null
-			: await loadTexture(gl, config.skyboxUrl ?? "/assets/starter-skybox.jpg");
+		// スカイボックスは非ブロッキングで読み込む（待つとPICO等で
+		// レンダーループ開始前にセッションが終了することがある）
+		let skyTexture: WebGLTexture | null = null;
+		if (!isAR) {
+			loadTexture(gl, config.skyboxUrl ?? "/assets/starter-skybox.jpg").then(
+				(texture) => {
+					skyTexture = texture;
+				},
+			);
+		}
 
 		function renderFrame(
 			time: number,
