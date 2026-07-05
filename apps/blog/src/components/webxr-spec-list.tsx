@@ -10,6 +10,7 @@ import {
 	webxrSpecCatalog,
 } from "@/lib/webxr-spec-catalog";
 import {
+	resolveStarterSessionFeatures,
 	type StarterSessionHandle,
 	startStarterSession,
 } from "@/lib/webxr-starter/session";
@@ -295,6 +296,14 @@ export function WebXRSpecList() {
 		);
 	}
 
+	const starterFeatures = features.filter((feature) =>
+		runnerEnabledFeatures.has(feature),
+	);
+	const skippedStarterFeatures = features.filter(
+		(feature) => !runnerEnabledFeatures.has(feature),
+	);
+	const builderSessionFeatures = resolveStarterSessionFeatures(starterFeatures);
+
 	const builderLines: string[] = [
 		`const supported = await navigator.xr.isSessionSupported("${mode}");`,
 		"",
@@ -303,9 +312,9 @@ export function WebXRSpecList() {
 	if (refSpace !== "viewer") {
 		builderOpts.push(`  requiredFeatures: ["${refSpace}"],`);
 	}
-	if (features.length > 0) {
+	if (builderSessionFeatures.length > 0) {
 		builderOpts.push(
-			`  optionalFeatures: [${features.map((f) => `"${f}"`).join(", ")}],`,
+			`  optionalFeatures: [${builderSessionFeatures.map((f) => `"${f}"`).join(", ")}],`,
 		);
 	}
 	if (builderOpts.length > 0) {
@@ -383,17 +392,17 @@ export function WebXRSpecList() {
 				),
 			});
 		}
-		if (features.length > 0) {
+		if (builderSessionFeatures.length > 0) {
 			codeJsxLines.push({
 				id: "l4",
 				content: (
 					<>
 						{"  "}
 						<span className={tokProp}>optionalFeatures</span>: [
-						{features.map((f, index) => (
+						{builderSessionFeatures.map((f, index) => (
 							<span key={f}>
 								<span className={tokHl}>"{f}"</span>
-								{index < features.length - 1 ? ", " : ""}
+								{index < builderSessionFeatures.length - 1 ? ", " : ""}
 							</span>
 						))}
 						],
@@ -447,13 +456,6 @@ export function WebXRSpecList() {
 				}),
 			]
 		: [];
-	const starterFeatures = features.filter((feature) =>
-		runnerEnabledFeatures.has(feature),
-	);
-	const skippedStarterFeatures = features.filter(
-		(feature) => !runnerEnabledFeatures.has(feature),
-	);
-
 	async function startExperience() {
 		setXrError(null);
 		if (selectedUnsupported.length > 0) {

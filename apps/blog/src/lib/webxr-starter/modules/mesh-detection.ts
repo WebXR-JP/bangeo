@@ -10,6 +10,7 @@ export function createMeshDetectionModule(): FeatureModule {
 
 	return {
 		id: "mesh-detection",
+		sessionFeatures: ["mesh-detection"],
 		update(ctx, frame) {
 			visible = [];
 			if (!frame.detectedMeshes || !frame.getPose) return;

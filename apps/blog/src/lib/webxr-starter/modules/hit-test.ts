@@ -10,6 +10,7 @@ export function createHitTestModule(): FeatureModule {
 
 	return {
 		id: "hit-test",
+		sessionFeatures: ["hit-test"],
 		async setup(ctx) {
 			if (!ctx.session.requestHitTestSource) return;
 			const viewerSpace = await ctx.session.requestReferenceSpace("viewer");

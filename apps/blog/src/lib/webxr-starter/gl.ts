@@ -139,25 +139,57 @@ export function compileProgram(
 	return program;
 }
 
+export interface TextureLoadResult {
+	texture: WebGLTexture | null;
+	error?: string;
+}
+
+function describeError(err: unknown): string {
+	return err instanceof Error ? err.message : String(err);
+}
+
+function waitForImageLoad(image: HTMLImageElement): Promise<void> {
+	if (image.complete && image.naturalWidth > 0) return Promise.resolve();
+	if (image.complete) {
+		return Promise.reject(new Error("画像を読み込めませんでした"));
+	}
+	return new Promise((resolve, reject) => {
+		image.onload = () => resolve();
+		image.onerror = () => reject(new Error("画像を読み込めませんでした"));
+	});
+}
+
 export async function loadTexture(
 	gl: WebGL2RenderingContext,
 	url: string,
-): Promise<WebGLTexture | null> {
+): Promise<TextureLoadResult> {
 	try {
 		const image = new Image();
+		image.decoding = "async";
 		image.src = url;
-		await image.decode();
+		try {
+			await image.decode();
+		} catch (err) {
+			try {
+				await waitForImageLoad(image);
+			} catch {
+				throw new Error(`画像decode/load失敗: ${describeError(err)}`);
+			}
+		}
+		if (gl.isContextLost()) {
+			throw new Error("WebGLコンテキストが失われました");
+		}
 		const texture = gl.createTexture();
-		if (!texture) return null;
+		if (!texture) return { texture: null, error: "テクスチャを作成できません" };
 		gl.bindTexture(gl.TEXTURE_2D, texture);
 		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-		return texture;
-	} catch {
-		return null;
+		return { texture };
+	} catch (err) {
+		return { texture: null, error: describeError(err) };
 	}
 }
 

@@ -10,6 +10,7 @@ export function createLightEstimationModule(): FeatureModule {
 
 	return {
 		id: "light-estimation",
+		sessionFeatures: ["light-estimation"],
 		async setup(ctx) {
 			if (!ctx.session.requestLightProbe) return;
 			probe = await ctx.session.requestLightProbe();

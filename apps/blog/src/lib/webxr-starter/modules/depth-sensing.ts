@@ -8,6 +8,7 @@ export function createDepthSensingModule(): FeatureModule {
 
 	return {
 		id: "depth-sensing",
+		sessionFeatures: ["depth-sensing"],
 		setup(ctx) {
 			ring = ctx.kit.makeBuffer(buildRing(0.12, 32));
 		},

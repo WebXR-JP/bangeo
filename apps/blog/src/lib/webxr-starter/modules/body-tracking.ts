@@ -11,6 +11,7 @@ export function createBodyTrackingModule(): FeatureModule {
 
 	return {
 		id: "body-tracking",
+		sessionFeatures: ["body-tracking"],
 		setup(ctx) {
 			buffer = ctx.kit.makeBuffer(store, true);
 		},

@@ -11,6 +11,7 @@ export function createHandTrackingModule(): FeatureModule {
 
 	return {
 		id: "hand-tracking",
+		sessionFeatures: ["hand-tracking"],
 		setup(ctx) {
 			buffer = ctx.kit.makeBuffer(store, true);
 		},

@@ -17,6 +17,8 @@ export function createAnchorsModule(): FeatureModule {
 
 	return {
 		id: "anchors",
+		sessionFeatures: ["anchors", "hit-test"],
+		dependencies: ["hit-test"],
 		async setup(ctx) {
 			if (!ctx.session.requestHitTestSource) return;
 			const viewerSpace = await ctx.session.requestReferenceSpace("viewer");

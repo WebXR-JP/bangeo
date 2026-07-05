@@ -59,6 +59,50 @@ function cubeModel(time: number, y: number): Float32Array {
 	return new Float32Array([c, 0, -s, 0, 0, 1, 0, 0, s, 0, c, 0, 0, y, -1.5, 1]);
 }
 
+function expandFeatureIds(
+	features: string[],
+	modules: FeatureModule[],
+): Set<string> {
+	const byId = new Map(modules.map((module) => [module.id, module]));
+	const expanded = new Set(features);
+	let changed = true;
+	while (changed) {
+		changed = false;
+		for (const id of [...expanded]) {
+			const module = byId.get(id);
+			if (!module?.dependencies) continue;
+			for (const dependency of module.dependencies) {
+				if (expanded.has(dependency)) continue;
+				expanded.add(dependency);
+				changed = true;
+			}
+		}
+	}
+	return expanded;
+}
+
+function collectSessionFeatures(
+	featureIds: Set<string>,
+	modules: FeatureModule[],
+): string[] {
+	const sessionFeatureSet = new Set<string>();
+	for (const module of modules) {
+		if (!featureIds.has(module.id)) continue;
+		for (const feature of module.sessionFeatures ?? [module.id]) {
+			sessionFeatureSet.add(feature);
+		}
+	}
+	return [...sessionFeatureSet];
+}
+
+export function resolveStarterSessionFeatures(features: string[]): string[] {
+	const featureModules = createFeatureModules();
+	return collectSessionFeatures(
+		expandFeatureIds(features, featureModules),
+		featureModules,
+	);
+}
+
 export async function startStarterSession(
 	config: StarterConfig,
 	onEnd: (message?: string) => void,
@@ -92,8 +136,17 @@ export async function startStarterSession(
 	}
 
 	const isAR = config.mode === "immersive-ar";
-	const optionalFeatures = [...config.features];
-	if (config.refSpace !== "viewer") optionalFeatures.push(config.refSpace);
+	const featureModules = createFeatureModules();
+	const runtimeFeatureIds = expandFeatureIds(config.features, featureModules);
+	const runtimeConfig: StarterConfig = {
+		...config,
+		features: [...runtimeFeatureIds],
+	};
+	const optionalFeatureSet = new Set(
+		collectSessionFeatures(runtimeFeatureIds, featureModules),
+	);
+	if (config.refSpace !== "viewer") optionalFeatureSet.add(config.refSpace);
+	const optionalFeatures = [...optionalFeatureSet];
 	const sessionInit: {
 		optionalFeatures: string[];
 		depthSensing?: {
@@ -101,7 +154,7 @@ export async function startStarterSession(
 			dataFormatPreference: string[];
 		};
 	} = { optionalFeatures };
-	if (config.features.includes("depth-sensing")) {
+	if (optionalFeatureSet.has("depth-sensing")) {
 		sessionInit.depthSensing = {
 			usagePreference: ["cpu-optimized"],
 			dataFormatPreference: ["luminance-alpha", "float32"],
@@ -122,8 +175,9 @@ export async function startStarterSession(
 	let poseCount = 0;
 	let diagRefSpace = config.refSpace;
 	let diagPhase = "requestSession完了";
+	let skyboxStatus = "未初期化";
 	const buildDiag = () =>
-		`診断: phase=${diagPhase} / mode=${config.mode} / フレーム${frameCount}回 / ポーズ取得${poseCount}回 / 空間 ${diagRefSpace}`;
+		`診断: phase=${diagPhase} / mode=${config.mode} / フレーム${frameCount}回 / ポーズ取得${poseCount}回 / 空間 ${diagRefSpace} / skybox=${skyboxStatus}`;
 	function handleEnd() {
 		if (ended) return;
 		ended = true;
@@ -183,16 +237,16 @@ export async function startStarterSession(
 			session,
 			space: refSpace,
 			refSpaceName,
-			config,
+			config: runtimeConfig,
 			kit,
 			cubeY,
 		};
 
 		// モジュールの選別とセットアップ（失敗したモジュールは外す）
-		const candidates = createFeatureModules().filter((module) =>
+		const candidates = featureModules.filter((module) =>
 			module.isActive
-				? module.isActive(config, refSpaceName)
-				: config.features.includes(module.id),
+				? module.isActive(runtimeConfig, refSpaceName)
+				: runtimeConfig.features.includes(module.id),
 		);
 		const modules: FeatureModule[] = [];
 		for (const module of candidates) {
@@ -224,10 +278,27 @@ export async function startStarterSession(
 			? kit.makeBuffer(buildSphere(40, 16, 24))
 			: null;
 		let skyTexture: WebGLTexture | null = null;
+		let skyboxEnabled = useSkybox;
+		skyboxStatus = useSkybox ? "loading" : "off";
 		if (useSkybox) {
 			loadTexture(gl, config.skyboxUrl ?? "/assets/starter-skybox.jpg").then(
-				(texture) => {
-					skyTexture = texture;
+				(result) => {
+					if (ended || !skyboxEnabled || gl.isContextLost()) {
+						skyboxStatus = "aborted";
+						return;
+					}
+					if (!result.texture) {
+						skyboxStatus = result.error
+							? `failed-load:${result.error}`
+							: "failed-load";
+						return;
+					}
+					skyTexture = result.texture;
+					skyboxStatus = "loaded";
+				},
+				(err) => {
+					skyboxStatus =
+						err instanceof Error ? `failed-load:${err.message}` : "failed-load";
 				},
 			);
 		}
@@ -271,22 +342,42 @@ export async function startStarterSession(
 				);
 
 				// 背景スカイボックス（VR / inline）
-				if (skyProgram && skyMvpLoc && skyBuffer && skyTexture) {
-					const rotationOnly = new Float32Array(view.transform.inverse.matrix);
-					rotationOnly[12] = 0;
-					rotationOnly[13] = 0;
-					rotationOnly[14] = 0;
-					const skyMvp = mat4Multiply(view.projectionMatrix, rotationOnly);
-					gl.depthMask(false);
-					applySkyProgram(skyProgram);
-					gl.uniformMatrix4fv(skyMvpLoc, false, skyMvp);
-					gl.activeTexture(gl.TEXTURE0);
-					gl.bindTexture(gl.TEXTURE_2D, skyTexture);
-					gl.bindBuffer(gl.ARRAY_BUFFER, skyBuffer.buffer);
-					gl.enableVertexAttribArray(skyPositionLoc);
-					gl.vertexAttribPointer(skyPositionLoc, 3, gl.FLOAT, false, 0, 0);
-					gl.drawArrays(gl.TRIANGLES, 0, skyBuffer.count);
-					gl.depthMask(true);
+				if (
+					skyboxEnabled &&
+					skyProgram &&
+					skyMvpLoc &&
+					skyBuffer &&
+					skyTexture
+				) {
+					try {
+						diagPhase = "skybox描画";
+						const rotationOnly = new Float32Array(
+							view.transform.inverse.matrix,
+						);
+						rotationOnly[12] = 0;
+						rotationOnly[13] = 0;
+						rotationOnly[14] = 0;
+						const skyMvp = mat4Multiply(view.projectionMatrix, rotationOnly);
+						gl.depthMask(false);
+						applySkyProgram(skyProgram);
+						gl.uniformMatrix4fv(skyMvpLoc, false, skyMvp);
+						gl.activeTexture(gl.TEXTURE0);
+						gl.bindTexture(gl.TEXTURE_2D, skyTexture);
+						gl.bindBuffer(gl.ARRAY_BUFFER, skyBuffer.buffer);
+						gl.enableVertexAttribArray(skyPositionLoc);
+						gl.vertexAttribPointer(skyPositionLoc, 3, gl.FLOAT, false, 0, 0);
+						gl.drawArrays(gl.TRIANGLES, 0, skyBuffer.count);
+						gl.depthMask(true);
+						diagPhase = "フレーム受信";
+					} catch (err) {
+						gl.depthMask(true);
+						skyboxEnabled = false;
+						skyTexture = null;
+						skyboxStatus =
+							err instanceof Error
+								? `failed-draw:${err.message}`
+								: "failed-draw";
+					}
 				}
 
 				if (isFloorBased && !isAR) {
@@ -319,8 +410,8 @@ export async function startStarterSession(
 		function onFrame(time: number, frame: XRFrameLike) {
 			if (ended) return;
 			diagPhase = "フレーム受信";
-			session.requestAnimationFrame(onFrame);
 			try {
+				session.requestAnimationFrame(onFrame);
 				renderFrame(time, frame);
 			} catch (err) {
 				fatalMessage =
@@ -336,9 +427,10 @@ export async function startStarterSession(
 			err instanceof Error
 				? err.message
 				: "セッション初期化中にエラーが発生しました";
+		const diagnosticMessage = `${fatalMessage} / ${buildDiag()}`;
 		session.end().catch(handleEnd);
 		handleEnd();
-		throw err;
+		throw new Error(diagnosticMessage);
 	}
 
 	return {

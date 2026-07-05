@@ -137,6 +137,10 @@ export interface ModuleContext {
 export interface FeatureModule {
 	/** ビルダーのfeature名と一致させる */
 	id: string;
+	/** このモジュールを動かすために requestSession へ渡すfeature名 */
+	sessionFeatures?: string[];
+	/** このモジュールを選んだときに一緒に有効化するモジュールID */
+	dependencies?: string[];
 	/** 有効条件。省略時は config.features に id が含まれるとき有効 */
 	isActive?(config: StarterConfig, refSpaceName: string): boolean;
 	setup?(ctx: ModuleContext): Promise<void> | void;
