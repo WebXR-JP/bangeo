@@ -121,14 +121,14 @@ export async function startStarterSession(
 	let frameCount = 0;
 	let poseCount = 0;
 	let diagRefSpace = config.refSpace;
+	let diagPhase = "requestSession完了";
+	const buildDiag = () =>
+		`診断: phase=${diagPhase} / mode=${config.mode} / フレーム${frameCount}回 / ポーズ取得${poseCount}回 / 空間 ${diagRefSpace}`;
 	function handleEnd() {
 		if (ended) return;
 		ended = true;
 		overlay.remove();
-		onEnd(
-			fatalMessage ??
-				`診断: フレーム${frameCount}回 / ポーズ取得${poseCount}回 / 空間 ${diagRefSpace}`,
-		);
+		onEnd(fatalMessage ? `${fatalMessage} / ${buildDiag()}` : buildDiag());
 	}
 	session.addEventListener("end", handleEnd);
 	closeButton.addEventListener("click", () => {
@@ -137,12 +137,14 @@ export async function startStarterSession(
 
 	try {
 		if (config.mode === "inline") {
+			diagPhase = "inline overlay追加";
 			document.body.appendChild(overlay);
 			const dpr = window.devicePixelRatio || 1;
 			canvas.width = Math.floor(canvas.clientWidth * dpr);
 			canvas.height = Math.floor(canvas.clientHeight * dpr);
 		}
 
+		diagPhase = "XRWebGLLayer作成前";
 		const XRWebGLLayerCtor = (
 			window as unknown as {
 				XRWebGLLayer?: new (
@@ -153,12 +155,14 @@ export async function startStarterSession(
 		).XRWebGLLayer;
 		if (!XRWebGLLayerCtor) throw new Error("XRWebGLLayerを利用できません");
 		const baseLayer = new XRWebGLLayerCtor(session, gl);
+		diagPhase = "updateRenderState前";
 		session.updateRenderState({ baseLayer });
 
 		let refSpace: object | null = null;
 		let refSpaceName = config.refSpace;
 		for (const name of [config.refSpace, "local-floor", "local", "viewer"]) {
 			try {
+				diagPhase = `requestReferenceSpace(${name})`;
 				refSpace = await session.requestReferenceSpace(name);
 				refSpaceName = name;
 				break;
@@ -169,6 +173,7 @@ export async function startStarterSession(
 		if (!refSpace) throw new Error("体験スペースを取得できませんでした");
 		diagRefSpace = refSpaceName;
 
+		diagPhase = "基本描画リソース作成";
 		const kit = createDrawKit(gl);
 		const isFloorBased =
 			refSpaceName === "local-floor" || refSpaceName === "bounded-floor";
@@ -202,15 +207,24 @@ export async function startStarterSession(
 		// 基本シーン
 		const gridBuffer = kit.makeBuffer(buildGrid(3, 0.5));
 		const cubeBuffer = kit.makeBuffer(buildCubeEdges(0.12));
-		const skyProgram = compileProgram(gl, SKY_VERT_SRC, SKY_FRAG_SRC);
+		// PICOのimmersive-vrでは画像decode/uploadがセッション遷移と衝突して
+		// レンダーループ前に終了することがあるため、VRでは一旦完全に無効化する。
+		const useSkybox = config.mode === "inline";
+		const skyProgram = useSkybox
+			? compileProgram(gl, SKY_VERT_SRC, SKY_FRAG_SRC)
+			: null;
 		const applySkyProgram = gl.useProgram.bind(gl);
-		const skyPositionLoc = gl.getAttribLocation(skyProgram, "a_position");
-		const skyMvpLoc = gl.getUniformLocation(skyProgram, "u_mvp");
-		const skyBuffer = kit.makeBuffer(buildSphere(40, 16, 24));
-		// スカイボックスは非ブロッキングで読み込む（待つとPICO等で
-		// レンダーループ開始前にセッションが終了することがある）
+		const skyPositionLoc = skyProgram
+			? gl.getAttribLocation(skyProgram, "a_position")
+			: -1;
+		const skyMvpLoc = skyProgram
+			? gl.getUniformLocation(skyProgram, "u_mvp")
+			: null;
+		const skyBuffer = useSkybox
+			? kit.makeBuffer(buildSphere(40, 16, 24))
+			: null;
 		let skyTexture: WebGLTexture | null = null;
-		if (!isAR) {
+		if (useSkybox) {
 			loadTexture(gl, config.skyboxUrl ?? "/assets/starter-skybox.jpg").then(
 				(texture) => {
 					skyTexture = texture;
@@ -257,7 +271,7 @@ export async function startStarterSession(
 				);
 
 				// 背景スカイボックス（VR / inline）
-				if (skyTexture) {
+				if (skyProgram && skyMvpLoc && skyBuffer && skyTexture) {
 					const rotationOnly = new Float32Array(view.transform.inverse.matrix);
 					rotationOnly[12] = 0;
 					rotationOnly[13] = 0;
@@ -304,6 +318,7 @@ export async function startStarterSession(
 
 		function onFrame(time: number, frame: XRFrameLike) {
 			if (ended) return;
+			diagPhase = "フレーム受信";
 			session.requestAnimationFrame(onFrame);
 			try {
 				renderFrame(time, frame);
@@ -314,8 +329,13 @@ export async function startStarterSession(
 			}
 		}
 
+		diagPhase = "requestAnimationFrame登録";
 		session.requestAnimationFrame(onFrame);
 	} catch (err) {
+		fatalMessage =
+			err instanceof Error
+				? err.message
+				: "セッション初期化中にエラーが発生しました";
 		session.end().catch(handleEnd);
 		handleEnd();
 		throw err;
