@@ -7,6 +7,7 @@ import {
 	maturityTitle,
 	type SpecCheckId,
 	type SpecSupport,
+	type WebXRSpecEntry,
 	webxrSpecCatalog,
 } from "@/lib/webxr-spec-catalog";
 
@@ -54,6 +55,7 @@ const specChecks: Record<
 	SpecCheckId,
 	() => SpecSupport | Promise<SpecSupport>
 > = {
+	inline: async () => asSupport(await sessionSupported("inline")),
 	"immersive-vr": async () => asSupport(await sessionSupported("immersive-vr")),
 	"immersive-ar": async () => asSupport(await sessionSupported("immersive-ar")),
 	"bounded-floor": () => (getXR() ? "unknown" : "unsupported"),
@@ -81,6 +83,8 @@ const specChecks: Record<
 	"body-tracking": () =>
 		asSupport(hasInterface("XRBody") || prototypeHas("XRFrame", "body")),
 };
+
+const sessionIds: SpecCheckId[] = ["inline", "immersive-vr", "immersive-ar"];
 
 function describeEnvironment(ua: string): string {
 	if (/OculusBrowser/i.test(ua)) return "Meta Quest / Quest Browser";
@@ -143,8 +147,12 @@ const supportTitle: Record<SpecSupport, string> = {
 
 const PAGE_URL = `${SITE_URL}/experiments`;
 
+const listClass =
+	"mt-3 divide-y divide-gray-100 rounded-2xl border border-gray-100";
+const sectionLabelClass =
+	"mt-10 text-[11px] font-black tracking-[0.14em] text-gray-400";
 const demoLinkClass =
-	"inline-flex items-center justify-center rounded-full border border-gray-200 bg-white px-3 py-1 text-[11px] font-bold text-gray-700 transition hover:border-gray-950 hover:text-gray-950";
+	"inline-flex items-center gap-1 rounded-full border border-gray-300 bg-white px-3.5 py-1.5 text-xs font-bold text-gray-800 transition hover:border-gray-950 hover:bg-gray-950 hover:text-white";
 
 export function WebXRSpecList() {
 	const [results, setResults] = useState<
@@ -182,22 +190,28 @@ export function WebXRSpecList() {
 	}, []);
 
 	const loaded = Object.keys(results).length > 0;
+	const sessionEntries = webxrSpecCatalog.filter((entry) =>
+		sessionIds.includes(entry.id),
+	);
+	const moduleEntries = webxrSpecCatalog.filter(
+		(entry) => !sessionIds.includes(entry.id),
+	);
 	const supportRank: Record<SpecSupport, number> = {
 		supported: 0,
 		unknown: 1,
 		checking: 2,
 		unsupported: 3,
 	};
-	const sortedEntries = loaded
-		? [...webxrSpecCatalog].sort(
+	const sortedModules = loaded
+		? [...moduleEntries].sort(
 				(a, b) =>
 					supportRank[results[a.id] ?? "checking"] -
 					supportRank[results[b.id] ?? "checking"],
 			)
-		: webxrSpecCatalog;
+		: moduleEntries;
 	const rows: (
 		| { kind: "header"; label: string }
-		| { kind: "entry"; entry: (typeof webxrSpecCatalog)[number] }
+		| { kind: "entry"; entry: WebXRSpecEntry }
 	)[] = [];
 	if (loaded) {
 		const groupDefs: { label: string; match: SpecSupport[] }[] = [
@@ -206,7 +220,7 @@ export function WebXRSpecList() {
 			{ label: "このブラウザでは未対応", match: ["unsupported"] },
 		];
 		for (const group of groupDefs) {
-			const items = sortedEntries.filter((entry) =>
+			const items = sortedModules.filter((entry) =>
 				group.match.includes(results[entry.id] ?? "checking"),
 			);
 			if (items.length === 0) continue;
@@ -216,7 +230,7 @@ export function WebXRSpecList() {
 			}
 		}
 	} else {
-		for (const entry of webxrSpecCatalog) {
+		for (const entry of moduleEntries) {
 			rows.push({ kind: "entry", entry });
 		}
 	}
@@ -258,6 +272,77 @@ export function WebXRSpecList() {
 		}
 	}
 
+	function renderEntry(entry: WebXRSpecEntry) {
+		const support = results[entry.id] ?? "checking";
+		const badge = supportBadge[support];
+		return (
+			<li key={entry.id} className="flex gap-4 px-5 py-4 sm:gap-5">
+				<span className="w-14 shrink-0 pt-0.5" title={supportTitle[support]}>
+					<span
+						className={`inline-flex w-full justify-center rounded-full px-2 py-1 text-[11px] font-bold ${badge.className}`}
+					>
+						{badge.label}
+					</span>
+				</span>
+				<div className="min-w-0 flex-1">
+					<p className="text-sm leading-snug">
+						<span className="font-bold text-gray-950">{entry.name}</span>
+						{entry.specUrl ? (
+							<a
+								href={entry.specUrl}
+								target="_blank"
+								rel="noopener noreferrer"
+								title={`${entry.specName}（${maturityTitle[entry.maturity]}）`}
+								className="ml-2 text-[11px] text-gray-400 transition hover:text-gray-600 hover:underline"
+							>
+								{entry.specName}
+							</a>
+						) : (
+							<span
+								className="ml-2 text-[11px] text-gray-400"
+								title={maturityTitle[entry.maturity]}
+							>
+								{entry.specName}
+							</span>
+						)}
+					</p>
+					<p className="mt-1 text-xs leading-relaxed text-gray-500">
+						{entry.description}
+						{entry.articleSlug && (
+							<Link
+								href={`/experiments/${entry.articleSlug}`}
+								className="ml-2 text-gray-400 underline decoration-gray-200 underline-offset-2 transition hover:text-[#e11d48]"
+							>
+								解説
+							</Link>
+						)}
+					</p>
+					<div className="mt-2.5 flex flex-wrap items-center gap-2">
+						{entry.demos && entry.demos.length > 0 ? (
+							entry.demos.map((demo) => (
+								<a
+									key={demo.href}
+									href={demo.href}
+									target="_blank"
+									rel="noopener noreferrer"
+									title={`${demo.label}のデモページを開く`}
+									className={demoLinkClass}
+								>
+									{demo.label}
+									<span aria-hidden="true" className="text-[10px]">
+										↗
+									</span>
+								</a>
+							))
+						) : (
+							<span className="text-xs text-gray-300">デモは近日公開</span>
+						)}
+					</div>
+				</div>
+			</li>
+		);
+	}
+
 	return (
 		<div>
 			<div className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl bg-gray-50 px-5 py-4">
@@ -293,7 +378,11 @@ export function WebXRSpecList() {
 				)}
 			</div>
 
-			<ul className="mt-6 divide-y divide-gray-100 rounded-2xl border border-gray-100">
+			<p className={sectionLabelClass}>セッションモード</p>
+			<ul className={listClass}>{sessionEntries.map(renderEntry)}</ul>
+
+			<p className={sectionLabelClass}>モジュール</p>
+			<ul className={listClass}>
 				{rows.map((row) => {
 					if (row.kind === "header") {
 						return (
@@ -305,75 +394,7 @@ export function WebXRSpecList() {
 							</li>
 						);
 					}
-					const entry = row.entry;
-					const support = results[entry.id] ?? "checking";
-					const badge = supportBadge[support];
-					return (
-						<li
-							key={entry.id}
-							className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:gap-5"
-						>
-							<span className="w-14 shrink-0" title={supportTitle[support]}>
-								<span
-									className={`inline-flex w-full justify-center rounded-full px-2 py-1 text-[11px] font-bold ${badge.className}`}
-								>
-									{badge.label}
-								</span>
-							</span>
-							<div className="min-w-0 flex-1">
-								<p className="text-sm leading-snug">
-									<span className="font-bold text-gray-950">{entry.name}</span>
-									{entry.specUrl ? (
-										<a
-											href={entry.specUrl}
-											target="_blank"
-											rel="noopener noreferrer"
-											title={`${entry.specName}（${maturityTitle[entry.maturity]}）`}
-											className="ml-2 text-[11px] text-gray-400 transition hover:text-gray-600 hover:underline"
-										>
-											{entry.specName}
-										</a>
-									) : (
-										<span
-											className="ml-2 text-[11px] text-gray-400"
-											title={maturityTitle[entry.maturity]}
-										>
-											{entry.specName}
-										</span>
-									)}
-								</p>
-								<p className="mt-1 text-xs leading-relaxed text-gray-500">
-									{entry.description}
-									{entry.articleSlug && (
-										<Link
-											href={`/experiments/${entry.articleSlug}`}
-											className="ml-2 text-gray-400 underline decoration-gray-200 underline-offset-2 transition hover:text-[#e11d48]"
-										>
-											解説
-										</Link>
-									)}
-								</p>
-							</div>
-							<div className="flex shrink-0 flex-wrap items-center gap-1.5 sm:w-52 sm:justify-end">
-								{entry.demos && entry.demos.length > 0 ? (
-									entry.demos.map((demo) => (
-										<a
-											key={demo.href}
-											href={demo.href}
-											target="_blank"
-											rel="noopener noreferrer"
-											title={`${demo.label}のデモページを開く`}
-											className={demoLinkClass}
-										>
-											{demo.label}
-										</a>
-									))
-								) : (
-									<span className="text-xs text-gray-300">近日</span>
-								)}
-							</div>
-						</li>
-					);
+					return renderEntry(row.entry);
 				})}
 			</ul>
 
