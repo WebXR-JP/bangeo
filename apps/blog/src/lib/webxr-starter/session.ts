@@ -207,9 +207,9 @@ export async function startStarterSession(
 		// 基本シーン
 		const gridBuffer = kit.makeBuffer(buildGrid(3, 0.5));
 		const cubeBuffer = kit.makeBuffer(buildCubeEdges(0.12));
-		// PICOのimmersive-vrでは画像decode/uploadがセッション遷移と衝突して
-		// レンダーループ前に終了することがあるため、VRでは一旦完全に無効化する。
-		const useSkybox = config.mode === "inline";
+		// スカイボックスは非ブロッキングで読み込む。
+		// 読み込み完了までは暗背景を出し、完了後のフレームから背景を描画する。
+		const useSkybox = !isAR;
 		const skyProgram = useSkybox
 			? compileProgram(gl, SKY_VERT_SRC, SKY_FRAG_SRC)
 			: null;
