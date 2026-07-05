@@ -24,6 +24,7 @@ import type {
 	ModuleContext,
 	StarterConfig,
 	StarterSessionHandle,
+	XRFrameLike,
 	XRSessionLike,
 	XRSystemLike,
 	XRWebGLLayerLike,
@@ -60,7 +61,7 @@ function cubeModel(time: number, y: number): Float32Array {
 
 export async function startStarterSession(
 	config: StarterConfig,
-	onEnd: () => void,
+	onEnd: (message?: string) => void,
 ): Promise<StarterSessionHandle> {
 	const xr = (navigator as Navigator & { xr?: XRSystemLike }).xr;
 	if (!xr) throw new Error("このブラウザではWebXRを利用できません");
@@ -83,6 +84,12 @@ export async function startStarterSession(
 		antialias: true,
 	}) as WebGL2RenderingContext | null;
 	if (!gl) throw new Error("WebGL2を利用できません");
+	const glCompat = gl as WebGL2RenderingContext & {
+		makeXRCompatible?: () => Promise<void>;
+	};
+	if (glCompat.makeXRCompatible) {
+		await glCompat.makeXRCompatible();
+	}
 
 	const isAR = config.mode === "immersive-ar";
 	const optionalFeatures = [...config.features];
@@ -110,11 +117,12 @@ export async function startStarterSession(
 	}
 
 	let ended = false;
+	let fatalMessage: string | null = null;
 	function handleEnd() {
 		if (ended) return;
 		ended = true;
 		overlay.remove();
-		onEnd();
+		onEnd(fatalMessage ?? undefined);
 	}
 	session.addEventListener("end", handleEnd);
 	closeButton.addEventListener("click", () => {
@@ -196,14 +204,13 @@ export async function startStarterSession(
 			? null
 			: await loadTexture(gl, config.skyboxUrl ?? "/assets/starter-skybox.jpg");
 
-		function onFrame(
+		function renderFrame(
 			time: number,
 			frame: Parameters<
 				Parameters<XRSessionLike["requestAnimationFrame"]>[0]
 			>[1],
 		) {
-			if (ended || !gl) return;
-			session.requestAnimationFrame(onFrame);
+			if (!gl) return;
 			const pose = frame.getViewerPose(ctx.space);
 			if (!pose) return;
 
@@ -217,7 +224,11 @@ export async function startStarterSession(
 			gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 			for (const module of modules) {
-				module.update?.(ctx, frame, time);
+				try {
+					module.update?.(ctx, frame, time);
+				} catch {
+					// モジュール単体の失敗ではセッションを止めない
+				}
 			}
 
 			for (const view of pose.views) {
@@ -266,8 +277,24 @@ export async function startStarterSession(
 				);
 
 				for (const module of modules) {
-					module.render?.(ctx, viewProjection, view, frame);
+					try {
+						module.render?.(ctx, viewProjection, view, frame);
+					} catch {
+						// モジュール単体の失敗ではセッションを止めない
+					}
 				}
+			}
+		}
+
+		function onFrame(time: number, frame: XRFrameLike) {
+			if (ended) return;
+			session.requestAnimationFrame(onFrame);
+			try {
+				renderFrame(time, frame);
+			} catch (err) {
+				fatalMessage =
+					err instanceof Error ? err.message : "描画中にエラーが発生しました";
+				session.end().catch(handleEnd);
 			}
 		}
 

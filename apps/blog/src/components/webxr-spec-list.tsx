@@ -444,9 +444,14 @@ export function WebXRSpecList() {
 			setXrRunning(true);
 			xrSessionRef.current = await startStarterSession(
 				{ mode, refSpace, features, skyboxUrl: "/assets/starter-skybox.jpg" },
-				() => {
+				(message) => {
 					setXrRunning(false);
 					xrSessionRef.current = null;
+					setXrError(
+						message
+							? `セッションが終了しました（${message}）`
+							: "セッションを終了しました。",
+					);
 				},
 			);
 		} catch (err) {
