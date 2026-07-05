@@ -35,7 +35,9 @@ export type SpecCheckId =
 	| "body-tracking";
 
 export interface SpecDemoLink {
-	/** リンクの表示ラベル（提供元） */
+	/** ボタンに表示する名前（省略時は label を表示） */
+	name?: string;
+	/** リンクの提供元 */
 	label:
 		| "WebXR Samples"
 		| "Three.js"
@@ -129,6 +131,16 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 			{ label: "PlayCanvas", href: `${PLAYCANVAS_DEMOS}/z7myUkHP/` },
 			{ label: "A-Frame", href: `${AFRAME_EXAMPLES}/boilerplate/hello-world/` },
 			{ label: "Babylon.js", href: `${BABYLONJS_PLAYGROUND}/#F41V6N#134` },
+			{
+				name: "360 Stereo Photos",
+				label: "WebXR Samples",
+				href: `${OFFICIAL_SAMPLES}/360-photos.html`,
+			},
+			{
+				name: "Stereo Video",
+				label: "WebXR Samples",
+				href: `${OFFICIAL_SAMPLES}/stereo-video.html`,
+			},
 		],
 	},
 	{
@@ -402,7 +414,26 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		whyNote:
 			"1枚のWebGLに全部を描くと、動画や文字は一度描いてから引き伸ばされてにじむ。ヘッドセットの合成器に直接渡せば劣化しない",
 		demos: [
-			{ label: "WebXR Samples", href: `${OFFICIAL_SAMPLES}/layers-samples/` },
+			{
+				name: "Quad Layer",
+				label: "WebXR Samples",
+				href: `${OFFICIAL_SAMPLES}/layers-samples/quad-layer.html`,
+			},
+			{
+				name: "Cylinder Layer",
+				label: "WebXR Samples",
+				href: `${OFFICIAL_SAMPLES}/layers-samples/cyld-layer.html`,
+			},
+			{
+				name: "Media Layer",
+				label: "WebXR Samples",
+				href: `${OFFICIAL_SAMPLES}/layers-samples/media-layer-sample.html`,
+			},
+			{
+				name: "Equirect Video",
+				label: "WebXR Samples",
+				href: `${OFFICIAL_SAMPLES}/layers-samples/eqrt-video.html`,
+			},
 			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webxr_vr_layers.html` },
 			{
 				label: "A-Frame",
@@ -418,9 +449,9 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://immersive-web.github.io/WebXR-WebGPU-Binding/",
 		maturity: "draft",
 		description:
-			"XRの映像を、WebGLよりあたらしく高速なWebGPUで描けるようにする",
+			"XRの映像をWebGPUでも描けるようにして、描画方法の選択肢を増やす",
 		whyNote:
-			"WebGLは設計が古く、描画負荷の高いXRでは性能の限界が近い。WebGPUで描ければ重い表現やコンピュートシェーダーが使える",
+			"WebGPUにはコンピュートシェーダーなど、WebGLには無い描画のしくみがある。それらをXRの描画でも使えるようにする接続層",
 		demos: [
 			{ label: "WebXR Samples", href: `${OFFICIAL_SAMPLES}/webgpu/` },
 			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webgpu_xr_cubes.html` },

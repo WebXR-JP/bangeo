@@ -352,7 +352,7 @@ export function WebXRSpecList() {
 									title={`${demo.label}の${entry.name}デモを開く`}
 									className={demoButtonClass}
 								>
-									<span className="truncate">{demo.label}</span>
+									<span className="truncate">{demo.name ?? demo.label}</span>
 									<span aria-hidden="true" className="shrink-0 text-[10px]">
 										↗
 									</span>
