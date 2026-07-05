@@ -138,6 +138,7 @@ export function Header() {
 								className="w-5 h-5"
 								fill="none"
 								viewBox="0 0 24 24"
+								aria-hidden="true"
 								strokeWidth="2"
 								stroke="currentColor"
 							>
@@ -159,6 +160,7 @@ export function Header() {
 								className="w-6 h-6"
 								fill="none"
 								viewBox="0 0 24 24"
+								aria-hidden="true"
 								strokeWidth="2"
 								stroke="currentColor"
 							>

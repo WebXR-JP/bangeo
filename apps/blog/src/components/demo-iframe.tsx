@@ -1,3 +1,5 @@
+import type { CSSProperties } from "react";
+
 interface DemoIframeProps {
 	src: string;
 	title: string;
@@ -17,7 +19,10 @@ export function DemoIframe({
 
 	return (
 		<figure className="demo-embed not-prose">
-			<div className="demo-embed-frame" style={{ height }}>
+			<div
+				className="demo-embed-frame"
+				style={{ "--demo-embed-height": `${height}px` } as CSSProperties}
+			>
 				<iframe
 					src={src}
 					title={title}

@@ -589,6 +589,7 @@ body {
 .tech-article-content .demo-embed-frame {
 	position: relative;
 	width: 100%;
+	height: var(--demo-embed-height, 480px);
 	overflow: hidden;
 	border-radius: 1rem;
 	border: 1px solid #e2e8f0;
@@ -632,7 +633,7 @@ body {
 
 @media (max-width: 720px) {
 	.tech-article-content .demo-embed-frame {
-		height: min(72vh, 560px) !important;
+		height: min(72vh, 560px);
 		min-height: 420px;
 	}
 }
