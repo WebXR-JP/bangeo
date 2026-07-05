@@ -12,7 +12,7 @@ type SitemapDoc = {
 	info: { path: string };
 };
 
-const SITE_STRUCTURE_UPDATED = new Date("2026-07-04T00:00:00Z");
+const SITE_STRUCTURE_UPDATED = new Date("2026-07-05T00:00:00Z");
 
 export default function sitemap(): MetadataRoute.Sitemap {
 	const blogDocs = getDocs(blog);

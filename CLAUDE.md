@@ -110,6 +110,38 @@ AR と VR で置き場所・URLパターンが違うので注意する。
 - 読者向けでない編集チェックやエージェント向け手順は、記事MDXではなく `.claude/skills/` に置く
 - サムネイルは既存画像の雰囲気を確認し、必要ならCodex Imageで新規生成して `apps/blog/public/assets/` に保存する
 
+## /experiments 仕様カタログとスターターコードビルダー
+
+`/experiments` は「1行 = 1つのWebXR仕様」のカタログページ。データは `apps/blog/src/lib/webxr-spec-catalog.ts` に集約し、UIは `apps/blog/src/components/webxr-spec-list.tsx` が担う。
+
+- セクションは「セッションモード」「モジュール」「体験スペース（Reference Spaces）」の3つ。分類は `webxr-spec-list.tsx` の `sessionIds` / `referenceSpaceIds` で行う
+- 対応判定はブラウザのAPI実装有無と `isSessionSupported` による簡易チェックで、ロジックは `specChecks` にある。バッジは「対応 / 未対応」の2値のみ（「実機」等の中間状態は置かない）
+- 各仕様エントリは `featureName`（`requestSession` に渡す文字列）、`description`（主語と述語が通る日常語の1行）、`whyNote`（無いと何に困るか）、`demos`（実在確認済みURLのみ）を持つ
+- `demos` の `label` は提供元（WebXR Samples / Three.js / Babylon.js / A-Frame / PlayCanvas / BANGEO）。同一提供元から複数載せるときは `name` で表示名を分ける
+- デモURLは掲載前に必ず実在確認する（リンク切れ厳禁）。W3C成熟度を変更したときはファイル冒頭コメントの確認日を更新する
+- ページ最下部の「スターターコードを組み立てる」は、モード・機能・体験スペースの選択から `requestSession` の開始コードを生成するプレイグラウンド。未対応端末でもコードの学習が完結することを重視する
+
+### BANGEO自前デモの制作方針（このページ起点）
+
+BANGEO自前デモの役割は、このカタログの各仕様を「BANGEOのデモで体験開始できる」状態に埋めていくこと。優先順位は次のとおり。
+
+1. `demos` が「近日」のままの仕様（DOM Overlays / Body Tracking など）
+2. 公式サンプルしかリンクが無い仕様
+3. すでにデモが充実している仕様の品質向上
+
+デモを公開したら `webxr-spec-catalog.ts` の該当エントリに `{ label: "BANGEO", name: "…", href: "/demo/…" }` を追加する。配列の先頭に置くと一番目のボタンとして表示される。
+
+### 拡張ロードマップ: ビルダーからの体験開始
+
+将来的に、スタータービルダーで組んだ構成をそのままBANGEOデモとして体験開始できるようにする。
+
+1. ビルダーの構成をURLクエリで表現する（例: `/demo/starter/?mode=immersive-vr&ref=local-floor&features=hit-test,hand-tracking`）
+2. IWSDKベースの汎用ランナーデモ `apps/starter`（配信は `/demo/starter/`）を作り、クエリを読んで `requestSession` を実行する。選択された各featureの動作可視化（hit-testなら面マーカー、hand-trackingなら関節表示、depth-sensingなら深度の可視化など）を同一シーンに合成する
+3. feature可視化は「1機能 = 1モジュール」で追加できる構造にし、カタログと同じ増分方針を保つ
+4. ランナーが動いたら、ビルダーに「この構成で体験を開始」ボタンを追加する。構成に未対応が含まれる端末ではボタンを出さず、コード学習のみとする
+
+これで「リストで調べる → デモで試す → ビルダーで書く → 組んだ構成を体験する」が1ページから一本につながる。
+
 ## 毎日のWebXRウォッチ: イベントウォッチ更新
 
 毎日のWebXR更新確認では、通常の仕様・ブラウザ・ライブラリ確認に加えて、BANGEOのWebXRイベントウォッチも確認する。

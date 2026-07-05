@@ -303,6 +303,115 @@ export function WebXRSpecList() {
 	);
 	const builderCode = builderLines.join("\n");
 
+	const tokKw = "text-fuchsia-400";
+	const tokFn = "text-sky-300";
+	const tokProp = "text-amber-200";
+	const tokCmt = "text-gray-500";
+	const tokHl =
+		"rounded bg-emerald-400/15 px-1 text-emerald-300 ring-1 ring-emerald-400/30";
+
+	const codeJsxLines: { id: string; content: ReactNode }[] = [];
+	codeJsxLines.push({
+		id: "c1",
+		content: (
+			<span className={tokCmt}>{"// 1. この端末でモードが使えるか確認"}</span>
+		),
+	});
+	codeJsxLines.push({
+		id: "l1",
+		content: (
+			<>
+				<span className={tokKw}>const</span> supported ={" "}
+				<span className={tokKw}>await</span> navigator.xr.
+				<span className={tokFn}>isSessionSupported</span>(
+				<span className={tokHl}>"{mode}"</span>);
+			</>
+		),
+	});
+	codeJsxLines.push({ id: "b1", content: <span> </span> });
+	codeJsxLines.push({
+		id: "c2",
+		content: (
+			<span className={tokCmt}>
+				{"// 2. セッションを開始（使いたい機能はここで要求）"}
+			</span>
+		),
+	});
+	if (builderOpts.length > 0) {
+		codeJsxLines.push({
+			id: "l2",
+			content: (
+				<>
+					<span className={tokKw}>const</span> session ={" "}
+					<span className={tokKw}>await</span> navigator.xr.
+					<span className={tokFn}>requestSession</span>(
+					<span className={tokHl}>"{mode}"</span>, {"{"}
+				</>
+			),
+		});
+		if (refSpace !== "viewer") {
+			codeJsxLines.push({
+				id: "l3",
+				content: (
+					<>
+						{"  "}
+						<span className={tokProp}>requiredFeatures</span>: [
+						<span className={tokHl}>"{refSpace}"</span>],
+					</>
+				),
+			});
+		}
+		if (features.length > 0) {
+			codeJsxLines.push({
+				id: "l4",
+				content: (
+					<>
+						{"  "}
+						<span className={tokProp}>optionalFeatures</span>: [
+						{features.map((f, index) => (
+							<span key={f}>
+								<span className={tokHl}>"{f}"</span>
+								{index < features.length - 1 ? ", " : ""}
+							</span>
+						))}
+						],
+					</>
+				),
+			});
+		}
+		codeJsxLines.push({ id: "l5", content: <span>{"});"}</span> });
+	} else {
+		codeJsxLines.push({
+			id: "l2",
+			content: (
+				<>
+					<span className={tokKw}>const</span> session ={" "}
+					<span className={tokKw}>await</span> navigator.xr.
+					<span className={tokFn}>requestSession</span>(
+					<span className={tokHl}>"{mode}"</span>);
+				</>
+			),
+		});
+	}
+	codeJsxLines.push({ id: "b2", content: <span> </span> });
+	codeJsxLines.push({
+		id: "c3",
+		content: (
+			<span className={tokCmt}>{"// 3. 体験の基準になる座標系を取得"}</span>
+		),
+	});
+	codeJsxLines.push({
+		id: "l6",
+		content: (
+			<>
+				<span className={tokKw}>const</span> refSpace ={" "}
+				<span className={tokKw}>await</span> session.
+				<span className={tokFn}>requestReferenceSpace</span>(
+				<span className={tokHl}>"{refSpace}"</span>);
+			</>
+		),
+	});
+
 	const selectedUnsupported = loaded
 		? [
 				...(results[mode] !== "supported" ? [mode] : []),
@@ -633,17 +742,38 @@ export function WebXRSpecList() {
 						</button>
 					))}
 				</div>
-				<div className="relative mt-5">
-					<pre className="overflow-x-auto rounded-xl bg-gray-950 p-4 text-xs leading-relaxed text-gray-100">
-						<code>{builderCode}</code>
-					</pre>
-					<button
-						type="button"
-						onClick={copyBuilderCode}
-						className="absolute top-3 right-3 rounded-full border border-white/20 px-3 py-1 text-[11px] font-bold text-white/80 transition hover:bg-white/10"
-					>
-						{codeCopied ? "コピーしました" : "コピー"}
-					</button>
+				<div className="mt-5 overflow-hidden rounded-xl bg-gray-950">
+					<div className="flex items-center gap-1.5 border-b border-white/10 px-4 py-2.5">
+						<span className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
+						<span className="h-2.5 w-2.5 rounded-full bg-amber-400/80" />
+						<span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
+						<span className="ml-3 font-mono text-[11px] text-gray-500">
+							starter.js
+						</span>
+						<button
+							type="button"
+							onClick={copyBuilderCode}
+							className="ml-auto rounded-full border border-white/15 px-3 py-1 text-[11px] font-bold text-white/70 transition hover:bg-white/10 hover:text-white"
+						>
+							{codeCopied ? "コピーしました" : "コピー"}
+						</button>
+					</div>
+					<div className="overflow-x-auto p-4">
+						<pre className="font-mono text-xs leading-relaxed">
+							<code>
+								{codeJsxLines.map((line, index) => (
+									<span key={line.id} className="flex gap-4">
+										<span className="w-5 shrink-0 select-none text-right text-gray-600">
+											{index + 1}
+										</span>
+										<span className="whitespace-pre text-gray-200">
+											{line.content}
+										</span>
+									</span>
+								))}
+							</code>
+						</pre>
+					</div>
 				</div>
 				{selectedUnsupported.length > 0 && (
 					<p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-700">
