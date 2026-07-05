@@ -311,6 +311,16 @@ export function WebXRSpecList() {
 					<p className="mt-1.5 text-sm leading-relaxed text-gray-600">
 						{entry.description}
 					</p>
+					{entry.whyNote && (
+						<details className="mt-1.5">
+							<summary className="cursor-pointer text-xs font-bold text-gray-400 transition hover:text-gray-600">
+								なぜ必要？
+							</summary>
+							<p className="mt-1 rounded-xl bg-gray-50 px-3 py-2 text-xs leading-relaxed text-gray-500">
+								{entry.whyNote}
+							</p>
+						</details>
+					)}
 					{entry.specUrl ? (
 						<a
 							href={entry.specUrl}
