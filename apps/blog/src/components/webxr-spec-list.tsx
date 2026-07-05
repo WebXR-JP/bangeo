@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { SITE_URL } from "@/lib/site-url";
 import {
 	maturityTitle,
@@ -161,6 +161,9 @@ const PAGE_URL = `${SITE_URL}/experiments`;
 
 const sectionLabelClass =
 	"mt-10 text-[11px] font-black tracking-[0.14em] text-gray-400";
+
+const noteCodeClass =
+	"rounded bg-gray-100 px-1 py-0.5 font-mono text-[11px] text-gray-600";
 
 const demoButtonClass =
 	"flex min-h-10 items-center justify-between gap-2 rounded-xl border border-gray-200 bg-white px-3.5 py-2 text-xs font-bold text-gray-700 transition hover:border-gray-950 hover:bg-gray-950 hover:text-white";
@@ -356,10 +359,15 @@ export function WebXRSpecList() {
 		);
 	}
 
-	function renderSection(label: string, entries: WebXRSpecEntry[]) {
+	function renderSection(
+		label: string,
+		note: ReactNode,
+		entries: WebXRSpecEntry[],
+	) {
 		return (
 			<>
 				<p className={sectionLabelClass}>{label}</p>
+				<p className="mt-1.5 text-xs leading-relaxed text-gray-500">{note}</p>
 				<ul className="mt-3 divide-y divide-gray-100 rounded-2xl border border-gray-100">
 					{entries.map(renderEntry)}
 				</ul>
@@ -402,9 +410,41 @@ export function WebXRSpecList() {
 				)}
 			</div>
 
-			{renderSection("セッションモード", sessionEntries)}
-			{renderSection("体験スペース", referenceSpaceEntries)}
-			{renderSection("モジュール", sortedModules)}
+			{renderSection(
+				"セッションモード",
+				<>
+					XR体験の入口です。体験を始めるときに{" "}
+					<code className={noteCodeClass}>
+						navigator.xr.requestSession("モード名")
+					</code>{" "}
+					で、この中から1つを選びます。
+				</>,
+				sessionEntries,
+			)}
+			{renderSection(
+				"モジュール",
+				<>
+					体験に足せる機能です。使いたい機能のfeature名を{" "}
+					<code className={noteCodeClass}>requiredFeatures</code>（必須）または{" "}
+					<code className={noteCodeClass}>optionalFeatures</code>
+					（任意）に入れて <code className={noteCodeClass}>requestSession</code>{" "}
+					に渡すと有効になります。
+				</>,
+				sortedModules,
+			)}
+			{renderSection(
+				"体験スペース",
+				<>
+					体験の基準になる座標系です。セッション開始後に{" "}
+					<code className={noteCodeClass}>
+						session.requestReferenceSpace("名前")
+					</code>{" "}
+					で選びます。bounded-floor などは{" "}
+					<code className={noteCodeClass}>optionalFeatures</code>{" "}
+					への指定も必要です。
+				</>,
+				referenceSpaceEntries,
+			)}
 
 			<p className="mt-4 text-xs leading-relaxed text-gray-400">
 				対応表示はブラウザのAPI実装有無に基づく簡易チェックです。各行のコードは、requestSession
