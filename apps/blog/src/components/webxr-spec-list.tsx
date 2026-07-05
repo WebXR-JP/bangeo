@@ -12,7 +12,7 @@ import {
 import {
 	type StarterSessionHandle,
 	startStarterSession,
-} from "@/lib/webxr-starter-session";
+} from "@/lib/webxr-starter/session";
 
 type XRSessionMode = "inline" | "immersive-vr" | "immersive-ar";
 
@@ -829,7 +829,7 @@ export function WebXRSpecList() {
 					</div>
 				</div>
 				<p className="mt-3 text-[11px] leading-relaxed text-gray-400">
-					体験を開始すると、VRでは360°スカイボックス、ARではパススルーを背景に、hit-test（面マーカー）・anchors（選択操作で固定キューブを設置）・hand-tracking（関節の点表示）・bounded-floor（境界線）・mesh-detection（部屋メッシュの点群）・depth-sensing（視線の先の実測距離マーカー）・light-estimation（主光源の方向線）がセッションの中で確認できます。残りの機能の確認モジュールは順次追加していきます。
+					体験を開始すると、VRでは360°スカイボックス、ARではパススルーを背景に、hit-test（面マーカー）・anchors（選択操作で固定キューブを設置）・hand-tracking（関節の点表示）・bounded-floor（境界線）・mesh-detection（部屋メッシュの点群）・depth-sensing（視線の先の実測距離マーカー）・light-estimation（主光源の方向線）・body-tracking（全身関節の点表示）がセッションの中で確認できます。残りの機能の確認モジュールは順次追加していきます。
 				</p>
 				{selectedUnsupported.length > 0 && (
 					<p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-700">

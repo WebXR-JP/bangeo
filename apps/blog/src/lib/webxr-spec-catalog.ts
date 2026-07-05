@@ -5,7 +5,7 @@
  * 公式仕様名・成熟度・仕様URLを一次情報として持つ。
  * 成熟度は W3C Immersive Web WG の公開情報で確認する（最終確認: 2026-07-04）。
  *
- * demos には実在を確認したデモページのみを載せる（URL検証日: 2026-07-04）。
+ * demos には実在を確認したデモページのみを載せる（URL検証日: 2026-07-05。PlayCanvasは playcanvas.vercel.app のエンジンexamplesを使う）。
  * BANGEO自前デモが公開されたら、同じ配列に label: "BANGEO" で追加する。
  */
 
@@ -85,8 +85,7 @@ export const maturityTitle: Record<SpecMaturity, string> = {
 
 const OFFICIAL_SAMPLES = "https://immersive-web.github.io/webxr-samples";
 const THREEJS_EXAMPLES = "https://threejs.org/examples";
-const PLAYCANVAS_DEMOS = "https://playcanv.as/p";
-const PLAYCANVAS_TUTORIALS = "https://developer.playcanvas.com/tutorials";
+const PLAYCANVAS_EXAMPLES = "https://playcanvas.vercel.app/#/xr";
 const AFRAME_EXAMPLES = "https://aframe.io/aframe/examples";
 const BABYLONJS_PLAYGROUND = "https://playground.babylonjs.com";
 
@@ -128,9 +127,9 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 				label: "Three.js",
 				href: `${THREEJS_EXAMPLES}/webxr_xr_ballshooter.html`,
 			},
-			{ label: "PlayCanvas", href: `${PLAYCANVAS_DEMOS}/z7myUkHP/` },
+			{ label: "PlayCanvas", href: `${PLAYCANVAS_EXAMPLES}/vr-basic` },
 			{ label: "A-Frame", href: `${AFRAME_EXAMPLES}/boilerplate/hello-world/` },
-			{ label: "Babylon.js", href: `${BABYLONJS_PLAYGROUND}/#F41V6N#134` },
+			{ label: "Babylon.js", href: `${BABYLONJS_PLAYGROUND}/#9K3MRA#1` },
 			{
 				name: "360 Stereo Photos",
 				label: "WebXR Samples",
@@ -160,7 +159,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 				href: `${OFFICIAL_SAMPLES}/immersive-ar-session.html`,
 			},
 			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webxr_ar_cones.html` },
-			{ label: "PlayCanvas", href: `${PLAYCANVAS_DEMOS}/AOYF3YyG/` },
+			{ label: "PlayCanvas", href: `${PLAYCANVAS_EXAMPLES}/ar-basic` },
 			{
 				label: "A-Frame",
 				href: `${AFRAME_EXAMPLES}/boilerplate/ar-hello-world/`,
@@ -247,12 +246,12 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 				href: `${OFFICIAL_SAMPLES}/controller-state.html`,
 			},
 			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webxr_xr_haptics.html` },
-			{ label: "PlayCanvas", href: `${PLAYCANVAS_DEMOS}/TUBZkBEl/` },
+			{ label: "PlayCanvas", href: `${PLAYCANVAS_EXAMPLES}/vr-controllers` },
 			{
 				label: "A-Frame",
 				href: `${AFRAME_EXAMPLES}/showcase/tracked-controls/`,
 			},
-			{ label: "Babylon.js", href: `${BABYLONJS_PLAYGROUND}/#F41V6N#134` },
+			{ label: "Babylon.js", href: `${BABYLONJS_PLAYGROUND}/#28EKWI#37` },
 		],
 	},
 	{
@@ -275,12 +274,11 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 				label: "Three.js",
 				href: `${THREEJS_EXAMPLES}/webxr_vr_handinput.html`,
 			},
-			{ label: "PlayCanvas", href: `${PLAYCANVAS_DEMOS}/VmHVW3Wb/` },
+			{ label: "PlayCanvas", href: `${PLAYCANVAS_EXAMPLES}/xr-hands` },
 			{
 				label: "A-Frame",
 				href: `${AFRAME_EXAMPLES}/showcase/hand-tracking/`,
 			},
-			{ label: "Babylon.js", href: `${BABYLONJS_PLAYGROUND}/#X7Y4H8#16` },
 		],
 	},
 	{
@@ -297,8 +295,8 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		demos: [
 			{ label: "WebXR Samples", href: `${OFFICIAL_SAMPLES}/hit-test.html` },
 			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webxr_ar_hittest.html` },
-			{ label: "PlayCanvas", href: `${PLAYCANVAS_DEMOS}/Kjol3uRS/` },
-			{ label: "Babylon.js", href: `${BABYLONJS_PLAYGROUND}/#F41V6N#32` },
+			{ label: "PlayCanvas", href: `${PLAYCANVAS_EXAMPLES}/ar-hit-test` },
+			{ label: "Babylon.js", href: `${BABYLONJS_PLAYGROUND}/#XWBES1` },
 		],
 	},
 	{
@@ -314,7 +312,10 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 			"トラッキングは常に裏で補正されるため、固定の座標に置いた物は現実に対して少しずつ流れる。目印を端末側に追従させれば補正後もその場に留まる",
 		demos: [
 			{ label: "WebXR Samples", href: `${OFFICIAL_SAMPLES}/anchors.html` },
-			{ label: "PlayCanvas", href: `${PLAYCANVAS_DEMOS}/Skq3Ry1K/` },
+			{
+				label: "PlayCanvas",
+				href: `${PLAYCANVAS_EXAMPLES}/ar-hit-test-anchors`,
+			},
 			{
 				label: "A-Frame",
 				href: `${AFRAME_EXAMPLES}/mixed-reality/anchor/`,
@@ -335,14 +336,6 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 			"XRの画面は毎フレームWebGLで描かれ、HTMLは一切表示されない。ボタン1つでもWebGLで自作するのは大変なので、HTMLをそのまま重ねる口が必要",
 		demos: [
 			{ label: "WebXR Samples", href: `${OFFICIAL_SAMPLES}/ar-barebones.html` },
-			{
-				label: "PlayCanvas",
-				href: `${PLAYCANVAS_TUTORIALS}/webxr-ar-dom-overlay/`,
-			},
-			{
-				label: "A-Frame",
-				href: `${AFRAME_EXAMPLES}/boilerplate/webxr-dom-overlay/`,
-			},
 		],
 	},
 	{
@@ -361,7 +354,8 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 				label: "WebXR Samples",
 				href: `${OFFICIAL_SAMPLES}/proposals/phone-ar-depth.html`,
 			},
-			{ label: "PlayCanvas", href: `${PLAYCANVAS_DEMOS}/UN0z1XE2/` },
+			{ label: "PlayCanvas", href: `${PLAYCANVAS_EXAMPLES}/ar-camera-depth` },
+			{ label: "Babylon.js", href: `${BABYLONJS_PLAYGROUND}/#KDWCZY#601` },
 		],
 	},
 	{
@@ -379,6 +373,10 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 			{
 				label: "WebXR Samples",
 				href: `${OFFICIAL_SAMPLES}/proposals/mesh-detection.html`,
+			},
+			{
+				label: "PlayCanvas",
+				href: `${PLAYCANVAS_EXAMPLES}/ar-mesh-detection`,
 			},
 			{
 				label: "A-Frame",
@@ -399,7 +397,7 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 			"現実は明るいのに3Dだけ暗い、影の向きが違う、といった「合成っぽさ」が出てしまう。現実の光を測って合わせると馴染む",
 		demos: [
 			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webxr_ar_lighting.html` },
-			{ label: "PlayCanvas", href: `${PLAYCANVAS_DEMOS}/AOYF3YyG/` },
+			{ label: "Babylon.js", href: `${BABYLONJS_PLAYGROUND}/#NAZYHG#5` },
 		],
 	},
 	{
@@ -467,6 +465,5 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 			"ヘッドセットやトラッカーで体の動きを読み取って、全身のポーズを取得する。アバターを動かすのに使う",
 		whyNote:
 			"頭と手の位置だけでは腰や脚の動きが分からず、アバターの下半身は推測で動かすしかない。全身の関節が取れれば実際の動きを反映できる",
-		demos: [{ label: "Babylon.js", href: `${BABYLONJS_PLAYGROUND}/#0FOISU#2` }],
 	},
 ];
