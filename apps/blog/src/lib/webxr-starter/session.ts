@@ -186,16 +186,24 @@ export async function startStarterSession(
 		}
 
 		diagPhase = "WebGL2作成";
-		const gl = canvas.getContext("webgl2", {
-			xrCompatible: true,
+		// inline は通常のcanvasと同じ描画経路なので xrCompatible は不要。
+		// デスクトップでXRデバイスが無い場合、makeXRCompatible() が InvalidStateError になるため、immersive時だけ有効化する。
+		const glAttributes: WebGLContextAttributes & { xrCompatible?: boolean } = {
 			alpha: true,
 			antialias: true,
-		}) as WebGL2RenderingContext | null;
+		};
+		if (config.mode !== "inline") {
+			glAttributes.xrCompatible = true;
+		}
+		const gl = canvas.getContext(
+			"webgl2",
+			glAttributes,
+		) as WebGL2RenderingContext | null;
 		if (!gl) throw new Error("WebGL2を利用できません");
 		const glCompat = gl as WebGL2RenderingContext & {
 			makeXRCompatible?: () => Promise<void>;
 		};
-		if (glCompat.makeXRCompatible) {
+		if (config.mode !== "inline" && glCompat.makeXRCompatible) {
 			diagPhase = "makeXRCompatible";
 			await glCompat.makeXRCompatible();
 		}
