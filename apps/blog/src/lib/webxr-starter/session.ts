@@ -195,9 +195,15 @@ export async function startStarterSession(
 		const glCompat = gl as WebGL2RenderingContext & {
 			makeXRCompatible?: () => Promise<void>;
 		};
-		if (glCompat.makeXRCompatible) {
+		const contextAttributes = gl.getContextAttributes();
+		if (glCompat.makeXRCompatible && !contextAttributes?.xrCompatible) {
 			diagPhase = "makeXRCompatible";
-			await glCompat.makeXRCompatible();
+			try {
+				await glCompat.makeXRCompatible();
+			} catch (err) {
+				if (config.mode !== "inline") throw err;
+				diagPhase = "makeXRCompatibleスキップ(inline)";
+			}
 		}
 
 		diagPhase = "XRWebGLLayer作成前";
