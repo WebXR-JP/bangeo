@@ -1,0 +1,163 @@
+---
+title: "A-Frame 1.8.0へ更新する前に確認したい5項目──three.js r184、Quest入力、WebXR Layers"
+description: "A-Frame 1.8.0の変更をWebXR開発者向けに整理。three.js r184への更新、モデル読み込み、Questコントローラー、WebXR Layers、廃止設定を1.7系からの移行チェックとして解説します。"
+date: "2026年7月17日"
+category: "NEWS"
+tags:
+  - "A-Frame"
+  - "WebXR"
+  - "three.js"
+  - "Meta Quest"
+  - "Apple Vision Pro"
+  - "WebXR Layers"
+author: "BANGEO Team"
+thumbnail: "/assets/tech/aframe-1-8-0-webxr-update.webp"
+draft: false
+---
+
+A-Frame 1.8.0が公開されました。同梱のthree.jsがr184へ更新され、`gltf-model`、`cursor`、`hand-controls`、WebXR Layersなど、WebXRコンテンツの実運用に関わる修正がまとまっています。
+
+[A-Frame公式ブログ](https://aframe.io/blog/aframe-v1.8.0/)では「20件を超える不具合修正と15件の改善」と紹介されています。大きな新機能を1つ追加したリリースというより、モデル、入力、レイヤー、周辺機器の挙動を整えた安定化リリースと見るのがよさそうです。
+
+この記事では、変更一覧をそのまま並べるのではなく、A-Frame 1.7系のWebXRコンテンツを1.8.0へ更新するときに確認したいポイントを5つに絞ります。
+
+## 先に結論：入力、レイヤー、廃止設定を重点的に見る
+
+A-Frame 1.8.0へ更新する際は、次の項目を優先して確認してください。
+
+- Questで左右のコントローラーとハンド表示が正しく切り替わるか
+- `gltf-model`のURLを読み込み途中で変更しても、最後に指定したモデルが表示されるか
+- WebXR Layers非対応環境でもXRセッションを開始できるか
+- `npot: true`や`shadow="type: pcfsoft"`が残っていないか
+- three.jsへ直接アクセスする独自コンポーネントがr184でも動くか
+
+マークアップ中心の小さなシーンでも、入力コンポーネントやmaterial設定を利用していれば影響を受ける可能性があります。ライブラリのURLだけを差し替えて公開するのではなく、実機で一度通して操作するのが安全です。
+
+## 1. three.jsがr184へ更新
+
+A-Frame 1.8.0では、同梱のthree.jsがr184へ更新されました。
+
+A-Frameの標準コンポーネントだけを使う場合、three.jsの変更を直接意識する場面は多くありません。一方、`object3D`、material、texture、rendererなどへ独自コンポーネントからアクセスしているプロジェクトでは、three.js側の廃止APIや挙動変更が影響します。
+
+今回のA-Frame側の更新では、three.js r183以降で非推奨になった`Clock`を`Timer`へ置き換え、同じく非推奨になった`PCFSoftShadowMap`に合わせてshadow設定を整理しています。
+
+特に既存シーンで次の指定を使っている場合は変更が必要です。
+
+```html
+<!-- 変更前 -->
+<a-scene shadow="type: pcfsoft">
+
+<!-- A-Frame 1.8.0以降 -->
+<a-scene shadow="type: pcf">
+```
+
+three.js側では現在の`PCFShadowMap`もソフトシャドウとして動作するため、A-Frameのリリースノートでは`pcfsoft`から`pcf`への移行が案内されています。
+
+独自コンポーネント内で`THREE.Clock`やrendererの実装詳細へ触れている場合は、A-Frame本体だけでなく[three.js r183・r184の移行内容](https://github.com/mrdoob/three.js/wiki/Migration-Guide)も確認しておくと安心です。
+
+## 2. モデルと画像の読み込みが安定
+
+WebXRコンテンツでは、起動時に大きなGLBを読み込んだり、ユーザーの選択に応じてモデルを入れ替えたりすることがあります。A-Frame 1.8.0では、この経路に複数の修正が入りました。
+
+主な変更は次のとおりです。
+
+- 読み込み中に`gltf-model`のURLを変更した場合の競合を修正
+- 読み込みに失敗した画像を誤ってキャッシュしないよう修正
+- 画像が残っているのにローディング画面が早く閉じる問題を修正
+- cube textureがlight probeへ反映されない問題を修正
+- ファイル形式ごとにキャッシュキーを分離
+
+たとえば、商品バリエーションやアバターを短時間に切り替えるUIでは、古いリクエストの完了が新しいモデル表示へ割り込まないかを確認したいところです。
+
+```javascript
+const model = document.querySelector("#preview-model");
+
+model.setAttribute("gltf-model", "/models/variant-a.glb");
+model.setAttribute("gltf-model", "/models/variant-b.glb");
+```
+
+1.8.0へ更新したら、通信を低速にした状態でも最後に指定したモデルが表示されるか、読み込み失敗後の再試行で画像やモデルが復帰するかを試してください。
+
+## 3. Questのコントローラーとhand-controlsを修正
+
+WebXR開発者にとって、今回もっとも実機確認の価値が高いのは入力まわりです。
+
+A-Frame 1.8.0では、Meta Questコントローラーで`hand-controls`の向きが正しくない問題が修正されました。加えて、次のような修正も含まれています。
+
+- tracked controllerの切断・再接続後の挙動を修正
+- `cursor`のclickイベントが別のコントローラーで発火する問題を修正
+- `tracked-controls`でコントローラーをprefixではなくIDで識別
+- ハンドとコントローラーを切り替えた際にモデルが表示されない問題を修正
+- Windows Motion Controllerのaxis名を修正
+
+左右の手を同時に使うシーン、コントローラーとハンドトラッキングを切り替えるシーン、片方のコントローラーをスリープから復帰させるシーンでは、回帰確認をおすすめします。
+
+見た目だけでなく、raycaster、click、button、axisのイベントが意図した側から届いているかもログで確認すると原因を切り分けやすくなります。
+
+## 4. WebXR Layers非対応環境で止まりにくくなった
+
+A-Frame 1.8.0では、quad layersをoptional featureとして扱う変更が入りました。公式リリースノートでは、Apple Vision ProのようにWebXR Layersをサポートしないデバイスでも動作させるための修正として説明されています。
+
+このほか、layerコンポーネントでは次の更新が行われています。
+
+- `XRWebGLBinding`が存在するかの判定を修正
+- quad layerのgeometryサイズを修正
+- 強制更新用の`needsRedraw`を再導入
+- 不要な6枚のcanvas初期化を削減
+- flat videoの描画に`XRMediaBinding.createQuadLayer()`を利用
+
+重要なのは、「Layersが使えない環境ではXR全体が使えない」と判定しないことです。レイヤーを使える場合は高品質なパネルや動画表示へ切り替え、使えない場合は通常の3D geometryへフォールバックする設計が必要です。
+
+更新後は、Layers対応端末だけでなく、Layersを利用できないブラウザやデバイスでもセッション開始まで確認してください。
+
+## 5. materialの`npot`をfilter指定へ置き換える
+
+materialコンポーネントでは、WebGL 1時代から残っていた`npot`プロパティが削除され、`minFilter`と`magFilter`が公開されました。
+
+これまで`npot: true`を、textureの`minFilter`をlinearにする目的で使っていた場合は、次のように置き換えます。
+
+```html
+<!-- 変更前 -->
+<a-plane material="src: #panel; npot: true"></a-plane>
+
+<!-- A-Frame 1.8.0以降 -->
+<a-plane material="src: #panel; minFilter: linear"></a-plane>
+```
+
+UIパネル、動画、動的canvas、2の累乗ではないサイズの画像を使っているシーンは、更新前後でぼやけ方、ちらつき、mipmapの生成、遠距離での見え方を比較してください。
+
+また、materialコンポーネントには`premultipliedAlpha`も公開されました。半透明のUIやエフェクトで輪郭に黒や白の縁が出る場合は、textureの生成方法と合わせて検証できます。
+
+## 1.7系からの更新チェックリスト
+
+公開前に、少なくとも次の順番で確認すると効率的です。
+
+1. A-Frameのバージョンだけを1.8.0へ変更し、コンソールのwarningとerrorを確認する
+2. `npot`と`pcfsoft`を検索し、新しい設定へ置き換える
+3. desktopの通常表示でモデル、画像、shadow、cursorを確認する
+4. Quest実機で左右入力、ハンド切り替え、再接続を確認する
+5. Layers対応・非対応の両経路でXRセッションを開始する
+6. 独自コンポーネントが利用するthree.js APIを確認する
+7. 低速回線でモデルの差し替えと読み込み失敗後の再試行を確認する
+
+WebXRコンテンツでは、ブラウザの開発者ツールだけで見つからない問題もあります。入力の向き、左右の取り違え、レイヤーのフォールバックは、最終的にヘッドセットで確認する必要があります。
+
+## まとめ
+
+A-Frame 1.8.0は、派手な新機能よりも、WebXRコンテンツの安定運用に効く修正が中心です。
+
+- three.jsがr184へ更新された
+- `gltf-model`と画像読み込みの競合やキャッシュが改善された
+- Questのコントローラー、hand-controls、cursorが修正された
+- WebXR Layersをoptionalに扱い、非対応環境へフォールバックしやすくなった
+- `npot`と`pcfsoft`は新しい設定へ移行が必要
+
+とくにQuest向けの入力を使うコンテンツや、quad layerを利用するUI・動画体験では、更新する価値があります。一方で、three.jsの更新と廃止設定も含まれるため、バージョンだけを差し替えるのではなく、入力、モデル、material、Layersの順に確認するのがおすすめです。
+
+## 関連リンク
+
+- [A-Frame 1.8.0公式ブログ](https://aframe.io/blog/aframe-v1.8.0/)
+- [A-Frame v1.8.0リリースノート](https://github.com/aframevr/aframe/releases/tag/v1.8.0)
+- [A-Frame CHANGELOG](https://github.com/aframevr/aframe/blob/master/CHANGELOG.md)
+- [three.js Migration Guide](https://github.com/mrdoob/three.js/wiki/Migration-Guide)
+- [8th Wall OSS版とA-FrameでWorld Effectsを作る](/tech-articles/8thwall-world-effects)
