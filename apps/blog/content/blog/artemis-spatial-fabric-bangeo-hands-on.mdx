@@ -1,0 +1,290 @@
+---
+title: "Artemisで自分のブログを開いてみた──BANGEOにSpatial Fabricを置く"
+description: "通常のブログURLではエラーになったArtemis。そこでBANGEOの配信環境にSpatial Fabricを用意し、自作の3D空間を表示してJWS署名済みの.msfまで試しました。"
+date: "2026年7月19日"
+category: "GUIDE"
+tags:
+  - "Artemis"
+  - "Spatial Fabric"
+  - "Sneeze"
+  - "RP1"
+  - "Blender"
+  - "WebAssembly"
+  - "JWS"
+author: "BANGEO Team"
+thumbnail: "/assets/tech/bangeo-spatial-fabric-preview.webp"
+draft: false
+---
+
+前回、ネイティブメタバースブラウザ「Artemis」をダウンロードして、試しにBANGEOのURLを入力してみました。
+
+結果はエラーでした。
+
+通常のBANGEOはHTMLを返すWebサイトです。一方、Artemisが開こうとしているのは、3D空間を記述した**Spatial Fabric**です。HTMLをSpatial Fabricとして読み込もうとしたため、シーンを構築できなかったと考えられます。
+
+ここまで調べると、次に試したくなることは単純でした。
+
+> それなら、自分のブログにSpatial Fabricを置けば、Artemisから開けるのでは？
+
+ということで、実際にBANGEOのSpatial Fabricを作ってみました。
+
+## 先に結果：ArtemisでBANGEOの3D空間が開いた
+
+BANGEOの配信環境にFabric JSON、WASM、GLBを置く構成を作り、Artemis v0.3.0へURLを入力すると、自作したBANGEOの3D空間が表示されました。
+
+![Artemis v0.3.0で署名済みのBANGEO Spatial Fabricを表示した画面](/assets/tech/bangeo-spatial-fabric-artemis-signed.webp)
+
+さらに、Fabric JSONをJWSで署名した`.msf`からも、同じ空間を表示できました。
+
+前回は「BANGEOを入力したらエラーになった」状態でしたが、今回はArtemisが読める入口をブログ側に用意したことで、実際に自分の3Dコンテンツを開けました。
+
+ただし、ブログ記事のHTMLがそのまま3Dになったわけではありません。通常のWebサイトとSpatial Fabricを、同じBANGEOの配信環境に並べて置いた形です。
+
+## 前回分かったこと
+
+前回の記事では、Artemis v0.3.0、Sneeze、Spatial Fabric、`.msf`のJWS署名について整理しました。
+
+- [ネイティブメタバースブラウザ「Artemis」v0.3.0公開──Spatial FabricとJWS署名を整理](/tech-articles/artemis-native-metaverse-browser-v030)
+
+そこで重要だったのは、通常のWebサイトを入力したときのエラーを、すぐに「証明書や署名がないから」と判断しないことです。
+
+BANGEOのトップページや記事URLが返すのはHTMLです。Artemisが必要としているのは、Fabric JSONまたはJWS署名済みの`.msf`です。まず返しているデータの形式が違います。
+
+今回は、通常のブログを残したまま、Artemis用のSpatial Fabricを別のURLに追加します。
+
+## ブログの中にSpatial Fabricの入口を作る
+
+BANGEOの公開ディレクトリへ、次のファイルを追加しました。
+
+```text
+public/spatial/bangeo/
+├─ bangeo.json
+├─ bangeo-test.msf
+├─ assets/
+│  └─ bangeo-spatial-guide-v3.glb
+└─ wasm/
+   └─ map.wasm
+```
+
+| ファイル | 役割 |
+| --- | --- |
+| `bangeo.json` | 空間、ライト、WASM、GLBの参照を記述するFabric JSON |
+| `bangeo-test.msf` | `bangeo.json`をJWSで署名したテスト用Spatial Fabric |
+| `bangeo-spatial-guide-v3.glb` | BANGEOの看板、マスコット、台座をまとめた3Dアセット |
+| `map.wasm` | Sneeze公式サンプルを基にした最小構成のマップモジュール |
+
+この記事と一緒にデプロイすると、次のように通常のWeb記事とSpatial Fabricが同じドメインに並びます。
+
+```text
+https://www.bangeo.net/tech-articles/...
+  └─ 人が通常のWebブラウザで読むHTML記事
+
+https://www.bangeo.net/spatial/bangeo/bangeo.json
+https://www.bangeo.net/spatial/bangeo/bangeo-test.msf
+  └─ Artemisが読み込むSpatial Fabric
+```
+
+この構成なら、既存のブログを作り直す必要はありません。Webブラウザ向けのHTMLと、メタバースブラウザ向けのSpatial Fabricを、それぞれのURLで配信できます。
+
+## Fabric JSONからWASMとGLBを参照する
+
+今回作った`bangeo.json`の中心部分は次のとおりです。
+
+```json
+{
+  "Container": "bangeo-spatial-guide",
+  "Services": [],
+  "Modules": [
+    {
+      "sUrl": "wasm/map.wasm",
+      "sHash": "sha256-a7b9b03a6bf7e88a3cd3dd65fff6dae263f7c8ad61864dbd6aedcadfbcf66718"
+    }
+  ],
+  "Primary": {
+    "Ambient": {
+      "fBrightness": 0.2,
+      "fColor": "0xDDEEFF"
+    },
+    "Directional": {
+      "fBrightness": 0.9,
+      "fColor": "0xFFFFFF",
+      "Rotation": [0.0, 0.5808, 0.6663, 0.468]
+    }
+  },
+  "Data": {
+    "Scene": {
+      "Head": { "Self": "P-?" },
+      "Name": "BANGEO Spatial Guide",
+      "Resource": {
+        "sReference": "assets/bangeo-spatial-guide-v3.glb"
+      }
+    }
+  }
+}
+```
+
+`Modules`から`map.wasm`を読み込み、`Data.Scene.Resource`からBANGEOのGLBを読み込みます。
+
+どちらも相対URLです。`bangeo.json`を起点に、`wasm/`と`assets/`以下のファイルが解決されます。JSONだけを移動すると参照先も変わるため、ディレクトリ構成ごと公開する必要があります。
+
+`sHash`には、取得する`map.wasm`のSHA-256を指定しています。JWS署名とは別に、実際に読み込んだWASMが指定された内容と一致するかを確認するための値です。
+
+## BANGEOの3DアセットをBlenderで作る
+
+Spatial Fabricから表示するGLBはBlenderで作成しました。
+
+![Blenderで作成したBANGEO Spatial Fabric用の3Dアセット](/assets/tech/bangeo-spatial-fabric-preview.webp)
+
+BANGEOのVRマスコットを配置した看板、円形の台座、発光リング、立体文字を1つのGLBにまとめています。マスコットの画像もGLBへ埋め込んだため、Artemis側で別の画像URLを追加取得する必要はありません。
+
+実際に試してみると、Fabric JSONを書くことよりも3Dモデルの見え方を合わせる作業に時間がかかりました。
+
+- 最初のカメラ位置では看板がほぼ側面から見えた
+- BlenderとglTFの向きによって立体文字が左右反転した
+- モデルが大きすぎて画面に収まらなかった
+- 同じGLB URLを使うと、調整前の表示が残ることがあった
+
+モデルの向き、表裏、スケールを調整し、GLB名に版番号を付けて再読み込みすると、意図した状態で表示できました。
+
+これは署名やSSL/TLSの問題ではなく、3Dモデルとカメラの座標系、キャッシュによる表示上の問題です。Fabricの形式エラーとは分けて確認する必要があります。
+
+## ArtemisへURLを入力する
+
+まず、BANGEOのローカル開発サーバーから未署名JSONを配信しました。
+
+```text
+http://127.0.0.1:3000/spatial/bangeo/bangeo.json
+```
+
+Artemisへ入力すると、Fabric JSON、WASM、GLBが順番に読み込まれ、BANGEOの空間が表示されました。
+
+Artemisではマウスドラッグで空間の周囲を回り、ホイールで距離を調整できます。最初は側面が見えていましたが、回り込むと看板の正面を確認できました。
+
+## Inspectorで本当に読み込めたか確認する
+
+Artemisで`F12`を押すと、組み込みのInspectorを開けます。
+
+![Artemis InspectorでFabric JSON、WASM、GLBがすべてHTTP 200になっている画面](/assets/tech/bangeo-spatial-fabric-inspector.webp)
+
+Networkには次の3ファイルが表示され、すべてHTTP 200になっていました。
+
+| Name | Status | Type |
+| --- | --- | --- |
+| `bangeo.json` | 200 | `application/json` |
+| `map.wasm` | 200 | `application/wasm` |
+| `bangeo-spatial-guide-v3.glb` | 200 | `model/gltf-binary` |
+
+Originsには`Sneeze/Root`と`/bangeo-spatial-guide`が表示されています。
+
+画面に3Dモデルが出ただけでなく、BANGEOの配信環境からFabric、実行モジュール、3Dアセットを取得し、Artemis内で1つの空間として構築できたことを確認できました。
+
+## JWS署名した`.msf`も試す
+
+未署名JSONで表示できた後、Artemis内蔵コマンドを使って`.msf`を作りました。
+
+```powershell
+Artemis.exe --sign `
+  --payload bangeo.json `
+  --key provider-key.pem `
+  --cert provider-cert.pem `
+  --out bangeo-test.msf
+```
+
+続けて、テストCAをTrust Anchorとして検証します。
+
+```powershell
+Artemis.exe --verify bangeo-test.msf --trust ca-cert.pem
+```
+
+結果は`Signature: VERIFIED`になりました。
+
+```text
+Algorithm:   RS256
+Fingerprint: 482cda4c2b6c2a81f46a39ec4232f140b24b439dba4b6040b4b7610506c490b7
+Signature:   VERIFIED
+
+Subject: C = US, O = Test Provider Inc., CN = Test Provider
+Issuer:  C = US, O = OMBI Test CA, CN = OMBI Test Root CA
+```
+
+署名済みファイルもローカルサーバーから配信し、Artemisへ入力しました。
+
+```text
+http://127.0.0.1:3000/spatial/bangeo/bangeo-test.msf
+```
+
+こちらも未署名JSONと同じBANGEO空間を表示できました。
+
+今回使ったのはSneeze公式リポジトリにある公開テスト証明書です。`Test Provider`による検証用署名であり、BANGEOの正式な公開者IDを証明するものではありません。テスト用秘密鍵はリポジトリへ追加せず、署名後に作業用ディレクトリから削除しました。
+
+## `.msf`のContent-Typeには注意
+
+ローカルサーバーでは、`.msf`が汎用MIMEデータベースによって`application/vnd.epson.msf`として返されていました。これは別用途の形式に割り当てられた値で、Spatial Fabricを意味するものではありません。
+
+Artemis v0.3.0は今回のファイルを内容から読み込めましたが、この自動判定には依存しない方がよさそうです。
+
+現在の`.msf`はJWS Compact Serializationなので、[RFC 7515](https://www.rfc-editor.org/rfc/rfc7515.html)に登録されている`application/jose`が内容に合うMIME型です。本番配信ではRP1 / Sneeze側の最新の指定も確認したうえで、レスポンスヘッダーを明示的に設定します。
+
+## 「ブログをArtemisで開けた」とはどういうことか
+
+今回の結果を整理すると、BANGEOの記事ページ自体をArtemisが表示したわけではありません。
+
+```text
+BANGEO
+├─ HTMLの記事 ───────── 通常のWebブラウザで読む
+└─ Spatial Fabric ──── Artemisで3D空間として開く
+```
+
+同じドメインの中に、Webブラウザ用とメタバースブラウザ用の入口を用意しました。
+
+この形は、通常のWebサイトを捨ててメタバース専用サイトへ作り直すものではありません。記事、検索、リンク、画像などは今までどおりWebで公開しながら、必要な場所に3D空間のURLを追加できます。
+
+前回、通常のBANGEO URLで表示できなかったことも無駄ではありませんでした。HTMLを返すURLとSpatial Fabricを返すURLを分ける必要があると分かったからこそ、今回の構成につながりました。
+
+## デプロイ後に試すURL
+
+この記事とSpatial Fabric一式をBANGEOへデプロイした後は、次のURLをArtemisへ入力して確認できます。
+
+- `https://www.bangeo.net/spatial/bangeo/bangeo.json`
+- `https://www.bangeo.net/spatial/bangeo/bangeo-test.msf`
+
+`bangeo-test.msf`は公開テスト証明書による検証用です。正式なBANGEO Spatial Fabricとして案内する前に、本番用の署名証明書と秘密鍵の管理方法を決める必要があります。
+
+## 次に試したいこと
+
+今回は、BANGEOの看板を表示する最小のSpatial Fabricまで作れました。
+
+次は次の順で進める予定です。
+
+1. BANGEOへデプロイし、外部のHTTPS URLからArtemisで再確認する
+2. `.msf`へ適切なContent-Typeを設定する
+3. 本番用の署名証明書と秘密鍵の管理方法を確認する
+4. RP1 Developer CenterへFabricのエンドポイントと空間座標を登録する
+5. 複数のFabric、インタラクション、ネットワークサービスを試す
+
+## まとめ
+
+前回、Artemisへ通常のブログURLを入力したときはエラーになりました。
+
+そこでBANGEOの配信環境にSpatial Fabric用のURLを追加したところ、自作したBANGEOの3D空間をArtemisで表示できました。未署名JSONだけでなく、JWS署名済みの`.msf`からも同じ空間を開けています。
+
+- 通常のHTMLとSpatial Fabricは別のURLで配信する
+- Fabric JSONからWASMとGLBを相対URLで読み込める
+- Inspectorで3ファイルのHTTP 200を確認できた
+- 3Dモデルの向き、表裏、スケール、キャッシュにも調整が必要だった
+- ArtemisのコマンドでJWS署名と検証を実行できた
+- テスト署名はBANGEOの本番公開者署名ではない
+
+「Artemisとは何なのか」を調べるところから始まり、今回は自分のブログにArtemis用の入口を作るところまで進みました。
+
+通常のWebブラウザで記事を読み、メタバースブラウザで同じサイトの3D空間へ入る。まだ最小のサンプルですが、オープンなSpatial Internetがどのような構成になるのか、少し具体的に見えてきました。
+
+## 参考リンク
+
+- [BANGEO：Artemis v0.3.0とSpatial Fabric・JWS署名を整理](/tech-articles/artemis-native-metaverse-browser-v030)
+- [Sneeze：A Simple Stool](https://omb.wiki/sneeze/examples/01-stool)
+- [Sneeze：Publishing a Signed Spatial Fabric](https://omb.wiki/sneeze/examples/03-signing)
+- [Sneeze GitHub Repository](https://github.com/MetaverseStandards/Sneeze)
+- [RFC 7515：JSON Web Signature（JWS）](https://www.rfc-editor.org/rfc/rfc7515.html)
+- [RP1：Developers](https://rp1.com/devs)
+- [RP1 Developer Center](https://dev.rp1.com/)
