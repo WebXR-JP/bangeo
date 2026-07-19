@@ -1,0 +1,247 @@
+---
+title: "ネイティブメタバースブラウザ「Artemis」v0.3.0公開──Spatial FabricとJWS署名を整理"
+description: "Artemis v0.3.0を実際に試し、通常のWebサイトがSpatial Fabricとして読み込めない理由、公式.msfの参照構造、JWS署名とHTTPS証明書の違いを整理します。"
+date: "2026年7月19日"
+category: "NEWS"
+tags:
+  - "Artemis"
+  - "RP1"
+  - "Sneeze"
+  - "OMBI"
+  - "Spatial Web"
+  - "WebAssembly"
+  - "JWS"
+author: "BANGEO Team"
+thumbnail: "/assets/news/artemis-native-metaverse-browser-v030.webp"
+draft: false
+---
+
+RP1は2026年7月16日、ネイティブのメタバースブラウザ「**Artemis**」v0.3.0を公開しました。Windows、macOS、Linux向けに配布されている初期プレビュー版です。
+
+Artemisは、通常のWebブラウザがHTMLのWebページを開くのに対して、ネットワーク上の3D空間である「**Spatial Fabric**」を開くためのブラウザです。RP1はArtemisを「世界初のネイティブメタバースブラウザ」と位置づけています。
+
+![RP1のArtemis紹介ページ。ArtemisのロゴとGet Artemisボタンが表示されている](/assets/news/artemis-native-metaverse-browser-v030.webp)
+
+Artemis v0.3.0で通常のWebサイト、公式のSpatial Fabric、RP1のWebXRデモを確認すると、3つは異なる仕組みで動いていることが分かります。
+
+この記事では、それぞれの挙動をもとに、Artemisが何を開くブラウザなのか、通常のWebサイトがなぜ読み込めないのか、`.msf`ファイルに含まれるJWS署名は何を保証するのか、既存のWebサイトとは別にSpatial Fabricを公開するには何が必要なのかを整理します。
+
+## ArtemisとSneezeの関係
+
+Artemisは、オープンソースのメタバースブラウザエンジン「**Sneeze**」を搭載したブラウザアプリケーションです。
+
+関係をWebブラウザにたとえると、SneezeはBlink、WebKit、Geckoのようなレンダリングエンジン側、Artemisはそのエンジンを組み込んだブラウザ製品側にあたります。
+
+| 名前 | 役割 |
+| --- | --- |
+| OMBI | Open Metaverse Browser Initiative。オープンなメタバースブラウザに必要な標準や設計を進める取り組み |
+| Sneeze | Spatial Fabricを読み込み、3D空間を構築・実行・保護するオープンソースのブラウザエンジン |
+| Artemis | Sneezeを搭載し、ユーザーがSpatial Fabricを開くためのネイティブブラウザ |
+| RP1 | Artemisと、Spatial Fabricを接続する空間インターネット基盤を開発する企業 |
+
+Sneezeの設計やWebXRとの違いについては、[Sneeze（Open Metaverse Browser Engine）とは？WebXRとの違いを整理](/tech-articles/sneeze-open-metaverse-browser-engine)でも詳しく紹介しています。
+
+## Artemis v0.3.0で現在できること
+
+公式リリース情報では、v0.3.0はArtemisの3回目のリリースです。複数のタブやウィンドウを開く機能、`F12`で表示する開発者向けInspector、Spatial Fabricの署名・検証、オートアップデートなどが案内されています。
+
+v0.2.0からの主な変更は次のとおりです。
+
+- macOS・Linux向けの不具合修正
+- Inspector内にGLBビューアの初期実装を追加
+- Spatial Fabricファイルの読み込み方法を更新
+- WASMとエンジンの接続方法を更新
+- WASMプログラムから使うエンジンAPIのRust crateを追加
+
+![Artemis v0.3.0のRelease Notes。現在できることと制限事項が表示されている](/assets/news/artemis-v030-release-notes.webp)
+
+一方で、まだ完成した一般向けブラウザではありません。公式リリースノートでは、次の制限も明記されています。
+
+- Spatial Fabricの形式はv1.0.0まで安定版とはみなされない
+- 現在のDiscoveryはアドレス入力が中心で、近接ベースの発見はロードマップ段階
+- ネットワーク接続機能は開発中
+- OpenXR経由のVR・ARは、このビルドではまだ利用できない
+- 空間内のラベルやHUD、Fabric制作ツールも開発途中
+
+2026年7月時点のArtemisは、「完成したメタバースプラットフォーム」というより、Spatial Fabricをブラウザで開く仕組みを実際に検証できる初期プレビューと見るのが適切です。
+
+## BANGEOのURLを入れると、3D空間にエラーが出た
+
+Artemisのアドレス欄へ通常のWebサイトであるBANGEOのURLを入力すると、Spatial Fabricの読み込みエラーが表示されます。
+
+画面には「This fabric couldn't load」と表示され、返された内容によっては「Failed to parse MSF」と表示される場合もあります。興味深いのは、エラー画面も通常のダイアログではなく、黒い3D空間の中にパネルとして配置されることです。
+
+![ArtemisでBANGEOのURLを入力し、Spatial Fabricを読み込めないエラーが3D空間に表示された画面](/assets/news/artemis-bangeo-invalid-fabric-error.webp)
+
+この結果は、Artemisからサイトへ到達できないというより、返されたHTMLをMetaverse Spatial Fabricとして解釈できなかった状態と考えられます。通常のWebサイトをHTTPSで公開しているだけでは、Artemis対応にはなりません。
+
+少なくとも、Artemisが読めるFabric JSONまたは`.msf`を用意し、そこからWASM、GLB、画像などの関連ファイルを取得できる構成が必要です。
+
+## Spatial Fabricは「3D版Webページ」に近い
+
+Artemisが開くのはHTMLではなく、Spatial Fabricです。
+
+Spatial Fabricは、3Dオブジェクト、ライト、座標、WASMモジュール、ネットワークサービスなどを組み合わせて空間を記述します。GLBなどの3Dアセットや`map.wasm`のようなプログラムを別ファイルとして参照し、ブラウザがそれらを読み込んでシーンを構築します。
+
+公式のサンプルFabricである[`artemis.msf`](https://cdn.rp1.com/fabric/artemis.msf)をArtemisで開くと、太陽と惑星の軌道を配置したデモ空間が表示されます。
+
+![Artemisで公式のartemis.msfを開き、太陽系のSpatial Fabricを表示している画面](/assets/news/artemis-solar-system-fabric.webp)
+
+実際に読み込みを追うと、1つの`.msf`だけで完結するのではなく、次のように複数のFabricがつながっていました。
+
+```text
+artemis.msf（太陽系）
+└─ earth-system.msf（地球と月）
+   └─ artemis-logo.msf（Artemisロゴ）
+```
+
+`artemis.msf`は各惑星のJPEG・PNG画像と`wasm/map.wasm`を参照します。`earth-system.msf`も地球・月の画像と`map.wasm`を読み込み、さらに`artemis-logo.msf`がArtemisロゴのGLBモデルとWASMを読み込みます。
+
+つまりSpatial Fabricは、3Dモデルを1ファイルにまとめた形式ではありません。シーン定義を起点に、別のFabric、実行コード、3Dモデル、画像をネットワーク越しに組み合わせる構造です。
+
+ここで重要なのは、通常のWebサイトのURLをそのまま入力してもSpatial Fabricにはならないことです。
+
+通常のWebサイトのトップページはHTMLを返します。Artemisが必要としているのは、Fabricを記述したJSON、または署名済みの`.msf`ファイルです。そのため、通常のサイトURLでシーンを読み込めない場合、原因を「署名されていないから」とは限りません。返されたデータがそもそもSpatial Fabric形式ではない可能性を先に確認する必要があります。
+
+## `.msf`ファイルは何なのか
+
+`.msf`は、**Metaverse Spatial Fabric**の公開用ファイルです。Metaverse Standards Forumも略称がMSFなので紛らわしいのですが、ファイル拡張子の`.msf`はSpatial Fabricの署名済みパッケージを指します。
+
+中身はバイナリの3Dモデルではなく、現在のサンプルではJWS（JSON Web Signature）のCompact Serializationです。長い文字列がピリオドで3つの部分に分かれています。
+
+```text
+BASE64URL(header).BASE64URL(payload).BASE64URL(signature)
+```
+
+- `header`: 署名アルゴリズムと証明書チェーン
+- `payload`: Spatial FabricのJSONデータ
+- `signature`: 秘密鍵で作成した電子署名
+
+通常のブラウザやテキストエディタで`.msf`を開くと、`eyJhbGci...`から始まる長い文字列に見えることがあります。これは壊れているのではなく、JWSとしてエンコードされた内容をそのまま表示している状態です。Artemisはこの文字列を検証し、payloadから3D空間を構築します。
+
+![artemis.msfをテキストとして開き、JWS Compact Serializationの長い文字列が表示された画面](/assets/news/artemis-msf-jws-compact.webp)
+
+## JWS署名は誰が作るのか
+
+Spatial Fabricの署名者は、基本的にそのFabricの公開者です。
+
+署名には次の3つを使用します。
+
+1. 署名を作成する秘密鍵
+2. 公開鍵と公開者の情報を含むリーフ証明書
+3. リーフ証明書を信頼済みの認証局へつなぐ証明書チェーン
+
+Artemisには署名と検証のコマンドが組み込まれています。
+
+```powershell
+Artemis.exe --sign --payload fabric.json --key provider-key.pem --cert provider-cert.pem --chain ca-cert.pem --out fabric.msf
+Artemis.exe --verify fabric.msf --trust ca-cert.pem
+```
+
+公式サンプルのJWSヘッダーには、`RS256`とX.509証明書チェーンを格納する`x5c`が含まれています。リーフ証明書のSubjectは`Test Provider`、発行者は`OMBI Test Root CA`です。
+
+これはサンプル用のテスト証明書であり、RP1やMetaversal Corporationの本番用署名を意味するものではありません。実際にFabricを公開する場合は、公開者が自分の証明書と秘密鍵を用意します。
+
+## JWS署名とHTTPS証明書は役割が違う
+
+ここは混同しやすい部分です。
+
+| 仕組み | 主に保証するもの |
+| --- | --- |
+| HTTPS/TLS証明書 | 接続先サーバーのドメインと、通信経路の暗号化 |
+| `.msf`のJWS署名 | Fabricを署名した公開者と、payloadが署名後に変更されていないこと |
+| WASMの`sha256`ハッシュ | 別途取得したWASMモジュールが、Fabricで指定された内容と一致すること |
+
+Developer Centerでは「SSL certificate」と表記されていますが、現在の一般的な技術用語ではHTTPSに使うTLS証明書のことです。これは公開URLへ安全に接続するために必要です。
+
+一方、`.msf`のJWS署名はFabricそのものに付ける署名です。同じX.509証明書の仕組みを利用しますが、HTTPSサーバーの秘密鍵をそのままFabric署名に流用することを前提にはしない方が安全です。Fabric署名専用の鍵を分離して管理する方が、漏えい時の影響範囲や更新作業を整理しやすくなります。
+
+Sneezeの公式チュートリアルでは、本番公開の方法として、OSが信頼する公開認証局から証明書を取得する方法と、組織内向けに独自CAを作り利用者のTrust Storeへ登録する方法が説明されています。
+
+## 現在は未署名だから即ブロックされるわけではない
+
+Sneezeの署名チュートリアルによると、現在のブラウザはFabricのTrust Levelを計算して表示しますが、未署名または信頼されていないことだけを理由に読み込みを拒否する段階にはなっていません。
+
+そのため、現在のエラーを調べるときは次の順で考えると整理しやすくなります。
+
+1. URLがHTMLではなくFabric JSONまたは`.msf`を返しているか
+2. Fabric内のWASM・GLBなどの相対URLが解決できるか
+3. ファイル形式が現在のArtemisに対応しているか
+4. WASMに指定したハッシュが実ファイルと一致するか
+5. JWS署名と証明書チェーンを検証できるか
+
+署名は今後のTrust Enforcementに備えるためにも重要ですが、「現在ロードできない理由」と「公開者の信頼性を証明する仕組み」は分けて考える必要があります。
+
+## BANGEOでSpatial Fabricを公開する5段階
+
+既存サイトとは別にSpatial Fabricを公開する手順は、次の5段階に整理できます。
+
+1. まず未署名のFabric JSONで、最小のBANGEO空間を表示する
+2. 検証専用のテスト証明書を用意し、署名と検証の流れを確認する
+3. 公開用の証明書と秘密鍵の管理方法を整える
+4. Artemisの`--sign`と`--verify`で`.msf`を作成・検証する
+5. `.msf`、WASM、GLB、画像をBANGEOのHTTPS環境から配信する
+
+最初から署名、Developer登録、RP1接続をすべて同時に進めると、形式エラー、相対URL、ハッシュ、証明書チェーンのどこで失敗したか分かりにくくなります。まず未署名JSONでシーンを表示し、その後に署名と公開者情報を加える順番が切り分けやすいでしょう。
+
+テスト用の秘密鍵や証明書を本番公開へ流用してはいけません。検証用と公開用の鍵を分け、秘密鍵をWebサーバーの公開ディレクトリへ置かないことも重要です。
+
+## RP1のDevelopers登録は何のためにあるのか
+
+[RP1のDevelopersページ](https://rp1.com/devs)には、Spatial Fabricを自分でホストし、RP1のUniversal Fabricへ接続するための導線があります。
+
+[Developer Center](https://dev.rp1.com/)では、全体の流れが次のように説明されています。
+
+1. 自分のMetaverse Serverを運用する
+2. Spatial Fabricを作成する
+3. Fabricのエンドポイントと空間座標を登録し、RP1のFabricへ接続する
+4. オープン標準対応ブラウザからアクセスできるようにする
+
+Developer Centerの案内では、Metaverse Serverの運用環境、Spatial Fabricを配信する公開URLとSSL/TLS証明書、RP1 Developer登録が接続準備として挙げられています。サーバー構成例ではNode.jsやMySQLも使われますが、Artemisで単体のFabricを試すことと、RP1のUniversal Fabricへサービスを接続することは分けて考える必要があります。個人開発者も登録できますが、活動情報の入力とDeveloper Termsへの同意が必要です。
+
+ただし、Developer登録、HTTPS/TLS、`.msf`のJWS署名はそれぞれ別の役割です。
+
+- Developer登録: RP1上で公開者とFabricの接続情報を管理する
+- HTTPS/TLS: Fabricや関連ファイルを安全な公開URLから配信する
+- JWS署名: Fabricの公開者と改ざんの有無を検証する
+
+Developerページには、登録時にFabric署名用証明書が自動発行されるとは明記されていません。署名用の証明書については、Sneezeの署名仕様とDeveloper Centerの案内を分けて確認する必要があります。
+
+## RP1のWebXRデモとは別のレイヤー
+
+RP1のサイトでは、[`enter.rp1.com`](https://enter.rp1.com/)からブラウザ上で動くWebXRデモも公開されています。都市空間に入り、マイクや参加者UIを使う体験は、RP1が目指す大規模な共有空間のイメージを確認する入口になります。
+
+![RP1のWebXR Demoで都市の3D空間を表示している画面](/assets/news/rp1-webxr-city-demo.webp)
+
+WebXRデモでは、同じ空間にいる参加者の音声が聞こえる場合があります。マイクの状態と音量を確認してから入ると安心です。
+
+ただし、このWebXRデモとArtemisは同じものではありません。WebXRデモは既存のWebブラウザ上で動く体験で、ArtemisはSneezeを搭載してSpatial Fabricを開くネイティブアプリです。
+
+WebXRがWebページからXRデバイスへアクセスするAPIであるのに対して、Artemis / Sneezeは、独立した空間サービスやアセットを発見・検証・合成するブラウザ基盤を目指しています。競合というより、空間インターネットを異なるレイヤーから扱う技術と見ると理解しやすくなります。
+
+## まとめ
+
+Artemis v0.3.0は、オープンなSpatial Webという構想を、実際にURLから3D空間を開くブラウザとして触れる段階まで進めた初期プレビューです。
+
+- ArtemisはSneezeを搭載したネイティブメタバースブラウザ
+- HTMLページではなくSpatial Fabricを開く
+- 通常のWebサイトを入力すると、HTMLをMSFとして解析できずエラーになる
+- 正しいFabricは別のFabric、WASM、GLB、画像を連鎖的に読み込む
+- `.msf`はFabric JSONをJWSで署名した公開形式
+- HTTPS/TLSとJWS署名は、保護する対象と役割が異なる
+- 現時点では未署名という理由だけでFabricが拒否されるわけではない
+- RP1 Developer登録は、Fabricのエンドポイントと空間座標をRP1へ接続するための導線
+- Fabric形式、ネットワーク、VR・AR、制作ツールはまだ開発途中
+
+通常サイトを入力したときの失敗例と、公式Fabricが複数の空間・コード・アセットを読み込む成功例を比べると、Artemis対応に必要な構成が見えてきます。最小の未署名FabricをHTTPSで配信し、Artemisでの表示を確認してからJWS署名とRP1接続へ進むのがよいでしょう。
+
+## 参考リンク
+
+- [RP1：Artemis](https://rp1.com/artemis)
+- [Artemis Release Manifest](https://cdn.rp1.com/artemis/manifest.json)
+- [Artemis公式サンプルFabric](https://cdn.rp1.com/fabric/artemis.msf)
+- [Sneeze Documentation](https://omb.wiki/sneeze)
+- [Publishing a Signed Spatial Fabric](https://omb.wiki/sneeze/examples/03-signing)
+- [RP1：Developers](https://rp1.com/devs)
+- [RP1 Developer Center](https://dev.rp1.com/)
+- [Open Metaverse Browser Initiative（OMBI）](https://metaverse-standards.org/open-metaverse-browser-initiative/)
