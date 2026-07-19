@@ -26,6 +26,11 @@ Artemis v0.3.0で通常のWebサイト、公式のSpatial Fabric、RP1のWebXR�
 
 この記事では、それぞれの挙動をもとに、Artemisが何を開くブラウザなのか、通常のWebサイトがなぜ読み込めないのか、`.msf`ファイルに含まれるJWS署名は何を保証するのか、既存のWebサイトとは別にSpatial Fabricを公開するには何が必要なのかを整理します。
 
+> **この記事は前後編の前編です。**
+>
+> - **前編（この記事）**：Artemis、Spatial Fabric、JWS署名の仕組みを整理
+> - **後編**：[Artemisで自分のブログを開いてみた──BANGEOにSpatial Fabricを置く](/tech-articles/artemis-spatial-fabric-bangeo-hands-on)
+
 ## ArtemisとSneezeの関係
 
 Artemisは、オープンソースのメタバースブラウザエンジン「**Sneeze**」を搭載したブラウザアプリケーションです。
@@ -234,6 +239,14 @@ Artemis v0.3.0は、オープンなSpatial Webという構想を、実際にURL�
 - Fabric形式、ネットワーク、VR・AR、制作ツールはまだ開発途中
 
 通常サイトを入力したときの失敗例と、公式Fabricが複数の空間・コード・アセットを読み込む成功例を比べると、Artemis対応に必要な構成が見えてきます。最小の未署名FabricをHTTPSで配信し、Artemisでの表示を確認してからJWS署名とRP1接続へ進むのがよいでしょう。
+
+## 続編：BANGEOのSpatial Fabricを実際に作る
+
+この記事では「通常のBANGEO URLをArtemisへ入力すると、HTMLをSpatial Fabricとして解釈できずエラーになる」ところまで確認しました。
+
+続編では、BANGEOの配信環境にFabric JSON、WASM、GLBを追加し、自作の3D空間をArtemisで表示します。未署名JSONだけでなく、JWS署名済みの`.msf`を作成・検証して開くところまで実際に試しています。
+
+**[後編「Artemisで自分のブログを開いてみた」を読む](/tech-articles/artemis-spatial-fabric-bangeo-hands-on)**
 
 ## 参考リンク
 
