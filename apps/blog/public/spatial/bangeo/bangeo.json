@@ -1,0 +1,32 @@
+{
+	"Container": "bangeo-spatial-guide",
+	"Services": [],
+	"Modules": [
+		{
+			"sUrl": "wasm/map.wasm",
+			"sHash": "sha256-a7b9b03a6bf7e88a3cd3dd65fff6dae263f7c8ad61864dbd6aedcadfbcf66718"
+		}
+	],
+	"Primary": {
+		"Ambient": {
+			"fBrightness": 0.2,
+			"fColor": "0xDDEEFF"
+		},
+		"Directional": {
+			"fBrightness": 0.9,
+			"fColor": "0xFFFFFF",
+			"Rotation": [0.0, 0.5808, 0.6663, 0.468]
+		}
+	},
+	"Data": {
+		"Scene": {
+			"Head": {
+				"Self": "P-?"
+			},
+			"Name": "BANGEO Spatial Guide",
+			"Resource": {
+				"sReference": "assets/bangeo-spatial-guide-v3.glb"
+			}
+		}
+	}
+}
