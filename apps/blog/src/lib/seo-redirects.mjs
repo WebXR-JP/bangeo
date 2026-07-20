@@ -17,7 +17,13 @@ export function buildExperimentDemoRedirects() {
 
 	const demoSlugs = fs
 		.readdirSync(demosDir, { withFileTypes: true })
-		.filter((d) => d.isDirectory())
+		.filter(
+			(d) =>
+				d.isDirectory() &&
+				["index.html", "app.html", "demo.html"].some((file) =>
+					fs.existsSync(path.join(demosDir, d.name, file)),
+				),
+		)
 		.map((d) => d.name);
 
 	return demoSlugs
@@ -52,13 +58,48 @@ export const LEGACY_REDIRECTS = [
 		permanent: true,
 	},
 	{
-		source: "/experiments/vr-sanpo",
-		destination: "/experiments",
+		source: "/experiments/depth-sensing",
+		destination: "/experiments/quest-depth-projection-box",
 		permanent: true,
 	},
 	{
-		source: "/experiments/depth-sensing",
-		destination: "/experiments",
+		source: "/experiments/body-tracking",
+		destination: "/experiments/webxr-body-tracking",
+		permanent: true,
+	},
+	{
+		source: "/demos/body-tracking/:path*",
+		destination: "/experiments/webxr-body-tracking",
+		permanent: true,
+	},
+	{
+		source: "/experiments/real-world-mesh-occlusion",
+		destination: "/experiments/xr-mesh-export",
+		permanent: true,
+	},
+	{
+		source: "/demos/real-world-mesh-occlusion/:path*",
+		destination: "/experiments/xr-mesh-export",
+		permanent: true,
+	},
+	{
+		source: "/experiments/hand-haptics",
+		destination: "/demos/haptics-pulse",
+		permanent: true,
+	},
+	{
+		source: "/demos/hand-haptics/:path*",
+		destination: "/demos/haptics-pulse",
+		permanent: true,
+	},
+	{
+		source: "/experiments/webgpu-xr-integration",
+		destination: "/experiments/webgpu-fallback-lab",
+		permanent: true,
+	},
+	{
+		source: "/demos/webgpu-xr-integration/:path*",
+		destination: "/experiments/webgpu-fallback-lab",
 		permanent: true,
 	},
 	{
@@ -67,33 +108,18 @@ export const LEGACY_REDIRECTS = [
 		permanent: true,
 	},
 	{
-		source: "/experiments/geo-anchors",
-		destination: "/experiments",
-		permanent: true,
-	},
-	{
 		source: "/experiments/haptics-pulse",
-		destination: "/experiments",
+		destination: "/demos/haptics-pulse",
 		permanent: true,
 	},
 	{
 		source: "/experiments/ui-interaction",
-		destination: "/experiments",
-		permanent: true,
-	},
-	{
-		source: "/experiments/layers-api",
-		destination: "/experiments",
-		permanent: true,
-	},
-	{
-		source: "/experiments/body-tracking",
-		destination: "/experiments",
+		destination: "/demos/ui-interaction",
 		permanent: true,
 	},
 	{
 		source: "/experiments/foveated-rendering",
-		destination: "/experiments",
+		destination: "/demos/foveated-rendering",
 		permanent: true,
 	},
 	{
@@ -114,6 +140,21 @@ export const LEGACY_REDIRECTS = [
 	{
 		source: "/tech-articles/8thwall-playcanvas-self-hosted",
 		destination: "/tech-articles/8thwall-world-effects",
+		permanent: true,
+	},
+	{
+		source: "/tech-articles/webxr-events-watch-2026",
+		destination: "/events",
+		permanent: true,
+	},
+	{
+		source: "/blog/webxr-events-watch-2026",
+		destination: "/events",
+		permanent: true,
+	},
+	{
+		source: "/articles/webxr-events-watch-2026",
+		destination: "/events",
 		permanent: true,
 	},
 	{

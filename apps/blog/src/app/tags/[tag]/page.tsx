@@ -11,6 +11,15 @@ interface PageProps {
 	params: Promise<{ tag: string }>;
 }
 
+function normalizeTagParam(tag: string): string {
+	if (!tag.includes("%")) return tag;
+	try {
+		return decodeURIComponent(tag);
+	} catch {
+		return tag;
+	}
+}
+
 export async function generateStaticParams() {
 	return collectTags([...getDocs(blog), ...getDocs(experiments)]).map(
 		(tag) => ({ tag }),
@@ -20,7 +29,8 @@ export async function generateStaticParams() {
 export async function generateMetadata({
 	params,
 }: PageProps): Promise<Metadata> {
-	const { tag } = await params;
+	const { tag: rawTag } = await params;
+	const tag = normalizeTagParam(rawTag);
 	const blogCount = getDocs(blog).filter(
 		(p) => !p.draft && p.tags && Array.isArray(p.tags) && p.tags.includes(tag),
 	).length;
@@ -44,7 +54,8 @@ export async function generateMetadata({
 }
 
 export default async function TagDetailPage({ params }: PageProps) {
-	const { tag } = await params;
+	const { tag: rawTag } = await params;
+	const tag = normalizeTagParam(rawTag);
 
 	const blogPosts = getDocs(blog)
 		.filter(

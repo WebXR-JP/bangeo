@@ -1,5 +1,5 @@
 import { blog } from "fumadocs-mdx:collections/server";
-import { permanentRedirect } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
 
 interface PageProps {
@@ -7,9 +7,11 @@ interface PageProps {
 }
 
 export async function generateStaticParams(): Promise<{ slug: string }[]> {
-	return getDocs(blog).map((doc) => ({
-		slug: getSlugFromPath(doc.info.path),
-	}));
+	return getDocs(blog)
+		.filter((doc) => !doc.draft)
+		.map((doc) => ({
+			slug: getSlugFromPath(doc.info.path),
+		}));
 }
 
 /**
@@ -18,5 +20,9 @@ export async function generateStaticParams(): Promise<{ slug: string }[]> {
  */
 export default async function BlogPostPage({ params }: PageProps) {
 	const { slug } = await params;
+	const isPublished = getDocs(blog).some(
+		(doc) => !doc.draft && getSlugFromPath(doc.info.path) === slug,
+	);
+	if (!isPublished) notFound();
 	permanentRedirect(`/tech-articles/${slug}`);
 }

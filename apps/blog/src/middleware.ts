@@ -5,31 +5,24 @@ const APP_HTML_DEMOS = new Set([
 	"anchors-basic",
 	"ar-lighting-est",
 	"audio-context-xr",
-	"body-tracking",
-	"camera-access",
-	"composition-layers",
 	"controller-haptics-test",
 	"controller-input-advanced",
 	"dom-overlay-ar",
 	"foveated-rendering",
 	"frame-timing",
 	"gamepad-api-xr",
-	"geo-anchors",
 	"grab-interaction",
-	"hand-haptics",
 	"hand-mesh-visualization",
 	"hand-tracking-advanced",
 	"haptics-pulse",
 	"head-tracking",
 	"immersive-ar-basic",
 	"inline-session",
-	"layers-api",
 	"lod-system",
 	"persistent-anchors",
 	"playcanvas-html-in-canvas",
 	"quest-depth-projection-box",
 	"ray-casting",
-	"real-world-mesh-occlusion",
 	"reference-space",
 	"render-optimization",
 	"session-end-events",
@@ -40,10 +33,8 @@ const APP_HTML_DEMOS = new Set([
 	"stereo-rendering",
 	"tracked-pointer",
 	"ui-interaction",
-	"viewer-pose",
 	"webgl-xr-integration",
 	"webgpu-fallback-lab",
-	"webgpu-xr-integration",
 	"world-effects",
 	"xr-frame-loop",
 ]);
@@ -60,8 +51,40 @@ const DEMO_HTML_DEMOS = new Set([
 	"8thwall-virtual-tryon",
 ]);
 
+const GONE_PATHS = new Set([
+	"/articles/webxr-advent-calendar-2025",
+	"/blog/webxr-advent-calendar-2025",
+	"/experiments/vr-sanpo",
+	"/tech-articles/webxr-advent-calendar-2025",
+]);
+
+const GONE_DEMO_SLUGS = new Set([
+	"camera-access",
+	"composition-layers",
+	"geo-anchors",
+	"layers-api",
+	"viewer-pose",
+]);
+
 export function middleware(request: NextRequest) {
 	const { pathname, searchParams } = request.nextUrl;
+
+	if (GONE_PATHS.has(pathname)) {
+		return new NextResponse(null, {
+			status: 410,
+			headers: { "X-Robots-Tag": "noindex" },
+		});
+	}
+
+	const retiredDemoMatch = pathname.match(
+		/^\/(?:demos|experiments)\/([^/]+)(?:\/.*)?$/,
+	);
+	if (retiredDemoMatch && GONE_DEMO_SLUGS.has(retiredDemoMatch[1])) {
+		return new NextResponse(null, {
+			status: 410,
+			headers: { "X-Robots-Tag": "noindex" },
+		});
+	}
 
 	// クエリ付き URL の重複を防ぐ（?author=, ?q= など）
 	if (
@@ -101,8 +124,11 @@ export function middleware(request: NextRequest) {
 
 export const config = {
 	matcher: [
+		"/articles/:path*",
 		"/tech-articles",
-		"/experiments",
+		"/tech-articles/:path*",
+		"/blog/:path*",
+		"/experiments/:path*",
 		"/experimentals",
 		"/demos/:path*",
 	],

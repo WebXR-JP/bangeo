@@ -42,6 +42,11 @@ export default withMDX({
 				destination: "https://www.bangeo.net/:path*",
 				permanent: true,
 			},
+			{
+				source: "/experimentals",
+				destination: "/experiments",
+				permanent: true,
+			},
 			...LEGACY_REDIRECTS,
 			...buildExperimentDemoRedirects(),
 			{

@@ -217,43 +217,6 @@ const experimentGuides: Record<string, ExperimentGuide> = {
 		qualityCheck:
 			"確認ポイントは、境界線が表示されること、床の高さが自然に見えること、終了後にページへ戻れることです。",
 	},
-	"body-tracking": {
-		statusLabel: "全身トラッキングの入口",
-		statusReadiness: "lab",
-		summary:
-			"対応デバイスで、全身トラッキング用のセッション開始可否を確認できます",
-		intent:
-			"Body Tracking対応ブラウザで、全身トラッキング機能を使う前の基本確認を行うデモです。アバター表現に進む前に、対象端末で機能が利用できるかを確認します。",
-		primaryDevice: "PICO / WebXR対応ヘッドセット",
-		track: "vr-basics",
-		launchHref: "/demos/body-tracking/",
-		deviceChecks: [
-			{
-				label: "PICO",
-				readiness: "lab",
-				note: "対応ブラウザとトラッカー設定が必要です。",
-			},
-			{
-				label: "その他XR",
-				readiness: "unknown",
-				note: "ブラウザや端末の実装状況によって利用可否が変わります。",
-			},
-			{
-				label: "Desktop",
-				readiness: "preview",
-				note: "画面表示の確認のみ可能です。実際のトラッキングには対応ヘッドセットが必要です。",
-			},
-		],
-		flow: [
-			"対応ヘッドセットで必要なトラッカー設定を行い、デモページを開く。",
-			"画面の案内に沿ってXRセッションを開始する。",
-			"表示される状態やログを見ながら、Body Trackingが利用できるか確認する。",
-		],
-		fallback:
-			"Body Trackingが利用できない場合でも、画面上の案内からどの状態で止まったかを確認できます。通常のVRデモとは対応条件が異なります。",
-		qualityCheck:
-			"確認ポイントは、XRセッションが開始できること、Body Trackingの状態が画面で分かること、未対応時にも案内が表示されることです。",
-	},
 	"webxr-body-tracking": {
 		statusLabel: "全身トラッキングを可視化",
 		statusReadiness: "lab",

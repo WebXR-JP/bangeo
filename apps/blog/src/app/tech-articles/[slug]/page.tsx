@@ -6,7 +6,7 @@ import { ArticleStructuredData } from "@/components/article-structured-data";
 import { mdxComponents } from "@/components/mdx-components";
 import { OptimizedImage } from "@/components/optimized-image";
 import { SocialShare } from "@/components/social-share";
-import { contentDateTime } from "@/lib/content-dates";
+import { contentDateTime, contentDateValue } from "@/lib/content-dates";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
 import { NO_IMAGE, THUMB_IMAGE_SIZES } from "@/lib/image-defaults";
 import { SITE_URL } from "@/lib/site-url";
@@ -50,13 +50,17 @@ interface PageProps {
 }
 
 function findDoc(slug: string) {
-	return getDocs(blog).find((d) => getSlugFromPath(d.info.path) === slug);
+	return getDocs(blog).find(
+		(d) => !d.draft && getSlugFromPath(d.info.path) === slug,
+	);
 }
 
 export async function generateStaticParams(): Promise<{ slug: string }[]> {
-	return getDocs(blog).map((doc) => ({
-		slug: getSlugFromPath(doc.info.path),
-	}));
+	return getDocs(blog)
+		.filter((doc) => !doc.draft)
+		.map((doc) => ({
+			slug: getSlugFromPath(doc.info.path),
+		}));
 }
 
 export async function generateMetadata({
@@ -103,11 +107,25 @@ export default async function TechArticlePage({ params }: PageProps) {
 	const image = doc.thumbnail ? String(doc.thumbnail) : "/ogp.png";
 	const publishedDate = doc.date ? String(doc.date) : undefined;
 	const modifiedDate = doc.updated ? String(doc.updated) : publishedDate;
-	const allDocs = getDocs(blog);
-	const otherArticles = allDocs
+	const currentTags = new Set((doc.tags as string[] | undefined) ?? []);
+	const relatedArticles = getDocs(blog)
 		.filter(
-			(a) => a.author === doc.author && getSlugFromPath(a.info.path) !== slug,
+			(article) =>
+				!article.draft && getSlugFromPath(article.info.path) !== slug,
 		)
+		.map((article) => ({
+			article,
+			relevance: ((article.tags as string[] | undefined) ?? []).filter((tag) =>
+				currentTags.has(tag),
+			).length,
+		}))
+		.sort(
+			(a, b) =>
+				b.relevance - a.relevance ||
+				contentDateValue(b.article.updated ?? b.article.date) -
+					contentDateValue(a.article.updated ?? a.article.date),
+		)
+		.map(({ article }) => article)
 		.slice(0, 3);
 
 	const shareUrl = `${SITE_URL}${BASE_PATH}/${slug}`;
@@ -226,14 +244,13 @@ export default async function TechArticlePage({ params }: PageProps) {
 							</div>
 						</div>
 
-						{otherArticles.length > 0 && (
+						{relatedArticles.length > 0 && (
 							<div className="mt-6 pt-6 border-t border-gray-200/60">
 								<h4 className="text-[10px] font-bold tracking-widest text-gray-500 uppercase mb-3">
-									{doc.author ? String(doc.author) : "BANGEO"}
-									の他の記事
+									関連する記事
 								</h4>
 								<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-									{otherArticles.map((a) => {
+									{relatedArticles.map((a) => {
 										const aSlug = getSlugFromPath(a.info.path);
 										return (
 											<Link

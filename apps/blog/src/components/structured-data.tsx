@@ -19,11 +19,6 @@ const websiteSchema = {
 	description:
 		"WebXR や空間コンピュータの日本語リソースサイト。デモや技術情報を公開しています。",
 	inLanguage: "ja",
-	potentialAction: {
-		"@type": "SearchAction",
-		target: `${SITE_URL}/search?q={search_term_string}`,
-		"query-input": "required name=search_term_string",
-	},
 };
 
 function JsonLdScript({ data }: { data: object }) {
