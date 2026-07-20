@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900" role="img" aria-labelledby="title desc">
+  <title id="title">KHR_interactivityで変わるWebXR hostとGLBの役割分担</title>
+  <desc id="desc">左は従来のWebXRアプリが入力からアセット固有ロジックまで実装する構成、右はXR入力とUIをhostに残し、アセット固有の状態とanimation制御をGLB内のBehavior Graphへ含める構成。</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#eefbff"/><stop offset="1" stop-color="#f5f0ff"/></linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#61719a" flood-opacity=".16"/></filter>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0 0L12 6L0 12Z" fill="#49bfcf"/></marker>
+    <style>
+      .heading{font:700 42px 'Noto Sans JP',sans-serif;fill:#26334e}.sub{font:500 23px 'Noto Sans JP',sans-serif;fill:#58677f}.label{font:700 26px 'Noto Sans JP',sans-serif;fill:#26334e}.small{font:500 20px 'Noto Sans JP',sans-serif;fill:#41516a}.mono{font:700 22px ui-monospace,monospace;fill:#28586c}.card{fill:#fff;stroke:#cfdef1;stroke-width:3}.line{fill:none;stroke:#49bfcf;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;marker-end:url(#arrow)}.thin{fill:none;stroke:#8ea3c8;stroke-width:4;stroke-linecap:round}.node{fill:#f8ffff;stroke:#49bfcf;stroke-width:6}
+    </style>
+  </defs>
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <text x="800" y="82" text-anchor="middle" class="heading">WebXR hostと「動くGLB」の役割分担</text>
+  <text x="800" y="124" text-anchor="middle" class="sub">KHR_interactivityは、XRそのものではなくアセット固有の振る舞いを運ぶための層</text>
+  <g filter="url(#shadow)">
+    <rect x="80" y="175" width="650" height="650" rx="36" class="card"/>
+    <rect x="870" y="175" width="650" height="650" rx="36" class="card"/>
+  </g>
+  <rect x="118" y="202" width="574" height="64" rx="22" fill="#e8effb"/>
+  <text x="405" y="245" text-anchor="middle" class="label">従来：アプリ側にロジックを実装</text>
+  <rect x="908" y="202" width="574" height="64" rx="22" fill="#dcf8f3"/>
+  <text x="1195" y="245" text-anchor="middle" class="label">KHR_interactivity対応後</text>
+  <rect x="142" y="302" width="526" height="116" rx="22" fill="#edf6ff" stroke="#8ec8f0" stroke-width="3"/>
+  <text x="405" y="346" text-anchor="middle" class="label">WebXR application</text>
+  <text x="405" y="387" text-anchor="middle" class="small">XR入力・UI・network・asset固有の状態</text>
+  <path d="M405 420V474" class="line"/>
+  <rect x="142" y="492" width="526" height="136" rx="22" fill="#fff4f2" stroke="#ffaaa0" stroke-width="3"/>
+  <text x="405" y="538" text-anchor="middle" class="label">クリック判定・条件分岐・animation制御</text>
+  <text x="405" y="581" text-anchor="middle" class="small">engineごとに書き直しやすい部分</text>
+  <path d="M405 630V684" class="line"/>
+  <rect x="142" y="700" width="526" height="82" rx="22" fill="#f2efff" stroke="#b3a2f3" stroke-width="3"/>
+  <text x="405" y="752" text-anchor="middle" class="mono">model.glb（見た目・animation）</text>
+  <rect x="932" y="302" width="526" height="116" rx="22" fill="#edf6ff" stroke="#8ec8f0" stroke-width="3"/>
+  <text x="1195" y="346" text-anchor="middle" class="label">WebXR host</text>
+  <text x="1195" y="387" text-anchor="middle" class="small">XR session・input・picking・DOM UI・network</text>
+  <path d="M1195 420V472" class="line"/>
+  <rect x="932" y="492" width="526" height="250" rx="26" fill="#f9ffff" stroke="#49bfcf" stroke-width="4"/>
+  <text x="1195" y="536" text-anchor="middle" class="mono">interactive-model.glb</text>
+  <rect x="970" y="566" width="146" height="76" rx="18" class="node"/>
+  <rect x="1234" y="566" width="146" height="76" rx="18" class="node"/>
+  <circle cx="1195" cy="682" r="48" class="node"/>
+  <text x="1043" y="611" text-anchor="middle" class="small">select event</text>
+  <text x="1307" y="611" text-anchor="middle" class="small">property更新</text>
+  <text x="1195" y="689" text-anchor="middle" class="small">状態</text>
+  <path d="M1118 604H1225" class="thin"/>
+  <path d="M1272 644L1224 666" class="thin"/>
+  <path d="M1159 666L1112 644" class="thin"/>
+  <text x="1195" y="721" text-anchor="middle" class="label">Behavior Graph</text>
+  <rect x="932" y="762" width="526" height="48" rx="18" fill="#f2efff"/>
+  <text x="1195" y="794" text-anchor="middle" class="small">状態・分岐・animationをアセットと一緒に運ぶ</text>
+  <path d="M730 500H854" stroke="#8da0bd" stroke-width="4" stroke-dasharray="10 12"/>
+  <text x="800" y="478" text-anchor="middle" class="sub">移せる範囲</text>
+</svg>
