@@ -1,6 +1,6 @@
 ---
-title: "glTFが「動く3Dアセット」へ：KHR_interactivityが批准手続きへ、仕組みとWebXRへの影響"
-description: "glTF 2.0のKHR_interactivityが批准手続きへ提出されました。Behavior Graphの仕組み、対応viewer、WebXRでの役割分担、試し方と導入時の注意点を一次情報から整理します。"
+title: "glTFに動作ロジックを持たせるKHR_interactivity──WebXRとの役割分担を整理"
+description: "glTF 2.0の拡張KHR_interactivityが批准手続きへ提出されました。GLBに保存できる動作、WebXRアプリに残る処理、対応状況と試す際の注意点を整理します。"
 date: "2026年7月20日"
 category: "NEWS"
 tags:
@@ -15,176 +15,147 @@ thumbnail: "/assets/tech/gltf-khr-interactivity.webp"
 draft: false
 ---
 
-2026年7月16日、Khronos Groupは、glTF 2.0にインタラクティブな振る舞いを含める`KHR_interactivity`拡張を批准手続きへ提出したと発表しました。
+glTF形式の3Dデータを別の3Dエンジンへ持っていくと、モデルとアニメーションは表示できても、「選ぶと色が変わる」「ボタンを押すと扉が開く」といった反応までは引き継がれません。こうした処理は3Dデータではなく、読み込む側のアプリに書かれているからです。
 
-これまでのglTFは、形状、マテリアル、テクスチャ、animationを運ぶ3Dアセット形式として広く使われてきました。一方で「選択したら色を変える」「近づいたらanimationを始める」「条件によって次の状態へ進む」といったロジックは、three.jsやBabylon.js、Unityなど、読み込んだ側のアプリに個別実装するのが普通でした。
+`KHR_interactivity`は、この隙間を埋めるためのglTF 2.0拡張です。モデル固有の状態や条件分岐、アニメーション制御をglTF／GLBに保存し、対応する環境へ一緒に持ち運べるようにします。
 
-`KHR_interactivity`は、そのうち**アセット自身の振る舞い**をBehavior GraphとしてGLB／glTFに含めるための仕様です。対応したviewerやengineなら、見た目と基本動作をまとめて受け渡せます。
+Khronos Groupは2026年7月16日、`KHR_interactivity`を[批准手続きへ提出したと発表](https://www.khronos.org/news/archives/gltf-interactivity-extension-submitted-for-ratification)しました。ただし、発表時点ではまだ批准済みではなく、正式批准に向けた候補仕様（Release Candidate）という位置づけです。
 
-![VRヘッドセットを着けた赤いマスコットが、信号機とBehavior Graphを内包したGLBキューブを説明しているイラスト](/assets/tech/gltf-khr-interactivity.webp)
+![VRヘッドセットを着けたマスコットが、信号機の見た目と動作をまとめた3Dデータを紹介しているイラスト](/assets/tech/gltf-khr-interactivity.webp)
 
-> この記事は2026年7月20日時点のKhronos公式発表、仕様本文、公式リポジトリをもとにしています。`KHR_interactivity`は正式批准済みではなく、批准手続きへ提出されたRelease Candidateです。仕様と実装状況は今後変わる可能性があります。
+## KHR_interactivityが埋める「隙間」
 
-先に要点をまとめます。
+たとえば、部品を選ぶと分解アニメーションが始まる製品モデルを考えてみます。
 
-- `KHR_interactivity`は、GLBへJavaScriptなどの任意コードを入れる仕様ではない
-- 定義済みoperationをつなぐBehavior Graphで、状態遷移やanimation制御を表現する
-- 対応viewerが必要で、glTFを読めるだけでは動作しない
-- WebXR Device APIの更新ではない。XR入力やsession管理は引き続きホストアプリの仕事
-- 単一ユーザー向けで、network同期、認証、UI、決済などは対象外
+従来のGLBに入っているのは、製品の形状、質感、アニメーションです。どの部品が選ばれたかを調べ、どのアニメーションを再生するか決める処理は、three.jsやBabylon.js、Unityなどのアプリ側に実装します。
 
-## いまのステータスは「批准待ち」
+この構成では、モデルを別のエンジンへ移すたびに操作部分の書き直しが発生します。`KHR_interactivity`を使うと、選択後の状態変更やアニメーション制御を「ビヘイビアグラフ」としてGLBに含められます。
 
-Khronosの[公式発表](https://www.khronos.org/news/archives/gltf-interactivity-extension-submitted-for-ratification)は、`KHR_interactivity`が「submitted for ratification」、つまり批准手続きへ提出されたと伝えています。仕様本文と[Extension Registry](https://github.com/KhronosGroup/glTF/blob/main/extensions/README.md)では、statusはRelease Candidateです。
+![従来はアプリ側にあったクリック判定や状態管理の一部を、KHR_interactivity対応GLBへ移す役割分担の図](/assets/tech/gltf-khr-interactivity-host-and-asset.webp)
 
-| 状態 | この記事での意味 |
-| --- | --- |
-| Release Candidate | 最終レビューと相互運用性の確認に進んだ仕様 |
-| Submitted for ratification | Khronosの批准手続きへ提出済み |
-| Ratified | Boardの承認後にRegistryのRatified一覧へ移る状態 |
+ここで、アプリ側のコードが不要になるわけではありません。マウスやXRコントローラーから入力を受け取る処理、画面上のUI、通信などは、引き続きアプリが担当します。GLBへ移せるのは、選択後に色を変える、部品を動かす、次の状態へ進むといった、そのモデルの中で意味が完結する反応です。
 
-したがって、現時点で「正式に標準化済み」と表現するのは早すぎます。`KHR_`というprefixも、批准済みの印ではありません。Khronosの説明では、将来の批准を予定する拡張も、このprefixを使えます。
+## 動作はノードをつないで記述する
 
-## 何が変わるのか：アセットとロジックの境界
+ビヘイビアグラフでは、イベントや計算、条件分岐といった処理を「ノード」と呼ばれる箱で表し、線でつないで実行順を組み立てます。
 
-従来は、アセットと操作ロジックが別々でした。同じGLBを別のengineへ移すと、見た目や通常のanimationは再利用できても、クリック判定、状態、色や表示の切り替えは書き直しになりがちです。
-
-`KHR_interactivity`では、イベント、条件分岐、計算、変数、glTF propertyの更新をBehavior Graphとしてアセット側へ記録します。アプリ全体をGLBへ移すものではなく、**アセット固有で移植可能な反応**をまとめるための層です。
-
-![従来のWebXRアプリとKHR_interactivity対応後の役割分担。XR入力・UI・ネットワークはホストに残り、アセット固有の状態・分岐・animation制御はGLB内のBehavior Graphへ移る](/assets/tech/gltf-khr-interactivity-host-and-asset.webp)
-
-たとえば、展示物を選ぶと部品が開く体験では、mouse、touch、controller、hand trackingなどからの入力を受けるのはホスト側です。その後の「選択されたら部品を開き、説明を表示する」という展示物固有の流れは、対応runtimeならGLBのBehavior Graphへ分離できます。
-
-## Behavior Graphの基本
-
-Behavior Graphは、相互接続されたinteractivity nodeからなる有向グラフです。グラフ内にはcustom variableとcustom eventも定義できます。[仕様](https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_interactivity/Specification.adoc)では、グラフの構造自体は有向cycleを持たないとされる一方、event、loop、delayなどによる実行モデルはTuring-completeです。runtimeは停止しない処理や過大な処理を許さないため、実行時間や同時処理数の上限を設けられます。
-
-概念的には、次のような流れです。
+信号機を選ぶたびに色が変わる処理なら、流れは次のようになります。
 
 ```text
-select event
+信号機が選ばれる
     ↓
-現在の状態を読む
+現在の色を確認する
     ↓
-条件を判定して次の状態を計算
+次の色を決める
     ↓
-variableへ保存
+新しい状態を保存する
     ↓
-animation・material・visibilityを更新
+表示とアニメーションを更新する
 ```
 
-### FlowとValueの2種類の接続
+ノードをつなぐ線は2種類あります。処理の順番を渡す「フロー」と、数値、色、真偽値、3Dモデル内の参照などを渡す「値」です。仕様書ではそれぞれFlow socket、Value socketと呼ばれています。
 
-node同士の接続には、処理順を運ぶ**Flow socket**と、数値や真偽値、vector、参照を運ぶ**Value socket**があります。操作名は`math/add`や`flow/sequence`のような`domain/operation`形式です。
+グラフの中には、現在の状態を覚えておく変数や、処理を始めるイベントも定義できます。信号機の現在色、選択中の商品カラー、操作説明がどこまで進んだか、といった情報です。
 
-- Flow socket: 次にどの処理を実行するかをつなぐ
-- Value socket: 数値、状態、node参照などを渡す
+位置、回転、マテリアルなどの読み書きは、特定の3Dエンジンの内部機能ではなく、glTFのデータ構造を基準に行います。この共通の基準があることで、別の実行環境でも同じ結果を再現しやすくなります。
 
-これにより、クリック後にphaseを進める、条件によって別のanimationを再生する、距離に応じて表示を変える、といった振る舞いを組み立てられます。
+### JavaScriptを埋め込む仕様ではない
 
-### 変数・event・propertyの更新
+`KHR_interactivity`は、JavaScriptやC#などのプログラムをGLB内で自由に実行する仕組みではありません。仕様で定義された処理をノードとして組み合わせます。
 
-custom variableは、信号機のphase、選択中の商品variant、操作説明の進捗など、アセット内の状態を保持するために使えます。custom eventは外部runtimeとの入口にもなりますが、その意味はアプリケーション固有です。たとえば`checkout`というeventを作っても、決済、認証、通信まで仕様が実装するわけではありません。
+任意のプログラムを許可する形式に比べれば、実行できる処理を把握しやすくなります。ただし、処理負荷を気にしなくてよいわけではありません。ノードを輪のように直接つなぐことは禁止されていますが、繰り返しや遅延を扱う処理は用意されています。ビューアーや3Dエンジンは、長時間止まらない処理を防ぐため、1フレーム内の処理数や実行時間に上限を設けられます。
 
-`pointer/get`と`pointer/set`などのoperationは、[glTF Asset Object Model](https://github.com/KhronosGroup/glTF/blob/main/specification/2.0/ObjectModel.adoc)のpropertyをJSON Pointerで読み書きします。対象はnodeのtransform、material parameter、animation state、対応拡張が定義するmutable propertyなどです。engine固有のクラスではなくglTF object modelを基準にすることが、移植性の土台になります。
+### アニメーションの自動再生には注意
 
-### Active CameraとXR
+`KHR_interactivity`を含むデータでは、glTFのアニメーションはビヘイビアグラフから制御します。ビューアーがアニメーションを自動再生しないことも仕様で定められています。
 
-仕様にはactive cameraの位置、回転、projectionを読むpropertyもあります。たとえば「カメラが一定距離まで近づいたらanimationを始める」「objectを視点へ向ける」といった動作を作れます。
+既存のGLBへグラフを追加する場合は、読み込み直後の自動再生を前提にしていないか確認が必要です。複数のアニメーションが同じ位置やマテリアルを同時に変更すると結果が定まらないため、更新先が重ならないようにも設計します。
 
-VRやARのように複数cameraを使うviewerは、片方を選ぶか、両眼位置の中点などのsynthetic cameraをactive cameraにできます。ただし、privacyや実装上の理由でcamera dataを提供しないruntimeも認められています。XRで使うときは、active cameraの意味をruntimeごとに確認する必要があります。
+## WebXRのAPIは変わらない
 
-### animationはGraphから制御する
+`KHR_interactivity`は、WebXR Device APIの拡張ではありません。ブラウザがXRデバイスへ接続する方法も、コントローラーやハンドトラッキング、ARのヒットテストを取得する方法も変わりません。
 
-Behavior Graphを含むassetでは、glTF animationはGraphに制御されるものとして扱われ、auto playしてはいけないと仕様に定められています。既存viewerが「最初のanimationを自動再生する」設計なら、`KHR_interactivity`対応時には挙動を見直す必要があります。
+VRコントローラーで展示物を選ぶ体験なら、処理は次のように分かれます。
 
-同じpropertyを複数のactive animationが同時に更新する期間は、結果がundefinedです。特にtransformやmaterial parameterを複数clipで重ねるassetは、対象propertyが競合しないように設計・検証します。
+1. WebXRアプリがコントローラーの入力を受け取る
+2. アプリが、どの展示物を選んだか判断する
+3. GLB内のビヘイビアグラフが、展示物の状態やアニメーションを切り替える
 
-## できることと、できないこと
+マウス、タッチ、コントローラー、視線入力の違いはアプリ側で吸収し、選択されたあとの反応をGLB側で共通化します。同じモデルをデスクトップ、スマートフォン、VRで使い回すときに、書き直す範囲を減らせる構成です。
 
-Khronosが示す用途には、商品コンフィギュレーター、操作説明、ミニゲーム、AR体験などがあります。[公式sample asset集](https://github.com/KhronosGroup/glTF-Test-Assets-Interactivity)では、Traffic Light、Construction Site、Ghost、Puzzleなどを試せます。
+仕様には、現在のカメラ位置や向きをグラフから参照する仕組みもあります。ただし、VRでは左右の目に別々のカメラがあります。実行環境によって、片方のカメラを使う場合、両目の中間を仮想的なカメラとする場合、プライバシーなどの理由で情報を渡さない場合があります。カメラとの距離を使う動作は、対象とする環境ごとに結果を確認する必要があります。
 
-| 用途 | Graphに含めやすいこと | ホスト側に残ること |
+## GLBへ入れる処理、アプリに残す処理
+
+切り分けの目安は、「その3Dモデルだけで意味が通る処理かどうか」です。
+
+| 用途 | GLBへ入れやすい処理 | アプリに残す処理 |
 | --- | --- | --- |
-| 商品variant | 選択状態、material・表示の変更 | 価格、在庫、購入UI、通信 |
-| 操作説明 | 手順の状態、部品の強調、animation | 言語切替、accessibility、進捗保存 |
-| 近接反応 | cameraとの距離計算、animation開始 | camera data、XR session |
-| ミニゲーム | score変数、条件分岐、objectの移動 | 入力mapping、音声、network、永続化 |
+| 商品の色・部品変更 | 選択状態、色や表示の切り替え | 価格、在庫、購入画面、通信 |
+| 展示物や教材 | 手順の状態、部品の強調、アニメーション | 言語切り替え、読み上げ、進捗の保存 |
+| 近づくと動く仕掛け | 距離の判定、動作の開始 | カメラ情報の提供、XRセッション |
+| 小さなゲーム要素 | 得点、条件分岐、物体の移動 | 入力の割り当て、通信、データの永続化 |
 
-反対に、次のものは`KHR_interactivity`の責務ではありません。
+たとえば、グラフに`checkout`というイベントを作っても、それだけで決済はできません。認証、サーバー通信、複数ユーザー間の同期、HTMLで作る画面、アクセシビリティ対応などはアプリ側の仕事です。
 
-- JavaScript、C#、WASMなどの任意scriptの埋め込み
-- 2D UI、フォーム、DOM、accessibility対応
-- マルチユーザー同期、権限、競合解決、server通信
-- WebXR session、controller、hand、gaze、hit test、anchorの取得
+「インタラクティブなGLB」という言葉から、ファイル単体でアプリ全体が動くように聞こえるかもしれません。実際には、GLBとアプリの境界を引き直すための仕様と捉えるほうが正確です。
 
-任意コードを許さず、定義済みoperationを実行する設計は、portableでsandbox化しやすい利点があります。ただしTuring-completeである以上、runtimeはgraphのnode数、同時animation数、frame内のevent数、実行時間に制限をかけられます。特にframe落ちが体験に直結するWebXRでは、PCで動いたgraphをstandalone headsetでも無検証で使わないことが重要です。
+## 「glTF対応」だけでは動かない
 
-## WebXRはどう変わるのか
+2026年7月20日時点で、`KHR_interactivity`は正式批准前のRelease Candidateです。[glTF Extension Registry](https://github.com/KhronosGroup/glTF/blob/main/extensions/README.md)でも、批准済みではなくRelease Candidateの一覧に掲載されています。`KHR_`という接頭辞は、批准済みであることを示す印ではありません。
 
-`KHR_interactivity`はWebXR Device APIやブラウザのXR対応状況を変える拡張ではありません。`navigator.xr`、`XRSession`、controllerやhand tracking、hit testなどは、これまでどおりbrowserとWebXR hostが担当します。
+作成や検証に使える公開ツールには、次のものがあります。
 
-変わり得るのは、**WebXR hostと3D assetの境界**です。hostがdesktop mouse、touch、XR controller、hand trackingなどを共通のselect／hover eventへ変換し、その先のアセット固有の処理をGraphへ委ねる構成を選べるようになります。
+- [Interactivity Graph Authoring Tool](https://github.khronos.org/glTF-InteractivityGraph-AuthoringTool/)：グラフの作成、確認、書き出し
+- [UnityGLTF](https://github.com/KhronosGroup/UnityGLTF)：Unity Visual Scriptingで作成したグラフの書き出し
+- [Babylon.js glTF loader](https://github.com/BabylonJS/Babylon.js/tree/master/packages/dev/loaders/src/glTF/2.0/Extensions)：`KHR_interactivity`を読み込む実装
 
-WebXR frameworkが対応を追加する場合、extension JSONをparseするだけでは足りません。
+通常のGLBを表示できるビューアーでも、ビヘイビアグラフを実行できるとは限りません。製品ページに「glTF対応」と書かれているだけでは判断できないため、`KHR_interactivity`への対応を別に確認します。
 
-- Graph、node、socket、configurationのvalidation
-- custom variable／eventのlifecycleとoperation scheduler
-- glTF Object Model pointerからengine objectへのmapping
-- animation、material、morph target、transformへの安全な書き込み
-- XR入力からselect／hoverへのmapping
-- active cameraとXR camera rigの扱い
-- 実行budget、unsupported operation、fallbackのテスト
+### 非対応環境では見た目だけ残す
 
-このため、GLBを読み込むだけでXR操作が自動的に完成するわけではありません。`KHR_node_selectability`や`KHR_node_hoverability`のようなcompanion extensionも含め、runtimeがどこまで実装するかが重要です。
+動作に対応していない環境でもモデルを表示したいなら、拡張なしで成立する基本データをGLBに残しておきます。
 
-## 対応viewerとfallbackを分けて考える
+glTFには、使用する拡張を示す`extensionsUsed`と、その拡張がなければデータを正しく扱えないことを示す`extensionsRequired`があります。動作がなくても商品や展示物として表示できるなら、`KHR_interactivity`を必須にする必要があるか検討します。
 
-[Babylon.jsのglTF loader](https://github.com/BabylonJS/Babylon.js/tree/master/packages/dev/loaders/src/glTF/2.0/Extensions)には`KHR_interactivity`実装が含まれています。公式の[Graph Authoring Tool](https://github.khronos.org/glTF-InteractivityGraph-AuthoringTool/)は、Graphの作成・編集・preview・exportを行えるweb-based toolです。また[UnityGLTF](https://github.com/KhronosGroup/UnityGLTF)は、Unity Visual Scripting Graphを`KHR_interactivity`としてexportできます。
+実行環境が知らない処理は、仕様上「何もしない処理」として扱われます。この挙動は、エラーで全体が止まらない代わりに、「モデルは見えるが途中から反応しない」という状態を生む可能性があります。静止モデルとして見せる、未対応であることを画面に出す、アプリ側の操作へ切り替えるなど、利用者が故障と勘違いしない見せ方が必要です。
 
-ただし「glTF対応」と「`KHR_interactivity`対応」は別です。three.js、A-Frame、PlayCanvasなどで通常のGLBを読み込めても、Behavior Graphが再生できるとは限りません。公開時には、対象runtimeと必要なcompanion extensionの対応を個別に確認してください。
+## 試すなら信号機のサンプルから
 
-互換性は、次の2段階に分けると整理しやすくなります。
+最初に見るなら、公式発表でも紹介された[Traffic Lightのデモ](https://gltf-interactivity.needle.tools/?model=https%3A%2F%2Fraw.githubusercontent.com%2FKhronosGroup%2FglTF-Test-Assets-Interactivity%2Fmain%2FModels%2FTrafficLight%2FglTF-Binary%2FTrafficLight.glb)が手頃です。信号機を操作すると、GLBに保存された状態が順番に切り替わります。
 
-1. viewerが`KHR_interactivity`自体を理解するか
-2. Graphが使うcompanion extensionとoperationを理解するか
+デモを動かしたあとは、[公式サンプル集](https://github.com/KhronosGroup/glTF-Test-Assets-Interactivity)から同じGLBを入手し、Interactivity Graph Authoring Toolで中身を開きます。画面上の反応と、イベント、変数、条件分岐、アニメーションのつながりを見比べると、グラフの役割を追いやすくなります。
 
-非対応viewerでも見た目だけは成立させたい場合は、base glTFとして表示できる設計にし、`extensionsUsed`と`extensionsRequired`を慎重に使い分けます。`extensionsRequired`に入れたextensionをviewerが理解しない場合、そのassetは完全には扱えないと判断されます。一方、runtimeが知らないoperationは仕様上no-opとして扱われ、Flowを進めず、output valueには既定値を返します。
+書き出したGLBは、作成に使った環境だけで確認して終わらせず、別の対応環境でも開きます。仕様の狙いは持ち運べることにあるため、1つの環境で動いただけでは十分な検証になりません。
 
-## まず試すならTraffic Lightから
+## 本番採用はまだ慎重に
 
-最初の例には、Khronos発表で紹介された[Traffic Lightのinteractive demo](https://gltf-interactivity.needle.tools/?model=https%3A%2F%2Fraw.githubusercontent.com%2FKhronosGroup%2FglTF-Test-Assets-Interactivity%2Fmain%2FModels%2FTrafficLight%2FglTF-Binary%2FTrafficLight.glb)が分かりやすいでしょう。見た目が似た信号機でも、内部Graphの違いによって状態遷移が変わる例です。
+公式サンプルや編集ツールが公開されているため、試作はすぐに始められます。一方、長く配布する商品データや教材へ採用できるかは、対応するビューアーと運用期間によって判断が分かれます。仕様が批准前で、実装も出揃っていないためです。
 
-次にsample asset集を開き、Graph Authoring ToolとBabylon.js Sandboxなど複数runtimeで同じGLBを比較します。最低限、eventの対象、分岐、variableの更新、animation、material、transformが一致するかを確認してください。対応していないoperationがある場合、意図しない中途半端な状態にならず、安全に停止またはfallbackするかも重要です。
+試作から先へ進める場合は、少なくとも次の項目を記録します。
 
-Unityで試す場合は、UnityGLTFの`Project Settings > UnityGLTF > Export`から`KHR_interactivity (VisualScripting)` pluginを有効にします。このpluginは仕様がまだ変化し得るため初期状態では無効です。書き出したassetは、Unity内だけでなくGraph Authoring ToolとBabylon.jsのような別runtimeでも検証するのが安全です。
+- 使用した仕様、編集ツール、書き出し機能、実行環境のバージョン
+- GLB側とアプリ側の責任範囲
+- 2つ以上の対応環境で同じ結果になるか
+- 非対応環境で表示する内容
+- スマートフォンや一体型VRヘッドセットでの処理負荷
 
-## 制作者は今すぐ使うべきか
+WebXRでは、処理の遅れが操作感や酔いやすさに直結します。デスクトップで動いたという理由だけで判断せず、公開対象のヘッドセットで一連の操作を確認する必要があります。
 
-学習、prototype、engine実装の検証には、すでに試す価値があります。sample asset、authoring tool、Babylon.js playback、Unity exportが揃っており、Behavior Graphが制作pipelineに合うか具体的に評価できます。
+## 現時点での見方
 
-一方、長期運用するproduction assetでは、最終批准と実装の成熟を見ながらversion管理を徹底する段階です。
+`KHR_interactivity`の価値は、GLBだけでアプリを完成させることではなく、モデル固有の処理をアプリから切り離せる点にあります。同じ商品や展示物を複数の端末、ビューアー、3Dエンジンで使う案件では、重複していた実装を減らせる可能性があります。
 
-- final specificationのstatusとrevisionを記録する
-- authoring tool、exporter、runtimeのversionを固定する
-- 少なくとも2つの独立runtimeで結果を比較する
-- 非対応viewer向けの表示・操作fallbackを用意する
-- mobile／standalone XRでframe timeと実行上限を測定する
+ただし、入力、UI、通信、WebXRセッションまでGLBが引き受けるわけではありません。どこまでをモデル側の動作とするか決めないまま導入すると、今度はGLBとアプリのどちらに処理があるのか分かりにくくなります。
 
-## まとめ
-
-`KHR_interactivity`は、glTFを「表示する3Dモデル」から「基本的な振る舞いを持つ3Dアセット」へ広げる提案です。
-
-WebXRでは、device accessや入力処理はWebXRとhost applicationが受け持ち、商品、展示物、教材、game objectごとの状態・分岐・animationをinteractive GLBへ移す構成が考えられます。普及すれば、desktop、mobile、AR、VR、複数engineで同じassetを使うときのロジックの書き直しを減らせる可能性があります。
-
-ただし、現時点は批准待ちで、対応runtimeも限定的です。まずは公式sampleを複数実装で比較し、version、fallback、performance limitを管理したうえでprototypeから取り入れるのが現実的です。
+現段階では、公式サンプルを複数の対応環境で比較し、制作工程に合うかを確かめるところから始めるのが妥当です。正式批准後は、仕様の変更点と各ツールの対応状況を改めて確認する必要があります。
 
 ## 参照
 
 - [Khronos：glTF Interactivity Extension Submitted for Ratification](https://www.khronos.org/news/archives/gltf-interactivity-extension-submitted-for-ratification)
-- [`KHR_interactivity` Specification](https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_interactivity/Specification.adoc)
+- [`KHR_interactivity`仕様書](https://github.com/KhronosGroup/glTF/blob/main/extensions/2.0/Khronos/KHR_interactivity/Specification.adoc)
 - [glTF Extension Registry](https://github.com/KhronosGroup/glTF/blob/main/extensions/README.md)
-- [glTF Interactivity Sample Assets](https://github.com/KhronosGroup/glTF-Test-Assets-Interactivity)
-- [Khronos Interactivity Graph Authoring Tool](https://github.com/KhronosGroup/glTF-InteractivityGraph-AuthoringTool)
+- [glTF Interactivity公式サンプル集](https://github.com/KhronosGroup/glTF-Test-Assets-Interactivity)
+- [Interactivity Graph Authoring Tool](https://github.com/KhronosGroup/glTF-InteractivityGraph-AuthoringTool)
 - [UnityGLTF](https://github.com/KhronosGroup/UnityGLTF)
 - [Babylon.js glTF loader extensions](https://github.com/BabylonJS/Babylon.js/tree/master/packages/dev/loaders/src/glTF/2.0/Extensions)
