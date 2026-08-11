@@ -44,7 +44,7 @@ export const LEGACY_REDIRECTS = [
 	},
 	{
 		source: "/experiments/hit-test-basic",
-		destination: "/experiments/hit-test-advanced",
+		destination: "/experiments",
 		permanent: true,
 	},
 	{
@@ -64,22 +64,22 @@ export const LEGACY_REDIRECTS = [
 	},
 	{
 		source: "/experiments/body-tracking",
-		destination: "/experiments/webxr-body-tracking",
+		destination: "/experiments",
 		permanent: true,
 	},
 	{
 		source: "/demos/body-tracking/:path*",
-		destination: "/experiments/webxr-body-tracking",
+		destination: "/experiments",
 		permanent: true,
 	},
 	{
 		source: "/experiments/real-world-mesh-occlusion",
-		destination: "/experiments/xr-mesh-export",
+		destination: "/experiments",
 		permanent: true,
 	},
 	{
 		source: "/demos/real-world-mesh-occlusion/:path*",
-		destination: "/experiments/xr-mesh-export",
+		destination: "/experiments",
 		permanent: true,
 	},
 	{
@@ -104,7 +104,7 @@ export const LEGACY_REDIRECTS = [
 	},
 	{
 		source: "/experiments/spatial-audio-advanced",
-		destination: "/experiments/webxr-audio-space",
+		destination: "/experiments",
 		permanent: true,
 	},
 	{
