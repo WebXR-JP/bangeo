@@ -209,8 +209,6 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		affectedBangeoPages: [
 			"/webxr-status",
 			"/notes/quest-browser",
-			"/experiments/webgpu-detector",
-			"/experiments/quest-depth-projection-box",
 		],
 		recommendedAction:
 			"イベント前は公式ページと開発者セッションを確認。イベント後はQuest Browser、Horizon OS、WebXR関連発表を一次情報で確認して記事化する。",

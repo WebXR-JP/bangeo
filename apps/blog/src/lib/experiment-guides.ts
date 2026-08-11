@@ -142,81 +142,6 @@ const experimentGuides: Record<string, ExperimentGuide> = {
 		qualityCheck:
 			"確認ポイントは、カードが読める距離に表示されること、選択時に本文が開くこと、戻る操作で迷わないことです。",
 	},
-	"webgpu-fallback-lab": {
-		statusLabel: "WebGPU / WebGLの描画確認",
-		statusReadiness: "lab",
-		summary:
-			"現在のブラウザでWebGPUが使えるか、WebGL表示に切り替わるかを確認できます",
-		intent:
-			"WebGPU対応の有無を画面上で確認し、対応していない環境でもWebGL表示へ切り替えてコンテンツを表示する考え方を体験できます。端末ごとに描画経路が変わるXRコンテンツの確認に向いています。",
-		primaryDevice: "Meta Quest / PICO / Desktop",
-		track: "vr-basics",
-		launchHref: "/demos/webgpu-fallback-lab/xr.html",
-		featuredOrder: 3,
-		deviceChecks: [
-			{
-				label: "Meta Quest",
-				readiness: "lab",
-				note: "WebGPU対応の有無とWebXR表示を分けて確認できます。",
-			},
-			{
-				label: "PICO",
-				readiness: "unknown",
-				note: "WebGPU対応と通常描画への切り替えをご確認ください。",
-			},
-			{
-				label: "Desktop",
-				readiness: "ready",
-				note: "ChromeやEdgeでWebGPUまたはWebGL表示を確認できます。",
-			},
-		],
-		flow: [
-			"通常プレビューで、現在のブラウザがWebGPUに対応しているか確認する。",
-			"WebGPU優先表示とWebGL表示を切り替え、見え方の違いを確認する。",
-			"ヘッドセットでは、XR表示が問題なく開けるかを確認する。",
-		],
-		fallback:
-			"WebGPUが使えない端末でも、WebGL表示へ切り替わればコンテンツを見続けられます。対応していないこと自体よりも、画面が空白にならないことを重視しています。",
-		qualityCheck:
-			"確認ポイントは、対応状況が画面で分かること、WebGPU非対応でも表示が残ること、XRに入れない時も案内が読めることです。",
-	},
-	"room-scale-bounds-viewer": {
-		statusLabel: "プレイエリア境界を確認",
-		statusReadiness: "lab",
-		summary: "VRで移動できる範囲や床の基準を、ヘッドセット内で可視化します",
-		intent:
-			"ヘッドセットのプレイエリア境界や床基準を確認するデモです。ルームスケールのVR体験で、ユーザーがどの範囲を安全に動けるかを把握するために使えます。",
-		primaryDevice: "Meta Quest",
-		track: "vr-basics",
-		launchHref: "/demos/room-tracking",
-		featuredOrder: 4,
-		deviceChecks: [
-			{
-				label: "Meta Quest",
-				readiness: "lab",
-				note: "プレイエリア境界と床基準の見え方を確認できます。",
-			},
-			{
-				label: "PICO",
-				readiness: "unknown",
-				note: "境界表示の取得可否と代替表示をご確認ください。",
-			},
-			{
-				label: "Desktop",
-				readiness: "preview",
-				note: "概念プレビューとして表示内容を確認できます。実際の境界確認にはヘッドセットが必要です。",
-			},
-		],
-		flow: [
-			"プレイエリアを設定済みのヘッドセットでデモを開く。",
-			"VRを開始し、床面に表示される境界線やマーカーを確認する。",
-			"向きを変えたり再センタリングしたりして、表示が大きくずれないか確認する。",
-		],
-		fallback:
-			"プレイエリア境界が取得できない場合でも、床基準の表示に切り替えて確認できます。境界情報がない環境では、デモ内の表示と案内をご確認ください。",
-		qualityCheck:
-			"確認ポイントは、境界線が表示されること、床の高さが自然に見えること、終了後にページへ戻れることです。",
-	},
 	"webxr-body-tracking": {
 		statusLabel: "全身トラッキングを可視化",
 		statusReadiness: "lab",
@@ -289,42 +214,6 @@ const experimentGuides: Record<string, ExperimentGuide> = {
 		qualityCheck:
 			"確認ポイントは、AR開始、面の検出、オブジェクト配置、配置後の安定性です。",
 	},
-	"quest-depth-projection-box": {
-		statusLabel: "QuestでMR合成を確認",
-		statusReadiness: "lab",
-		summary: "現実の物体と仮想オブジェクトの前後関係を確認できます",
-		intent:
-			"Questのパススルー環境で、仮想オブジェクトが現実の物体に隠れる・手前に見えるといったMR合成の前後関係を確認するデモです。",
-		primaryDevice: "Meta Quest 3 / 3S / Pro",
-		track: "mr-lab",
-		launchHref: "/demos/quest-depth-projection-box/xr.html",
-		deviceChecks: [
-			{
-				label: "Meta Quest",
-				readiness: "lab",
-				note: "Quest 3系でのMR表示確認に向いています。",
-			},
-			{
-				label: "PICO",
-				readiness: "unsupported",
-				note: "Quest向けのMR表示確認として扱います。",
-			},
-			{
-				label: "Desktop",
-				readiness: "preview",
-				note: "通常表示で前後関係の概念を確認できます。",
-			},
-		],
-		flow: [
-			"通常プレビューで、箱と机エッジの前後関係を確認する。",
-			"QuestでWebXRデモを開き、MR表示の差を確認する。",
-			"Depth表示が使えない場合でも、通常の3D表示として内容が伝わるか確認する。",
-		],
-		fallback:
-			"Depth情報が使えない場合は、通常の3D合成として表示します。非対応環境でも、どのような見え方になるかを確認できます。",
-		qualityCheck:
-			"確認ポイントは、Depthあり・なしの違いが分かること、非対応時も表示が崩れないこと、Quest向けデモであることが明確なことです。",
-	},
 	"xr-mesh-export": {
 		statusLabel: "Questの部屋形状を書き出す",
 		statusReadiness: "lab",
@@ -360,42 +249,6 @@ const experimentGuides: Record<string, ExperimentGuide> = {
 			"部屋メッシュが取得できない環境では、Quest向け機能として案内します。一般的なVRデモとは対応条件が異なります。",
 		qualityCheck:
 			"確認ポイントは、部屋形状が表示されること、分類ラベルが確認できること、GLBを書き出せることです。",
-	},
-	"spatial-model-preview": {
-		statusLabel: "ページ内3Dモデルを確認",
-		statusReadiness: "preview",
-		summary: "通常のWebページで3Dモデル表示や代替表示の見え方を確認できます",
-		intent:
-			"Webページ内で3Dモデルを表示する時の見え方と、3D表示が使えない環境での代替表示を確認するデモです。商品ビューアや空間Webの入口として、PCやスマートフォンでも試せます。",
-		primaryDevice: "Desktop / Mobile / Vision Pro",
-		track: "mr-lab",
-		launchHref: "/demos/spatial-model-preview/xr.html",
-		deviceChecks: [
-			{
-				label: "Desktop",
-				readiness: "ready",
-				note: "3Dプレビューと回転操作を確認できます。",
-			},
-			{
-				label: "Meta Quest / PICO",
-				readiness: "preview",
-				note: "空間内に置いた時の大きさや距離感を確認できます。",
-			},
-			{
-				label: "iOS / visionOS",
-				readiness: "preview",
-				note: "対応状況に応じて通常表示または空間表示の確認ができます。",
-			},
-		],
-		flow: [
-			"通常プレビューで3D表示と代替表示を切り替える。",
-			"3D表示が使えない環境でも内容が伝わるか確認する。",
-			"対応ヘッドセットでは、空間内での大きさや距離感を確認する。",
-		],
-		fallback:
-			"3D表示に対応していない環境でも、画像や通常表示で内容が伝わるようにしています。空白のままにしないことを重視しています。",
-		qualityCheck:
-			"確認ポイントは、3D表示の有無が分かること、非対応でも内容が読めること、空間表示が補助的に使えることです。",
 	},
 	"8thwall-face-glasses": {
 		statusLabel: "スマホで顔ARを体験",

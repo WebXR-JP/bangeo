@@ -59,7 +59,7 @@ export const LEGACY_REDIRECTS = [
 	},
 	{
 		source: "/experiments/depth-sensing",
-		destination: "/experiments/quest-depth-projection-box",
+		destination: "/experiments",
 		permanent: true,
 	},
 	{
@@ -94,12 +94,12 @@ export const LEGACY_REDIRECTS = [
 	},
 	{
 		source: "/experiments/webgpu-xr-integration",
-		destination: "/experiments/webgpu-fallback-lab",
+		destination: "/experiments",
 		permanent: true,
 	},
 	{
 		source: "/demos/webgpu-xr-integration/:path*",
-		destination: "/experiments/webgpu-fallback-lab",
+		destination: "/experiments",
 		permanent: true,
 	},
 	{

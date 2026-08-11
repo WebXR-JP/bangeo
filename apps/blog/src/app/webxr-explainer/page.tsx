@@ -507,7 +507,7 @@ export default async function WebXRExplainerPage() {
 							{
 								name: "Depth Sensing Module",
 								body: "現実空間のdepth情報を使い、depth occlusionやMR合成を行うためのModuleです。Quest Browser 146以降のdepth projection検証とも関係します。",
-								link: "/experiments/quest-depth-projection-box",
+								link: "/webxr-status",
 							},
 							{
 								name: "WebXR/WebGPU Binding",
