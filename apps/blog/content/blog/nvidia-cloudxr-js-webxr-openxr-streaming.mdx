@@ -1,0 +1,550 @@
+---
+title: "NVIDIA CloudXR.jsを試す：WebXRブラウザへOpenXRアプリをストリーミングする"
+description: "NVIDIA CloudXR.jsの構成、Simple WebGL・React Three Fiber公式サンプルの起動方法、WebXRからトラッキングを送りサーバー映像を描画する流れ、実機運用の注意点を解説します。"
+date: "2026年8月12日"
+category: "TECH"
+tags:
+  - "WebXR"
+  - "CloudXR"
+  - "NVIDIA"
+  - "WebRTC"
+  - "OpenXR"
+  - "Omniverse"
+  - "React Three Fiber"
+author: "BANGEO Team"
+thumbnail: "/assets/mascot/tech.webp"
+draft: false
+---
+
+NVIDIAの「CloudXR.js」を使うと、NVIDIA GPUを搭載したサーバーで動くOpenXRアプリケーションを、Meta QuestやPICOのWebブラウザから体験できます。
+
+一般的なWebXRアプリケーションでは、three.jsなどを使い、ブラウザ側で3Dシーンを描画します。一方、CloudXR.jsでは、重い3Dレンダリングをサーバーへ移し、描画済みの映像をWebRTCでブラウザへ配信します。ブラウザは映像を表示するだけでなく、WebXR Device APIから得たヘッドセットやコントローラーのトラッキング情報をサーバーへ返します。
+
+この記事では、NVIDIAが公開している[CloudXR.jsのドキュメント](https://docs.nvidia.com/cloudxr-sdk/cloudxr-js/)と[公式サンプル](https://github.com/NVIDIA/cloudxr-js-samples)を手掛かりに、Simple WebGLサンプルとReact Three Fiberサンプルの役割、WebXRとCloudXR.jsが接続される場所、実機で確認するときの注意点を整理します。
+
+> この記事のコマンドとコードはCloudXR.js 6.2系の公式サンプルを前提にした説明です。CloudXR.jsはSDKの配布物、サーバー側は対応するCloudXR Runtimeが必要です。導入前に、利用するSDKとRuntimeのバージョンに対応したドキュメントも確認してください。
+
+## CloudXR.jsの役割
+
+CloudXR.jsは、NVIDIA CloudXRのWebブラウザ向けクライアントSDKです。サーバー側のCloudXR Runtimeへ接続し、次の双方向通信を受け持ちます。
+
+- サーバーからブラウザへ、レンダリング済みの左右眼映像と音声を送る
+- ブラウザからサーバーへ、頭部姿勢やコントローラーなどのトラッキング情報を返す
+- WebXRセッションのフレームと、受信した映像の表示タイミングを接続する
+
+ここで大切なのは、CloudXR.jsがWebXRを置き換えるわけではないことです。WebXRは、ブラウザがXRデバイスへアクセスし、`XRSession`、`XRFrame`、reference space、入力デバイスなどを扱うために引き続き使われます。CloudXR.jsは、そのWebXRクライアントとサーバー上のOpenXRアプリケーションをつなぐストリーミング層です。
+
+## 一般的なWebXRとの違い
+
+three.jsを使ったクライアントレンダリング型のWebXRは、概ね次の構成です。
+
+```text
+glTF / GLB・テクスチャ
+          ↓
+       three.js
+          ↓
+   WebGL / WebGPU
+          ↓
+        WebXR
+          ↓
+   Meta Questなど
+```
+
+3Dアセットをブラウザへダウンロードし、端末のCPU/GPUでシーンを更新・描画します。通信後の応答性を確保しやすく、Web配信との相性も良い一方、シーンの規模や画質はクライアント端末の性能に左右されます。
+
+CloudXR.jsは次の構成です。
+
+```text
+OpenXR Application
+          ↓
+  NVIDIA GPUで描画
+          ↓
+   CloudXR Runtime
+          ↓
+        WebRTC
+          ↓
+      CloudXR.js
+          ↓
+        WebXR
+          ↓
+ Meta Quest / PICO
+```
+
+ブラウザへ届くのは、OpenUSDやglTFのシーンデータではなく、サーバーで描画された映像です。その代わり、クライアントからは毎フレームの姿勢と入力を返す必要があります。
+
+| 観点 | クライアントレンダリング型WebXR | CloudXR.js |
+| --- | --- | --- |
+| 3D描画 | XR端末 | NVIDIA GPUサーバー |
+| ブラウザへ配信するもの | 3Dアセット、コード、テクスチャ | エンコード済み映像・音声 |
+| 端末負荷 | シーンの複雑さに応じて増える | 映像デコードと合成が中心 |
+| ネットワーク依存 | 初回ロード後は比較的小さい | セッション中の帯域、遅延、揺らぎに強く依存 |
+| サーバー | 静的ホスティングでも構成可能 | NVIDIA GPU、CloudXR Runtime、OpenXRアプリが必要 |
+| 向いている用途 | Web配布、軽量な体験、オフライン寄りの構成 | 高品質な可視化、既存OpenXRアプリ、重いシミュレーション |
+
+CloudXR.jsは、スタンドアロンヘッドセットだけでは描画しにくいシーンや、既存のOpenXRアプリケーションをWebブラウザへ届けたい場合に有力です。一方、ネットワーク品質とGPUサーバーの運用が体験品質に直結します。単純に「通常のWebXRより高性能」と捉えるのではなく、計算資源を端末からサーバーへ移す設計と考えるのが適切です。
+
+## 公式サンプルの構成
+
+NVIDIAの`cloudxr-js-samples`リポジトリには、主に次の構成が用意されています。
+
+```text
+cloudxr-js-samples/
+├── simple/
+├── react/
+├── proxy/
+└── Dockerfile
+```
+
+- `simple`：WebGL2とWebXRを直接扱う最小構成
+- `react`：React Three Fiber、React Three XR、React Three UIKitを組み合わせる構成
+- `proxy`：HTTPS/WSSでCloudXR Runtimeへ到達させる構成で使うプロキシ関連実装
+- `Dockerfile`：サンプルWebクライアントをコンテナで配信するための定義
+
+CloudXR.js固有の処理を追いたい場合は、まず`simple`を見るのがおすすめです。React版は、CloudXR映像へクライアント側の3D UIを重ねたい場合の参考になります。
+
+## Simple WebGLサンプルの起動
+
+ローカルで試すには、Node.js、CloudXR.jsのパッケージ、CloudXR Runtimeを実行するサーバーが必要です。6.2系サンプルのRequirementsではNode.js 20.19.0以降が案内されています。
+
+まず公式サンプルを取得します。
+
+```bash
+git clone https://github.com/NVIDIA/cloudxr-js-samples.git
+cd cloudxr-js-samples/simple
+```
+
+次に、NVIDIAから入手したCloudXR.jsパッケージを指定してインストールします。
+
+```bash
+npm install /path/to/nvidia-cloudxr-<version>.tgz
+npm install
+```
+
+ローカル開発サーバーは次のコマンドで起動します。
+
+```bash
+npm run dev-server
+```
+
+QuestやPICOなど、別端末からHTTPSでアクセスする場合はHTTPS用スクリプトを使います。
+
+```bash
+npm run dev-server:https
+```
+
+コマンド名や証明書の準備方法はサンプルのバージョンによって変わる可能性があります。実際に使用するチェックアウトのREADMEと`package.json`を正として確認してください。
+
+### Dockerでの配信
+
+リポジトリ直下のDockerfileから、Simpleサンプルを配信するコンテナも作成できます。
+
+```bash
+docker build \
+  -t cloudxr-js-sample \
+  --build-arg EXAMPLE_NAME=simple \
+  .
+
+docker run \
+  -d \
+  --name cloudxr-js-sample \
+  -p 8080:80 \
+  -p 8443:443 \
+  cloudxr-js-sample
+```
+
+この例ではHTTPを`8080`、HTTPSを`8443`へ公開します。コンテナはWebクライアントの配信を簡単にするものです。CloudXR RuntimeとOpenXRアプリケーションを実行するGPUサーバーは、別途必要です。
+
+## サーバー側の準備
+
+ブラウザ側のサンプルを起動しただけでは、ストリーミングは始まりません。接続先には次の2つが必要です。
+
+```text
+WebXR Browser
+      ↕
+ CloudXR.js
+      ↕
+CloudXR Runtime
+      ↕
+OpenXR Application
+```
+
+CloudXR Runtimeでは、CloudXR.js向けのdevice profileとして`auto-webrtc`を設定します。また、CloudXR Runtimeから起動・接続できるOpenXRアプリケーションも用意します。
+
+最初からOmniverse Kitを含む構成へ進むと、OpenXR、アプリケーション起動、ネットワーク、映像コーデック、WebXRクライアントのどこに問題があるのか分かりにくくなります。NVIDIAのワークフローで例示されるLÖVRのような小さなOpenXRアプリケーションを使い、次の順に確認すると切り分けやすくなります。
+
+1. サーバー上でOpenXRアプリケーションが起動する
+2. CloudXR Runtimeがアプリケーションを認識する
+3. デスクトップブラウザからCloudXR.jsが接続できる
+4. 映像の開始・停止とログを確認する
+5. XRヘッドセットからWebXRセッションを開始する
+6. 頭部姿勢とコントローラー入力がサーバーへ届く
+
+## Simpleサンプルの処理
+
+Simpleサンプルの中心は`simple/src/main.ts`です。実装の流れを概念化すると、次のようになります。
+
+```text
+WebGL2 contextを初期化
+          ↓
+WebXRセッションを開始
+          ↓
+XRWebGLLayerを作成
+          ↓
+CloudXRセッションを作成・接続
+          ↓
+XRFrameごとにトラッキングを送信
+          ↓
+受信映像をXRの描画先へ表示
+```
+
+以下のコードは仕組みを説明するための抜粋・簡略例です。型名、設定項目、コールバックの正確なシグネチャは、導入するCloudXR.jsのAPI Referenceと公式サンプルを確認してください。
+
+### WebGL2 contextの準備
+
+最初にCanvasからWebGL2 contextを取得し、WebXRで利用できる状態にします。
+
+```typescript
+const gl = canvas.getContext("webgl2", {
+  alpha: true,
+  depth: true,
+  antialias: false,
+});
+
+if (!gl) {
+  throw new Error("WebGL2 is not available");
+}
+
+await gl.makeXRCompatible();
+```
+
+`makeXRCompatible()`は、このcontextをXRデバイスと互換性のある描画先として使用できるようにします。`getContext()`が`null`を返す場合もあるため、実装では必ず確認します。
+
+### WebXRセッションの開始
+
+次に、通常のWebXRアプリケーションと同じく`navigator.xr.requestSession()`を呼びます。
+
+```typescript
+const xrSession = await navigator.xr.requestSession("immersive-vr", {
+  requiredFeatures: ["local-floor"],
+  optionalFeatures: ["hand-tracking"],
+});
+
+const referenceSpace = await xrSession.requestReferenceSpace("local-floor");
+```
+
+`local-floor`は床面を原点の基準にするreference spaceです。`hand-tracking`はoptional featureなので、未対応環境でもセッション開始を妨げません。ただし、機能が利用できることを保証するものではありません。
+
+### XRWebGLLayerの作成
+
+WebGLの描画先として`XRWebGLLayer`を作成し、セッションへ設定します。
+
+```typescript
+const layer = new XRWebGLLayer(xrSession, gl);
+
+xrSession.updateRenderState({
+  baseLayer: layer,
+});
+```
+
+CloudXR.jsが受信映像を表示するときも、最終的にはWebXRセッションが管理する描画先へ接続します。
+
+## CloudXRセッションの作成
+
+WebXR側の準備ができたらCloudXRセッションを作成し、Runtimeへ接続します。概念的な設定例は次のとおりです。
+
+```typescript
+import { createSession } from "@nvidia/cloudxr";
+
+const cloudxr = createSession(
+  {
+    serverAddress: "192.168.1.10",
+    serverPort: 49100,
+    gl,
+    referenceSpace,
+    perEyeWidth: 2048,
+    perEyeHeight: 1792,
+    deviceFrameRate: 90,
+    maxStreamingBitrateKbps: 150000,
+  },
+  {
+    onStreamStarted() {
+      console.log("Streaming started");
+    },
+    onStreamStopped(error) {
+      console.log("Streaming stopped", error);
+    },
+  },
+);
+
+cloudxr.connect();
+```
+
+接続先、ポート、片眼あたりの解像度、リフレッシュレート、最大ビットレートは固定の正解ではありません。ヘッドセット、ネットワーク、GPU、コーデック、サーバーとの距離に合わせて決めます。最初から最大値を指定するのではなく、安定して接続できる設定から画質を上げていくほうが原因を追いやすくなります。
+
+公式サンプルでは、コーデック、reprojection grid、pose smoothing、media address、media portなど、さらに細かな設定も扱えます。設定名と利用可否はSDKバージョンに依存します。
+
+## 中心となるXR render loop
+
+CloudXR.jsの仕組みが最も分かりやすいのが、WebXRのフレームごとに実行される処理です。概念的には次の2つが中心です。
+
+```typescript
+cloudxr.sendTrackingStateToServer(timestamp, frame);
+cloudxr.render(timestamp, frame, layer);
+```
+
+`sendTrackingStateToServer()`は、現在の`XRFrame`から得られる姿勢や入力状態をCloudXR Runtimeへ送ります。`render()`は、サーバーから受信したストリームを現在のXRフレームへ描画します。
+
+```text
+WebXR XRFrame
+      ↓
+トラッキング情報を送信
+      ↓
+CloudXR Runtime / OpenXR Application
+      ↓
+サーバーで左右眼映像を描画・エンコード
+      ↓
+WebRTCでブラウザへ配信
+      ↓
+CloudXR.jsがXRWebGLLayerへ描画
+```
+
+一般的なthree.jsアプリケーションなら、render loopの中でシーンとカメラを更新して`renderer.render()`を呼びます。CloudXR.jsでは、端末の姿勢をサーバーへ送り、その結果として返る映像を表示する点が大きく異なります。
+
+トラッキング送信が途切れると、サーバーは最新の頭部姿勢に基づく映像を作れません。また、映像が届いても表示時点の姿勢との差が大きければ、違和感や酔いにつながります。このため、平均帯域だけでなく、往復遅延、パケット損失、ジッター、フレーム時間をまとめて確認する必要があります。
+
+## React Three Fiberサンプル
+
+React版は、CloudXR.jsに次のライブラリを組み合わせます。
+
+- React
+- React Three Fiber
+- React Three XR
+- React Three UIKit
+- CloudXR.js
+
+構造を簡略化すると、React Three Fiberの`Canvas`とXRコンテキストの中に、CloudXRの映像を扱うコンポーネントとクライアント側UIを配置します。
+
+```tsx
+<Canvas>
+  <XR store={store}>
+    <CloudXRComponent config={config} />
+    <CloudXR3DUI />
+  </XR>
+</Canvas>
+```
+
+React Three Fiberがサーバー上のOmniverseシーンを再描画しているわけではありません。背景となる高品質な3D映像はサーバーで描画され、React Three Fiberは接続UI、ステータス表示、メニュー、ポインターなどのクライアント側オブジェクトを追加するために使えます。
+
+```text
+CloudXRのサーバーレンダリング映像
+                  ＋
+React Three Fiberのクライアント描画
+```
+
+クライアント側UIは、サーバーへ往復しなくても素早く反応させられる利点があります。ただし、CloudXR映像の深度情報とクライアント側オブジェクトの前後関係が自動的に一致するとは限りません。サーバー映像の上にUIを重ねる設計では、常に手前へ表示するパネルなど、合成の制約を踏まえた表現から始めるのが安全です。
+
+## Three.jsと共有するWebGL state
+
+React Three Fiber、Three.js、CloudXR.jsが同じWebGL contextへ描画する場合、WebGL stateの管理が重要です。
+
+CloudXR側の描画がframebuffer、texture、viewport、blend、depth testなどを変更したままにすると、後続のThree.js描画が崩れる可能性があります。反対に、Three.js側の状態がCloudXR描画へ影響する場合もあります。
+
+```text
+Three.jsの描画
+      ↓
+WebGL stateを保存
+      ↓
+CloudXR.jsの描画
+      ↓
+WebGL stateを復元・再同期
+      ↓
+Three.jsの描画を継続
+```
+
+公式Reactサンプルは、この境界でstateを扱う実装の参考になります。CloudXR.js 6.2系ではレンダリング前後のWebGL state handlingも改善されていますが、独自のpost-processingや複数rendererを組み合わせる場合は、公式サンプルと同じ順序で再現できているか確認してください。
+
+## Omniverseとの関係
+
+CloudXR.jsを使えば、Omniverse Kitで動くXRコンテンツをWebXRブラウザへ配信する構成も作れます。
+
+```text
+OpenUSD
+   ↓
+Omniverse Kit
+   ↓
+OpenXR
+   ↓
+CloudXR Runtime
+   ↓
+WebRTC
+   ↓
+CloudXR.js + WebXR
+   ↓
+Meta Quest / PICO
+```
+
+ただし、CloudXR.jsはOpenUSDをglTFへ変換したり、Omniverseのシーンをthree.jsへ移植したりするライブラリではありません。OpenUSDの読み込み、シミュレーション、シーン更新、描画はサーバー側で行われ、ブラウザへは描画後の映像が届きます。
+
+そのため、次の構成とは設計上の性質が異なります。
+
+```text
+OpenUSDからWeb向けアセットを生成
+              ↓
+       glTF / GLBを配信
+              ↓
+     three.jsで端末描画
+              ↓
+            WebXR
+```
+
+前者はサーバー上のアプリケーションをそのまま届けやすく、後者はWebとして配布しやすい構成です。更新頻度、知的財産を含むアセットの扱い、同時接続数、GPUコスト、必要な画質を比較して選ぶ必要があります。
+
+## 対応環境とsecure context
+
+CloudXR.js 6.2系のRequirementsでは、次のヘッドセットとブラウザ環境が案内されています。
+
+| デバイス | OS条件 | ブラウザ |
+| --- | --- | --- |
+| Meta Quest 2 | 79+ | Meta Quest Browser |
+| Meta Quest 3 | 79+ | Meta Quest Browser |
+| Meta Quest 3S | 79+ | Meta Quest Browser |
+| PICO 4 Ultra | PICO OS 15.4.4U+ | PICO Browser |
+
+対応表はSDKリリース時点の情報です。OSやブラウザを更新すると挙動が変わる可能性があるため、製品導入では利用するCloudXR.jsバージョンのRequirementsを確認し、実機で固定した組み合わせを検証してください。
+
+デスクトップブラウザでは、IWER（Immersive Web Emulation Runtime）を使ったWebXRエミュレーションも利用できます。これは接続画面や基本的なセッション処理を開発するには便利ですが、実機の映像デコード性能、ネットワーク遅延、コントローラー、ハンドトラッキング、装着時の快適性までは再現できません。
+
+WebXRの没入型セッションは原則としてsecure contextが必要です。`localhost`は開発用の例外として扱われますが、別端末のヘッドセットから開発PCのプライベートIPへHTTP接続すると同じ条件にはなりません。
+
+CloudXR.jsの構成では、開発用HTTP/WebSocketと、本番向けHTTPS/WSSの両方が案内されています。Meta QuestでHTTPを試す構成ではブラウザ側でinsecure originを許可する設定が必要になる場合があります。PICO 4 UltraはCloudXR.jsでHTTPSのみがサポートされるため、最初から証明書とWSSプロキシを用意するほうが確実です。
+
+```text
+Browser
+   ↓ HTTPS / WSS
+HAProxy・nginxなど
+   ↓
+CloudXR Runtime
+```
+
+自己署名証明書は、ヘッドセット側で信頼されず接続に失敗することがあります。本番では信頼された認証局の証明書を使い、WebページだけでなくWebSocket、シグナリング、必要なメディア経路がすべて到達できることを確認します。
+
+## 実機検証のチェックポイント
+
+CloudXR.jsの接続テストでは、「映像が出た」だけで完了にしないことが重要です。少なくとも次を確認します。
+
+### ネットワーク
+
+- クライアントからシグナリング用のアドレスとポートへ到達できるか
+- WebRTCで使うメディア経路がfirewallやNATに遮断されていないか
+- HTTPSページから安全でないWebSocketへ接続するmixed contentが発生していないか
+- 平均帯域だけでなく、往復遅延、ジッター、パケット損失が安定しているか
+- Wi-Fiではアクセスポイントとの距離、混雑、帯域を変えて再現性を確認したか
+
+### 映像と性能
+
+- 左右眼の映像、向き、視野が正しいか
+- 頭を動かしたときに映像が遅れて見えないか
+- 解像度、フレームレート、ビットレートがネットワーク能力に対して過大でないか
+- サーバー側の描画時間、エンコード時間、GPU使用率に余裕があるか
+- 長時間接続でフレーム落ちやメモリ増加が起きないか
+
+### 入力とセッション
+
+- 6DoFの頭部姿勢がOpenXRアプリケーションへ反映されるか
+- 左右コントローラー、ボタン、trigger、thumbstickが正しく対応するか
+- optional featureがない環境でもセッションを開始できるか
+- ヘッドセットを外したとき、タブを隠したとき、XRセッションを終了したときに切断処理が走るか
+- 再接続時に古いセッションやWebRTC接続が残らないか
+
+### セキュリティと運用
+
+- CloudXR Runtimeの管理ポートを不要に公開していないか
+- 接続先アドレスや認証情報をリポジトリへ直接書いていないか
+- 利用者ごとのセッション分離とGPU割り当てを設計しているか
+- 接続ログに個人を特定できる入力情報を残しすぎていないか
+- 同時接続数に対するGPU、エンコーダー、ネットワークの上限を計測したか
+
+## トラブルシューティング
+
+### XR開始ボタンが機能しない
+
+ページがsecure contextとして認識されているか、ブラウザが`immersive-vr`をサポートしているか、XRセッション開始がユーザー操作から呼ばれているかを確認します。デスクトップでのIWER表示と実機のWebXR対応は分けて考えます。
+
+### Runtimeへ接続できない
+
+サーバーアドレス、シグナリングポート、media address/port、device profile、firewall、リバースプロキシを順に確認します。ブラウザの開発者ツールでは、証明書エラー、mixed content、WebSocket切断を最初に探します。
+
+### 接続するが映像が表示されない
+
+OpenXRアプリケーションがサーバー上で実際に描画しているか、ストリーム開始コールバックが呼ばれたか、対応コーデックが選ばれたかを確認します。最初は解像度、フレームレート、ビットレートを下げ、単純なサーバーアプリケーションで再現させます。
+
+### 映像は出るが操作が合わない
+
+reference space、コントローラーの左右、OpenXR action mapping、トラッキング送信の呼び出し頻度を確認します。ブラウザ側の`XRFrame`だけでなく、サーバーアプリケーションが受け取ったposeとactionもログで比較すると切り分けやすくなります。
+
+### React Three FiberのUIが崩れる
+
+CloudXR描画の前後でWebGL stateを正しく保存・復元しているか、描画順、viewport、framebuffer、depth test、blendの状態を確認します。まずCloudXR映像だけ、次に単純なUI、最後にpost-processingという順に機能を戻します。
+
+## CloudXR.jsを選ぶ判断基準
+
+CloudXR.jsが向いているのは、次のようなプロジェクトです。
+
+- すでにOpenXR対応のデスクトップアプリケーションがある
+- Omniverse、Isaac Lab、独自シミュレーションなど、サーバーGPUで動かしたい処理がある
+- クライアントへ大規模な3Dアセットを配布したくない
+- 管理されたネットワーク内で高品質なXR可視化を提供したい
+- Webブラウザを入口にしながら、端末性能を超える描画を行いたい
+
+一方、次の条件ではクライアントレンダリング型WebXRも比較すべきです。
+
+- 不特定多数へURLだけで広く配布したい
+- GPUサーバーの同時接続コストを避けたい
+- 通信が不安定な環境やオフラインでも動かしたい
+- 映像ではなく、ブラウザ上で3DオブジェクトやDOMへ直接アクセスしたい
+- 低遅延な入力や端末内処理を最優先したい
+
+技術検証では、画質だけでなく「1セッションあたりのGPUコスト」「許容できるネットワーク遅延」「同時接続数」「WebXR機能と入力の対応範囲」まで測ると、方式を判断しやすくなります。
+
+## まとめ
+
+CloudXR.jsは、WebXRブラウザをサーバー側のOpenXRアプリケーションへ接続するストリーミングSDKです。
+
+```text
+OpenXR Application
+        ↓
+Server Rendering
+        ↓
+CloudXR Runtime / WebRTC
+        ↓
+CloudXR.js
+        ↓
+WebXR Browser
+```
+
+実装の中心は、WebXRセッションとWebGL layerを準備し、CloudXRセッションへ接続したうえで、XRフレームごとにトラッキング情報を送り、受信映像を描画する処理です。
+
+```typescript
+createSession();
+connect();
+sendTrackingStateToServer();
+render();
+```
+
+仕組みを理解するならSimple WebGLサンプル、CloudXR映像へブラウザ側の3D UIを組み合わせるならReact Three Fiberサンプルから追うと分かりやすいでしょう。
+
+CloudXR.jsは、OpenUSDやglTFをWeb向けへ変換するツールではありません。高品質なサーバーレンダリングとWebXRのデバイスアクセスを組み合わせる仕組みです。導入時は、SDKのAPIだけでなく、対応するRuntime、OpenXRアプリケーション、secure context、WebRTCのネットワーク経路、GPUの収容設計までを1つのシステムとして検証する必要があります。
+
+## 参照
+
+- [NVIDIA CloudXR.js Documentation](https://docs.nvidia.com/cloudxr-sdk/cloudxr-js/)
+- [NVIDIA CloudXR.js Requirements](https://docs.nvidia.com/cloudxr-sdk/cloudxr-js/requirements.html)
+- [NVIDIA CloudXR.js Simple WebGL Sample Workflow](https://docs.nvidia.com/cloudxr-sdk/cloudxr-js/simple-sample.html)
+- [NVIDIA CloudXR.js React Sample Workflow](https://docs.nvidia.com/cloudxr-sdk/cloudxr-js/react-sample.html)
+- [NVIDIA CloudXR.js API Reference](https://docs.nvidia.com/cloudxr-sdk/cloudxr-js/api/)
+- [NVIDIA cloudxr-js-samples](https://github.com/NVIDIA/cloudxr-js-samples)
+- [NVIDIA CloudXR SDK Release Notes](https://docs.nvidia.com/cloudxr-sdk/release_notes/release_notes.html)
+
+## note用タグ候補
+
+`#WebXR` `#CloudXR` `#NVIDIA` `#WebRTC` `#OpenXR` `#Omniverse` `#ReactThreeFiber` `#BANGEO`
