@@ -36,6 +36,56 @@ draft: false
 - **禁止**: 文字、数字、透かし、商標ロゴ
 - 3:2 横長。縮小表示でも主題が判別できる構図
 
+### Codex Image生成コマンド（gpt-image-2 / codex exec）
+
+このマシンでは `codex` CLI（`codex exec`）から `image_gen`（gpt-image-2）を呼んでサムネイルを生成する。実行時の既知の癖と回避策:
+
+1. **`--ignore-user-config` を必ず付ける**
+   `~/.codex/config.toml` はCodexデスクトップアプリ用の設定（`model_provider = "ollama-launch-codex-app"` 等）が入っており、素の `codex exec` からは解決できず `Model provider ... not found` で落ちる。このファイルは他プロジェクトとも共有のグローバル設定なので編集しない。`--ignore-user-config` を付けて無視すれば、ChatGPTログインでそのまま使えるデフォルトのprovider/modelにフォールバックする。
+
+2. **`codex exec` は非対話実行のため書き込み不可（sandbox: read-only固定）**
+   `--sandbox workspace-write` を付けても、`codex exec` のバナーは `sandbox: read-only` / `approval: never` のまま変わらない。つまり `codex` 自身にリポジトリへファイルをコピーさせることはできない。`--dangerously-bypass-approvals-and-sandbox` で回避できるが、不要なリスクを増やすだけなので使わない。
+   一方 `image_gen` ツールの出力自体はこのshell sandboxの外（Codexのツール管理領域）に保存されるため、画像生成そのものは成功する。保存先は `~/.codex/generated_images/<session-id>/<file-id>.png`。
+
+3. **生成後はClaude側のBashで手動コピーする**
+
+   ```bash
+   codex exec -C "<repo-root絶対パス>" --ignore-user-config --sandbox workspace-write "<下の生成プロンプトを含む指示>"
+
+   # 完了後、最新の生成画像を探してリポジトリへコピー（複数セッションが並ぶ場合は転記されたsession idで特定する）
+   ls -t ~/.codex/generated_images/*/*.png | head -1
+   cp "<上で見つけたパス>" "apps/blog/public/assets/{tech,news}/<name>.png"
+   ```
+
+   コピー後は必ず Read で画像を目視確認し、blob-v1のスタイル・3:2・文字/ロゴなしを満たしているか確認してから次に進む。
+
+4. **生成プロンプトのテンプレート**（キャラクターは固定、小道具とつながりの演出だけ記事テーマに合わせる）
+
+   ```
+   Cute flat vector mascot illustration, consistent children's-book style.
+   Two round pastel blob characters with dark gray rounded outline strokes (2-3px),
+   simple black facial features (closed happy curved-line eyes, small open smile),
+   pink circular blush cheeks, short stubby arms and feet.
+   Left blob mint green, right blob sky blue wearing a simple white rounded VR headset strap.
+   [ここに記事テーマに合わせた小道具・2キャラの関係性を1-2文で追加する]
+   Background: soft pastel gradient mint green (top-left) to light lavender (bottom-right),
+   soft circular glow behind characters, soft drop-shadow ellipse under each character.
+   Scatter small thin-outline (2px) floating isometric shapes: cubes, hexagon, gear, triangle
+   in mint/sky-blue/lavender/soft orange outlines.
+   Centered symmetric composition readable at small thumbnail size.
+   Absolutely no text, no numbers, no watermark, no logos, no brand names anywhere.
+   ```
+
+   サイズは `1536x1024`（3:2）を指定する。
+
+5. **`optimize:images` は `public/` 全体を再走査する点に注意**
+   `pnpm -C apps/blog run optimize:images` は新規ファイルだけでなく既存のPNG/WebPも丸ごと再圧縮する。実行後は必ず `git status --short` で差分を確認し、今回のサムネイル以外が変更されていたら `git checkout -- <path>` で対象ファイルだけ戻す。
+   （dev serverらしき常駐プロセスが一部アセットを継続的に再生成する環境では、戻しても差分が復活することがある。その場合は自分の変更ではないので追いかけずに放置してよい）
+
+6. **登録**
+   - 記事frontmatterの `thumbnail` をWebPパスに更新する
+   - `.claude/skills/bangeo-article-authoring/thumbnails.json` の `articles`（experimentsの場合は `experiments`）配列に `{ slug, filename, assetDir, thumbnail }` を追記する
+
 ### 配置
 
 1. PNG を `apps/blog/public/assets/{tech,news}/` に置く
