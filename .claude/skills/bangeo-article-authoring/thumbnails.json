@@ -151,6 +151,12 @@
 			"filename": "sneeze-open-metaverse-browser-engine",
 			"assetDir": "tech",
 			"thumbnail": "/assets/tech/sneeze-open-metaverse-browser-engine.webp"
+		},
+		{
+			"slug": "nvidia-cloudxr-js-webxr-openxr-streaming",
+			"filename": "nvidia-cloudxr-js-webxr-openxr-streaming",
+			"assetDir": "tech",
+			"thumbnail": "/assets/tech/nvidia-cloudxr-js-webxr-openxr-streaming.webp"
 		}
 	],
 	"experiments": [
