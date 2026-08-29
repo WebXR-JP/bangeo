@@ -268,11 +268,11 @@ body {
 }
 
 /* ========================================
-   Code blocks — Rose Pine Moon palette
-   Base: #232136  Surface: #2a273f
-   Muted: #6e6a86  Subtle: #908caa
-   Text: #e0def4  Love: #eb6f92
-   Gold: #f6c177  Iris: #c4a7e7
+   Code blocks — Rose Pine Dawn palette (light)
+   Base: #faf4ed  Surface: #fffaf3
+   Muted: #9893a5  Subtle: #797593
+   Text: #575279  Love: #b4637a
+   Gold: #ea9d34  Iris: #907aa9  Pine: #286983
    ======================================== */
 
 /* Figure wrapper for code blocks */
@@ -280,10 +280,10 @@ body {
 	margin: 1.5rem 0;
 	border-radius: 0.875rem;
 	overflow: hidden;
-	border: 1px solid rgba(110, 106, 134, 0.15);
+	border: 1px solid rgba(152, 147, 165, 0.3);
 	box-shadow:
-		0 4px 24px rgba(35, 33, 54, 0.18),
-		0 1px 3px rgba(35, 33, 54, 0.1);
+		0 4px 24px rgba(87, 82, 121, 0.08),
+		0 1px 3px rgba(87, 82, 121, 0.06);
 }
 
 /* Header with language or title */
@@ -292,21 +292,21 @@ body {
 	align-items: center;
 	justify-content: space-between;
 	padding: 0.5rem 1.25rem;
-	background: #2a273f;
-	border-bottom: 1px solid rgba(110, 106, 134, 0.12);
+	background: #f2e9e1;
+	border-bottom: 1px solid rgba(152, 147, 165, 0.25);
 }
 .code-block-title {
 	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 	font-size: 0.75rem;
 	font-weight: 600;
-	color: #908caa;
+	color: #797593;
 	letter-spacing: 0.02em;
 }
 .code-block-lang {
 	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 	font-size: 0.65rem;
 	font-weight: 700;
-	color: #6e6a86;
+	color: #9893a5;
 	text-transform: uppercase;
 	letter-spacing: 0.08em;
 }
@@ -342,6 +342,8 @@ body {
 	padding: 0;
 	border-radius: 0;
 	border: none;
+	/* plaintext ブロックはShikiが色を付けないため、インラインコードの赤を継承しないよう明示する */
+	color: #575279;
 }
 
 /* Shiki spans: respect inline colors from Shiki */
@@ -361,10 +363,10 @@ body {
 	justify-content: center;
 	width: 2rem;
 	height: 2rem;
-	background: rgba(110, 106, 134, 0.1);
-	border: 1px solid rgba(110, 106, 134, 0.15);
+	background: rgba(152, 147, 165, 0.12);
+	border: 1px solid rgba(152, 147, 165, 0.25);
 	border-radius: 0.375rem;
-	color: #6e6a86;
+	color: #797593;
 	cursor: pointer;
 	opacity: 0;
 	transition: all 0.15s ease;
@@ -377,9 +379,9 @@ body {
 	opacity: 1;
 }
 .code-copy-btn:hover {
-	background: rgba(196, 167, 231, 0.15);
-	color: #e0def4;
-	border-color: rgba(196, 167, 231, 0.25);
+	background: rgba(144, 122, 169, 0.15);
+	color: #575279;
+	border-color: rgba(144, 122, 169, 0.3);
 }
 .code-copy-btn:active {
 	transform: scale(0.92);
@@ -392,8 +394,8 @@ body {
 /* Line highlighting: // [!code highlight] — Gold accent */
 .tech-article-content pre .line.highlighted,
 .code-block-figure pre .line.highlighted {
-	background: rgba(246, 193, 119, 0.1);
-	border-left: 3px solid #f6c177;
+	background: rgba(234, 157, 52, 0.12);
+	border-left: 3px solid #ea9d34;
 	margin-left: -1.5rem;
 	padding-left: calc(1.5rem - 3px);
 	margin-right: -1.5rem;
@@ -403,8 +405,8 @@ body {
 /* Diff: // [!code ++] and // [!code --] */
 .tech-article-content pre .line.diff.add,
 .code-block-figure pre .line.diff.add {
-	background: rgba(62, 143, 176, 0.1);
-	border-left: 3px solid #3e8fb0;
+	background: rgba(40, 105, 131, 0.08);
+	border-left: 3px solid #286983;
 	margin-left: -1.5rem;
 	padding-left: calc(1.5rem - 3px);
 	margin-right: -1.5rem;
@@ -412,8 +414,8 @@ body {
 }
 .tech-article-content pre .line.diff.remove,
 .code-block-figure pre .line.diff.remove {
-	background: rgba(235, 111, 146, 0.1);
-	border-left: 3px solid #eb6f92;
+	background: rgba(180, 99, 122, 0.1);
+	border-left: 3px solid #b4637a;
 	margin-left: -1.5rem;
 	padding-left: calc(1.5rem - 3px);
 	margin-right: -1.5rem;
@@ -437,7 +439,7 @@ body {
 /* Word highlight: // [!code word:xxx] — Iris accent */
 .tech-article-content pre .highlighted-word,
 .code-block-figure pre .highlighted-word {
-	background: rgba(196, 167, 231, 0.18);
+	background: rgba(144, 122, 169, 0.15);
 	border-radius: 0.2rem;
 	padding: 0.1rem 0.2rem;
 	margin: -0.1rem -0.2rem;
@@ -448,9 +450,9 @@ body {
 	border-radius: 0.875rem;
 	margin: 1.5rem 0;
 	box-shadow:
-		0 4px 24px rgba(35, 33, 54, 0.18),
-		0 1px 3px rgba(35, 33, 54, 0.1);
-	border: 1px solid rgba(110, 106, 134, 0.15);
+		0 4px 24px rgba(87, 82, 121, 0.08),
+		0 1px 3px rgba(87, 82, 121, 0.06);
+	border: 1px solid rgba(152, 147, 165, 0.3);
 }
 /* Lists */
 .tech-article-content ul {

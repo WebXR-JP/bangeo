@@ -42,7 +42,7 @@ session.requestAnimationFrame(function onFrame(time, frame) {
 export default async function WebXRExplainerPage() {
 	const minimalCodeHtml = await codeToHtml(MINIMAL_CODE, {
 		lang: "javascript",
-		theme: "rose-pine-moon",
+		theme: "rose-pine-dawn",
 	});
 	return (
 		<div className="relative px-4 md:px-6 py-16 md:py-20 max-w-5xl mx-auto overflow-hidden">
