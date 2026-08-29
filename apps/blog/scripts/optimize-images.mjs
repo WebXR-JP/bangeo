@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { readdir, rename, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -52,9 +53,12 @@ async function writeOptimized(filePath, pipeline) {
 	await rename(tempPath, filePath);
 }
 
-async function writeWebpVariant(filePath) {
+async function writeWebpVariant(filePath, { force = false } = {}) {
 	if (!/\.(png|jpe?g)$/i.test(filePath)) return;
 	const webpPath = filePath.replace(/\.(png|jpe?g)$/i, ".webp");
+	// 既にwebpがあるなら再生成しない（毎ビルドでコミット済みwebpが書き換わるのを防ぐ）。
+	// 元画像をリサイズした直後だけ force で作り直す。
+	if (!force && existsSync(webpPath)) return;
 	await sharp(filePath).webp({ quality: 80 }).toFile(webpPath);
 	console.log(
 		`updated webp variant: ${path.relative(publicDir, webpPath).replace(/\\/g, "/")}`,
@@ -86,6 +90,7 @@ async function optimizeFile(filePath) {
 
 	if (ext === ".gif") {
 		const webpPath = filePath.replace(/\.gif$/i, ".webp");
+		if (existsSync(webpPath)) return;
 		await sharp(filePath, { animated: false })
 			.resize(maxWidth, null, { withoutEnlargement: true })
 			.webp({ quality: 80 })
@@ -110,7 +115,7 @@ async function optimizeFile(filePath) {
 		sharp(filePath).resize(maxWidth, null, { withoutEnlargement: true }),
 	);
 	console.log(`resized ${relative} (${Math.round(info.size / 1024)}KB)`);
-	await writeWebpVariant(filePath);
+	await writeWebpVariant(filePath, { force: true });
 }
 
 await ensureNoImagePlaceholder();
