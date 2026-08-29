@@ -81,7 +81,7 @@ export default defineConfig({
 			[
 				rehypeShiki,
 				{
-					theme: "rose-pine-moon",
+					theme: "rose-pine-dawn",
 					transformers: [
 						transformerNotationDiff(),
 						transformerNotationHighlight(),
