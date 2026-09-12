@@ -13,7 +13,7 @@ metadata:
 
 ## 配置と動作の条件
 
-- ソースは `apps/<demo-name>/`。配信ビルドは `apps/blog/public/demo/<demo-name>/`、URLは `/demo/<demo-name>/`。
+- ソースは `apps/<demo-name>/`。配信ビルドは `apps/blog/public/demo/<demo-name>/`。URLは配信ルートに合わせ、`/demo/<demo-name>/` または明示的なHTMLパスを使う。
 - Viteに `base: './'` を設定する。JS内のモデルや画像も相対URLか `import.meta.env.BASE_URL` を使い、ビルド後の参照を確認する。
 - MDXは `apps/blog/content/experiments/<demo-name>.mdx`。`link` と画像を実在する配信先に合わせる。スキーマと表示先は現行の `apps/blog/source.config.ts` とルート実装を確認する。
 - 既存デモの修正ではその依存バージョンとlockfileを維持する。新規生成時は利用可能なCLIオプションを確認し、使うエージェントに合う設定を選ぶ。
@@ -21,7 +21,7 @@ metadata:
 
 ## 必要な参照
 
-[reference.md](reference.md) はCLI、ECS、UI、WebXR仕様リンクを調べるときに該当節だけ読む。記載されたバージョンやMCPツールの存在は現環境で確認する。
+[reference.md](reference.md) は既存実装、SDK調査、WebXR機能、配信の該当節だけ読む。登録・導線を変更する場合はルートの `docs/agent-guides/demos.md` を確認する。
 
 既存ソースの例は `apps/xr-mesh-export/`。登録形式は現在のMDX・スキーマを優先する。
 

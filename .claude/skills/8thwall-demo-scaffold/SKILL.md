@@ -22,7 +22,7 @@ metadata:
 
 ## 必要な参照
 
-[reference.md](reference.md) の効果・チャンク・HTML例・トラブルシューティングを必要に応じて読む。対応表は現状の保証ではなく調査の入口として扱う。
+[reference.md](reference.md) の効果・チャンク・HTML例・トラブルシューティングを必要に応じて読む。MDX登録・導線を変更する場合はルートの `docs/agent-guides/demos.md` を確認する。
 
 既存HTMLを使う場合は対象効果に近い実装だけを確認する。存在しない過去デモをコピー元として要求しない。
 

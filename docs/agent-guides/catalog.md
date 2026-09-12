@@ -1,17 +1,19 @@
-## /experiments 仕様カタログとスターターコードビルダー
+# WebXR仕様カタログとスターター
 
-`/experiments` は「1行 = 1つのWebXR仕様」のカタログページ。データは `apps/blog/src/lib/webxr-spec-catalog.ts` に集約し、UIは `apps/blog/src/components/webxr-spec-list.tsx` が担う。
+以下のパスはリポジトリルート基準。
 
-- セクションは「セッションモード」「モジュール」「体験スペース（Reference Spaces）」の3つ。分類は `webxr-spec-list.tsx` の `sessionIds` / `referenceSpaceIds` で行う
-- 対応判定はブラウザのAPI実装有無と `isSessionSupported` による簡易チェックで、ロジックは `specChecks` にある。バッジは「対応 / 未対応」の2値のみ（「実機」等の中間状態は置かない）
-- 各仕様エントリは `featureName`（`requestSession` に渡す文字列）、`description`（主語と述語が通る日常語の1行）、`whyNote`（無いと何に困るか）、`demos`（実在確認済みURLのみ）を持つ
-- `demos` の `label` は提供元（WebXR Samples / Three.js / Babylon.js / A-Frame / PlayCanvas / BANGEO）。同一提供元から複数載せるときは `name` で表示名を分ける
-- デモURLは掲載前に必ず実在確認する（リンク切れ厳禁）。W3C成熟度を変更したときはファイル冒頭コメントの確認日を更新する
-- ページ最下部の「スターターコードを組み立てる」は、モード・機能・体験スペースの選択から `requestSession` の開始コードを生成するプレイグラウンド。未対応端末でもコードの学習が完結することを重視する
+| 役割 | 参照先 |
+| --- | --- |
+| /experimentsのページ | `apps/blog/src/app/experiments/page.tsx` |
+| 仕様・参照URL・デモリンク | `apps/blog/src/lib/webxr-spec-catalog.ts` |
+| 分類、簡易判定、構成選択 | `apps/blog/src/components/webxr-spec-list.tsx` |
+| セッション開始・終了、機能ごとの処理 | `apps/blog/src/lib/webxr-starter/session.ts`、`modules/`、`types.ts` |
+| 実験結果と匿名送信 | `docs/experiment-analytics.md` |
 
+カタログはsession mode、モジュール、Reference Spaceを扱う。表示区分や型はコードを正とし、文書に固定の対応表を複製しない。MDXを追加してもこのカタログへ自動掲載されない。
 
-## 変更範囲
+デモリンクは実在するURLと実装内容を確認する。WebXR APIを使う実証デモを該当項目に紐づけ、カメラベースWebARは含めない。空欄を埋めるための疑似デモは作らない。
 
-カタログとスターターコードビルダーを中心に、依頼された機能や不具合を改善する。デモ数を増やすことや空欄を埋めることは目標にしない。APIを呼ばない模擬表示を実機能のデモと表示しない。
+API存在確認、isSessionSupported、セッションで許可された機能、実データ取得を区別する。簡易判定から実機動作を保証せず、unknownを検証成功として扱わない。UIの表示と送信時の状態変換はそれぞれの実装を確認する。
 
-旧ガイドの「ビルダーからの体験開始は未着手」は現状と一致しない。実装は `apps/blog/src/lib/webxr-starter/` と呼び出し側を確認する。履歴にある削除済みデモを指示だけで復活させない。
+スターターを変更するときは構成選択から開始・終了・再開始まで確認し、未対応の構成でもコードの学習ができるようにする。実測情報を変更する場合は匿名レポートとの対応も確認する。

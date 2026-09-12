@@ -1,191 +1,52 @@
-# BANGEO 記事公開前チェック
+# 記事制作リファレンス
 
-このファイルは公開リポジトリに置くエージェント/コントリビューター向けガイド。秘密情報や非公開の運用情報は書かない。
+以下のリポジトリ内パスはルート基準。変更内容に関係する節だけ参照する。
 
 ## MDX frontmatter
 
-既存記事に合わせて次の形にする。
+定義は `apps/blog/source.config.ts` の `blogSchema`。新規記事は `apps/blog/content/blog/` に置く。titleは必須で、説明・日付・分類・タグ・著者・画像などは内容に合わせて設定する。
 
-```yaml
----
-title: "..."
-description: "..."
-date: "YYYY年M月D日"
-category: "NEWS"
-tags:
-  - "WebXR"
-author: "BANGEO Team"
-thumbnail: "/assets/tech/example.webp"
-draft: false
----
-```
+日付文字列は `"YYYY-MM-DD"` または `"YYYY年M月D日"`。更新時は初回公開日を保持してupdatedを設定する。draftの扱いは記事ページと一覧の実装を確認する。公開用の記事を下書きのまま残したり、未完成の内容を公開扱いにしたりしない。
 
-- `NEWS`: リリース、発表、ブラウザ更新、仕様ステータスの変化
-- `TECH`: 技術解説、実装背景、仕様比較
-- `GUIDE`: 手順、チェックリスト、導入方法
+NEWSは発表や更新、TECHは技術解説、GUIDEは手順を目安とし、既存の分類を使う。記事本文に作業用スキーマや架空の検証結果を入れない。
 
 ## サムネイル
 
-### スタイル（blob-v1）
+スタイルと画像台帳は同ディレクトリの [thumbnails.json](thumbnails.json)。blob-v1の配色・キャラクター・3:2構図に合わせ、文字・透かし・商標ロゴを入れない。台帳のstyleReferenceが指す実画像を確認する。
 
-参照テイスト: `unity-webxr-build-guide` / `webxr-colocation-meta-quest`
+PNG原本とWebPを `apps/blog/public/assets/tech/` または `apps/blog/public/assets/news/` に保存し、frontmatterのthumbnailはWebPを優先する。台帳の該当articles / experimentsエントリを更新する。既存画像を参照するだけなら再生成しない。
 
-- パステル blob マスコット（mint green + sky blue）、ピンクチーク、白 VR ヘッドセット
-- 淡い mint → lavender グラデ背景、浮遊する等角キューブ・ギア・六角形
-- ダークグレーの丸みあるアウトライン、中央にソフトグロー
-- **禁止**: 文字、数字、透かし、商標ロゴ
-- 3:2 横長。縮小表示でも主題が判別できる構図
+画像生成は現在使える機能を使い、返された画像を明示的に特定して目視確認する。他セッションを含む「最新ファイル」で選ばない。
 
-### 画像生成と管理
-
-現在の環境で利用可能な画像生成機能を使う。モデル名・CLIオプション・保存パスを特定マシンの経験から固定しない。グローバル設定や承認・sandbox設定を変更しない。
-
-生成に返された画像を明示的に特定し、目視確認して記事の保存先へ配置する。他セッションを含む「最新画像」の検索で選ばない。PNGとWebPを揃え、frontmatterにはWebPを優先する。
-
-`pnpm -C apps/blog run optimize:images` は既存画像にも影響する。実行前後の差分を比較し、この操作が作った対象外差分だけを除く。既存のユーザー変更は戻さない。
-
-画像を追加・変更したときは同ディレクトリの `thumbnails.json` の該当 `articles` / `experiments` エントリも更新する。画像生成が利用できなければ、内容を正しく伝える既存画像を選ぶか不足を明示する。
-
-### 配置
-
-1. PNG を `apps/blog/public/assets/{tech,news}/` に置く
-2. 同名の WebP を用意する（`pnpm -C apps/blog run optimize:images` で生成可）
-3. frontmatter の `thumbnail` を WebP パスに更新
-
-### 新規記事
-
-1. 近いテーマの既存記事とサムネイルを確認する
-2. 画像を配置し frontmatter を更新する
-3. `pnpm -C apps/blog build` で参照切れがないか確認する
-
-## WebXR / WebGPU記事で確認すること
-
-検証項目のテンプレートは、原則としてこのガイドに置く。記事本文には、具体的なデモや検証結果の再現に必要な場合だけ、読者向けの情報として短く入れる。
-
-```md
-### 検証環境
-
-- Engine: PlayCanvas Engine v2.19.7
-- Browser: Quest Browser 146.x / Chrome Stable / Chrome Canary
-- Device: Meta Quest 3 / Android / Desktop
-- Rendering path: WebGL / WebGPU
-- XR mode: immersive-vr / immersive-ar / inline
-- Input: controllers / hand tracking / gamepad without thumbstick axes
-- Depth: enabled / disabled
-- Fallback: WebGPU unavailable時はWebGLへ切り替え
-```
-
-記事本文に入れるかどうかは、読者の再現性に直接役立つかで判断する。編集者向け・エージェント向けの作業メモとしては入れない。
+`pnpm -C apps/blog run optimize:images` はpublic内の画像を走査する。画像サイズによって原本も変更され、既存WebPは条件によって更新されないため、同名の原本を差し替えた場合はWebPにも変更が反映されたか確認する。詳細は `apps/blog/scripts/optimize-images.mjs`。操作前後の差分を比較し、ユーザーの既存変更を戻さない。
 
 ## 公開本文の読者向けチェック
 
-調査メモ、イベントウォッチ、PR本文、エージェント出力をそのままMDXに移すと、読者ではなく編集者やAIエージェントに向いた文章が混ざりやすい。公開前に次を確認する。
+発表内容、開発者への影響、利用条件を読者向けに説明する。出典は公式リリースノート、仕様、公式リポジトリを優先し、発表日と実際に利用可能になった日を区別する。
 
-### 残さない表現
+調査メモの「BANGEO向け」「回収メモ」「重要度」「confidence」「次回確認」などを記事へ転記しない。たとえば「BANGEOで更新すべきページ」は本文から外し、発表の技術的な意味を説明する。語の一律禁止ではなく、編集作業の説明が混ざっていないかを確認する。
 
-- `回収メモ`、`拾う`、`候補`、`深追いしない` など、調査作業を説明する語
-- `BANGEO向け`、`BANGEOでの評価`、`BANGEO内の置き場所` など、サイト運用側の判断
-- `重要度`、`confidence`、`source_type`、`recommended_action`、`affected_bangeo_pages` など、エージェント出力の構造化項目
-- `この記事から派生できる記事`、`次回確認`、`更新すべきページ` など、編集計画そのもの
-- `扱うのが安全`、`書くべきではない` のような執筆判断。必要なら「現時点では断定できない」「実装状況を分けて確認する」と読者向けに言い換える
+## WebXR / WebGPU記事
 
-### 言い換えの型
+再現に必要なEngine・ブラウザ・端末・バージョン・session modeを記載する。サンプルの固定バージョンを確認済み環境として流用しない。公式記載と自分の検証結果を分ける。
 
-| 内部メモ寄り | 公開本文向け |
-| --- | --- |
-| AWEからWebXR関連だけを回収する | AWEの発表からWebXR開発者に関係する論点を整理する |
-| BANGEOでは深追いしない | この記事ではWeb技術と接続する話題に絞る |
-| 見るべきポイント | 開発者が確認したいポイント |
-| BANGEOでの評価 | 現時点での見方 |
-| WebXRの代替として扱わない方が安全 | WebXRとはレイヤーが違うため、代替ではなく周辺構想として分けて読む |
-| 派生できる記事 | 関連して理解したいテーマ |
-
-### 仕上げ検索
-
-記事公開前に対象MDXで次の語を検索し、読者向けの文脈になっているか確認する。
-
-```bash
-rg -n "回収|拾う|候補|BANGEO向け|BANGEOでの評価|置き場所|重要度|confidence|source_type|recommended_action|affected_bangeo_pages|派生|更新すべき|TODO|内部|社内" apps/blog/content/blog/<slug>.mdx
-```
+APIの存在、セッションへの機能許可、実データ取得は別の状態。ブラウザ対応や測定結果をこれらの間で読み替えない。未検証の実機動作を保証しない。
 
 ## PlayCanvas / WebXRデモの確認項目
 
-- PlayCanvas Engineのバージョンを固定している
-- `navigator.gpu` と `requestAdapter()` の失敗時に停止しない
-- WebGPU不可の場合にWebGLへフォールバックする
-- `navigator.xr` と `isSessionSupported()` を確認している
-- WebXR不可の場合に通常3D表示または説明UIへ切り替える
-- iframe埋め込みでXRが必要な場合は `allow="camera; microphone; xr-spatial-tracking; fullscreen"` を設定する
-- iframe内XRが不安定な環境向けに別タブリンクを用意する
-- XR入力処理でthumbstick axesが必ず存在する前提にしない
-- depth/occlusionデモはdepthなしでも表示できる
-- HTML-in-Canvasデモは `device.supportsHtmlTextures` を確認し、fallbackを用意する
+実装例が使う機能に限って確認する。
 
-## 用語とSEO：公的技術名称を優先する
+- WebGPUを使う場合は初期化失敗時の動作を確認する。WebGLへの切り替えが目的に合わなければ、未対応の理由を表示する。
+- WebXRを使う場合は要求するモード・機能と失敗時の表示を確認する。入力軸やDepthデータが常に取得できると仮定しない。
+- iframeのPermissions Policyは必要な機能に合わせる。XRという理由だけでcameraやmicrophoneを追加しない。別タブで起動する導線も確認する。
+- HTML-in-Canvasなど実験機能は、導入済みEngineの公式APIと対象ブラウザの実装を確認する。
 
-BANGEOは技術者が調べて使うサイトなので、記事・デモの用語は検索クエリに乗る公的な技術名称を優先する。和製語・独自の言い換えは避ける。
+## 用語とSEO
 
-### 優先する公的名称
+WebXR、Hit Test、Hand Input、Depth Sensingなど、公的な名称を保ち、必要なら初出に自然な日本語の説明を添える。日本語を禁止するための置換表は作らない。API識別子、標準モジュール名、メーカー独自機能を区別する。
 
-| 分類 | 公的名称 | 避ける和製語 |
-| --- | --- | --- |
-| WebXR ReferenceSpaceType | `local` / `local-floor` / `bounded-floor` / `unbounded` | ルームスケール境界、境界取得 |
-| WebXR プロパティ | `boundsGeometry` / `featurePointCloud` / `motionVectorTexture` / `depthStencilTexture` | 境界形状、3D特徴点、動き |
-| WebXR 機能Module | `Hit Test Module` / `Anchors Module` / `Hand Input Module` / `Depth Sensing Module` / `Lighting Estimation Module` / `DOM Overlays Module` / `Layers Module` | ヒットテスト、ヒット判定、空間アンカー、ハンドトラッキング、奥行き合成、奥行き表現 |
-| WebXR session mode | `inline` / `immersive-vr` / `immersive-ar` / `inline-stereo` | ページ内モード、没入型表示 |
-| WebXR Mesh | `XRMeshDetection` | シーンメッシュ、メッシュ取得 |
-| Quest 公式実装名 | `scene capture` / `room mesh` / `depth projection` / `app space warp` / `passthrough` / `Spatial Anchors` | 空間スキャン、ルームスキャン、奥行き、パススルー（MR）、空間アンカー |
-| 8th Wall 公式 | `world sensing` / `world tracking` / `SLAM` / `face mesh` / `face attachment` / `Face Effects` / `Image Targets` / `Sky Effects` / `World Effects` | ワールドトラッキング、特徴点、自動追従 |
-| 業界標準 | `occlusion` / `depth occlusion` / `MR合成` / `passthrough` / `fallback` / `polyfill` / `hit test` / `hand tracking` / `eye tracking` / `spatial mapping` / `spatial UI` / `co-presence` / `VR sickness` / `stereo rendering` / `foveated rendering` / `artifact` | 奥行き合成、代替表示、代替ライブラリ、ヒット判定、ハンドトラッキング、視線追跡、空間認識、空間UI、共存、酔い、ステレオレンダリング、描画崩れ、破綻 |
+タイトルは対象技術と記事で分かることを具体的に書く。タグは既存分類と公式名称に合わせる。仕様の候補・提案を標準化済みとして説明しない。
 
-### 和製語を使う場合のルール
+## 検証
 
-どうしても和製語を使う場合は公的名称を併記する。和製語単独では使わない。
-
-```
-✕ ハンドトラッキングに対応
-○ hand tracking（ハンドトラッキング）に対応
-```
-
-### 注釈の入れ方
-
-公的技術名称のうち読者に説明が必要なもの（仕様プロパティ名・Module名・メーカー実装名）は、初出箇所の直後または「用語メモ」セクションに1-2行の注釈を入れる。毎回ではなく記事内で1回（初出または用語メモ）でよい。
-
-```
-boundsGeometry（XRBoundedReferenceSpace の境界ジオメトリ。プレイエリアの外周を表す点列）
-depth projection（Quest Browser 146 で実装された WebXR Depth Sensing の実装名。depth テクスチャを使って仮想オブジェクトの前後関係を合成する）
-app space warp（Meta のレイトレーシング負荷軽減機能。motion vector と depth を使って前フレームから現在フレームを外挿する）
-scene capture（Quest の部屋形状取得機能。room mesh と semantic label をまとめて取得する）
-```
-
-### frontmatter tags
-
-`tags` にも和製語を入れない。`代替表示` / `奥行き` / `境界` のような和製語タグは、`fallback` / `occlusion` / `bounded-floor` のような公的名称に置き換える。
-
-### title と description
-
-`title` は技術者が検索クエリに入れる公的名称を前半に配置する。説明的な和製語タイトル（「〇〇ビューア」「〇〇デモ」「〇〇実験」）は、公的名称を先にした形に作り直す。
-
-```
-✕ ルームスケール境界ビューア
-○ WebXR Bounded Floor ビューア — boundsGeometry の可視化
-
-✕ Quest奥行き合成デモ
-○ WebXR Depth Occlusion デモ — Quest depth projection でMR合成を検証
-```
-
-## 公開記事に入れてよい注意書き
-
-```md
-WebGPU対応ブラウザであっても、端末、GPU、ドライバ、ブラウザバージョンによってWebGPU経路が無効化される場合があります。WebGPUが使えない場合にWebGLへフォールバックする設計にしておくと安全です。
-```
-
-```md
-このデモは実験的なWeb APIやブラウザ機能を含みます。Engine、ブラウザ、GPU、端末、入力デバイスの組み合わせによって動作が変わる場合があります。
-```
-
-## 仕上げ
-
-- `BANGEO用`, `BANGEO向け`, `更新すべき`, `TODO`, `内部`, `非公開`, `社内` などの語が記事に残っていないか確認する
-- 参照リンクが実在するか確認する
-- `pnpm -C apps/blog build` を実行できる場合は実行する
+MDX構文・スキーマ、変更した出典リンク、画像の実在と表示を確認する。ビルドだけではpublic内の画像URLや外部リンクの実在までは保証できない。表示に影響する変更は使える環境で画面も確認する。ビルドと差分確認の共通方針はルートのAGENTS.mdに従う。
