@@ -12,11 +12,15 @@ import {
 	type WebXREventStatus,
 	type WebXRRelevance,
 } from "@/data/webxr-events";
+import {
+	WEBXR_EVENT_FOCUS,
+	WEBXR_EVENT_FOCUS_LAST_UPDATED,
+} from "@/data/webxr-event-focus";
 
 export const metadata: Metadata = {
-	title: "WebXRイベントウォッチ｜Meta Connect・WWDC・AWE・XR Kaigi",
+	title: "WebXRイベントウォッチ｜国内XRイベント・Meta Connect・WWDC・XR Kaigi",
 	description:
-		"Meta Connect、Google I/O、Apple WWDC、AWE、W3C TPAC、XR Kaigiなど、WebXR / WebAR / Spatial Web 開発者が追うべきイベントと、BANGEOで更新されそうなページを整理しています。",
+		"国内XRイベント、Meta Connect、Google I/O、Apple WWDC、W3C TPACなど、WebXR / WebAR / Spatial Web 開発者が追うべきイベントと、BANGEOで更新されそうなページを整理しています。",
 	alternates: { canonical: "/events" },
 };
 
@@ -247,37 +251,79 @@ export default async function EventsPage({ searchParams }: EventsPageProps) {
 				</h1>
 				<p className="max-w-3xl text-sm font-medium leading-7 text-gray-600 md:text-base">
 					WebXR / WebAR / Spatial Web
-					開発者向けに、標準化・ブラウザ・国内XRイベント・デバイス展示を追跡しています。
+					開発者向けに、標準化・ブラウザ・国内XRイベント・デバイス展示を追跡しています。開催日だけでなく、出展者・セッション公開や会期後の公式資料まで確認します。
 				</p>
 				<p className="text-xs font-bold text-gray-400">
-					更新: {WEBXR_EVENTS_LAST_UPDATED}
+					国内重点更新: {WEBXR_EVENT_FOCUS_LAST_UPDATED} / 一覧データ: {WEBXR_EVENTS_LAST_UPDATED}
 				</p>
 			</header>
 
-			<section className="mb-6 rounded-3xl border border-amber-100 bg-amber-50/70 p-5">
-				<div className="grid gap-5 md:grid-cols-[1.2fr_0.8fr]">
-					<div className="space-y-3">
-						<p className="text-xs font-black uppercase tracking-[0.25em] text-amber-700">
-							2026-06-27 priority
+			<section className="mb-8 rounded-3xl border border-rose-100 bg-rose-50/60 p-5 md:p-6">
+				<div className="mb-5 flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+					<div>
+						<p className="text-xs font-black uppercase tracking-[0.25em] text-rose-700">
+							Japan XR Focus
 						</p>
-						<h2 className="text-xl font-black tracking-tight text-gray-950">
-							イベント後の発表回収に切り替え
+						<h2 className="mt-2 text-xl font-black tracking-tight text-gray-950 md:text-2xl">
+							いま追う国内XRイベント
 						</h2>
-						<p className="text-sm leading-7 text-gray-700">
-							AWE USA 2026、Google I/O 2026、WWDC26、XR・メタバース総合展
-							夏は「発表回収」として扱います。IVS2026とManufacturing World Tokyo
-							2026は7月1日開始の開催直前イベントとして、XR / Spatial AI / Web 3D
-							/ デジタルツインに絞って確認します。
+						<p className="mt-2 max-w-3xl text-sm leading-7 text-gray-700">
+							開催予定を並べるだけでなく、BANGEO読者が見るべきXRデバイス、Web技術、空間コンピューティング、会期後の公式資料まで追跡します。
 						</p>
 					</div>
-					<div className="rounded-2xl bg-white/80 p-4 text-sm shadow-xs">
-						<p className="font-black text-gray-950">次に重点確認</p>
-						<ul className="mt-2 space-y-2 text-gray-700">
-							<li>2026-06-30: IVS / Manufacturing World 直前確認</li>
-							<li>2026-07-04: IVS / Manufacturing World 発表回収</li>
-							<li>2026-07-15: Meta Connect / TPAC / CEATEC / TGS 確認</li>
-						</ul>
-					</div>
+					<p className="text-xs font-bold text-gray-500">
+						更新: {WEBXR_EVENT_FOCUS_LAST_UPDATED}
+					</p>
+				</div>
+
+				<div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+					{WEBXR_EVENT_FOCUS.map((event) => (
+						<article
+							key={event.title}
+							className="rounded-2xl border border-white bg-white/90 p-4 shadow-xs"
+						>
+							<div className="flex flex-wrap gap-2 text-[11px] font-black">
+								<span
+									className={
+										event.priority === "high"
+											? "rounded-full bg-rose-100 px-2.5 py-1 text-rose-700"
+											: "rounded-full bg-amber-100 px-2.5 py-1 text-amber-800"
+									}
+								>
+									{event.priority === "high" ? "重点" : "監視"}
+								</span>
+								<span className="rounded-full bg-gray-100 px-2.5 py-1 text-gray-700">
+									{event.phase}
+								</span>
+							</div>
+							<h3 className="mt-3 text-base font-black text-gray-950 md:text-lg">
+								{event.title}
+							</h3>
+							<p className="mt-1 text-xs font-bold text-gray-500">
+								{event.dates}・{event.location}
+							</p>
+							<p className="mt-3 text-sm leading-6 text-gray-700">{event.summary}</p>
+							<ul className="mt-3 space-y-1 text-xs leading-5 text-gray-600">
+								{event.watch.slice(0, 2).map((item) => (
+									<li key={item}>・{item}</li>
+								))}
+							</ul>
+							<details className="mt-3 border-t border-gray-100 pt-3 text-sm">
+								<summary className="cursor-pointer font-black text-gray-700">
+									次に確認すること
+								</summary>
+								<p className="mt-2 leading-6 text-gray-700">{event.nextAction}</p>
+							</details>
+							<a
+								href={event.sourceUrl}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="mt-3 inline-flex text-sm font-black text-gray-950 underline decoration-gray-200 underline-offset-4 hover:decoration-gray-900"
+							>
+								公式情報
+							</a>
+						</article>
+					))}
 				</div>
 			</section>
 
