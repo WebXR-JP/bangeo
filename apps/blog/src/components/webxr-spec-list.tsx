@@ -2,6 +2,7 @@
 
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import type { SessionReport } from "@/lib/experiment-report";
+import { checkWebXRSupport } from "@/lib/webxr-support";
 import { SITE_URL } from "@/lib/site-url";
 import {
 	maturityTitle,
@@ -18,81 +19,6 @@ import {
 import { ExperimentReportPanel } from "./experiment-report-panel";
 
 type XRSessionMode = "inline" | "immersive-vr" | "immersive-ar";
-
-interface MinimalXRSystem {
-	isSessionSupported(mode: XRSessionMode): Promise<boolean>;
-}
-
-function getXR(): MinimalXRSystem | null {
-	if (typeof navigator === "undefined") return null;
-	const nav = navigator as Navigator & { xr?: MinimalXRSystem };
-	return nav.xr ?? null;
-}
-
-function hasInterface(name: string): boolean {
-	if (typeof window === "undefined") return false;
-	return (
-		typeof (window as unknown as Record<string, unknown>)[name] !== "undefined"
-	);
-}
-
-function prototypeHas(interfaceName: string, prop: string): boolean {
-	if (typeof window === "undefined") return false;
-	const ctor = (window as unknown as Record<string, unknown>)[interfaceName] as
-		| { prototype?: object }
-		| undefined;
-	return Boolean(ctor?.prototype && prop in ctor.prototype);
-}
-
-async function sessionSupported(mode: XRSessionMode): Promise<boolean> {
-	const xr = getXR();
-	if (!xr) return false;
-	try {
-		return await xr.isSessionSupported(mode);
-	} catch {
-		return false;
-	}
-}
-
-const asSupport = (value: boolean): SpecSupport =>
-	value ? "supported" : "unsupported";
-
-const specChecks: Record<
-	SpecCheckId,
-	() => SpecSupport | Promise<SpecSupport>
-> = {
-	inline: async () => asSupport(await sessionSupported("inline")),
-	"immersive-vr": async () => asSupport(await sessionSupported("immersive-vr")),
-	"immersive-ar": async () => asSupport(await sessionSupported("immersive-ar")),
-	viewer: () => (getXR() ? "supported" : "unsupported"),
-	local: () => (getXR() ? "supported" : "unsupported"),
-	"local-floor": () => (getXR() ? "unknown" : "unsupported"),
-	"bounded-floor": () => (getXR() ? "unknown" : "unsupported"),
-	unbounded: () => (getXR() ? "unknown" : "unsupported"),
-	gamepads: () => asSupport(hasInterface("XRInputSource")),
-	"hand-input": () => asSupport(hasInterface("XRHand")),
-	"hit-test": () => asSupport(hasInterface("XRHitTestSource")),
-	anchors: () => asSupport(hasInterface("XRAnchor")),
-	"dom-overlays": () => asSupport(prototypeHas("XRSession", "domOverlayState")),
-	"depth-sensing": () =>
-		asSupport(
-			hasInterface("XRCPUDepthInformation") ||
-				hasInterface("XRWebGLDepthInformation") ||
-				prototypeHas("XRSession", "depthUsage"),
-		),
-	"mesh-detection": () =>
-		asSupport(
-			hasInterface("XRMesh") || prototypeHas("XRFrame", "detectedMeshes"),
-		),
-	"lighting-estimation": () => asSupport(hasInterface("XRLightEstimate")),
-	layers: () =>
-		asSupport(
-			hasInterface("XRProjectionLayer") || hasInterface("XRMediaBinding"),
-		),
-	"webgpu-binding": () => asSupport(hasInterface("XRGPUBinding")),
-	"body-tracking": () =>
-		asSupport(hasInterface("XRBody") || prototypeHas("XRFrame", "body")),
-};
 
 const sessionIds: SpecCheckId[] = ["inline", "immersive-vr", "immersive-ar"];
 
@@ -148,8 +74,8 @@ const supportBadge: Record<SpecSupport, { label: string; className: string }> =
 			className: "bg-gray-100 text-gray-400",
 		},
 		unknown: {
-			label: "対応",
-			className: "bg-emerald-50 text-emerald-700",
+			label: "未確認",
+			className: "bg-amber-50 text-amber-700",
 		},
 		checking: {
 			label: "…",
@@ -158,9 +84,9 @@ const supportBadge: Record<SpecSupport, { label: string; className: string }> =
 	};
 
 const supportTitle: Record<SpecSupport, string> = {
-	supported: "このブラウザで利用できます",
+	supported: "APIまたはセッションモードの対応を確認しました",
 	unsupported: "このブラウザでは利用できません",
-	unknown: "このブラウザで利用できます",
+	unknown: "セッション開始後の確認が必要、または判定できませんでした",
 	checking: "確認中",
 };
 
@@ -215,29 +141,11 @@ export function WebXRSpecList() {
 			setUserAgent(navigator.userAgent);
 			setEnvLabel(describeEnvironment(navigator.userAgent));
 
-			const next: Partial<Record<SpecCheckId, SpecSupport>> = {};
-			for (const entry of webxrSpecCatalog) {
-				let support: SpecSupport = "unsupported";
-				try {
-					const result = specChecks[entry.id]();
-					support = result instanceof Promise ? await result : result;
-				} catch {
-					support = "unsupported";
+			await checkWebXRSupport((id, support) => {
+				if (!cancelled) {
+					setResults((previous) => ({ ...previous, [id]: support }));
 				}
-				next[entry.id] = support;
-			}
-			const immersiveReady =
-				next["immersive-vr"] === "supported" ||
-				next["immersive-ar"] === "supported";
-			const sessionDependentIds: SpecCheckId[] = [
-				"local-floor",
-				"bounded-floor",
-				"unbounded",
-			];
-			for (const id of sessionDependentIds) {
-				next[id] = immersiveReady ? "supported" : "unsupported";
-			}
-			if (!cancelled) setResults(next);
+			});
 		}
 
 		run();
@@ -246,7 +154,7 @@ export function WebXRSpecList() {
 		};
 	}, []);
 
-	const loaded = Object.keys(results).length > 0;
+	const loaded = Object.keys(results).length === webxrSpecCatalog.length;
 	const sessionEntries = webxrSpecCatalog.filter((entry) =>
 		sessionIds.includes(entry.id),
 	);
@@ -450,7 +358,7 @@ export function WebXRSpecList() {
 
 	const selectedUnsupported = loaded
 		? [
-				...(results[mode] !== "supported" ? [mode] : []),
+				...(results[mode] === "unsupported" ? [mode] : []),
 				...(results[refSpace as SpecCheckId] === "unsupported"
 					? [refSpace]
 					: []),
@@ -519,7 +427,7 @@ export function WebXRSpecList() {
 			<span
 				aria-hidden="true"
 				className={`inline-block h-1.5 w-1.5 shrink-0 rounded-full ${ok ? "bg-emerald-500" : "bg-gray-300"}`}
-				title={ok ? "この端末で利用できます" : "この端末では未対応です"}
+				title={supportTitle[results[id] ?? "checking"]}
 			/>
 		);
 	}
@@ -680,7 +588,7 @@ export function WebXRSpecList() {
 					{loaded && (
 						<p className="mt-0.5 text-xs text-gray-400">
 							{supportedNames.length} / {webxrSpecCatalog.length}{" "}
-							の仕様がこのブラウザで利用できます
+							の仕様でAPIまたはセッション対応を確認しました
 						</p>
 					)}
 				</div>
