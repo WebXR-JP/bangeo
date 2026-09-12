@@ -78,6 +78,7 @@ export interface XRFrameLike {
 }
 
 export interface XRSessionLike {
+	enabledFeatures?: string[];
 	updateRenderState(state: { baseLayer?: object }): void;
 	requestReferenceSpace(type: string): Promise<object>;
 	requestAnimationFrame(
@@ -124,6 +125,8 @@ export interface ModuleContext {
 	kit: DrawKit;
 	/** 基本シーンのキューブのY座標（床基準なら1.2、それ以外は0） */
 	cubeY: number;
+	/** Only boolean evidence reaches reports; never pass coordinates. */
+	observe?(id: string): void;
 }
 
 /**

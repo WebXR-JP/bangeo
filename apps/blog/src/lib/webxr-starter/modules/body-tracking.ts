@@ -22,6 +22,7 @@ export function createBodyTrackingModule(): FeatureModule {
 				if (count >= CAPACITY) break;
 				const pose = frame.getPose(jointSpace, ctx.space);
 				if (!pose) continue;
+				ctx.observe?.("body-tracking");
 				const { x, y, z } = pose.transform.position;
 				store[count * 3] = x;
 				store[count * 3 + 1] = y;

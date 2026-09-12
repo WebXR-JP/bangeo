@@ -15,6 +15,7 @@ export function createBoundedFloorModule(): FeatureModule {
 				ctx.space as { boundsGeometry?: { x: number; z: number }[] }
 			).boundsGeometry;
 			if (!geometry?.length) return;
+			ctx.observe?.("bounded-floor");
 			const out: number[] = [];
 			for (const point of geometry) {
 				out.push(point.x, 0.02, point.z);
