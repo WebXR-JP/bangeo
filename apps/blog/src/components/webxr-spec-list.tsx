@@ -1,6 +1,7 @@
 "use client";
 
 import { type ReactNode, useEffect, useRef, useState } from "react";
+import type { SessionReport } from "@/lib/experiment-report";
 import { SITE_URL } from "@/lib/site-url";
 import {
 	maturityTitle,
@@ -14,6 +15,7 @@ import {
 	type StarterSessionHandle,
 	startStarterSession,
 } from "@/lib/webxr-starter/session";
+import { ExperimentReportPanel } from "./experiment-report-panel";
 
 type XRSessionMode = "inline" | "immersive-vr" | "immersive-ar";
 
@@ -200,6 +202,9 @@ export function WebXRSpecList() {
 	const [features, setFeatures] = useState<string[]>([]);
 	const [codeCopied, setCodeCopied] = useState(false);
 	const [xrRunning, setXrRunning] = useState(false);
+	const [sessionReport, setSessionReport] = useState<SessionReport | null>(
+		null,
+	);
 	const [xrError, setXrError] = useState<string | null>(null);
 	const xrSessionRef = useRef<StarterSessionHandle | null>(null);
 
@@ -466,6 +471,7 @@ export function WebXRSpecList() {
 		}
 		try {
 			setXrRunning(true);
+			setSessionReport(null);
 			xrSessionRef.current = await startStarterSession(
 				{
 					mode,
@@ -482,6 +488,7 @@ export function WebXRSpecList() {
 							: "セッションを終了しました。",
 					);
 				},
+				setSessionReport,
 			);
 		} catch (err) {
 			setXrRunning(false);
@@ -697,6 +704,12 @@ export function WebXRSpecList() {
 					</div>
 				)}
 			</div>
+
+			<ExperimentReportPanel
+				checks={results}
+				session={sessionReport}
+				running={xrRunning}
+			/>
 
 			{renderSection(
 				"セッションモード",

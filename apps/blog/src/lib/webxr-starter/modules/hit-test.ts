@@ -22,7 +22,10 @@ export function createHitTestModule(): FeatureModule {
 			if (!source || !frame.getHitTestResults) return;
 			const results = frame.getHitTestResults(source);
 			const pose = results[0]?.getPose(ctx.space);
-			if (pose) hitModel = pose.transform.matrix;
+			if (pose) {
+				hitModel = pose.transform.matrix;
+				ctx.observe?.("hit-test");
+			}
 		},
 		render(ctx, viewProjection) {
 			if (!ring || !hitModel) return;

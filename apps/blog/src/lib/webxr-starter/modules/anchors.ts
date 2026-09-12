@@ -29,6 +29,7 @@ export function createAnchorsModule(): FeatureModule {
 					?.createAnchor?.()
 					.then((anchor) => {
 						anchors.push(anchor);
+						ctx.observe?.("anchors");
 					})
 					.catch(() => {
 						// アンカーを作成できない環境では何もしない

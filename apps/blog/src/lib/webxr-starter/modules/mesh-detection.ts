@@ -18,6 +18,7 @@ export function createMeshDetectionModule(): FeatureModule {
 			for (const mesh of frame.detectedMeshes) {
 				if (index >= MAX_MESHES) break;
 				index++;
+				if (mesh.vertices.length > 0) ctx.observe?.("mesh-detection");
 				let buffer = cache.get(mesh);
 				if (!buffer) {
 					buffer = ctx.kit.makeBuffer(mesh.vertices);

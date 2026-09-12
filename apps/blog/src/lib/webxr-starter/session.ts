@@ -1,3 +1,8 @@
+import {
+	reportFeatures,
+	reportModules,
+	type SessionReport,
+} from "../experiment-report";
 /**
  * /experiments のスタータービルダーで組んだ構成から、そのままXRセッションを開始する最小ランナー。
  * フレームワーク非依存（素のWebGL2）で、ページ内で完結する。
@@ -106,6 +111,7 @@ export function resolveStarterSessionFeatures(features: string[]): string[] {
 export async function startStarterSession(
 	config: StarterConfig,
 	onEnd: (message?: string) => void,
+	onReport?: (report: SessionReport) => void,
 ): Promise<StarterSessionHandle> {
 	const xr = (navigator as Navigator & { xr?: XRSystemLike }).xr;
 	if (!xr) throw new Error("このブラウザではWebXRを利用できません");
@@ -148,10 +154,37 @@ export async function startStarterSession(
 		};
 	}
 
+	const report: SessionReport = {
+		mode: config.mode,
+		requestedReferenceSpace: config.refSpace,
+		actualReferenceSpace: null,
+		requestedFeatures: optionalFeatures.filter((f) =>
+			(reportFeatures as readonly string[]).includes(f),
+		),
+		enabledFeatures: null,
+		outcome: "request-failed",
+		frameReceived: false,
+		poseReceived: false,
+		modules: {},
+	};
+	let reportSent = false;
+	const publishReport = () => {
+		if (!reportSent) {
+			reportSent = true;
+			onReport?.(structuredClone(report));
+		}
+	};
 	let session: XRSessionLike;
 	try {
 		session = await xr.requestSession(config.mode, sessionInit);
+		report.enabledFeatures = session.enabledFeatures
+			? [...session.enabledFeatures].filter((f) =>
+					(reportFeatures as readonly string[]).includes(f),
+				)
+			: null;
+		report.outcome = "ended";
 	} catch (err) {
+		publishReport();
 		const reason = err instanceof Error ? err.message : String(err);
 		throw new Error(`セッションを開始できませんでした（${reason}）`);
 	}
@@ -169,6 +202,8 @@ export async function startStarterSession(
 		if (ended) return;
 		ended = true;
 		overlay.remove();
+		if (fatalMessage) report.outcome = "runtime-error";
+		publishReport();
 		onEnd(fatalMessage ? `${fatalMessage} / ${buildDiag()}` : buildDiag());
 	}
 	session.addEventListener("end", handleEnd);
@@ -236,6 +271,7 @@ export async function startStarterSession(
 		}
 		if (!refSpace) throw new Error("体験スペースを取得できませんでした");
 		diagRefSpace = refSpaceName;
+		report.actualReferenceSpace = refSpaceName;
 
 		diagPhase = "基本描画リソース作成";
 		const kit = createDrawKit(gl);
@@ -250,6 +286,10 @@ export async function startStarterSession(
 			config: runtimeConfig,
 			kit,
 			cubeY,
+			observe: (id) => {
+				const evidence = report.modules[id as (typeof reportModules)[number]];
+				if (evidence) evidence.dataObserved = true;
+			},
 		};
 
 		// モジュールの選別とセットアップ（失敗したモジュールは外す）
@@ -260,10 +300,22 @@ export async function startStarterSession(
 		);
 		const modules: FeatureModule[] = [];
 		for (const module of candidates) {
+			if ((reportModules as readonly string[]).includes(module.id))
+				report.modules[module.id as (typeof reportModules)[number]] = {
+					dataObserved: false,
+					error: false,
+				};
+		}
+		const moduleError = (id: string) => {
+			const evidence = report.modules[id as (typeof reportModules)[number]];
+			if (evidence) evidence.error = true;
+		};
+		for (const module of candidates) {
 			try {
 				await module.setup?.(ctx);
 				modules.push(module);
 			} catch {
+				moduleError(module.id);
 				// このモジュールだけ無効化して続行する
 			}
 		}
@@ -321,9 +373,11 @@ export async function startStarterSession(
 		) {
 			if (!gl) return;
 			frameCount++;
+			report.frameReceived = true;
 			const pose = frame.getViewerPose(ctx.space);
 			if (!pose) return;
 			poseCount++;
+			report.poseReceived = true;
 
 			gl.bindFramebuffer(gl.FRAMEBUFFER, baseLayer.framebuffer);
 			gl.enable(gl.DEPTH_TEST);
@@ -338,6 +392,7 @@ export async function startStarterSession(
 				try {
 					module.update?.(ctx, frame, time);
 				} catch {
+					moduleError(module.id);
 					// モジュール単体の失敗ではセッションを止めない
 				}
 			}
@@ -411,6 +466,7 @@ export async function startStarterSession(
 					try {
 						module.render?.(ctx, viewProjection, view, frame);
 					} catch {
+						moduleError(module.id);
 						// モジュール単体の失敗ではセッションを止めない
 					}
 				}

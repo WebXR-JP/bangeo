@@ -21,6 +21,7 @@ export function createLightEstimationModule(): FeatureModule {
 			if (!probe || !frame.getLightEstimate || !line) return;
 			const direction = frame.getLightEstimate(probe)?.primaryLightDirection;
 			if (!direction) return;
+			ctx.observe?.("light-estimation");
 			store[0] = 0;
 			store[1] = ctx.cubeY;
 			store[2] = -1.5;

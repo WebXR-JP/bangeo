@@ -19,6 +19,7 @@ export function createDepthSensingModule(): FeatureModule {
 				if (!depthInfo) return;
 				const distance = depthInfo.getDepthInMeters(0.5, 0.5);
 				if (!Number.isFinite(distance) || distance <= 0) return;
+				ctx.observe?.("depth-sensing");
 				const m = view.transform.matrix;
 				const model = translation(
 					m[12] - m[8] * distance,
