@@ -26,15 +26,7 @@
 
 ## 対応環境
 
-| 環境 | 対応 | 備考 |
-| --- | :---: | --- |
-| iPhone Safari | ○ | 要HTTPS（localhost は可） |
-| Android Chrome | ○ | |
-| Desktop Chrome（PC カメラ） | ○ | |
-| Meta Quest Browser | ○ | パススルー映像経由 |
-| 古いブラウザ | △ | getUserMedia と WebGL 2 対応が前提 |
-
-iOS で WebXR が未対応なのに対し、8th Wall は `getUserMedia` と独自トラッキングで動くため **ほぼ全てのモダンスマホで使える** のが強み。
+WebXRの対応表だけでは8th Wallの動作は判断できない。カメラアクセス、WebGL、使用する効果、ランタイムの対応範囲を公式情報と対象端末で確認する。Questのpassthrough表示とWebページへのカメラ画像アクセスを同一視しない。
 
 ## A-Frame 1.5.0 ＋ XRExtras の基本構造
 
@@ -98,8 +90,8 @@ IWSDK 側と共通。
 
 | ファイル | 内容 |
 | --- | --- |
-| `apps/blog/src/data/devices.ts` | デバイス一覧（iPhone / Android / PC の WebXR 対応状況。8th Wall はWebXR非依存なのでほぼ全端末で動く前提で書く） |
-| `apps/blog/src/data/webxr-status.ts` | WebXR機能のブラウザ対応状況。8th Wall 使用時は「WebXRが未対応でも8thWallなら動く」という根拠として参照 |
+| `apps/blog/src/data/devices.ts` | デバイス一覧。WebXR対応から8th Wallの動作を推定しない |
+| `apps/blog/src/data/webxr-status.ts` | WebXR機能のブラウザ対応状況。8th Wallの動作保証には使わない |
 
 ## 配置規約（IWSDK との違い）
 

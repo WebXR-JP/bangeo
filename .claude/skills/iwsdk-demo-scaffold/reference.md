@@ -1,6 +1,6 @@
 # IWSDK / WebXR リファレンス
 
-IWSDK（Immersive Web SDK）は `llms.txt` を公開していないため、`https://iwsdk.dev/` の公式ドキュメント（2026年4月時点）と、W3C の WebXR 仕様をまとめたリファレンス。
+既存実装を読むための参考例と公式リンク。CLI・API・MCP・対応状況は導入バージョンと現在の公式情報で確認する。以下を現在の仕様や利用可能ツールの保証として扱わない。
 
 ## IWSDK 公式URL
 
@@ -14,8 +14,6 @@ IWSDK（Immersive Web SDK）は `llms.txt` を公開していないため、`htt
 | Project Setup | https://iwsdk.dev/guides/01-project-setup.html |
 | GitHub | https://github.com/facebook/immersive-web-sdk |
 
-> 注意: `/ai/llms-txt`、`/ai/rules`、`/ai/cursor`、`/ai/claude-code` は404（存在しない）。
-
 ## ヒアリング時に参照するBANGEO内データ
 
 デモ依頼を受けたら、以下のファイルを Read して対応デバイス・対応ブラウザを整理する。結果は `experiments/<demo-name>.mdx` の `devices` フィールドや記事中の「対応デバイス」表にも反映する。
@@ -27,13 +25,7 @@ IWSDK（Immersive Web SDK）は `llms.txt` を公開していないため、`htt
 | `apps/blog/src/data/platforms.ts` | 関連プラットフォーム（XRift、DeoVR） | 配信・視聴環境への言及が必要な場合のみ |
 | `apps/blog/src/data/libraries.ts` | WebXR関連ライブラリ | `tags` や `frameworks` の候補として参照 |
 
-典型的な結論:
-
-- **VRハンドトラッキング系** → Meta Quest 2/3/3S/Pro、Pico 4 Ultra、Samsung Galaxy XR が対応、iOS Safari は非対応
-- **AR Hit Test／Anchors系** → Android Chrome（ARCore）と Quest Browser が対応、Desktop Chrome／iOS Safari は未対応
-- **Layers** → Quest Browser のみ（Chrome各種・Safariは未対応）
-- **Depth Sensing** → Chrome Android と Quest のみ
-- **iOS Safari** → WebXR自体が未対応のため基本的に常に対象外
+対応判定は対象API・端末・ブラウザバージョンごとに確認する。ローカル表から全機能の対応を推定しない。
 
 ## WebXR 仕様リンク集
 
@@ -239,9 +231,9 @@ class SpinSystem extends createSystem({
 | 空間UI | UIKitML |
 | 開発支援 | Playwright ＋ MCP |
 
-## AI への推奨システムプロンプト（IWSDK 公式推奨）
+## シーンの検証
 
-> "Before any action, call `xr_get_session_status`. Navigate scenes with `scene_get_hierarchy`, verify changes via screenshots, debug with ECS tools, and monitor console logs for errors."
+XRセッション状態が検証に関係するとき、利用可能なら `xr_get_session_status` を使う。文書修正など、シーンに触れない操作の前には不要。
 
 ## 初回確認に使う推奨プロンプト
 
