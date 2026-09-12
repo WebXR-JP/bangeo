@@ -21,3 +21,11 @@ APIの存在検出、セッションに許可された機能、実データを�
 API契約の公開部分は`apps/blog/src/lib/experiment-report.ts`です。Analytics側のschemaVersion 1と合わせて変更します。PrivateなサーバーコードをBANGEOへ取り込む必要はありません。
 
 公開画面は報告数を表示します。人数や端末台数ではなく、同じ人が別の報告を送ることもできます。送信を選ばなくても実験機能は使えます。外部デモサイトでの操作結果は取得対象外で、このページのスターター体験のみを記録します。
+
+## 変更時の参照先
+
+- `apps/blog/src/components/experiment-report-panel.tsx`: 同意、プレビュー、SDKの遅延読込、再試行、集計取得。
+- `apps/blog/src/lib/experiment-report.ts`: 公開する型と値の範囲。
+- `apps/blog/src/lib/webxr-starter/session.ts`: セッションで許可された機能と実データ取得の記録。
+
+ローカル検証で本番の集計へ試験データを送らない。未設定時の表示と、必要に応じてテスト用SDK・送信先で同意前の未送信、失敗時の再試行、受付後の表示を確認する。PrivateなAnalytics側の実装を確認できない場合は、クライアントで確認できた範囲とサーバー側の未確認事項を分けて報告する。
