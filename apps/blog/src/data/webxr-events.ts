@@ -77,7 +77,7 @@ export const WEBXR_EVENT_IMPORTANCE_LABELS: Record<
 	low: "低",
 };
 
-export const WEBXR_EVENTS_LAST_UPDATED = "2026-06-27";
+export const WEBXR_EVENTS_LAST_UPDATED = "2026-09-14";
 
 export const WEBXR_DEVICE_WATCH_TARGETS = [
 	"Meta / Quest / Quest Browser / Horizon OS",
@@ -183,8 +183,8 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		startDate: "2026-09-23",
 		endDate: "2026-09-24",
 		timezone: "America/Los_Angeles",
-		location: "Menlo Park, California",
-		status: "upcoming",
+		location: "オンライン配信",
+		status: "schedule-live",
 		importance: "high",
 		confidence: "high",
 		sourceUrl: "https://www.meta.com/connect/",
@@ -206,13 +206,10 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 			"MR browser UI",
 			"AI glasses web integration",
 		],
-		affectedBangeoPages: [
-			"/webxr-status",
-			"/notes/quest-browser",
-		],
+		affectedBangeoPages: ["/webxr-status", "/notes/quest-browser"],
 		recommendedAction:
 			"イベント前は公式ページと開発者セッションを確認。イベント後はQuest Browser、Horizon OS、WebXR関連発表を一次情報で確認して記事化する。",
-		lastCheckedAt: "2026-06-15",
+		lastCheckedAt: "2026-09-14",
 		nextCheckAt: "2026-07-15",
 		notes:
 			"Meta公式Connectページでは2026年9月23〜24日開催とライブ配信登録が案内されている。",
@@ -228,7 +225,7 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		status: "upcoming",
 		importance: "high",
 		confidence: "high",
-		sourceUrl: "https://www.w3.org/events/tpac/2026/tpac-2026/",
+		sourceUrl: "https://www.w3.org/news-events/tpac/2026/",
 		sourceType: "primary",
 		entityTags: ["W3C", "TPAC", "Immersive Web", "WebXR", "Web standards"],
 		watchTopics: [
@@ -245,7 +242,7 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		],
 		recommendedAction:
 			"登録開始、会議アジェンダ、Immersive Web関連ミーティングの議題公開を確認し、仕様差分メモと標準化ページの更新候補を整理する。",
-		lastCheckedAt: "2026-06-15",
+		lastCheckedAt: "2026-09-14",
 		nextCheckAt: "2026-07-15",
 		notes:
 			"W3C公式イベントページではDublinで2026年10月26〜30日開催、登録は7月中旬開始予定、議題詳細は後日とされている。",
@@ -404,7 +401,7 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		endDate: "2026-07-03",
 		timezone: "Asia/Tokyo",
 		location: "Kyoto, Japan",
-		status: "live-soon",
+		status: "recap-needed",
 		importance: "medium",
 		confidence: "high",
 		sourceUrl: "https://www.ivs.events/en/",
@@ -418,7 +415,7 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		],
 		affectedBangeoPages: ["/tech-articles", "/libraries", "/platforms"],
 		recommendedAction:
-			"開催直前。スタートアップ全般ではなく、XR / Spatial AI / WebAR / 3Dコマース / デバイス系の登壇・展示に絞って確認する。",
+			"スタートアップ全般ではなく、XR / Spatial AI / WebAR / 3Dコマース / デバイス系の登壇・展示に絞って確認する。",
 		lastCheckedAt: "2026-06-27",
 		nextCheckAt: "2026-06-30",
 		notes:
@@ -432,11 +429,11 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		endDate: "2026-08-06",
 		timezone: "Asia/Tokyo",
 		location: "Nagoya, Aichi",
-		status: "upcoming",
+		status: "recap-needed",
 		importance: "medium",
 		confidence: "medium",
-		sourceUrl: "https://www.moguravr.com/xr-kaigi-hub-2026-nagoya-en/",
-		sourceType: "news",
+		sourceUrl: "https://xrkaigi.com/",
+		sourceType: "primary",
 		entityTags: ["XR Kaigi Hub", "Japan", "Nagoya", "XR", "device makers"],
 		watchTopics: [
 			"国内XR企業の展示",
@@ -447,7 +444,7 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		affectedBangeoPages: ["/events", "/tech-articles", "/platforms"],
 		recommendedAction:
 			"スポンサー・出展者更新を確認し、国内XR企業やデバイスメーカーの発表からBANGEOで紹介すべきWebXR/WebAR活用事例を探す。",
-		lastCheckedAt: "2026-06-15",
+		lastCheckedAt: "2026-09-14",
 		nextCheckAt: "2026-07-06",
 		notes:
 			"Mogura VRの記事では2026年8月6日に名古屋のSTATION Aiで開催予定とされている。公式ページ側の詳細公開も継続確認する。",
@@ -463,8 +460,7 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		status: "upcoming",
 		importance: "medium",
 		confidence: "high",
-		sourceUrl:
-			"https://4c281b16296b2ab02a4e0b2e3f75446d.cdnext.stream.ne.jp/tgs/2026/exhibition/common/press/tgs26_0210_01news_en.pdf",
+		sourceUrl: "https://tgs.cesa.or.jp/2026/en",
 		sourceType: "primary",
 		entityTags: [
 			"TGS",
@@ -484,7 +480,7 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		affectedBangeoPages: ["/devices", "/platforms", "/tech-articles"],
 		recommendedAction:
 			"出展社一覧と公式番組を確認し、XRデバイス、ブラウザ対応、ゲーム由来の空間UI事例、国内向けデバイス販売情報を回収する。",
-		lastCheckedAt: "2026-06-15",
+		lastCheckedAt: "2026-09-14",
 		nextCheckAt: "2026-07-15",
 		notes:
 			"CESA/Nikkei BPの公式発表PDFでは2026年9月17〜21日に幕張メッセで開催予定とされている。",
@@ -500,7 +496,7 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		status: "upcoming",
 		importance: "medium",
 		confidence: "high",
-		sourceUrl: "https://www.ceatec.com/en/application/outline/",
+		sourceUrl: "https://www.ceatec.com/ja/",
 		sourceType: "primary",
 		entityTags: [
 			"CEATEC",
@@ -519,7 +515,7 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		affectedBangeoPages: ["/devices", "/platforms", "/tech-articles"],
 		recommendedAction:
 			"出展者一覧とセッションを確認し、スマートグラス、3D表示、産業向けAR、Web連携可能なデバイス発表をBANGEOのデバイス/活用事例候補として整理する。",
-		lastCheckedAt: "2026-06-15",
+		lastCheckedAt: "2026-09-14",
 		nextCheckAt: "2026-07-15",
 		notes:
 			"CEATEC公式ページでは2026年10月13〜16日に幕張メッセで開催予定と案内されている。",
@@ -559,7 +555,7 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		],
 		recommendedAction:
 			"出展者一覧を定期確認し、WebXR開発者が比較すべき国内デバイス、SDK、WebAR/3D配信サービスを候補化する。",
-		lastCheckedAt: "2026-06-15",
+		lastCheckedAt: "2026-09-14",
 		nextCheckAt: "2026-07-15",
 		notes:
 			"RX Japan公式ページでは2026年11月11〜13日に幕張メッセで開催予定と案内されている。",
@@ -572,7 +568,7 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		endDate: "2026-07-03",
 		timezone: "Asia/Tokyo",
 		location: "Tokyo Big Sight",
-		status: "live-soon",
+		status: "recap-needed",
 		importance: "medium",
 		confidence: "high",
 		sourceUrl: "https://www.manufacturing-world.jp/tokyo/ja-jp.html",
@@ -594,7 +590,7 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		],
 		affectedBangeoPages: ["/platforms", "/devices", "/tech-articles"],
 		recommendedAction:
-			"開催直前。WebXR単体ではなく、Web 3D / デジタルツイン / CAD / 製造業AR / フィジカルAIの題材回収イベントとして確認する。",
+			"WebXR単体ではなく、Web 3D / デジタルツイン / CAD / 製造業AR / フィジカルAIの題材回収イベントとして確認する。",
 		lastCheckedAt: "2026-06-27",
 		nextCheckAt: "2026-06-30",
 		notes:
@@ -638,7 +634,7 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		affectedBangeoPages: ["/platforms", "/tech-articles", "/experiments"],
 		recommendedAction:
 			"空間映像、イマーシブ配信、バーチャルプロダクション、Web配信技術の発表を確認し、WebXR/3D Webの学習題材にできるものを拾う。",
-		lastCheckedAt: "2026-06-15",
+		lastCheckedAt: "2026-09-14",
 		nextCheckAt: "2026-07-15",
 		notes:
 			"公式ページでは2026年11月18〜20日に幕張メッセで開催予定と案内されている。",
@@ -660,8 +656,8 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		location: "Pacifico Yokohama / Online",
 		status: "announced",
 		importance: "low",
-		confidence: "medium",
-		sourceUrl: "https://www.cpplus.jp/",
+		confidence: "high",
+		sourceUrl: "https://prtimes.jp/main/html/rd/p/000000040.000086300.html",
 		sourceType: "primary",
 		entityTags: [
 			"CP+",
@@ -681,7 +677,7 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		affectedBangeoPages: ["/devices", "/platforms", "/tech-articles"],
 		recommendedAction:
 			"Canon EOS VR、MREAL、3D写真・空間映像系の展示を確認し、WebXR/3D Web素材制作への接続点がある場合だけ拾う。",
-		lastCheckedAt: "2026-06-15",
+		lastCheckedAt: "2026-09-14",
 		nextCheckAt: "2026-10-01",
 		notes:
 			"次回日程は公式ページとメーカーのCP+レポートで継続確認する。WebXR直接ではなく素材制作・空間映像側の隣接イベントとして扱う。",
@@ -695,26 +691,26 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		developerRelevance: "low",
 	},
 	{
-		title: "TOKYO DIGICONX",
+		title: "TOKYO DIGICONX 2027",
 		slug: "tokyo-digiconx",
 		category: "Japan / Content / XR / AI / Web3",
-		startDate: "2026-01-01",
-		endDate: "2026-12-31",
+		startDate: "2027-01-13",
+		endDate: "2027-01-15",
 		timezone: "Asia/Tokyo",
-		location: "Tokyo, Japan",
+		location: "有明GYM-EX（東京）",
 		status: "announced",
 		importance: "low",
-		confidence: "low",
-		sourceUrl: "https://www.digiconx.tokyo/",
+		confidence: "high",
+		sourceUrl: "https://prtimes.jp/main/html/rd/p/000000023.000131493.html",
 		sourceType: "primary",
 		entityTags: ["TOKYO DIGICONX", "Japan", "XR", "AI", "Web3", "game"],
 		watchTopics: ["XR", "メタバース", "AI", "Web3", "ゲーム/コンテンツ横断"],
 		affectedBangeoPages: ["/events", "/platforms", "/tech-articles"],
 		recommendedAction:
-			"次回日程と出展内容が公式に出たら更新。XR/AI/Web3/ゲーム横断の中からWebXR開発者に近い発表だけ拾う。",
-		lastCheckedAt: "2026-06-15",
+			"公式の出展者・セッション情報から、WebXRやWebARに関連する内容を確認する。",
+		lastCheckedAt: "2026-09-14",
 		nextCheckAt: "2026-07-15",
-		notes: "次回日程要確認。発見用の低優先度イベントとして扱う。",
+		notes: "主催者発表で2027年1月13〜15日、有明GYM-EXでの開催を確認。",
 		region: "japan-local",
 		organizerType: "expo",
 		watchMode: "discovery",
@@ -758,7 +754,7 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		],
 		recommendedAction:
 			"セッション一覧、企業キーノート、展示社、XR Kaigi Hubの派生イベントを確認し、国内WebXR/デバイスメーカーの更新候補を記事化する。",
-		lastCheckedAt: "2026-06-15",
+		lastCheckedAt: "2026-09-14",
 		nextCheckAt: "2026-07-15",
 		notes:
 			"XR Kaigi公式サイトでは2026年11月30日〜12月2日に東京ポートシティ竹芝で開催予定と案内されている。",
