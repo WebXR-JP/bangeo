@@ -25,14 +25,6 @@ bangeo/
 pnpm install
 ```
 
-### よく使うコマンド
-
-```bash
-pnpm dev
-pnpm build
-pnpm preview:blog
-pnpm ci
-```
 
 ## デプロイ
 
