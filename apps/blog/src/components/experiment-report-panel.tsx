@@ -132,7 +132,8 @@ const button =
 	"rounded-lg border border-gray-300 px-4 py-2 text-sm font-bold hover:border-gray-900 focus-visible:outline-2 disabled:opacity-40";
 
 function submissionError(error: unknown): string {
-	const code = error && typeof error === "object" && "code" in error ? error.code : null;
+	const code =
+		error && typeof error === "object" && "code" in error ? error.code : null;
 	const message =
 		code === "experiment_sharing_disabled"
 			? "匿名データの受付がAnalytics側で無効です。管理者に設定を確認してください。"
@@ -145,8 +146,12 @@ function submissionError(error: unknown): string {
 						: code === "rate_limited"
 							? "送信が集中しています。少し待ってから再試行してください。"
 							: "送信を確認できませんでした。同じ内容で再試行できます。";
-	const requestId = error && typeof error === "object" && "requestId" in error ? error.requestId : null;
-	return typeof requestId === "string" && /^[a-zA-Z0-9_-]{1,80}$/.test(requestId)
+	const requestId =
+		error && typeof error === "object" && "requestId" in error
+			? error.requestId
+			: null;
+	return typeof requestId === "string" &&
+		/^[a-zA-Z0-9_-]{1,80}$/.test(requestId)
 		? `${message} 問い合わせID: ${requestId}`
 		: message;
 }
