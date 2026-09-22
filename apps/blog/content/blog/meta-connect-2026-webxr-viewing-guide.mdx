@@ -1,0 +1,98 @@
+---
+title: "Meta Connect 2026視聴ガイド：日本時間の配信予定とWebXR関連セッション"
+description: "Meta Connect 2026は現地9月23〜24日に開催。日本時間の基調講演・開発者向け講演の開始時刻、WebXRとMeta Ray-Ban Display向けWebアプリのセッション、発表を読むときの注意点を紹介します。"
+date: "2026-09-23"
+category: "NEWS"
+tags:
+  - "Meta Connect"
+  - "WebXR"
+  - "Meta Quest"
+  - "Immersive Web SDK"
+  - "Meta Ray-Ban Display"
+author: "BANGEO XR"
+thumbnail: "/assets/news/webxr-events-watch-2026.webp"
+draft: false
+---
+
+Metaの開発者イベント「Meta Connect 2026」が、米国太平洋時間の9月23〜24日に開催されます。初日はMark Zuckerberg氏の基調講演、2日目は開発者向けの講演と技術セッションが案内されています。オンライン視聴の入口は[Meta Connect公式サイト](https://www.meta.com/connect/)です。
+
+Web開発者にとって注目したいのは、**WebXRによる没入型体験と、Meta Ray-Ban Display向けWebアプリの両方がセッションの題材になっていること**です。新製品の発表を追うだけでなく、自分のWebコンテンツをどの画面で、どのような入力方法で使ってもらうかを考える機会になります。
+
+この記事では、[公式Agenda](https://www.meta.com/ja-jp/connect/agenda/)をもとに、日本時間の視聴予定とWeb開発に関係するセッションを紹介します。セッションで扱う予定の内容と、すでに利用できる機能は分けて説明します。
+
+## 日本では9月24日朝と25日深夜に配信
+
+公式の開催日「9月23〜24日」は米国側の日付です。日本から見る場合、基調講演は**9月24日（木）午前8時**、開発者向け講演は**9月25日（金）午前2時**になります。
+
+| 配信 | 公式の米国太平洋時間（PT） | 日本時間（JST） |
+| --- | --- | --- |
+| Meta Connect keynote | 9月23日（水）16:00 | **9月24日（木）08:00** |
+| Developer State of the Union | 9月24日（木）10:00 | **9月25日（金）02:00** |
+
+9月の米国太平洋時間は夏時間（PDT、UTC−7）です。日本時間（UTC＋9）との時差は16時間で、どちらの講演も日本では翌日になります。
+
+開発者セッションは、公式Agendaでは**オンデマンド形式**として案内されています。個別セッションがすべて午前2時からライブ配信されるという意味ではありません。動画の公開状況や配信先は[公式Agenda](https://www.meta.com/ja-jp/connect/agenda/)で確認してください。開始時刻や公開方法が変更される可能性もあるため、視聴直前には公式案内を確認するのが確実です。
+
+## WebXR開発者が見たいセッション
+
+### Webサイトから没入型体験へ：Web/WebXRの開発セッション
+
+「Building Immersive Experiences with Web/WebXR」は、Felix Zhang氏によるセッションです。既存サイトをブラウザ向けに調整する方法と、Immersive Web SDKを使った没入型体験の構築が題材になっています。公式の紹介文には、SDKとエミュレーターの新しい機能を使った開発・テストも挙げられています。
+
+ここで押さえたいのは、**VRヘッドセットでWebサイトを開くことと、WebXRで空間に入り込むことは別の体験**だという点です。
+
+たとえば商品紹介なら、Webページ内の写真や3Dプレビューを見せるだけで十分な場合があります。一方、家具の大きさを確かめたり、建物の中を歩いたりする用途では、利用者の位置や向き、コントローラーなどを扱う没入型体験が候補になります。どちらを作るかによって、UIや操作、性能の検証項目も変わります。
+
+Metaの[開発方式の紹介](https://developers.meta.com/horizon/discover/2d-apps-meta-spatial/)も、2DのWeb、WebXR、PWA、Androidアプリ、Meta Spatial SDKを分けて案内しています。今回のセッションは、既存サイトをそのまま生かす部分と、空間向けに作り直す部分を判断したい開発者に向いています。
+
+### Meta Ray-Ban Display向けWebアプリ
+
+「Building web apps for Meta Ray-Ban Display」は、Abhijit Srikanth氏によるセッションです。Display向けWebアプリの概要と、構築・公開の方法が紹介される予定です。
+
+これは「グラス向けWeb開発がConnectで初めて可能になる」という話ではありません。Metaの[Wearables開発者サイト](https://developers.meta.com/wearables/)には、すでにWeb Apps Starter Kitへの案内があります。公式リポジトリでも、Display向けWebアプリはHTML・CSS・JavaScriptで構築するアプリとして説明されています。
+
+普段のWeb開発と接点がある一方、スマートフォンの画面をそのまま移せば使いやすくなるとは限りません。短い時間で必要な情報を読み取れるか、少ない操作で目的を達成できるか、画面を見続けなくても使えるか、といった観点でセッションを見ると、UIを考える手がかりになります。
+
+ただし、**「Webアプリを表示できる」という案内だけで、WebXRの没入型VR・ARセッションにも対応しているとは判断できません**。Quest向けWebXRの対応状況を、Displayへそのまま当てはめないようにしましょう。利用できるAPIや入力、配布条件は、Display向けの公式資料で確認する必要があります。
+
+### Webとネイティブのどちらを選ぶか
+
+開発方式を比較したい人には、Dilmer Valecillos氏の「Pick your path」セッションも候補です。公式Agendaでは、Unity・Unreal Engine、Web/WebXR、モバイル・Android、Meta Spatial SDKなどの選択肢が紹介されています。
+
+既存のWeb資産を生かしたいのか、VR専用の操作や描画を重視したいのかで、適した方法は変わります。「新しいSDKだから採用する」のではなく、作りたい体験、配布方法、チームが保守できる技術の三つを決めてから比較すると、発表内容を自分のプロジェクトに結び付けやすくなります。
+
+## 発表を見るときは「どこで動くか」まで確認する
+
+基調講演やセッションで紹介された機能を、すぐ自分のアプリに組み込めるとは限りません。特にWebXRでは、端末のOSに機能があっても、ブラウザから同じ情報を取得できるとは限らないためです。
+
+発表を読んだ後は、次の違いを確認すると実装の判断がしやすくなります。
+
+| 発表で見かける内容 | 実装前に確認すること |
+| --- | --- |
+| 新しいSDK・エミュレーターの紹介 | 公開されたバージョン、サンプル、既存コードからの変更点。エミュレーターでの動作だけで実機対応を判断しない |
+| QuestのOS・ネイティブSDKの新機能 | Browser向けにも公開されているか。利用するWebXR APIや権限が明記されているか |
+| Browserの描画・入力機能 | 対象のBrowserバージョン、対応端末、正式提供か実験機能か |
+| グラス向けWebアプリ | 対象製品、利用条件、入力方法、公開手順。WebXR対応とは別に確認する |
+
+Quest Browserの機能については、[Meta公式リリースノート](https://developers.meta.com/horizon/release-notes/?search_key=browser)が確認先になります。講演のデモが動いていても、自分の利用者に届いているバージョンで使えるかは別途確認が必要です。
+
+また、Quest向けの発表は、そのままSafari、PICO Browser、PC側のChromeなどへの対応を意味しません。複数の端末で公開するWebXRコンテンツでは、機能を使えない環境でも体験が成立するかを考えておくと、導入時の手戻りを減らせます。
+
+## まとめ
+
+Meta Connect 2026は、日本時間では9月24日朝の基調講演と、25日深夜のDeveloper State of the Unionが視聴の起点になります。Web開発が目的なら、基調講演だけで終わらず、Web/WebXRとMeta Ray-Ban Display向けWebアプリのセッションまで確認したいところです。
+
+今回の見どころは、Webの届け先を「ヘッドセットの中のWebページ」「没入型のVR・AR」「グラス上の情報表示」に分け、それぞれに合う作り方を考えられることです。同じWeb技術を使っていても、必要なUIや入力、対応APIは異なります。発表の新しさだけでなく、自分のコンテンツをどの環境で使えるようにするのかを軸に視聴すると、具体的な開発判断につながります。
+
+*日程とセッション紹介は2026年9月23日時点の公式案内に基づきます。本記事は発表前の視聴ガイドであり、未公開のSDKや端末での動作を検証したものではありません。*
+
+## 参考情報
+
+- [Meta Connect公式サイト](https://www.meta.com/connect/)
+- [Meta Connect公式Agenda](https://www.meta.com/ja-jp/connect/agenda/)
+- [Meta Horizon：Web・WebXR・PWAなどの開発方式](https://developers.meta.com/horizon/discover/2d-apps-meta-spatial/)
+- [Meta Wearables開発者サイト](https://developers.meta.com/wearables/)
+- [Meta Wearables Web App公式リポジトリ](https://github.com/facebook/meta-wearables-webapp)
+- [Meta公式リリースノート：Browser](https://developers.meta.com/horizon/release-notes/?search_key=browser)
+
+関連するイベントは[イベント一覧](/events)、ブラウザと端末ごとの違いは[WebXR対応状況](/webxr-status)で確認できます。
