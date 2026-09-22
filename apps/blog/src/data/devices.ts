@@ -4,7 +4,7 @@ export type DeviceWebxrSummary = {
 	type: string;
 	manufacturer: string;
 	webxrSupport: {
-		status: "対応" | "非対応";
+		status: "対応" | "非対応" | "未確認";
 		detail: string;
 	};
 	browsers: string[];
@@ -15,6 +15,27 @@ export type DeviceWebxrSummary = {
 };
 
 export const VR_DEVICES: DeviceWebxrSummary[] = [
+	{
+		id: "steam-frame",
+		name: "Steam Frame",
+		type: "VR",
+		manufacturer: "Valve",
+		webxrSupport: {
+			status: "未確認",
+			detail:
+				"SteamOS上のブラウザからのWebXR利用と、PCからストリーミングした際のWebXR動作は実機未確認（2026年9月22日時点）。SteamVR・OpenXR対応だけではWebXR対応を判断できません。",
+		},
+		browsers: ["WebXRを利用できるブラウザは未確認"],
+		connectionType:
+			"スタンドアロン（SteamOS）。PCからVRコンテンツを無線ストリーミング可能。",
+		priceRange: "地域・構成によって異なる（公式ストアで要確認）",
+		availability: "販売状況は地域によって異なる（公式ストアで要確認）。",
+		notes: [
+			"Valveはスタンドアロン動作とSteamVR・OpenXRへの対応を案内しています。",
+			"WebXRの対応状況はブラウザ・実行経路ごとに確認が必要です。",
+			"出典: https://partner.steamgames.com/doc/steamhardware/steamframe",
+		],
+	},
 	{
 		id: "meta-quest-3",
 		name: "Meta Quest 3",
