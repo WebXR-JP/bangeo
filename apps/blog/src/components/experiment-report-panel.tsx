@@ -131,6 +131,26 @@ const stageLabels: Record<string, string> = {
 const button =
 	"rounded-lg border border-gray-300 px-4 py-2 text-sm font-bold hover:border-gray-900 focus-visible:outline-2 disabled:opacity-40";
 
+function submissionError(error: unknown): string {
+	const code = error && typeof error === "object" && "code" in error ? error.code : null;
+	const message =
+		code === "experiment_sharing_disabled"
+			? "匿名データの受付がAnalytics側で無効です。管理者に設定を確認してください。"
+			: code === "origin_not_allowed"
+				? "BANGEOのURLがAnalytics側で許可されていません。管理者に設定を確認してください。"
+				: code === "invalid_experiment_report"
+					? "送信内容を確認できませんでした。ページを再読み込みしてください。"
+					: code === "maintenance" || code === "queue_unavailable"
+						? "受付を一時的に利用できません。時間をおいて再試行してください。"
+						: code === "rate_limited"
+							? "送信が集中しています。少し待ってから再試行してください。"
+							: "送信を確認できませんでした。同じ内容で再試行できます。";
+	const requestId = error && typeof error === "object" && "requestId" in error ? error.requestId : null;
+	return typeof requestId === "string" && /^[a-zA-Z0-9_-]{1,80}$/.test(requestId)
+		? `${message} 問い合わせID: ${requestId}`
+		: message;
+}
+
 export function ExperimentReportPanel({
 	checks,
 	session,
@@ -217,10 +237,10 @@ export function ExperimentReportPanel({
 				throw new Error("Unexpected response");
 			setReceipt(accepted);
 			setNotice("受け付けました。集計への反映には少し時間がかかります。");
-		} catch {
+		} catch (error) {
 			setNotice(
 				allowed.current
-					? "送信を確認できませんでした。同じ内容で再試行できます。"
+					? submissionError(error)
 					: "送信を中止しました。すでに受け付けたデータは取り消されません。",
 			);
 		} finally {
