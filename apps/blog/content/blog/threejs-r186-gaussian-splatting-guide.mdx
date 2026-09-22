@@ -1,0 +1,97 @@
+---
+title: "three.js r186のGaussian Splatting入門：SPZを表示し、大規模配信との違いを知る"
+description: "three.js r186に加わったGaussian Splattingアドオンを公式サンプルから解説。SPZの最小表示例、対応形式、WebGL経路、視点依存の色と大規模シーン配信の限界を整理します。"
+date: "2026年9月22日"
+category: "TECH"
+tags:
+  - "three.js"
+  - "Gaussian Splatting"
+  - "WebGPU"
+  - "WebGL"
+  - "Web3D"
+author: "BANGEO Team"
+thumbnail: "/assets/tech/threejs-r186-gaussian-splatting.webp"
+draft: false
+---
+
+2026年9月8日公開の[three.js r186](https://github.com/mrdoob/three.js/releases/tag/r186)には、3D Gaussian Splattingを読み込んで描画する公式アドオンが入りました。写真から再構成した空間をWebに表示する際、これまでは別のビューワーを組み合わせることが多かったところ、three.jsのシーンにスプラットを追加する経路ができました。
+
+ただし、**ファイルを読み込めることと、大きな空間を段階的に配信できることは別**です。この記事ではr186の[公式サンプル](https://github.com/mrdoob/three.js/blob/r186/examples/webgpu_gaussian_splat.html)と実装をもとに、最初の表示手順と採用時の判断点を整理します。内容は2026年9月22日に公開ソースで確認したもので、特定の端末での実測結果ではありません。
+
+## Gaussian Splattingとは
+
+Gaussian Splattingは、空間を多数の半透明な楕円状の要素（スプラット）として表現し、視点から見た位置・大きさ・色を計算して描く方法です。通常の三角形メッシュとは、データ構造も透明な要素を重ねる処理も異なります。
+
+r186の`GaussianSplat`は、読み込んだデータから描画用のオブジェクトを作り、通常のthree.jsシーンに追加できます。[実装](https://github.com/mrdoob/three.js/blob/r186/examples/jsm/objects/GaussianSplat.js)には視点に応じた並べ替えと、色の視点依存表現に関する処理もあります。
+
+## SPZファイルを表示する最小例
+
+次は[公式サンプル](https://github.com/mrdoob/three.js/blob/r186/examples/webgpu_gaussian_splat.html)の読み込み部分を、r186のAPI名で抜き出した例です。`scene`、`camera`、画面サイズの設定は通常のthree.jsアプリと同様に用意します。
+
+```js
+import * as THREE from "three/webgpu";
+import { SPZLoader } from "three/addons/loaders/SPZLoader.js";
+import { GaussianSplat } from "three/addons/objects/GaussianSplat.js";
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.01, 100);
+camera.position.set(0, 0, 3);
+
+const renderer = new THREE.WebGPURenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+await renderer.init();
+document.body.appendChild(renderer.domElement);
+
+const geometry = await new SPZLoader().loadAsync("/models/scene.spz");
+const splats = new GaussianSplat(geometry);
+scene.add(splats);
+
+renderer.setAnimationLoop(() => {
+  renderer.render(scene, camera);
+});
+```
+
+`/models/scene.spz`は自分で配信するファイルのURLに置き換えます。画面のリサイズ処理、モデルの向きとカメラ位置はデータに合わせて調整してください。公式サンプルは`autoSort: false`にして各フレームで`updateSort(renderer, camera)`を明示的に呼びます。上の例は既定の自動並べ替えを利用しています。
+
+**名称に注意してください。** 初期の[導入PR](https://github.com/mrdoob/three.js/pull/33950)には`GaussianSplatMesh`という名前の説明がありますが、r186の[リリース版](https://github.com/mrdoob/three.js/blob/r186/examples/jsm/objects/GaussianSplat.js)とサンプルで使う名前は`GaussianSplat`です。古いコードをそのまま貼るとimportに失敗します。
+
+## どの形式を読み込めるか
+
+r186の[アドオン一覧](https://github.com/mrdoob/three.js/tree/r186/examples/jsm/loaders)には、`SPZLoader`、`SPLATLoader`、`KSPLATLoader`、`GaussianSplatPLYLoader`、`GLTFGaussianSplatLoaderExtension`があります。いずれもスプラット用のデータをthree.jsで扱う入口ですが、同じファイルをどのローダーに渡してもよいわけではありません。
+
+| 手元のデータ | r186で確認する入口 |
+| --- | --- |
+| SPZ（`.spz`） | `SPZLoader` |
+| SPLAT（`.splat`） | `SPLATLoader` |
+| KSPLAT（`.ksplat`） | `KSPLATLoader` |
+| Gaussian Splatting用のPLY | `GaussianSplatPLYLoader` |
+| Gaussian Splatting拡張を含むglTF | `GLTFGaussianSplatLoaderExtension`を登録して利用 |
+
+glTFの拡張は通常の`GLTFLoader`に自動で組み込まれるものではありません。[導入PR](https://github.com/mrdoob/three.js/pull/33950)は、必要なアプリだけが登録する設計を説明しています。また、PLYという拡張子だけでデータの中身を決めつけず、書き出し元と属性を確認してください。
+
+## WebGPU・WebGL・WebXRの関係
+
+このアドオンが使うのは`WebGPURenderer`です。[クラスの説明](https://github.com/mrdoob/three.js/blob/r186/examples/jsm/objects/GaussianSplat.js)は、`WebGPURenderer`の`forceWebGL`経路をサポートする一方、従来の`WebGLRenderer`では使えないと明記しています。「WebGLでも動く」は`WebGLRenderer`へ差し替えられるという意味ではありません。
+
+r186の公式サンプルは画面上でモデルを回して見る例であり、この記事のコードもWebXRセッションを開始しません。r186にはWebGPU経由のXR描画に関する修正も入っていますが、スプラットをQuestなどで快適に表示できるかは、ブラウザ・端末・モデルの大きさを固定して別途測る必要があります。
+
+## 大きなシーンで残る課題
+
+ファイル形式が圧縮されていても、ファイル全体を読み込む方式だけでは、視点の近くから優先して表示したり、歩いた先の領域だけを追加取得したりはできません。[導入PRの説明](https://github.com/mrdoob/three.js/pull/33950)でも、段階的な読み込みや空間分割による大規模シーン配信は今後の課題として分けられています。SPZにLOD用の情報があっても、現行ローダーでそれを段階表示に利用できるとは書かれていません。
+
+運用するモデルでは、次の項目を別々に測ると、ファイルサイズだけでは見えない負荷をつかめます。
+
+- 初回表示までの時間とダウンロード量
+- 読み込み後のメモリ・GPUメモリ
+- カメラ移動中のフレーム時間と並べ替えの負荷
+- 目標端末のブラウザと描画経路
+- 複数のシーンを切り替えたときの解放と再読み込み
+
+小さな被写体を既存のthree.jsシーンに足す用途には試しやすい更新です。広域の屋外や歩き回る空間では、形式の変換だけでなく、空間分割・段階配信・端末側の予算を含めて設計する必要があります。
+
+## 参照
+
+- [three.js r186リリースノート](https://github.com/mrdoob/three.js/releases/tag/r186)
+- [three.js r186 Gaussian Splatting公式サンプル](https://github.com/mrdoob/three.js/blob/r186/examples/webgpu_gaussian_splat.html)
+- [GaussianSplatのr186実装](https://github.com/mrdoob/three.js/blob/r186/examples/jsm/objects/GaussianSplat.js)
+- [Gaussian Splatting導入PR #33950](https://github.com/mrdoob/three.js/pull/33950)

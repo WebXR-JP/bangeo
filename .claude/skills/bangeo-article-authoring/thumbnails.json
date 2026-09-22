@@ -157,6 +157,12 @@
 			"filename": "nvidia-cloudxr-js-webxr-openxr-streaming",
 			"assetDir": "tech",
 			"thumbnail": "/assets/tech/nvidia-cloudxr-js-webxr-openxr-streaming.webp"
+		},
+		{
+			"slug": "threejs-r186-gaussian-splatting-guide",
+			"filename": "threejs-r186-gaussian-splatting",
+			"assetDir": "tech",
+			"thumbnail": "/assets/tech/threejs-r186-gaussian-splatting.webp"
 		}
 	],
 	"experiments": [
