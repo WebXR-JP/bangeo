@@ -1,6 +1,6 @@
 ---
 title: "SuperSplat 3.0を読む：WebGPU化で3D Gaussian Splatting編集はどう変わった？"
-description: "4.4百万Gaussianの編集時メモリを例に、SuperSplat Editor 3.0のGPU処理、JavaScriptヒープ削減、WebXRとの接続条件を解説します。"
+description: "440万個のGaussianを使ったメモリ比較から、SuperSplat Editor 3.0のGPU処理、JavaScriptヒープ削減、WebXRとの接続条件を解説します。"
 date: "2026年9月23日"
 category: "TECH"
 tags:
@@ -20,7 +20,7 @@ draft: false
 ## 先に要点
 
 - 3.0の大きな成果は、描画速度だけでなく、編集データをJavaScript側に重複して持たない設計へ変えたことです。
-- PlayCanvasが示した比較では、440万Gaussianを含むシーンの読み込み後のJavaScriptヒープが、2.xの1,557 MBから3.0の105 MBになりました。これはJavaScriptヒープの値であり、端末全体のメモリやGPUメモリの比較ではありません。
+- PlayCanvasが示した比較では、440万個のGaussianを含むシーンの読み込み後のJavaScriptヒープが、2.xの1,557 MBから3.0の105 MBになりました。これはJavaScriptヒープの値であり、端末全体のメモリやGPUメモリの比較ではありません。
 - エディターのWebGPU対応と、WebXRセッションでWebGPUを使えることは別の条件です。SuperSplat 3.0が公開されたからといって、同じ編集環境がQuestなどのヘッドセットで動くとは限りません。
 
 ## 3D Gaussian Splattingの編集で重くなる処理
@@ -39,7 +39,7 @@ SuperSplat 3.0では、毎フレームの投影、視界外のGaussianの除外�
 
 ## 公開されたメモリ比較の読み方
 
-PlayCanvasは、440万Gaussianを含む990 MBのPLYを使い、SuperSplat 2.xと3.0のピークJavaScriptヒープを比較しています。代表的な数値は次のとおりです。([公式発表][1])
+PlayCanvasは、440万個のGaussianを含む990 MBのPLYを使い、SuperSplat 2.xと3.0のピークJavaScriptヒープを比較しています。代表的な数値は次のとおりです。([公式発表][1])
 
 | 操作 | SuperSplat 2.x | SuperSplat 3.0 |
 | --- | ---: | ---: |
