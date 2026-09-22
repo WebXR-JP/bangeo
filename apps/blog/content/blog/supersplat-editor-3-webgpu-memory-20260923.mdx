@@ -46,17 +46,17 @@ SuperSplat 3.0では、毎フレームの投影、視界外のGaussianの除外�
 
 ## R3FやThree.jsの実装とどう使い分ける？
 
-SuperSplat Editor 3.0と、R3Fやレンダリングライブラリは担当する作業が異なります。SuperSplatはGaussianの選択、色調整、書き出し、公開を行う編集アプリです。R3FはThree.jsのシーンをReactコンポーネントとして記述するためのrendererで、Dreiの\`<Splat>\`を組み合わせると、ReactアプリのシーンへGaussianを配置できます。([React Three Fiber][4]) ([Drei][5])
+SuperSplat Editor 3.0と、R3Fやレンダリングライブラリは担当する作業が異なります。SuperSplatはGaussianの選択、色調整、書き出し、公開を行う編集アプリです。R3FはThree.jsのシーンをReactコンポーネントとして記述するためのrendererで、Dreiの`<Splat>`を組み合わせると、ReactアプリのシーンへGaussianを配置できます。([React Three Fiber][4]) ([Drei][5])
 
 | 選択肢 | 主な役割 | 向いている場面 | 導入時に考えること |
 | --- | --- | --- | --- |
 | SuperSplat Editor 3.0 | Gaussianの編集、選択、色調整、書き出し、公開 | 大きなシーンの編集や配信用データの作成 | WebGPUを使えるブラウザが必要 |
-| R3F + Drei \`Splat\` | React / Three.jsアプリのシーンにGaussianを表示 | ReactのUIや状態管理と3Dシーンを一緒に作る | 選択・色調整・書き出しの編集フローはアプリ側に組み立てる |
-| Three.js \`GaussianSplat\` + loaders | Gaussianデータを読み、Three.jsのシーンへ追加 | 表示や操作を自分のアプリに合わせて作る | \`GaussianSplat\`は\`WebGPURenderer\`向け。PLY、SPLAT、SPZなど形式ごとにloaderを選ぶ |
+| R3F + Drei `Splat` | React / Three.jsアプリのシーンにGaussianを表示 | ReactのUIや状態管理と3Dシーンを一緒に作る | 選択・色調整・書き出しの編集フローはアプリ側に組み立てる |
+| Three.js `GaussianSplat` + loaders | Gaussianデータを読み、Three.jsのシーンへ追加 | 表示や操作を自分のアプリに合わせて作る | `GaussianSplat`は`WebGPURenderer`向け。PLY、SPLAT、SPZなど形式ごとにloaderを選ぶ |
 | Spark | Three.js / WebGL2上で複数の動的なGaussianを表示 | メッシュとGaussianの共存、モバイルやWebXR向け表示 | 表示ライブラリとしてアプリへ組み込む。編集UIや納品フローは別に設計する |
-| \`@mkkellogg/gaussian-splats-3d\` | Three.jsベースのViewer。PLY、SPLAT、KSPLATとWebXRに対応 | 既存プロジェクトのViewerや以前の実装例を調べる | READMEは現在アクティブに開発していないと説明し、Sparkを候補に挙げている |
+| `@mkkellogg/gaussian-splats-3d` | Three.jsベースのViewer。PLY、SPLAT、KSPLATとWebXRに対応 | 既存プロジェクトのViewerや以前の実装例を調べる | READMEは現在アクティブに開発していないと説明し、Sparkを候補に挙げている |
 
-たとえば、WebXR空間やReactアプリの中へGaussianを組み込むなら、R3F / DreiやSparkのような表示ライブラリが候補になります。編集画面を一から作らず、選択・色調整・各種形式への書き出し・公開まで進めるなら、SuperSplatが担う作業です。Three.jsにも\`GaussianSplat\`とPLY / SPLAT / SPZ用loaderがありますが、独自UIやデータ処理はアプリ側で実装します。現在のthree.jsドキュメントでは\`GaussianSplat\`は\`WebGPURenderer\`を前提とし、通常の\`WebGLRenderer\`には対応しません。([three.js GaussianSplat][6]) ([three.js loaders][7])
+たとえば、WebXR空間やReactアプリの中へGaussianを組み込むなら、R3F / DreiやSparkのような表示ライブラリが候補になります。編集画面を一から作らず、選択・色調整・各種形式への書き出し・公開まで進めるなら、SuperSplatが担う作業です。Three.jsにも`GaussianSplat`とPLY / SPLAT / SPZ用loaderがありますが、独自UIやデータ処理はアプリ側で実装します。現在のthree.jsドキュメントでは`GaussianSplat`は`WebGPURenderer`を前提とし、通常の`WebGLRenderer`には対応しません。([three.js GaussianSplat][6]) ([three.js loaders][7])
 
 この比較は機能の役割を整理したもので、同じデータを使った速度測定ではありません。前節の数値もSuperSplat 2.xと3.0の比較です。R3F / Drei、three.js、Sparkとの優劣を示す共通ベンチマークは公開されていないため、実行環境で比べるときは同じファイル、端末、ブラウザ、描画解像度をそろえ、読み込み時間、フレーム時間、JavaScriptヒープ、GPUメモリをそれぞれ測ります。
 
