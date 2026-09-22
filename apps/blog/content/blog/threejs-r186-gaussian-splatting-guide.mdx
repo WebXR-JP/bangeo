@@ -33,10 +33,11 @@ import { SPZLoader } from "three/addons/loaders/SPZLoader.js";
 import { GaussianSplat } from "three/addons/objects/GaussianSplat.js";
 
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(60, 1, 0.01, 100);
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.01, 100);
 camera.position.set(0, 0, 3);
 
 const renderer = new THREE.WebGPURenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
 await renderer.init();
 document.body.appendChild(renderer.domElement);
 
@@ -49,7 +50,7 @@ renderer.setAnimationLoop(() => {
 });
 ```
 
-`/models/scene.spz`は自分で配信するファイルのURLに置き換えます。画面の縦横比やリサイズ処理、モデルの向きとカメラ位置はデータに合わせて調整してください。公式サンプルは`autoSort: false`にして各フレームで`updateSort(renderer, camera)`を明示的に呼びます。上の例は既定の自動並べ替えを利用しています。
+`/models/scene.spz`は自分で配信するファイルのURLに置き換えます。画面のリサイズ処理、モデルの向きとカメラ位置はデータに合わせて調整してください。公式サンプルは`autoSort: false`にして各フレームで`updateSort(renderer, camera)`を明示的に呼びます。上の例は既定の自動並べ替えを利用しています。
 
 **名称に注意してください。** 初期の[導入PR](https://github.com/mrdoob/three.js/pull/33950)には`GaussianSplatMesh`という名前の説明がありますが、r186の[リリース版](https://github.com/mrdoob/three.js/blob/r186/examples/jsm/objects/GaussianSplat.js)とサンプルで使う名前は`GaussianSplat`です。古いコードをそのまま貼るとimportに失敗します。
 
