@@ -163,6 +163,12 @@
 			"filename": "threejs-r186-gaussian-splatting",
 			"assetDir": "tech",
 			"thumbnail": "/assets/tech/threejs-r186-gaussian-splatting.webp"
+		},
+		{
+			"slug": "meta-connect-2026-webxr-viewing-guide",
+			"filename": "webxr-events-watch-2026",
+			"assetDir": "news",
+			"thumbnail": "/assets/news/webxr-events-watch-2026.webp"
 		}
 	],
 	"experiments": [
