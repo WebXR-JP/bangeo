@@ -11,12 +11,16 @@ import {
 export const metadata: Metadata = {
 	title: "WebXR対応デバイス一覧｜VRヘッドセット・スマートフォン",
 	description:
-		"Meta Quest、Apple Vision Pro、HTC Vive、PICO、iPhone、Androidなど、WebXR（immersive-vr / immersive-ar）で動作確認できるVRヘッドセットとスマートフォンの対応状況・ブラウザ・接続方式を一覧で整理しています。",
+		"Meta Quest、Steam Frame、Apple Vision Pro、HTC Vive、PICO、iPhone、AndroidなどのWebXR対応状況・未確認情報、ブラウザ、接続方式を一覧で整理しています。",
 	alternates: { canonical: "/devices" },
 };
 
 function DeviceCard({ device }: { device: DeviceWebxrSummary }) {
-	const isSupported = device.webxrSupport.status === "対応";
+	const statusClasses = {
+		対応: "bg-emerald-50 text-emerald-700 border-emerald-100",
+		非対応: "bg-rose-50 text-rose-700 border-rose-100",
+		未確認: "bg-amber-50 text-amber-800 border-amber-200",
+	} as const;
 
 	return (
 		<article className="p-8 md:p-10 bg-white/70 border border-white rounded-[2.5rem] shadow-xs hover:shadow-xl transition-all duration-500">
@@ -30,11 +34,7 @@ function DeviceCard({ device }: { device: DeviceWebxrSummary }) {
 					</h3>
 				</div>
 				<span
-					className={`inline-flex items-center px-4 py-2 rounded-full text-xs font-black border ${
-						isSupported
-							? "bg-emerald-50 text-emerald-700 border-emerald-100"
-							: "bg-rose-50 text-rose-700 border-rose-100"
-					}`}
+					className={`inline-flex items-center px-4 py-2 rounded-full text-xs font-black border ${statusClasses[device.webxrSupport.status]}`}
 				>
 					WebXR: {device.webxrSupport.status}
 				</span>
@@ -125,8 +125,7 @@ export default function DevicesPage() {
 						対応デバイス一覧
 					</h1>
 					<p className="text-xl md:text-2xl text-gray-500 font-medium leading-relaxed">
-						WebXR に対応する VR
-						ヘッドセットやスマートフォンを、ブラウザ、接続方式、特徴とあわせて確認できます。
+						VRヘッドセットやスマートフォンのWebXR対応状況を、未確認の機種も含め、ブラウザや接続方式とあわせて確認できます。
 					</p>
 					<Link
 						href="/devices/submit"
