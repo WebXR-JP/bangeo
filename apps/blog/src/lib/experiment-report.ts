@@ -97,10 +97,10 @@ export function reportBrowser(ua: string): ExperimentReport["browser"] {
 		["quest-browser", /OculusBrowser\/(\d+)/i],
 		["pico-browser", /Pico\s?Browser\/(\d+)/i],
 		["wolvic", /Wolvic\/(\d+)/i],
-		["edge", /Edg\/(\d+)/],
-		["firefox", /Firefox\/(\d+)/],
-		["chrome", /Chrome\/(\d+)/],
-		["safari", /Version\/(\d+).*Safari/],
+		["edge", /(?:Edg|EdgiOS|EdgA)\/(\d+)/i],
+		["firefox", /(?:Firefox|FxiOS)\/(\d+)/i],
+		["chrome", /(?:Chrome|CriOS)\/(\d+)/i],
+		["safari", /Version\/(\d+).*Safari/i],
 	];
 	for (const [family, pattern] of patterns) {
 		const match = ua.match(pattern);
@@ -111,6 +111,19 @@ export function reportBrowser(ua: string): ExperimentReport["browser"] {
 			};
 	}
 	return { family: "other", major: null };
+}
+/** Best-effort model detection; ambiguous UA strings remain unclassified. */
+export function reportDevice(ua: string): ReportDevice {
+	if (/Quest\s?3S\b/i.test(ua)) return "quest-3s";
+	if (/Quest\s?Pro\b/i.test(ua)) return "quest-pro";
+	if (/Quest\s?3\b/i.test(ua)) return "quest-3";
+	if (/Quest\s?2\b/i.test(ua)) return "quest-2";
+	if (/OculusBrowser|Quest\b|Oculus\b/i.test(ua)) return "quest-other";
+	if (/PICO\s?4\s?Ultra\b/i.test(ua)) return "pico-4-ultra";
+	if (/PICO\s?4\b/i.test(ua)) return "pico-4";
+	if (/PicoBrowser|Pico\s?Browser|PICO\b/i.test(ua)) return "pico-other";
+	if (/iPhone|iPad|iPod|Android/i.test(ua)) return "other";
+	return "unknown";
 }
 function object(value: unknown): value is Record<string, unknown> {
 	return value !== null && typeof value === "object" && !Array.isArray(value);
