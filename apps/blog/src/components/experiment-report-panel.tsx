@@ -5,6 +5,7 @@ import {
 	type ExperimentReport,
 	type ReportDevice,
 	reportBrowser,
+	reportDevice,
 	reportDevices,
 	type SessionReport,
 } from "@/lib/experiment-report";
@@ -48,9 +49,13 @@ declare global {
 	}
 }
 const options: Options = {
-	key: process.env.NEXT_PUBLIC_BANGEO_ANALYTICS_KEY ?? "",
-	ingest: process.env.NEXT_PUBLIC_BANGEO_ANALYTICS_INGEST ?? "",
-	api: process.env.NEXT_PUBLIC_BANGEO_ANALYTICS_API ?? "",
+	key: (process.env.NEXT_PUBLIC_BANGEO_ANALYTICS_KEY ?? "").trim(),
+	ingest:
+		process.env.NEXT_PUBLIC_BANGEO_ANALYTICS_INGEST?.trim() ||
+		"https://bangeo-ingest.peraperapera.workers.dev",
+	api:
+		process.env.NEXT_PUBLIC_BANGEO_ANALYTICS_API?.trim() ||
+		"https://bangeo-api.peraperapera.workers.dev",
 };
 let sdkPromise: Promise<SDK> | null = null;
 function loadSDK(): Promise<SDK> {
@@ -91,7 +96,7 @@ function loadSDK(): Promise<SDK> {
 	return sdkPromise;
 }
 const deviceLabels: Record<ReportDevice, string> = {
-	unknown: "選択しない",
+	unknown: "判別できない",
 	"quest-2": "Meta Quest 2",
 	"quest-3": "Meta Quest 3",
 	"quest-3s": "Meta Quest 3S",
@@ -100,7 +105,7 @@ const deviceLabels: Record<ReportDevice, string> = {
 	"pico-4": "PICO 4",
 	"pico-4-ultra": "PICO 4 Ultra",
 	"pico-other": "その他のPICO",
-	other: "その他",
+	other: "その他（スマートフォンなど）",
 };
 const resultLabels: Record<string, string> = {
 	detected: "検出",
@@ -147,7 +152,10 @@ export function ExperimentReportPanel({
 	const reportId = useRef<string | null>(null);
 	const abort = useRef<AbortController | null>(null);
 	const allowed = useRef(false);
-	const configured = Boolean(options.key && options.ingest && options.api);
+	const configured = /^bg_pk_[a-zA-Z0-9_-]{1,80}$/.test(options.key);
+	useEffect(() => {
+		setDevice(reportDevice(navigator.userAgent));
+	}, []);
 	useEffect(
 		() => () => {
 			allowed.current = false;
@@ -249,7 +257,7 @@ export function ExperimentReportPanel({
 			</p>
 			{!configured && (
 				<p className="mt-3 text-sm text-gray-600">
-					匿名データの受付は準備中です。送信内容の確認はできます。
+					BANGEO Analyticsの公開キーが未設定か形式が異なるため送信できません。送信内容の確認はできます。
 				</p>
 			)}
 			<div className="mt-4 flex flex-wrap items-end gap-3">
@@ -258,7 +266,13 @@ export function ExperimentReportPanel({
 					<select
 						value={device}
 						disabled={sending}
-						onChange={(e) => setDevice(e.target.value as ReportDevice)}
+						onChange={(e) => {
+							setDevice(e.target.value as ReportDevice);
+							setPreview(null);
+							setConsent(false);
+							allowed.current = false;
+							abort.current?.abort();
+						}}
 						className="ml-2 rounded border p-2"
 					>
 						{reportDevices.map((d) => (
@@ -277,6 +291,9 @@ export function ExperimentReportPanel({
 					送信内容を確認
 				</button>
 			</div>
+			<p className="mt-2 text-xs text-gray-500">
+				端末とブラウザはブラウザの情報から推定します。機種が違う場合は選び直してください。判別できない場合はそのまま送信できます。
+			</p>
 			{running && (
 				<p className="mt-2 text-sm">体験を終了すると結果を確認できます。</p>
 			)}
