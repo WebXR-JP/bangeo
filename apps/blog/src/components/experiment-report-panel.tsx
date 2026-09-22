@@ -257,7 +257,8 @@ export function ExperimentReportPanel({
 			</p>
 			{!configured && (
 				<p className="mt-3 text-sm text-gray-600">
-					BANGEO Analyticsの公開キーが未設定か形式が異なるため送信できません。送信内容の確認はできます。
+					BANGEO
+					Analyticsの公開キーが未設定か形式が異なるため送信できません。送信内容の確認はできます。
 				</p>
 			)}
 			<div className="mt-4 flex flex-wrap items-end gap-3">
