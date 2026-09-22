@@ -1,7 +1,8 @@
 ---
-title: "SuperSplat 3.0を読む：WebGPU化で3D Gaussian Splatting編集はどう変わった？"
-description: "440万個のGaussianを使ったメモリ比較から、SuperSplat Editor 3.0のGPU処理、JavaScriptヒープ削減、WebXRとの接続条件を解説します。"
+title: "SuperSplat 3.0を読む：WebGPU化とR3F・Three.jsとの使い分け"
+description: "440万個のGaussianを使ったメモリ比較に加え、R3F・Drei、three.js、Sparkとの役割の違いとWebXRで選ぶときの注意点を解説します。"
 date: "2026年9月23日"
+updated: "2026年9月23日"
 category: "TECH"
 tags:
   - "SuperSplat"
@@ -9,13 +10,19 @@ tags:
   - "WebGPU"
   - "WebXR"
   - "PlayCanvas"
+  - "Three.js"
+  - "React Three Fiber"
+  - "Spark"
 author: "BANGEO Team"
+thumbnail: "/assets/tech/supersplat-editor-3-webgpu.webp"
 draft: false
 ---
 
 2026年9月9日、PlayCanvasはSuperSplat Editor 3.0を公開しました。大きな変更は、エディターをWebGPU専用に作り直したことです。画面を描くAPIを入れ替えただけではありません。データの持ち方も変え、Gaussianの投影や並べ替え、選択、書き出しまで、重い処理をGPUへ寄せています。([公式発表][1])
 
 この記事では、SuperSplat Editor 3.0の変更を手がかりに、3D Gaussian Splattingの編集で何が重くなりやすいのか、WebGPU化でJavaScript側のメモリがなぜ減ったのか、そしてこの更新をWebXR開発者がどう受け止めればよいかを整理します。
+
+![Gaussianの点群を前に、ミント色と空色のマスコットが編集画面を操作するイラスト](/assets/tech/supersplat-editor-3-webgpu.webp)
 
 ## 先に要点
 
@@ -36,6 +43,22 @@ SuperSplat 3.0では、毎フレームの投影、視界外のGaussianの除外�
 データも、シーン全体の複製をJavaScriptに置く方式から、GPU上の分割された保存領域と、編集状態を持つ小さなGaussianごとの一覧を使う構成へ変わっています。ヒストグラム、範囲選択、色合わせ、境界の計算、選択表示もGPU計算を使います。書き出しや公開は、シーン全体を一度に展開せず、splat-transformを使って分割単位で進めます。([公式発表][1])
 
 つまり、効果の中心は「WebGPUだから描画が速い」だけではありません。大量のデータをどこに置き、どの処理でCPUとGPUの間を行き来させるかまで見直しています。
+
+## R3FやThree.jsの実装とどう使い分ける？
+
+SuperSplat Editor 3.0と、R3Fやレンダリングライブラリは担当する作業が異なります。SuperSplatはGaussianの選択、色調整、書き出し、公開を行う編集アプリです。R3FはThree.jsのシーンをReactコンポーネントとして記述するためのrendererで、Dreiの\`<Splat>\`を組み合わせると、ReactアプリのシーンへGaussianを配置できます。([React Three Fiber][4]) ([Drei][5])
+
+| 選択肢 | 主な役割 | 向いている場面 | 導入時に考えること |
+| --- | --- | --- | --- |
+| SuperSplat Editor 3.0 | Gaussianの編集、選択、色調整、書き出し、公開 | 大きなシーンの編集や配信用データの作成 | WebGPUを使えるブラウザが必要 |
+| R3F + Drei \`Splat\` | React / Three.jsアプリのシーンにGaussianを表示 | ReactのUIや状態管理と3Dシーンを一緒に作る | 選択・色調整・書き出しの編集フローはアプリ側に組み立てる |
+| Three.js \`GaussianSplat\` + loaders | Gaussianデータを読み、Three.jsのシーンへ追加 | 表示や操作を自分のアプリに合わせて作る | \`GaussianSplat\`は\`WebGPURenderer\`向け。PLY、SPLAT、SPZなど形式ごとにloaderを選ぶ |
+| Spark | Three.js / WebGL2上で複数の動的なGaussianを表示 | メッシュとGaussianの共存、モバイルやWebXR向け表示 | 表示ライブラリとしてアプリへ組み込む。編集UIや納品フローは別に設計する |
+| \`@mkkellogg/gaussian-splats-3d\` | Three.jsベースのViewer。PLY、SPLAT、KSPLATとWebXRに対応 | 既存プロジェクトのViewerや以前の実装例を調べる | READMEは現在アクティブに開発していないと説明し、Sparkを候補に挙げている |
+
+たとえば、WebXR空間やReactアプリの中へGaussianを組み込むなら、R3F / DreiやSparkのような表示ライブラリが候補になります。編集画面を一から作らず、選択・色調整・各種形式への書き出し・公開まで進めるなら、SuperSplatが担う作業です。Three.jsにも\`GaussianSplat\`とPLY / SPLAT / SPZ用loaderがありますが、独自UIやデータ処理はアプリ側で実装します。現在のthree.jsドキュメントでは\`GaussianSplat\`は\`WebGPURenderer\`を前提とし、通常の\`WebGLRenderer\`には対応しません。([three.js GaussianSplat][6]) ([three.js loaders][7])
+
+この比較は機能の役割を整理したもので、同じデータを使った速度測定ではありません。前節の数値もSuperSplat 2.xと3.0の比較です。R3F / Drei、three.js、Sparkとの優劣を示す共通ベンチマークは公開されていないため、実行環境で比べるときは同じファイル、端末、ブラウザ、描画解像度をそろえ、読み込み時間、フレーム時間、JavaScriptヒープ、GPUメモリをそれぞれ測ります。
 
 ## 公開されたメモリ比較の読み方
 
@@ -91,6 +114,13 @@ WebXR開発者にとっての学びは、WebGPU対応の有無だけで判断し
 
 ## 参照
 
+- [React Three Fiberの概要][4]
+- [DreiのSplatコンポーネント][5]
+- [three.js GaussianSplat][6]
+- three.jsのGaussian splat loader: [PLY][7]、[SPLAT][8]、[SPZ][9]
+- [Sparkの概要][10]
+- [GaussianSplats3DのREADME][11]
+
 - [SuperSplat Editor 3.0：WebGPUで再構築](https://blog.playcanvas.com/new-in-supersplat-editor-3-0-rebuilt-on-webgpu/)
 - [SuperSplat 3.0.0リリースノート](https://github.com/playcanvas/supersplat/releases/tag/v3.0.0)
 - [WebXR/WebGPU Binding Module - Level 1](https://immersive-web.github.io/webxr-webgpu-binding/)
@@ -99,3 +129,11 @@ WebXR開発者にとっての学びは、WebGPU対応の有無だけで判断し
 [1]: https://blog.playcanvas.com/new-in-supersplat-editor-3-0-rebuilt-on-webgpu/ "SuperSplat Editor 3.0 rebuilt on WebGPU"
 [2]: https://immersive-web.github.io/webxr-webgpu-binding/ "WebXR/WebGPU Binding Module - Level 1"
 [3]: /tech-articles/quest-browser-146-webgpu-webxr "Quest Browser 146.xでWebGPU / WebXR depth projectionが実験的に追加"
+[4]: https://r3f.docs.pmnd.rs/getting-started/introduction "React Three Fiber Introduction"
+[5]: https://drei.docs.pmnd.rs/abstractions/splat "Drei Splat"
+[6]: https://threejs.org/docs/pages/GaussianSplat.html "three.js GaussianSplat"
+[7]: https://threejs.org/docs/pages/GaussianSplatPLYLoader.html "three.js GaussianSplatPLYLoader"
+[8]: https://threejs.org/docs/pages/SPLATLoader.html "three.js SPLATLoader"
+[9]: https://threejs.org/docs/pages/SPZLoader.html "three.js SPZLoader"
+[10]: https://sparkjs.dev/docs/overview/ "Spark Overview"
+[11]: https://github.com/mkkellogg/GaussianSplats3D "GaussianSplats3D repository"

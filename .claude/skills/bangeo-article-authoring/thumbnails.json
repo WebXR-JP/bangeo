@@ -163,6 +163,12 @@
 			"filename": "threejs-r186-gaussian-splatting",
 			"assetDir": "tech",
 			"thumbnail": "/assets/tech/threejs-r186-gaussian-splatting.webp"
+		},
+		{
+			"slug": "supersplat-editor-3-webgpu-memory-20260923",
+			"filename": "supersplat-editor-3-webgpu",
+			"assetDir": "tech",
+			"thumbnail": "/assets/tech/supersplat-editor-3-webgpu.webp"
 		}
 	],
 	"experiments": [
