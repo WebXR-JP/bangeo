@@ -29,6 +29,7 @@ draft: false
 - 3.0の大きな成果は、描画速度だけでなく、編集データをJavaScript側に重複して持たない設計へ変えたことです。
 - PlayCanvasが示した比較では、440万個のGaussianを含むシーンの読み込み後のJavaScriptヒープが、2.xの1,557 MBから3.0の105 MBになりました。これはJavaScriptヒープの値であり、端末全体のメモリやGPUメモリの比較ではありません。
 - エディターのWebGPU対応と、WebXRセッションでWebGPUを使えることは別の条件です。SuperSplat 3.0が公開されたからといって、同じ編集環境がQuestなどのヘッドセットで動くとは限りません。
+- SuperSplatは編集・書き出しを行うアプリで、R3F / DreiやSparkはアプリ内表示の選択肢です。公開された性能値はライブラリ横断の比較ではありません。
 
 ## 3D Gaussian Splattingの編集で重くなる処理
 
@@ -58,7 +59,7 @@ SuperSplat Editor 3.0と、R3Fやレンダリングライブラリは担当す�
 
 たとえば、WebXR空間やReactアプリの中へGaussianを組み込むなら、R3F / DreiやSparkのような表示ライブラリが候補になります。編集画面を一から作らず、選択・色調整・各種形式への書き出し・公開まで進めるなら、SuperSplatが担う作業です。Three.jsにも`GaussianSplat`とPLY / SPLAT / SPZ用loaderがありますが、独自UIやデータ処理はアプリ側で実装します。現在のthree.jsドキュメントでは`GaussianSplat`は`WebGPURenderer`を前提とし、通常の`WebGLRenderer`には対応しません。([three.js GaussianSplat][6]) ([three.js loaders][7])
 
-この比較は機能の役割を整理したもので、同じデータを使った速度測定ではありません。前節の数値もSuperSplat 2.xと3.0の比較です。R3F / Drei、three.js、Sparkとの優劣を示す共通ベンチマークは公開されていないため、実行環境で比べるときは同じファイル、端末、ブラウザ、描画解像度をそろえ、読み込み時間、フレーム時間、JavaScriptヒープ、GPUメモリをそれぞれ測ります。
+この比較は機能の役割を整理したもので、同じデータを使った速度測定ではありません。前節の数値もSuperSplat 2.xと3.0の比較です。PlayCanvasの発表はR3F / Drei、three.js、Sparkとの性能比較を掲載していません。そのため、実行環境で比べるときは同じファイル、端末、ブラウザ、描画解像度をそろえ、読み込み時間、フレーム時間、JavaScriptヒープ、GPUメモリをそれぞれ測ります。
 
 ## 公開されたメモリ比較の読み方
 
