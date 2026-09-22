@@ -1,7 +1,8 @@
 ---
 title: "three.js r186のGaussian Splatting入門：SPZを表示し、大規模配信との違いを知る"
-description: "three.js r186に加わったGaussian Splattingアドオンを公式サンプルから解説。SPZの最小表示例、対応形式、WebGL経路、視点依存の色と大規模シーン配信の限界を整理します。"
+description: "three.js r186のGaussian Splatting公式アドオンを解説。SPZ表示例とDrei・R3F・Spark・GaussianSplats3D・PlayCanvasとの違い、大規模配信の限界を整理します。"
 date: "2026年9月22日"
+updated: "2026年9月23日"
 category: "TECH"
 tags:
   - "three.js"
@@ -14,7 +15,7 @@ thumbnail: "/assets/tech/threejs-r186-gaussian-splatting.webp"
 draft: false
 ---
 
-2026年9月8日公開の[three.js r186](https://github.com/mrdoob/three.js/releases/tag/r186)には、3D Gaussian Splattingを読み込んで描画する公式アドオンが入りました。写真から再構成した空間をWebに表示する際、これまでは別のビューワーを組み合わせることが多かったところ、three.jsのシーンにスプラットを追加する経路ができました。
+2026年9月8日公開の[three.js r186](https://github.com/mrdoob/three.js/releases/tag/r186)には、3D Gaussian Splattingを読み込んで描画する公式アドオンが入りました。写真から再構成した空間は、これまでもDreiや専用ライブラリを組み合わせてthree.jsのシーンに表示できました。今回増えたのは、three.js本体のリポジトリで提供される公式アドオンという選択肢です。
 
 ただし、**ファイルを読み込めることと、大きな空間を段階的に配信できることは別**です。この記事ではr186の[公式サンプル](https://github.com/mrdoob/three.js/blob/r186/examples/webgpu_gaussian_splat.html)と実装をもとに、最初の表示手順と採用時の判断点を整理します。内容は2026年9月22日に公開ソースで確認したもので、特定の端末での実測結果ではありません。
 
@@ -75,6 +76,28 @@ glTFの拡張は通常の`GLTFLoader`に自動で組み込まれるものでは�
 
 r186の公式サンプルは画面上でモデルを回して見る例であり、この記事のコードもWebXRセッションを開始しません。r186にはWebGPU経由のXR描画に関する修正も入っていますが、スプラットをQuestなどで快適に表示できるかは、ブラウザ・端末・モデルの大きさを固定して別途測る必要があります。
 
+## 既存の方法と何が違うか
+
+r186以前も、React Three Fiber（R3F）でGaussian Splattingを表示できました。R3Fはthree.jsのシーンをReactで組み立てる仕組みであり、スプラットの描画方式そのものではありません。たとえば[Dreiの`<Splat />`](https://drei.docs.pmnd.rs/abstractions/splat)はR3F用の部品として`.splat`を扱います。また、[SparkのR3Fサンプル](https://github.com/sparkjsdev/spark-react-r3f)では、R3Fの`extend`を使ってSparkの`SplatMesh`と`SparkRenderer`をシーンへ組み込んでいます。
+
+| 選択肢 | 既存アプリへの組み込み方 | 公式資料から分かる特徴・注意点 |
+| --- | --- | --- |
+| three.js r186の`GaussianSplat` | `WebGPURenderer`とthree.js公式アドオンを使用 | SPZ・SPLAT・KSPLAT・Gaussian Splatting用PLYなどのローダーがある。`WebGLRenderer`へそのまま追加する方式ではない |
+| Dreiの`<Splat />` | R3FのJSXでシーンに配置 | `.splat`向け。ドキュメントはPLY非対応と明記。ダウンロード中の段階表示や複数スプラットを扱うが、大規模シーンの空間別LODとは別の機能 |
+| GaussianSplats3D | 専用`Viewer`、または既存シーンに足す`DropInViewer` | PLY・SPLAT・KSPLATを扱い、`progressiveLoad`で読み込み途中から表示できる。描画ループやthree.jsシーンとの合成方法を選べる |
+| Spark | three.jsのシーンに`SparkRenderer`と`SplatMesh`を追加。R3F用サンプルもある | WebGL2を軸に複数スプラットの描画や動的な編集を提供。PLY・SPZ・SPLAT・KSPLAT・SOGなどを挙げている |
+| PlayCanvasのStreamed SOG | PlayCanvas Engineと専用の空間分割データを使用 | 領域ごとのLODを読み込み・解放し、全体のスプラット数の上限を管理。広い空間を移動する用途に合う |
+
+比較の根拠は各プロジェクトの[Drei](https://drei.docs.pmnd.rs/abstractions/splat)、[GaussianSplats3D](https://github.com/mkkellogg/GaussianSplats3D)、[Spark](https://github.com/sparkjsdev/spark)、[PlayCanvas Streamed SOG](https://developer.playcanvas.com/user-manual/gaussian-splatting/building/lod-streaming/)の公式資料です。機能表は実測の速度比較ではなく、公開されているAPIと配信方式の整理です。
+
+### R3Fで制作している場合
+
+すでにDreiの`<Splat />`を使っているなら、r186の登場だけを理由に置き換える必要はありません。扱う形式、現在の読み込み方式、複数スプラットの表示、React側の操作を確認してから決めるのがよいでしょう。
+
+特に`<Splat />`を`<primitive object={...} />`に変えるだけでは移行は完了しません。r186の`GaussianSplat`は`WebGPURenderer`向けで、従来の`WebGLRenderer`では使えません。R3F側のrenderer設定と、使っているライブラリの対応関係を含めて検証する必要があります。R3Fという書き方と、実際にスプラットを描くライブラリを分けて考えるのがポイントです。
+
+なお、DreiやGaussianSplats3Dの「読み込み途中から表示する」機能は、単一ファイルを取得しながら画面を更新するものです。PlayCanvasのStreamed SOGが行う、視点に応じて空間の領域とLODを入れ替える配信とは区別してください。
+
 ## 大きなシーンで残る課題
 
 ファイル形式が圧縮されていても、ファイル全体を読み込む方式だけでは、視点の近くから優先して表示したり、歩いた先の領域だけを追加取得したりはできません。[導入PRの説明](https://github.com/mrdoob/three.js/pull/33950)でも、段階的な読み込みや空間分割による大規模シーン配信は今後の課題として分けられています。SPZにLOD用の情報があっても、現行ローダーでそれを段階表示に利用できるとは書かれていません。
@@ -95,3 +118,8 @@ r186の公式サンプルは画面上でモデルを回して見る例であり�
 - [three.js r186 Gaussian Splatting公式サンプル](https://github.com/mrdoob/three.js/blob/r186/examples/webgpu_gaussian_splat.html)
 - [GaussianSplatのr186実装](https://github.com/mrdoob/three.js/blob/r186/examples/jsm/objects/GaussianSplat.js)
 - [Gaussian Splatting導入PR #33950](https://github.com/mrdoob/three.js/pull/33950)
+- [Drei Splat](https://drei.docs.pmnd.rs/abstractions/splat)
+- [GaussianSplats3D](https://github.com/mkkellogg/GaussianSplats3D)
+- [Spark](https://github.com/sparkjsdev/spark)
+- [SparkのR3Fサンプル](https://github.com/sparkjsdev/spark-react-r3f)
+- [PlayCanvas Streamed SOG](https://developer.playcanvas.com/user-manual/gaussian-splatting/building/lod-streaming/)

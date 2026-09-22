@@ -11,17 +11,21 @@ import {
 export const metadata: Metadata = {
 	title: "WebXR対応デバイス一覧｜VRヘッドセット・スマートフォン",
 	description:
-		"Meta Quest、Apple Vision Pro、HTC Vive、PICO、iPhone、Androidなど、WebXR（immersive-vr / immersive-ar）で動作確認できるVRヘッドセットとスマートフォンの対応状況・ブラウザ・接続方式を一覧で整理しています。",
+		"Meta Quest、Steam Frame、Apple Vision Pro、HTC Vive、PICO、iPhone、AndroidなどのWebXR対応状況・未確認情報、ブラウザ、接続方式を一覧で整理しています。",
 	alternates: { canonical: "/devices" },
 };
 
 function DeviceCard({ device }: { device: DeviceWebxrSummary }) {
-	const isSupported = device.webxrSupport.status === "対応";
+	const statusClasses = {
+		対応: "bg-emerald-50 text-emerald-700 border-emerald-100",
+		非対応: "bg-rose-50 text-rose-700 border-rose-100",
+		未確認: "bg-amber-50 text-amber-800 border-amber-200",
+	} as const;
 
 	return (
-		<article className="p-8 md:p-10 bg-white/70 border border-white rounded-[2.5rem] shadow-xs hover:shadow-xl transition-all duration-500">
+		<article className="min-w-0 p-5 sm:p-8 md:p-10 bg-white/70 border border-white rounded-[2.5rem] shadow-xs hover:shadow-xl transition-all duration-500">
 			<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-				<div className="space-y-2">
+				<div className="min-w-0 space-y-2">
 					<div className="text-[10px] font-black text-[#e11d48] uppercase tracking-widest">
 						{device.type} / {device.manufacturer}
 					</div>
@@ -30,30 +34,26 @@ function DeviceCard({ device }: { device: DeviceWebxrSummary }) {
 					</h3>
 				</div>
 				<span
-					className={`inline-flex items-center px-4 py-2 rounded-full text-xs font-black border ${
-						isSupported
-							? "bg-emerald-50 text-emerald-700 border-emerald-100"
-							: "bg-rose-50 text-rose-700 border-rose-100"
-					}`}
+					className={`inline-flex items-center px-4 py-2 rounded-full text-xs font-black border ${statusClasses[device.webxrSupport.status]}`}
 				>
 					WebXR: {device.webxrSupport.status}
 				</span>
 			</div>
-			<p className="mt-4 text-sm text-gray-600 leading-relaxed">
+			<p className="mt-4 text-sm text-gray-600 leading-relaxed [overflow-wrap:anywhere]">
 				{device.webxrSupport.detail}
 			</p>
 
-			<div className="mt-8 grid gap-8 md:grid-cols-2">
-				<div className="space-y-6">
+			<div className="mt-8 grid min-w-0 grid-cols-1 gap-8 md:grid-cols-2">
+				<div className="min-w-0 space-y-6">
 					<div>
 						<h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
 							対応ブラウザ
 						</h4>
 						<ul className="mt-2 space-y-2 text-sm text-gray-600 leading-relaxed">
 							{device.browsers.map((browser) => (
-								<li key={browser} className="flex gap-2">
+								<li key={browser} className="flex min-w-0 gap-2">
 									<span className="text-[#e11d48] mt-1">&bull;</span>
-									<span>{browser}</span>
+									<span className="min-w-0 [overflow-wrap:anywhere]">{browser}</span>
 								</li>
 							))}
 						</ul>
@@ -62,7 +62,7 @@ function DeviceCard({ device }: { device: DeviceWebxrSummary }) {
 						<h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
 							接続タイプ
 						</h4>
-						<p className="mt-2 text-sm text-gray-600 leading-relaxed">
+						<p className="mt-2 text-sm text-gray-600 leading-relaxed [overflow-wrap:anywhere]">
 							{device.connectionType}
 						</p>
 					</div>
@@ -70,7 +70,7 @@ function DeviceCard({ device }: { device: DeviceWebxrSummary }) {
 						<h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
 							価格帯
 						</h4>
-						<p className="mt-2 text-sm text-gray-600 leading-relaxed">
+						<p className="mt-2 text-sm text-gray-600 leading-relaxed [overflow-wrap:anywhere]">
 							{device.priceRange}
 						</p>
 					</div>
@@ -78,22 +78,22 @@ function DeviceCard({ device }: { device: DeviceWebxrSummary }) {
 						<h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
 							入手可能性
 						</h4>
-						<p className="mt-2 text-sm text-gray-600 leading-relaxed">
+						<p className="mt-2 text-sm text-gray-600 leading-relaxed [overflow-wrap:anywhere]">
 							{device.availability}
 						</p>
 					</div>
 				</div>
 
-				<div className="space-y-6">
+				<div className="min-w-0 space-y-6">
 					<div>
 						<h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
 							特徴・注意点
 						</h4>
 						<ul className="mt-2 space-y-2 text-sm text-gray-600 leading-relaxed">
 							{device.notes.map((note) => (
-								<li key={note} className="flex gap-2">
+								<li key={note} className="flex min-w-0 gap-2">
 									<span className="text-[#e11d48] mt-1">&bull;</span>
-									<span>{note}</span>
+									<span className="min-w-0 [overflow-wrap:anywhere]">{note}</span>
 								</li>
 							))}
 						</ul>
@@ -125,8 +125,7 @@ export default function DevicesPage() {
 						対応デバイス一覧
 					</h1>
 					<p className="text-xl md:text-2xl text-gray-500 font-medium leading-relaxed">
-						WebXR に対応する VR
-						ヘッドセットやスマートフォンを、ブラウザ、接続方式、特徴とあわせて確認できます。
+						VRヘッドセットやスマートフォンのWebXR対応状況を、未確認の機種も含め、ブラウザや接続方式とあわせて確認できます。
 					</p>
 					<Link
 						href="/devices/submit"
@@ -155,7 +154,7 @@ export default function DevicesPage() {
 					<h2 className="text-3xl font-black tracking-tight border-l-4 border-[#e11d48] pl-6 ml-2">
 						VRヘッドセットのWebXR対応まとめ
 					</h2>
-					<div className="space-y-6">
+					<div className="min-w-0 space-y-6">
 						{VR_DEVICES.map((device) => (
 							<DeviceCard key={device.id} device={device} />
 						))}
@@ -181,7 +180,7 @@ export default function DevicesPage() {
 						は、端末とブラウザの組み合わせによって利用条件が大きく変わります。特に
 						iOS では、ブラウザ以外の手段を検討する必要があるケースもあります。
 					</p>
-					<div className="space-y-6">
+					<div className="min-w-0 space-y-6">
 						{AR_DEVICES.map((device) => (
 							<DeviceCard key={device.id} device={device} />
 						))}
