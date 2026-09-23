@@ -169,6 +169,12 @@
 			"filename": "webxr-events-watch-2026",
 			"assetDir": "news",
 			"thumbnail": "/assets/news/webxr-events-watch-2026.webp"
+		},
+		{
+			"slug": "supersplat-editor-3-webgpu-memory-20260923",
+			"filename": "supersplat-editor-3-webgpu",
+			"assetDir": "tech",
+			"thumbnail": "/assets/tech/supersplat-editor-3-webgpu.webp"
 		}
 	],
 	"experiments": [

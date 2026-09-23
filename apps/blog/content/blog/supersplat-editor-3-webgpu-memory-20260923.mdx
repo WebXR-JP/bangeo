@@ -1,0 +1,140 @@
+---
+title: "SuperSplat 3.0を読む：WebGPU化とR3F・Three.jsとの使い分け"
+description: "440万個のGaussianを使ったメモリ比較に加え、R3F・Drei、three.js、Sparkとの役割の違いとWebXRで選ぶときの注意点を解説します。"
+date: "2026年9月23日"
+updated: "2026年9月23日"
+category: "TECH"
+tags:
+  - "SuperSplat"
+  - "Gaussian Splatting"
+  - "WebGPU"
+  - "WebXR"
+  - "PlayCanvas"
+  - "Three.js"
+  - "React Three Fiber"
+  - "Spark"
+author: "BANGEO Team"
+thumbnail: "/assets/tech/supersplat-editor-3-webgpu.webp"
+draft: false
+---
+
+2026年9月9日、PlayCanvasはSuperSplat Editor 3.0を公開しました。大きな変更は、エディターをWebGPU専用に作り直したことです。画面を描くAPIを入れ替えただけではありません。データの持ち方も変え、Gaussianの投影や並べ替え、選択、書き出しまで、重い処理をGPUへ寄せています。([公式発表][1])
+
+この記事では、SuperSplat Editor 3.0の変更を手がかりに、3D Gaussian Splattingの編集で何が重くなりやすいのか、WebGPU化でJavaScript側のメモリがなぜ減ったのか、そしてこの更新をWebXR開発者がどう受け止めればよいかを整理します。
+
+![Gaussianの点群を前に、ミント色と空色のマスコットが編集画面を操作するイラスト](/assets/tech/supersplat-editor-3-webgpu.webp)
+
+## 先に要点
+
+- 3.0の大きな成果は、描画速度だけでなく、編集データをJavaScript側に重複して持たない設計へ変えたことです。
+- PlayCanvasが示した比較では、440万個のGaussianを含むシーンの読み込み後のJavaScriptヒープが、2.xの1,557 MBから3.0の105 MBになりました。これはJavaScriptヒープの値であり、端末全体のメモリやGPUメモリの比較ではありません。
+- エディターのWebGPU対応と、WebXRセッションでWebGPUを使えることは別の条件です。SuperSplat 3.0が公開されたからといって、同じ編集環境がQuestなどのヘッドセットで動くとは限りません。
+- SuperSplatは編集・書き出しを行うアプリで、R3F / DreiやSparkはアプリ内表示の選択肢です。公開された性能値はライブラリ横断の比較ではありません。
+
+## 3D Gaussian Splattingの編集で重くなる処理
+
+Gaussian Splattingでは、シーンに含まれる多数のGaussianを視点に合わせて画面上へ投影し、見えている要素を選び、奥行き順に並べて描画します。カメラが動けば、投影や並べ替えも繰り返します。シーンが大きくなると、最終的な描画だけでなく、視点が動くたびの準備や編集操作も負荷になります。
+
+さらにエディターは、表示だけでなく選択範囲の計算、色の調整、ヒストグラム、書き出しにもシーンデータを使います。描画処理が速くなっても、同じデータをJavaScript側に複製して保持したり、書き出し時に全体を一度に展開したりすれば、メモリ不足や操作の停止は残ります。
+
+## SuperSplat 3.0がGPU側へ移したもの
+
+SuperSplat 3.0では、毎フレームの投影、視界外のGaussianの除外、描画対象の整理、奥行き順の並べ替え、描画指示までをGPUで処理します。CPU上の並べ替えワーカーはなくなりました。
+
+データも、シーン全体の複製をJavaScriptに置く方式から、GPU上の分割された保存領域と、編集状態を持つ小さなGaussianごとの一覧を使う構成へ変わっています。ヒストグラム、範囲選択、色合わせ、境界の計算、選択表示もGPU計算を使います。書き出しや公開は、シーン全体を一度に展開せず、splat-transformを使って分割単位で進めます。([公式発表][1])
+
+つまり、効果の中心は「WebGPUだから描画が速い」だけではありません。大量のデータをどこに置き、どの処理でCPUとGPUの間を行き来させるかまで見直しています。
+
+## R3FやThree.jsの実装とどう使い分ける？
+
+SuperSplat Editor 3.0と、R3Fやレンダリングライブラリは担当する作業が異なります。SuperSplatはGaussianの選択、色調整、書き出し、公開を行う編集アプリです。R3FはThree.jsのシーンをReactコンポーネントとして記述するためのrendererで、Dreiの`<Splat>`を組み合わせると、ReactアプリのシーンへGaussianを配置できます。([React Three Fiber][4]) ([Drei][5])
+
+| 選択肢 | 主な役割 | 向いている場面 | 導入時に考えること |
+| --- | --- | --- | --- |
+| SuperSplat Editor 3.0 | Gaussianの編集、選択、色調整、書き出し、公開 | 大きなシーンの編集や配信用データの作成 | WebGPUを使えるブラウザが必要 |
+| R3F + Drei `Splat` | React / Three.jsアプリのシーンにGaussianを表示 | ReactのUIや状態管理と3Dシーンを一緒に作る | 選択・色調整・書き出しの編集フローはアプリ側に組み立てる |
+| Three.js `GaussianSplat` + loaders | Gaussianデータを読み、Three.jsのシーンへ追加 | 表示や操作を自分のアプリに合わせて作る | `GaussianSplat`は`WebGPURenderer`向け。PLY、SPLAT、SPZなど形式ごとにloaderを選ぶ |
+| Spark | Three.js / WebGL2上で複数の動的なGaussianを表示 | メッシュとGaussianの共存、モバイルやWebXR向け表示 | 表示ライブラリとしてアプリへ組み込む。編集UIや納品フローは別に設計する |
+| `@mkkellogg/gaussian-splats-3d` | Three.jsベースのViewer。PLY、SPLAT、KSPLATとWebXRに対応 | 既存プロジェクトのViewerや以前の実装例を調べる | READMEは現在アクティブに開発していないと説明し、Sparkを候補に挙げている |
+
+たとえば、WebXR空間やReactアプリの中へGaussianを組み込むなら、R3F / DreiやSparkのような表示ライブラリが候補になります。編集画面を一から作らず、選択・色調整・各種形式への書き出し・公開まで進めるなら、SuperSplatが担う作業です。Three.jsにも`GaussianSplat`とPLY / SPLAT / SPZ用loaderがありますが、独自UIやデータ処理はアプリ側で実装します。現在のthree.jsドキュメントでは`GaussianSplat`は`WebGPURenderer`を前提とし、通常の`WebGLRenderer`には対応しません。([three.js GaussianSplat][6]) ([three.js loaders][7])
+
+この比較は機能の役割を整理したもので、同じデータを使った速度測定ではありません。前節の数値もSuperSplat 2.xと3.0の比較です。PlayCanvasの発表はR3F / Drei、three.js、Sparkとの性能比較を掲載していません。そのため、実行環境で比べるときは同じファイル、端末、ブラウザ、描画解像度をそろえ、読み込み時間、フレーム時間、JavaScriptヒープ、GPUメモリをそれぞれ測ります。
+
+## 公開されたメモリ比較の読み方
+
+PlayCanvasは、440万個のGaussianを含む990 MBのPLYを使い、SuperSplat 2.xと3.0のピークJavaScriptヒープを比較しています。代表的な数値は次のとおりです。([公式発表][1])
+
+| 操作 | SuperSplat 2.x | SuperSplat 3.0 |
+| --- | ---: | ---: |
+| 読み込み後、待機中 | 1,557 MB | 105 MB |
+| PLYを書き出し | 1,722 MB | 623 MB |
+| 圧縮PLYを書き出し | 2,982 MB | 1,759 MB |
+| 公開 | 1,934 MB | 741 MB |
+| 1080p動画を書き出し | 1,673 MB | 142 MB |
+
+この表の単位は**JavaScriptヒープ**です。ブラウザ全体のメモリ使用量やGPUメモリを示すものではありません。また、これはPlayCanvasが公開した特定のシーンでの比較値であり、すべての端末・ブラウザ・ファイルで同じ割合になることを示す独立検証ではありません。
+
+それでも、読み込み後の待機中に1,557 MBから105 MBまで下がった値は、エディターがシーン全体をJavaScript側で抱え込まない設計に変わった効果をよく表しています。大きなPLYを扱うときは、圧縮後のファイルサイズだけでなく、編集時のヒープ、GPUメモリ、書き出し中の最大使用量を分けて見る必要があります。
+
+## 移動中は並べ替えを省いて操作を保つ
+
+3.0では、操作中の応答性を保つために「Stochastic Alpha」も導入されました。多数のGaussianを毎フレーム正確に並べ替える代わりに、視点が動いている間は確率的な被覆処理を使い、奥行き順の並べ替えなしで描画します。視点が止まると、正確な並べ替えと合成に戻ります。([公式発表][1])
+
+既定の「Auto」では、GPUで通常描画したフレームが遅いと分かったときだけ、移動中の描画を切り替えます。軽いシーンでは通常の描画を保ち、重いシーンでは操作中の応答性を優先する仕組みです。
+
+ここから分かるのは、体験を滑らかにする方法が、常に同じ精度で全処理を続けることだけではないということです。操作中は反応を優先し、画面が落ち着いたら表示精度を戻す。この切り替えを、データ量やGPU負荷に合わせて行っています。
+
+## WebGPU専用のエディターとWebXRの違い
+
+SuperSplat Editor 3.0はWebGPUが必須です。PlayCanvasのリリース記事では、現行のChromeとEdge、Safari 26以降、WebGPUを有効にしたFirefoxが案内されており、WebGPUを使えないブラウザでは3.0のエディターは起動しません。WebGLへの自動切り替えはなく、2.xのエディターは別のv2ブランチで継続されています。([公式発表][1])
+
+ただし、「ブラウザがWebGPUを使える」ことだけでは、WebXRのヘッドセットへWebGPUで描画できるとは限りません。WebXRセッションでWebGPUを使うには、XR機器と互換性のあるGPUアダプターを要求し、`webgpu`機能を含むXRセッションを作り、`XRGPUBinding`から描画レイヤーを用意する必要があります。この接続方法は、WebXR/WebGPU Bindingのエディターズドラフト（Editor's Draft）で定義されています。([仕様草案][2])
+
+Quest Browser 146.0では、WebXR内でのWebGPUが実験機能として案内されました。これは特定バージョンでの実験的な対応であり、SuperSplat 3.0の対応環境を示すものではありません。Quest BrowserでWebGPUが使えるという情報だけから、SuperSplatの編集画面やWebXR向けビューアーが動くと判断しないようにしましょう。([BANGEOの記事][3])
+
+## WebXRで3DGSを使うときの確認項目
+
+SuperSplat 3.0のデータ管理やGPU処理は、大規模な3DGSをWebで編集するときの参考になります。一方で、エディターの性能向上と、公開後のビューアーやWebXR体験の性能は別に測る必要があります。
+
+実機検証では、次の項目を分けて記録すると原因を追いやすくなります。
+
+- 使用したブラウザ、端末、描画経路（WebGL / WebGPU）
+- Gaussian数、配信形式、ダウンロード量、最初に表示されるまでの時間
+- JavaScriptヒープとGPUメモリ
+- 視点を動かしている間と止めた後のフレーム時間
+- 読み込み、選択、書き出し、公開にかかる時間
+
+特にヘッドセットでは、ディスプレイ上で表示できるかだけでなく、両目分の描画を続けながら操作に追従できるかが大切です。デスクトップの編集性能やブラウザのWebGPU対応状況を、そのままXR端末の実行性能に置き換えず、実際に使う端末で確かめる必要があります。
+
+## まとめ
+
+SuperSplat 3.0の更新は、WebGPUを使って描画を速くする話にとどまりません。シーン全体のコピーをJavaScript側に持たないこと、編集処理をGPUへ寄せること、書き出しを分割して行うことが重なり、大きなシーンを扱うときのメモリ負荷と操作性を改善しています。
+
+WebXR開発者にとっての学びは、WebGPU対応の有無だけで判断しないことです。編集ツール、配信形式、ビューアー、XRセッションの対応状況を分け、実機上でメモリとフレーム時間を測る必要があります。WebGPUは有力な選択肢ですが、エディターでの対応がそのままヘッドセット上のWebXR対応を意味するわけではありません。
+
+## 参照
+
+- [React Three Fiberの概要][4]
+- [DreiのSplatコンポーネント][5]
+- [three.js GaussianSplat][6]
+- three.jsのGaussian splat loader: [PLY][7]、[SPLAT][8]、[SPZ][9]
+- [Sparkの概要][10]
+- [GaussianSplats3DのREADME][11]
+
+- [SuperSplat Editor 3.0：WebGPUで再構築](https://blog.playcanvas.com/new-in-supersplat-editor-3-0-rebuilt-on-webgpu/)
+- [SuperSplat 3.0.0リリースノート](https://github.com/playcanvas/supersplat/releases/tag/v3.0.0)
+- [WebXR/WebGPU Binding Module - Level 1](https://immersive-web.github.io/webxr-webgpu-binding/)
+- [Quest Browser 146.0で実験的に追加されたWebGPU / WebXR機能](/tech-articles/quest-browser-146-webgpu-webxr)
+
+[1]: https://blog.playcanvas.com/new-in-supersplat-editor-3-0-rebuilt-on-webgpu/ "SuperSplat Editor 3.0 rebuilt on WebGPU"
+[2]: https://immersive-web.github.io/webxr-webgpu-binding/ "WebXR/WebGPU Binding Module - Level 1"
+[3]: /tech-articles/quest-browser-146-webgpu-webxr "Quest Browser 146.xでWebGPU / WebXR depth projectionが実験的に追加"
+[4]: https://r3f.docs.pmnd.rs/getting-started/introduction "React Three Fiber Introduction"
+[5]: https://drei.docs.pmnd.rs/abstractions/splat "Drei Splat"
+[6]: https://threejs.org/docs/pages/GaussianSplat.html "three.js GaussianSplat"
+[7]: https://threejs.org/docs/pages/GaussianSplatPLYLoader.html "three.js GaussianSplatPLYLoader"
+[8]: https://threejs.org/docs/pages/SPLATLoader.html "three.js SPLATLoader"
+[9]: https://threejs.org/docs/pages/SPZLoader.html "three.js SPZLoader"
+[10]: https://sparkjs.dev/docs/overview/ "Spark Overview"
+[11]: https://github.com/mkkellogg/GaussianSplats3D "GaussianSplats3D repository"
