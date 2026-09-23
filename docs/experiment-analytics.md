@@ -2,15 +2,15 @@
 
 `/experiments`に匿名送信と集計表示を追加しています。ブラウザだけで動き、BANGEOサーバーにDB・KV・秘密鍵・受信APIは追加しません。
 
-配信環境でBANGEO専用の公開キーを指定し、再ビルドしてください。`NEXT_PUBLIC_`の値はビルド時にブラウザへ組み込まれるため、既存のデプロイにキーを追加しただけでは反映されません。
+配信環境で匿名レポート専用プロジェクトの公開キーを指定し、再ビルドしてください。本番のBANGEOではAnalyticsの「BANGEO WebXR 検証」プロジェクトのproduction公開キーを使います。通常のサイト計測に使う`NEXT_PUBLIC_BANGEO_SITE_ANALYTICS_KEY`とは別の設定です。`NEXT_PUBLIC_`の値はビルド時にブラウザへ組み込まれるため、既存のデプロイにキーを追加しただけでは反映されません。
 
 ```dotenv
 NEXT_PUBLIC_BANGEO_ANALYTICS_KEY=bg_pk_プロジェクトの公開キー
 ```
 
-受信先と集計APIは本番の公開URLを既定値として利用します。別の環境に接続するときだけ`NEXT_PUBLIC_BANGEO_ANALYTICS_INGEST`と`NEXT_PUBLIC_BANGEO_ANALYTICS_API`にそれぞれHTTPSのオリジンを設定してください。通常のアクセス解析用キーや管理用トークンではなく、`bg_pk_`で始まる専用プロジェクトの公開キーが必要です。
+受信先は`https://bangeo-ingest.peraperapera.workers.dev`、公開集計APIは`https://analytics.bangeo.net`を既定値として利用します。別の環境に接続するときだけ`NEXT_PUBLIC_BANGEO_ANALYTICS_INGEST`と`NEXT_PUBLIC_BANGEO_ANALYTICS_API`にそれぞれHTTPSのオリジンを設定してください。通常のアクセス解析用キーや管理用トークンではなく、`bg_pk_`で始まる専用プロジェクトの公開キーが必要です。
 
-Analytics側で当該環境の匿名検証受付・集計公開を有効にし、BANGEOのオリジンを許可する必要があります。管理用トークンはBANGEOに設定しません。公開キーは秘密情報ではなく、公開するデータセットの選択に使います。未設定時は検証・JSON確認ができ、送信・集計取得は無効になります。
+Analytics側で当該環境の匿名検証受付・集計公開を有効にし、BANGEOのオリジンを許可する必要があります。本番では`https://www.bangeo.net`と`https://bangeo.net`を許可します。管理用トークンはBANGEOに設定しません。公開キーは秘密情報ではなく、公開するデータセットの選択に使います。未設定時は検証・JSON確認ができ、送信・集計取得は無効になります。
 
 端末とブラウザはUser-Agentをブラウザ内で分類します。曖昧な機種は「その他」または「判別できない」とし、利用者が端末を選び直せます。生のUser-Agentは送信しません。「送信内容を確認」でスナップショットを確認します。同意をチェックして「匿名データを送信する」を押したときだけ送信します。ページ表示・体験開始・同意チェックだけでは送信しません。同意は保存せず、再読み込みごとにオフです。
 

@@ -55,7 +55,7 @@ const options: Options = {
 		"https://bangeo-ingest.peraperapera.workers.dev",
 	api:
 		process.env.NEXT_PUBLIC_BANGEO_ANALYTICS_API?.trim() ||
-		"https://bangeo-api.peraperapera.workers.dev",
+		"https://analytics.bangeo.net",
 };
 let sdkPromise: Promise<SDK> | null = null;
 function loadSDK(): Promise<SDK> {
