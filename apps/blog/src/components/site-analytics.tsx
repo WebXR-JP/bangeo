@@ -36,7 +36,7 @@ export function SiteAnalytics() {
 	useEffect(() => {
 		setLiveHost(
 			window.location.protocol === "https:" &&
-				window.location.hostname === "www.bangeo.net",
+				["bangeo.net", "www.bangeo.net"].includes(window.location.hostname),
 		);
 	}, []);
 
