@@ -22,7 +22,7 @@ export default function PrivacyPolicyPage() {
 					<span className="text-[#e11d48]">。</span>
 				</h1>
 				<p className="text-xl text-gray-500 font-medium leading-relaxed">
-					最終更新日: 2026年3月24日
+					最終更新日: 2026年9月23日
 				</p>
 			</header>
 
@@ -72,6 +72,14 @@ export default function PrivacyPolicyPage() {
 						アクセス解析・タグ管理
 					</h2>
 					<p className="text-gray-600 leading-relaxed">
+						本番サイトの通常ページでは BANGEO Analytics
+						を使い、ページの表示とサイト内のページ遷移を計測します。送信するのは、ページのURL（ドメインとパスのみ）・タイトル、参照元のドメイン、表示時刻、ページを開いている間だけ使うセッションID、ブラウザ・OS・端末の種類、画面サイズ、言語・タイムゾーン、WebXRの利用可否などです。端末によっては機種名、メモリ容量、CPUコア数も含まれます。URLのクエリとハッシュ、生のUser-Agent、Cookieは計測データに含めません。エラー内容、描画性能、WebXR体験中の操作は、このサイトの通常計測では収集しません。
+				</p>
+				<p className="text-gray-600 leading-relaxed">
+						BANGEO Analytics の受信先は Cloudflare 上で運用しています。計測データに
+						IPアドレスを記録する項目はありませんが、通信時のIPアドレスなどは配信事業者に届きます。匿名のWebXR検証結果は通常計測とは別で、利用者が送信内容を確認し、同意して送信した場合にのみ受け付けます。
+				</p>
+				<p className="text-gray-600 leading-relaxed">
 						当サイトでは、環境設定に応じて Google Tag Manager
 						を読み込み、必要に応じて Google Analytics
 						などの計測サービスを利用する場合があります。これらのサービスは

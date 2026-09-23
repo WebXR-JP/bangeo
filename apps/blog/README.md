@@ -39,6 +39,10 @@ pnpm check
 
 - `NEXT_PUBLIC_GTM_ID`: Google Tag Manager を有効にする場合のみ設定
 - `NEXT_PUBLIC_ADSENSE_CLIENT`: AdSense を有効にする場合のみ設定
+- `NEXT_PUBLIC_BANGEO_SITE_ANALYTICS_KEY`: 通常のサイト計測用公開キー。本番ビルドに設定し、`https://www.bangeo.net` からのアクセス時だけSDKを読み込みます。受信先は `https://bangeo-ingest.peraperapera.workers.dev` です。Analytics側でも `https://www.bangeo.net` を許可オリジンに登録してください。
+- `NEXT_PUBLIC_BANGEO_ANALYTICS_KEY`: 任意の匿名実験レポート専用。通常のサイト計測には使用しません。
+
+公開キーはビルド時に組み込まれるため、Vercel の Production 環境へ設定した後に再デプロイしてください。通常の計測は Next.js のページに適用されます。`public/demos/` の独立したHTMLには適用されません。
 
 ## デプロイ
 

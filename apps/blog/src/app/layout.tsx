@@ -5,6 +5,7 @@ import Script from "next/script";
 import { Analytics, GTMNoScript } from "@/components/analytics";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { SiteAnalytics } from "@/components/site-analytics";
 import { StructuredData } from "@/components/structured-data";
 import { SITE_URL } from "@/lib/site-url";
 import { ADSENSE_CLIENT, HAS_ADSENSE, HAS_GTM } from "@/lib/third-party";
@@ -144,6 +145,7 @@ export default function RootLayout({
 				<main className="flex-1 pt-24 md:pt-28">{children}</main>
 				<Footer />
 				<Analytics />
+				<SiteAnalytics />
 			</body>
 		</html>
 	);
