@@ -1,4 +1,5 @@
 import { createFishRenderer } from "./fish.js";
+import { createPatternRenderer } from "./patterns.js";
 
 // The immersive WebGPU setup follows the Immersive Web Community Group's
 // WebGPU barebones sample (MIT): https://github.com/immersive-web/webxr-samples
@@ -8,7 +9,7 @@ const status = document.querySelector("#status");
 const requested = document.querySelector("#requested");
 const actual = document.querySelector("#actual");
 const level = Number(document.documentElement.dataset.foveationLevel);
-const levelLabel = level === 1 ? "最大（1）" : "最小（0）";
+let activeLevel = level;
 
 let session;
 let binding;
@@ -16,11 +17,15 @@ let layer;
 let referenceSpace;
 let device;
 let fishRenderer;
+let patternRenderer;
 let ready = false;
 let lastError = "";
 
 function setStatus(message) {
 	status.textContent = message;
+}
+function levelLabel(value) {
+	return value === 1 ? "1（最大）" : "0（最小）";
 }
 function showError(error) {
 	lastError =
@@ -32,7 +37,7 @@ function showError(error) {
 	setStatus(lastError);
 }
 function updateControls() {
-	requested.textContent = levelLabel;
+	requested.textContent = levelLabel(activeLevel);
 	endButton.disabled = !session;
 	startButton.disabled = Boolean(session) || !ready;
 	startButton.textContent = session
@@ -46,7 +51,7 @@ function updateControls() {
 			: String(layer.fixedFoveation)
 		: "VR開始前";
 }
-function onFrame(time, frame) {
+function onFrame(_time, frame) {
 	if (!session || frame.session !== session) return;
 	session.requestAnimationFrame(onFrame);
 	const pose = frame.getViewerPose(referenceSpace);
@@ -85,7 +90,8 @@ function onFrame(time, frame) {
 				0,
 				1,
 			);
-			fishRenderer.draw(pass, view, time, index);
+			patternRenderer.draw(pass, view, index);
+			fishRenderer.draw(pass, view, index);
 			pass.end();
 		}
 		device.queue.submit([encoder.finish()]);
@@ -110,7 +116,9 @@ async function start() {
 				session = undefined;
 				binding = undefined;
 				layer = undefined;
+				patternRenderer = undefined;
 				referenceSpace = undefined;
+				activeLevel = level;
 				actual.textContent = "VR開始前";
 				setStatus(lastError || "VRを終了しました。");
 				updateControls();
@@ -126,11 +134,30 @@ async function start() {
 		});
 		if (layer.fixedFoveation == null)
 			throw new Error("この環境ではfixed foveationを設定できません。");
-		layer.fixedFoveation = level;
+		activeLevel = level;
+		layer.fixedFoveation = activeLevel;
+		patternRenderer = createPatternRenderer(device, format, activeLevel);
+		session.addEventListener("select", () => {
+			if (!layer) return;
+			try {
+				const nextLevel = activeLevel === 0 ? 1 : 0;
+				layer.fixedFoveation = nextLevel;
+				activeLevel = nextLevel;
+				patternRenderer.setLevel(activeLevel);
+				updateControls();
+				setStatus(
+					`設定値${activeLevel}に切り替えました。トリガーで再度切り替えられます。`,
+				);
+			} catch (error) {
+				showError(error);
+			}
+		});
 		session.updateRenderState({ layers: [layer] });
 		referenceSpace = await session.requestReferenceSpace("local");
 		updateControls();
-		setStatus(`${levelLabel}でVRを実行中です。終了後に別の設定を選べます。`);
+		setStatus(
+			`設定値${activeLevel}でVRを実行中です。トリガーで0と1を切り替えられます。`,
+		);
 		session.requestAnimationFrame(onFrame);
 	} catch (error) {
 		showError(error);
@@ -152,10 +179,12 @@ async function checkSupport() {
 	if (!navigator.xr) throw new Error("WebXRが見つかりません。");
 	if (!("XRGPUBinding" in window))
 		throw new Error(
-			"XRGPUBindingが見つかりません。chrome://flagsのWebXR/WebGPU BindingとWebXR Projection Layersを確認し、Quest Browserを再起動してください。",
+			"WebXRでWebGPUを使えません。Quest BrowserのWebXR/WebGPU Binding設定を確認してください。",
 		);
 	if (!(await navigator.xr.isSessionSupported("immersive-vr")))
-		throw new Error("immersive-vrに対応していません。");
+		throw new Error(
+			"この端末ではVRを開始できません。Quest Browserで開いてください。",
+		);
 	const adapter = await navigator.gpu.requestAdapter({ xrCompatible: true });
 	if (!adapter) throw new Error("XR対応のWebGPUアダプターがありません。");
 	device = await adapter.requestDevice();

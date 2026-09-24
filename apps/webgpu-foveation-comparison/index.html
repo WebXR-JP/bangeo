@@ -18,11 +18,11 @@
       <section class="hero" aria-labelledby="title">
         <div class="hero-copy">
           <p class="badge"><span class="badge-dot"></span> QUEST BROWSER 150.1 / WEBGPU</p>
-          <h1 id="title">視野の周辺は、<br /><span>どう見える？</span></h1>
-          <p class="lead">foveation（視野の中心より周辺の描画密度を下げる技術）を試すデモです。比較したい設定を下から選び、Quest BrowserでそれぞれVRを開始してください。VR中にコントローラーを操作して設定を変える必要はありません。</p>
+          <h1 id="title">foveationの設定を<br /><span>比べる</span></h1>
+          <p class="lead">VR内でコントローラーのトリガーを押すたび、foveationの設定値が0と1で切り替わります。頭を動かさず、魚の後ろにある細線の格子、同心円、斜線が視野の端でどう変わるか比べてください。</p>
           <div class="mode-choices" aria-label="比較する設定">
-            <a class="mode-link" href="./minimum.html"><span class="mode-number">0</span><span><strong>最小設定（0）を開く</strong><small>fixedFoveation = 0</small></span><span aria-hidden="true">↗</span></a>
-            <a class="mode-link" href="./maximum.html"><span class="mode-number">1</span><span><strong>最大設定（1）を開く</strong><small>fixedFoveation = 1</small></span><span aria-hidden="true">↗</span></a>
+            <a class="mode-link" href="./minimum.html"><span class="mode-number">0</span><span><strong>設定値0から始める</strong><small>トリガーで1に切り替え</small></span><span aria-hidden="true">↗</span></a>
+            <a class="mode-link" href="./maximum.html"><span class="mode-number">1</span><span><strong>設定値1から始める</strong><small>トリガーで0に切り替え</small></span><span aria-hidden="true">↗</span></a>
           </div>
         </div>
         <figure class="preview">
@@ -34,29 +34,23 @@
         <div class="details-heading"><p class="eyebrow">BEFORE YOU START</p><h2 id="setup-title">Quest BrowserでWebGPUを有効にする</h2></div>
         <div class="setup-layout">
           <div class="setup-copy">
-            <p>このデモのVR描画には、Quest BrowserのWebGPUとWebXRでのWebGPU連携が必要です。VRを開始できない場合は、次の設定項目を確認してください。</p>
+            <p>VRを開始するには、Quest BrowserのWebXRでWebGPUを使える状態にする必要があります。</p>
             <ol>
-              <li>Quest Browserで <code>chrome://flags</code> を開きます。</li>
-              <li><strong>WebXR/WebGPU Binding</strong> と <strong>WebXR Projection Layers</strong> を検索し、それぞれ <strong>Enabled</strong> にします。</li>
+              <li>Quest Browserで <a href="chrome://flags">chrome://flags</a> を開きます。</li>
+              <li><strong>WebXR/WebGPU Binding</strong> を検索して <strong>Enabled</strong> にします。</li>
               <li>画面の案内に従ってQuest Browserを再起動し、デモを開き直します。</li>
             </ol>
-            <p class="setup-caution">画像の「WebXR/WebGPU Binding」は撮影時には <strong>Disabled</strong> です。有効化前の画面例としてご覧ください。「Unsafe WebGPU Support」と「WebGPU Developer Features」は撮影時に有効でしたが、このデモに必須とは確認できていません。</p>
           </div>
-          <figure class="setup-figure"><img src="./assets/quest-browser-flags-privacy.webp" alt="Quest Browserのchrome://flagsでWebGPU関連設定を検索した画面。WebXR/WebGPU BindingはDisabled、ほかの2項目は有効の状態" width="1672" height="941" loading="lazy" /><figcaption>Quest Browserの <code>chrome://flags</code>。画像では「WebXR/WebGPU Binding」が無効になっています。</figcaption></figure>
         </div>
       </section>
       <section class="details" aria-label="比較の手順">
         <div class="details-heading"><p class="eyebrow">HOW TO COMPARE</p><h2>2つのページで見え方を比べる</h2></div>
         <div class="cards">
-          <div class="card"><span class="step">01</span><h3>設定を選ぶ</h3><p>最小設定（0）か最大設定（1）のページを開き、Quest Browserで「VRを開始」を押します。</p></div>
-          <div class="card"><span class="step">02</span><h3>3Dモデルを見る</h3><p>視野の中央と左右に置いた魚型モデルの模様を見ます。背景の同心円や格子は表示しません。</p></div>
-          <div class="card"><span class="step">03</span><h3>もう一方も開く</h3><p>VRを終了して比較ページに戻り、別の設定を開きます。Questの機種とBrowserのバージョンも記録してください。</p></div>
+          <div class="card"><span class="step">01</span><h3>VRを開始</h3><p>設定値0か1を初期値に選び、Quest Browserで「VRを開始」を押します。</p></div>
+          <div class="card"><span class="step">02</span><h3>トリガーで切り替える</h3><p>頭を動かさずにトリガーを押します。VR内の大きな数字とページの読取値が切り替わります。</p></div>
+          <div class="card"><span class="step">03</span><h3>視野の端を見る</h3><p>中心と端の細線や交点を比べます。模様が変わらなくても、数字だけで描画効果は判断できません。</p></div>
         </div>
-        <p class="note">このデモは視線追跡を使いません。0はAPIで指定できる最小値で、描画処理が完全に無効になるとは限りません。見え方の違いはヘッドセットで確認してください。</p>
-      </section>
-      <section class="quest-view" aria-labelledby="quest-view-title">
-        <div class="details-heading"><p class="eyebrow">ON QUEST</p><h2 id="quest-view-title">Quest Browserで開いた画面</h2></div>
-        <figure class="setup-figure"><img src="./assets/quest-browser-demo-privacy.webp" alt="Quest Browser内に表示されたBANGEOのWebGPUデモ" width="1672" height="941" loading="lazy" /><figcaption>2026年9月24日に撮影した画面です。現在は最小設定と最大設定を別々のページで開きます。</figcaption></figure>
+        <p class="note">背景のシェーダーは各画素で複数回の計算を行います。設定値を読み取れても、画質やGPU負荷に効果が出た証明にはなりません。見え方はヘッドセットで、負荷はGPUプロファイラーで確認してください。</p>
       </section>
     </main>
   </body>
