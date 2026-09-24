@@ -12,6 +12,7 @@ const contentTypes = {
 	"/maximum.html": "text/html; charset=utf-8",
 	"/app.js": "text/javascript; charset=utf-8",
 	"/fish.js": "text/javascript; charset=utf-8",
+	"/patterns.js": "text/javascript; charset=utf-8",
 	"/style.css": "text/css; charset=utf-8",
 	"/assets/bangeo-fish.glb": "model/gltf-binary",
 	"/assets/bangeo-fish-preview.gif": "image/gif",

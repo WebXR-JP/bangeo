@@ -19,8 +19,8 @@
       <section class="hero" aria-labelledby="title">
         <div class="hero-copy">
           <p class="badge"><span class="badge-dot"></span> QUEST BROWSER 150.1 / WEBGPU</p>
-          <h1 id="title">foveation：<br /><span>最小設定（0）</span></h1>
-          <p class="lead">このページからVRを開始すると、fixedFoveationが最小値の0に設定されます。淡い単色の背景に、魚型の3Dモデルを中央と左右に配置しています。VRを終了したら、最大設定（1）のページも開いて見え方を比べてください。</p>
+          <h1 id="title">foveation：<br /><span>設定値 0</span></h1>
+          <p class="lead">fixedFoveationを0から始めます。VR中にコントローラーのトリガーを押すたび、0と1が切り替わります。頭を動かさず、視野の端にある細線や魚の模様を比べてください。VR内の大きな数字は現在の設定値です。</p>
           <div class="controls">
             <button id="start" class="primary" type="button" disabled>対応状況を確認中</button>
             <button id="end" class="quiet" type="button" disabled>VRを終了</button>
@@ -36,8 +36,8 @@
       </section>
       <section class="details" aria-label="設定と操作">
         <div class="details-heading"><p class="eyebrow">CURRENT SETTING</p><h2>設定値0のVRシーン</h2></div>
-        <div class="readout"><div><span>指定値</span><strong id="requested">最小（0）</strong></div><div><span>実際に読み取った値</span><strong id="actual">VR開始前</strong></div><div><span>次の操作</span><strong>VR終了後に別の設定を開く</strong></div></div>
-        <p class="note">0はAPIで指定できる最小値で、描画処理が完全に無効になるとは限りません。読み取り値だけではGPU負荷の変化は分かりません。VRの見え方を確認し、<a href="./maximum.html">もう一方の設定</a>と比べてください。</p>
+        <div class="readout"><div><span>設定値</span><strong id="requested">0（最小）</strong></div><div><span>APIが返した値</span><strong id="actual">VR開始前</strong></div><div><span>操作</span><strong>トリガーで0と1を切り替え</strong></div></div>
+        <p class="note">0はAPIで指定できる最小値で、描画処理が完全に無効になるとは限りません。数字と読取値は効果の証明ではありません。視野端の細線が切り替え前後で変わるか確かめてください。</p>
       </section>
     </main>
   </body>

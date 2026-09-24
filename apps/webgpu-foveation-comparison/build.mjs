@@ -14,6 +14,7 @@ for (const name of [
 	"maximum.html",
 	"app.js",
 	"fish.js",
+	"patterns.js",
 	"style.css",
 ]) {
 	await cp(resolve(root, name), resolve(output, name));

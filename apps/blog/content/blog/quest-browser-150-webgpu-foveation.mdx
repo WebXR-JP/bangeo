@@ -17,7 +17,7 @@ draft: false
 
 Metaは2026年8月28日公開の[Quest Browser 150.1リリースノート](https://developers.meta.com/horizon/downloads/package/browser/150.1/)で、WebXRのWebGPU描画におけるfoveation（視野の中心より周辺の描画密度を下げ、GPU負荷を抑える技術）の実験的なサポートを発表しました。WebXRでのWebGPU対応に続き、描画負荷を調整する機能が加わりました。
 
-動作を確かめられるよう、BANGEOでは[WebGPUの比較デモ](/demos/webgpu-foveation-comparison/index.html)を用意しました。fixed foveation（視線追跡を使わない固定方式）の設定を、最小値の0と最大値の1の別々のページで試せます。Blenderで作った魚型の3DモデルにUVテクスチャを貼り、視野の中央と左右に配置しました。VR画面に重なって見える同心円や格子は使わず、淡い単色の背景にしています。設定ごとにVRを開始し、モデルの模様を比べてください。
+動作を確かめられるよう、BANGEOでは[WebGPUの比較デモ](/demos/webgpu-foveation-comparison/index.html)を用意しました。fixed foveation（視線追跡を使わない固定方式）を0または1から始め、VR中にコントローラーのトリガーで切り替えられます。Blenderで作った魚型の3Dモデルを視野の中央と左右に置き、その後方に細線の格子、同心円、斜線を描画します。背景のシェーダーは各画素で複数回の計算を行います。同じシーンを見たまま切り替え、視野の端にある魚の模様と背景の線を見比べてください。
 
 デモページにはモデルの動きを示す短いアニメーションもあります。3Dモデルのプレビューであり、VRシーンやfoveationの効果を撮影した映像ではありません。ヘッドセットがなくても、モデルの形を確認できます。
 
@@ -37,31 +37,23 @@ Quest Browser 150.1のリリースノートには、WebXRのWebGPU描画に対�
 
 ## デモを始める前のWebGPU設定
 
-このデモはWebXRセッション内でWebGPUを使って描画します。Quest BrowserでWebGPUとWebXRのWebGPU連携を使える状態にしてください。VRを開始できない場合は、Browserで`chrome://flags`を開き、`WebXR/WebGPU Binding`と`WebXR Projection Layers`を検索して、両方を`Enabled`に設定します。変更後は画面の案内に従ってBrowserを再起動し、デモを開き直してください。[Chromiumの設定説明](https://chromium.googlesource.com/chromium/src/+/bf517330f1f8f20a208aae7fa2abd55657dd0e1e/chrome/browser/flag_descriptions.cc)にも、`WebXR/WebGPU Binding`には`WebXR Projection Layers`の有効化が必要と記されています。
-
-![Quest Browserのchrome://flagsでWebGPU関連設定を検索した画面。WebXR/WebGPU BindingはDisabledの状態](/demos/webgpu-foveation-comparison/assets/quest-browser-flags-privacy.webp)
-
-画像は設定を変更する**前**の状態で、`WebXR/WebGPU Binding`は`Disabled`です。撮影時には`Unsafe WebGPU Support`と`WebGPU Developer Features`も有効でしたが、これらがこのデモの必須条件であることは確認できていません。設定名と現在値はご自身の端末で確認してください。
+このデモはWebXRセッション内でWebGPUを使って描画します。Quest Browserで[chrome://flags](chrome://flags)を開き、`WebXR/WebGPU Binding`を検索して`Enabled`にします。変更後は画面の案内に従ってBrowserを再起動し、デモを開き直してください。
 
 ## 比較デモの操作
 
-1. WebGPUとWebXRに対応したQuest Browserで[比較デモ](/demos/webgpu-foveation-comparison/index.html)をHTTPSで開き、「最小設定（0）を開く」か「最大設定（1）を開く」を選びます。
+1. WebGPUとWebXRに対応したQuest Browserで[比較デモ](/demos/webgpu-foveation-comparison/index.html)を開き、設定値0か1を初期値に選びます。
 2. 選んだページで「VRを開始」を押します。デモは`immersive-vr`セッションで`webgpu`機能を要求し、`XRGPUBinding`からWebGPU用`XRProjectionLayer`を作ります。
-3. 中央と左右に置いた魚型モデルの模様を観察します。設定値は起動したページで固定され、コントローラーの操作では変わりません。
-4. VRを終了して比較ページに戻り、もう一方の設定を開きます。なるべく同じ頭の向きで見え方を比べてください。
-5. 画面収録やスクリーンショットを残す場合は、0と1の両方を記録し、Questの機種、Quest Browserのバージョン、設定を添えると比較しやすくなります。
+3. 頭を動かさずにトリガーを押すと、設定値が0と1で切り替わります。VR内の大きな数字は現在の設定値です。
+4. 魚型モデルの模様と、背景の細線や交点を視野の中心と端で比べます。変化が見えなくても、数字やAPIの読取値だけで描画効果が出ているとは判断できません。
+5. 記録を残す場合は、0と1の両方についてQuestの機種、Quest Browserのバージョン、見え方を添えてください。
 
-![Quest BrowserでBANGEOのWebGPUデモを開いた様子](/demos/webgpu-foveation-comparison/assets/quest-browser-demo-privacy.webp)
-
-Quest Browserでデモを開いた画面です。2026年9月24日の撮影後に操作方法を変更し、現在は最小設定と最大設定を別々のページで開きます。
-
-各ページには、指定値とProjection Layerから読み取った値を表示します。`fixedFoveation`が`null`の場合は、その環境でこの属性を使えないため、VRを開始できない理由を表示します。読み取り値が0または1であっても、それだけでGPUの負荷軽減や画像上の効果まで証明できるわけではありません。Metaのドキュメントでは、実効を調べる方法として`ovrgpuprofiler -t`による確認も紹介しています。
+各ページには、現在の設定値とProjection Layerから読み取った値を表示します。`fixedFoveation`が`null`の場合は、その環境でこの属性を使えないため、VRを開始できない理由を表示します。読み取り値が0または1でも、GPUの負荷軽減や画質の変化を証明したことにはなりません。負荷はMetaのドキュメントで紹介されている`ovrgpuprofiler -t`でも確認してください。
 
 ## デモが使うAPIと比較の意味
 
-デモはWebGPUのRender Pipelineで、UV展開した3Dモデルのテクスチャをサンプリングします。中央と左右のモデルは3D空間に配置し、`XRGPUBinding.getViewSubImage()`で得た左右それぞれのProjection Layerのテクスチャへ直接描画します。WebGPU対応の有無を`navigator.gpu`だけで判定せず、WebXR、`XRGPUBinding`、`immersive-vr`の対応を個別に確認します。
+デモはWebGPUのRender Pipelineで、UV展開した3Dモデルのテクスチャをサンプリングします。背景もWebGPUのシェーダーで描画し、格子、同心円、斜線に加えて複数の周期模様を計算します。中央と左右のモデルは3D空間に配置し、`XRGPUBinding.getViewSubImage()`で得た左右それぞれのProjection Layerのテクスチャへ直接描画します。WebGPU対応の有無を`navigator.gpu`だけで判定せず、WebXR、`XRGPUBinding`、`immersive-vr`の対応を個別に確認します。
 
-設定に使うのは[`XRProjectionLayer.fixedFoveation`](https://www.w3.org/TR/webxrlayers-1/#dom-xrprojectionlayer-fixedfoveation)です。[WebXR Layers API Level 1](https://www.w3.org/TR/webxrlayers-1/)では、0が最小、1が最大で、具体的な描画方式と段階の解釈はブラウザ側に委ねられています。対応しない環境では`null`を返し、値を設定しても効果はありません。各ページはVR開始時にそれぞれの値を設定します。
+設定に使うのは[`XRProjectionLayer.fixedFoveation`](https://www.w3.org/TR/webxrlayers-1/#dom-xrprojectionlayer-fixedfoveation)です。[WebXR Layers API Level 1](https://www.w3.org/TR/webxrlayers-1/)では、0が最小、1が最大で、具体的な描画方式と段階の解釈はブラウザ側に委ねられています。対応しない環境では`null`を返し、値を設定しても効果はありません。各ページはVR開始時に初期値を設定し、WebXRの`select`イベントで値を切り替えます。
 
 このデモが扱うのは**fixed foveation**です。視線追跡で注視点を追う方式は扱いません。ページに表示する設定値は、描画負荷の変化を示すものではありません。スクリーンショットだけではヘッドセットで見たときの周辺視野の印象が伝わりにくいため、画質は装着した状態でも確かめてください。
 
@@ -79,7 +71,6 @@ Quest Browserでデモを開いた画面です。2026年9月24日の撮影後に
 - [Meta Quest Browser 149.1リリースノート](https://developers.meta.com/horizon/downloads/package/browser/149.1/)
 - [Meta Quest Browser 146.0リリースノート](https://developers.meta.com/horizon/downloads/package/browser/146.0/)
 - [Meta: WebXR Fixed Foveated Rendering](https://developers.meta.com/horizon/documentation/web/webxr-ffr/)
-- [Chromium: WebXR/WebGPU Bindingの設定説明](https://chromium.googlesource.com/chromium/src/+/bf517330f1f8f20a208aae7fa2abd55657dd0e1e/chrome/browser/flag_descriptions.cc)
 - [WebXR Layers API Level 1](https://www.w3.org/TR/webxrlayers-1/)
 - [Immersive Web WebGPUサンプル](https://immersive-web.github.io/webxr-samples/webgpu/)
 - [WebXRパフォーマンスとfoveation](/tech-articles/webxr-performance-foveation-fixed-dynamic-eye-tracking)

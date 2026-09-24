@@ -190,11 +190,7 @@ export async function createFishRenderer(device) {
 				});
 			}
 		},
-		draw(pass, view, time, index) {
-			const angle = Math.sin(time * 0.0008) * 0.17;
-			const c = Math.cos(angle);
-			const s = Math.sin(angle);
-			const bob = Math.sin(time * 0.0015) * 0.035;
+		draw(pass, view, index) {
 			pass.setPipeline(pipeline);
 			// World-space copies stay aligned between the two eyes.
 			for (const [instance, x, y, z, scale] of [
@@ -203,20 +199,20 @@ export async function createFishRenderer(device) {
 				[2, 1.1, 0.02, -2.5, 0.65],
 			]) {
 				const model = [
-					scale * c,
+					scale,
 					0,
-					-scale * s,
+					0,
 					0,
 					0,
 					scale,
 					0,
 					0,
-					scale * s,
 					0,
-					scale * c,
+					0,
+					scale,
 					0,
 					x,
-					y + bob,
+					y,
 					z,
 					1,
 				];
