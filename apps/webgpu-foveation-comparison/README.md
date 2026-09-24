@@ -1,6 +1,6 @@
 # WebGPU foveation comparison
 
-WebXRの`XRGPUBinding`と`XRProjectionLayer.fixedFoveation`を使うBANGEOの比較デモです。`index.html`で初期値を選び、`minimum.html`または`maximum.html`からVRを開始します。`app.js`はWebXRセッションと値の切り替え、`fish.js`はUVテクスチャ付きglTFモデル、`patterns.js`は高密度の背景をWebGPUで描画します。
+WebXRの`XRGPUBinding`と`XRProjectionLayer.fixedFoveation`を使うBANGEOの比較デモです。`index.html`からVRを開始し、実行中にトリガーで設定を切り替えます。`app.js`はWebXRセッションと値の切り替え、`fish.js`はUVテクスチャ付きglTFモデル、`patterns.js`は高密度の背景をWebGPUで描画します。
 
 - `node dev-server.mjs`: デスクトップ用の案内画面プレビュー（`http://127.0.0.1:8766/`）。WebXRの実機動作は確認できません。
 - `node build.mjs`: `apps/blog/public/demos/webgpu-foveation-comparison/`へ配信ファイルをコピーします。

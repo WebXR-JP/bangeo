@@ -15,55 +15,37 @@ demoUrl: "/demos/webgpu-foveation-comparison/index.html"
 draft: false
 ---
 
-Metaは2026年8月28日公開の[Quest Browser 150.1リリースノート](https://developers.meta.com/horizon/downloads/package/browser/150.1/)で、WebXRのWebGPU描画におけるfoveation（視野の中心より周辺の描画密度を下げ、GPU負荷を抑える技術）の実験的なサポートを発表しました。WebXRでのWebGPU対応に続き、描画負荷を調整する機能が加わりました。
+Metaは[Quest Browser 150.1のリリースノート](https://developers.meta.com/horizon/downloads/package/browser/150.1/)で、WebXRのWebGPU描画におけるfoveationの実験的なサポートを発表しました。foveationは視野の周辺の描画密度を下げ、GPUの描画負荷を抑える技術です。
 
-動作を確かめられるよう、BANGEOでは[WebGPUの比較デモ](/demos/webgpu-foveation-comparison/index.html)を用意しました。fixed foveation（視線追跡を使わない固定方式）を0または1から始め、VR中にコントローラーのトリガーで切り替えられます。Blenderで作った魚型の3Dモデルを視野の中央と左右に置き、その後方に細線の格子、同心円、斜線を描画します。背景のシェーダーは各画素で複数回の計算を行います。同じシーンを見たまま切り替え、視野の端にある魚の模様と背景の線を見比べてください。
+BANGEOでは、この更新を試せるWebGPUのデモを公開しました。
 
-デモページにはモデルの動きを示す短いアニメーションもあります。3Dモデルのプレビューであり、VRシーンやfoveationの効果を撮影した映像ではありません。ヘッドセットがなくても、モデルの形を確認できます。
+<a href="/demos/webgpu-foveation-comparison/index.html" style={{display: "inline-block", padding: "0.9rem 1.4rem", borderRadius: "999px", background: "#111827", color: "white", fontWeight: 700, textDecoration: "none", margin: "0.5rem 0 1rem"}}>比較デモを開く →</a>
 
-![Blenderで制作したBANGEOの魚型3Dモデルがゆっくり向きを変えるプレビュー](/demos/webgpu-foveation-comparison/assets/bangeo-fish-preview.gif)
+![Quest Browserで開いた比較デモのページ](/demos/webgpu-foveation-comparison/assets/quest-browser-demo-privacy.webp)
 
-## 150.1で変わったこと
+*Quest Browserで撮影したデモ画面。現在は一画面に統合しています。*
 
-Quest Browser 150.1のリリースノートには、WebXRのWebGPU描画に対するfoveationの実験的なサポートが記載されています。同じリリースにはMV-HEVC動画再生の有効化と、信頼性・セキュリティ・性能の改善も含まれます。対応する方式やQuest機種ごとの効果、性能向上率は示されていません。[Quest Browser 149.1](https://developers.meta.com/horizon/downloads/package/browser/149.1/)ではWebGPU用Space Warp Layer、[Quest Browser 146.0](https://developers.meta.com/horizon/downloads/package/browser/146.0/)ではWebXRでの実験的なWebGPU対応が案内されていました。
+![デモで使う3Dモデルのプレビュー](/demos/webgpu-foveation-comparison/assets/bangeo-fish-preview.gif)
+
+## WebXRでのWebGPU対応の流れ
+
+Quest Browserでは、WebXRでのWebGPU対応に続いて関連機能が追加されています。
 
 | Browser | 公式リリースノートにあるWebXR / WebGPU関連の更新 |
 | --- | --- |
-| 146.0（2026年4月21日） | WebXRでの実験的なWebGPU対応 |
-| 149.1（2026年7月27日） | WebGPU用Space Warp Layer対応 |
-| 150.1（2026年8月28日） | WebXRのWebGPU描画でfoveationを実験的にサポート |
+| [146.0](https://developers.meta.com/horizon/downloads/package/browser/146.0/)（2026年4月21日） | WebXRでの実験的なWebGPU対応 |
+| [149.1](https://developers.meta.com/horizon/downloads/package/browser/149.1/)（2026年7月27日） | WebGPU用Space Warp Layer対応 |
+| [150.1](https://developers.meta.com/horizon/downloads/package/browser/150.1/)（2026年8月28日） | WebXRのWebGPU描画でfoveationを実験的にサポート |
 
-[Metaのfixed foveationの解説](https://developers.meta.com/horizon/documentation/web/webxr-ffr/)によると、GPUのピクセル処理がボトルネックになっている場面で効果が期待できます。一方、コントラストの高い画像や文字では、画質の変化が目立つことがあります。
+WebGPUでの描画が可能になり、Space Warp Layerに続いて描画負荷を調整する機能が加わりました。
 
-## デモを始める前のWebGPU設定
+## foveationで何が変わるか
 
-このデモはWebXRセッション内でWebGPUを使って描画します。Quest Browserで[chrome://flags](chrome://flags)を開き、`WebXR/WebGPU Binding`を検索して`Enabled`にします。変更後は画面の案内に従ってBrowserを再起動し、デモを開き直してください。
+今回の対応は**fixed foveation**です。視線を追跡する方式ではなく、画面の中心と周辺で描画密度を変えます。[Metaの解説](https://developers.meta.com/horizon/documentation/web/webxr-ffr/)によると、GPUのピクセル処理が負荷の原因となっている場面で効果が期待できます。一方、文字や輪郭のはっきりした画像は周辺部の変化が目立つことがあります。
 
-## 比較デモの操作
+WebXRでは[`XRProjectionLayer.fixedFoveation`](https://www.w3.org/TR/webxrlayers-1/#dom-xrprojectionlayer-fixedfoveation)で設定します。この値はVRの実行中にも変更できます。具体的な描画方法はブラウザに委ねられているため、画質とGPU負荷は対象の端末で確かめる必要があります。
 
-1. WebGPUとWebXRに対応したQuest Browserで[比較デモ](/demos/webgpu-foveation-comparison/index.html)を開き、設定値0か1を初期値に選びます。
-2. 選んだページで「VRを開始」を押します。デモは`immersive-vr`セッションで`webgpu`機能を要求し、`XRGPUBinding`からWebGPU用`XRProjectionLayer`を作ります。
-3. 頭を動かさずにトリガーを押すと、設定値が0と1で切り替わります。VR内の大きな数字は現在の設定値です。
-4. 魚型モデルの模様と、背景の細線や交点を視野の中心と端で比べます。変化が見えなくても、数字やAPIの読取値だけで描画効果が出ているとは判断できません。
-5. 記録を残す場合は、0と1の両方についてQuestの機種、Quest Browserのバージョン、見え方を添えてください。
-
-各ページには、現在の設定値とProjection Layerから読み取った値を表示します。`fixedFoveation`が`null`の場合は、その環境でこの属性を使えないため、VRを開始できない理由を表示します。読み取り値が0または1でも、GPUの負荷軽減や画質の変化を証明したことにはなりません。負荷はMetaのドキュメントで紹介されている`ovrgpuprofiler -t`でも確認してください。
-
-## デモが使うAPIと比較の意味
-
-デモはWebGPUのRender Pipelineで、UV展開した3Dモデルのテクスチャをサンプリングします。背景もWebGPUのシェーダーで描画し、格子、同心円、斜線に加えて複数の周期模様を計算します。中央と左右のモデルは3D空間に配置し、`XRGPUBinding.getViewSubImage()`で得た左右それぞれのProjection Layerのテクスチャへ直接描画します。WebGPU対応の有無を`navigator.gpu`だけで判定せず、WebXR、`XRGPUBinding`、`immersive-vr`の対応を個別に確認します。
-
-設定に使うのは[`XRProjectionLayer.fixedFoveation`](https://www.w3.org/TR/webxrlayers-1/#dom-xrprojectionlayer-fixedfoveation)です。[WebXR Layers API Level 1](https://www.w3.org/TR/webxrlayers-1/)では、0が最小、1が最大で、具体的な描画方式と段階の解釈はブラウザ側に委ねられています。対応しない環境では`null`を返し、値を設定しても効果はありません。各ページはVR開始時に初期値を設定し、WebXRの`select`イベントで値を切り替えます。
-
-このデモが扱うのは**fixed foveation**です。視線追跡で注視点を追う方式は扱いません。ページに表示する設定値は、描画負荷の変化を示すものではありません。スクリーンショットだけではヘッドセットで見たときの周辺視野の印象が伝わりにくいため、画質は装着した状態でも確かめてください。
-
-`fixedFoveation = 0`は仕様上の最小値です。ブラウザ側の描画処理が完全に無効になることまでは保証されません。デモの表示にも、仕様上の範囲を表す「最小（0）」「最大（1）」を用いています。
-
-## 開発時に見るポイント
-
-今回の更新によって、WebGPUで描画するWebXRアプリでもfixed foveationを試せます。効果はピクセル処理の負荷やシーンの細かさ、UIの位置、Quest Browserと端末の実装によって変わります。線や文字を多用する画面では、周辺部の読みやすさを確認してください。
-
-実験的なサポートのため、製品への採用を判断するときは対象端末で設定値ごとの画質とGPU負荷を測り、Quest Browserの更新後にも確かめる必要があります。WebGPUを使ったXR描画の実装例として、[Immersive WebのWebGPUサンプル](https://immersive-web.github.io/webxr-samples/webgpu/)も参考になります。
+Quest Browser 150.1でのサポートは実験的です。Metaのリリースノートには、機種ごとの効果や性能向上率は示されていません。
 
 ## 参考資料
 
@@ -72,5 +54,3 @@ Quest Browser 150.1のリリースノートには、WebXRのWebGPU描画に対�
 - [Meta Quest Browser 146.0リリースノート](https://developers.meta.com/horizon/downloads/package/browser/146.0/)
 - [Meta: WebXR Fixed Foveated Rendering](https://developers.meta.com/horizon/documentation/web/webxr-ffr/)
 - [WebXR Layers API Level 1](https://www.w3.org/TR/webxrlayers-1/)
-- [Immersive Web WebGPUサンプル](https://immersive-web.github.io/webxr-samples/webgpu/)
-- [WebXRパフォーマンスとfoveation](/tech-articles/webxr-performance-foveation-fixed-dynamic-eye-tracking)
