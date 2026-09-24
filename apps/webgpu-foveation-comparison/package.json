@@ -1,0 +1,9 @@
+{
+	"name": "@bangeo/webgpu-foveation-comparison",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"dev": "node dev-server.mjs",
+		"build": "node build.mjs"
+	}
+}
