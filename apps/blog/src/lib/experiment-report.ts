@@ -85,16 +85,16 @@ export interface SessionReport {
 	modules: Partial<Record<(typeof reportModules)[number], ModuleEvidence>>;
 }
 export interface ExperimentReport {
-	schemaVersion: 1;
+	schemaVersion: 2;
 	device: ReportDevice;
-	browser: { family: ReportBrowser; major: number | null };
+	browser: { family: ReportBrowser; version: string | null };
 	checks: Partial<Record<(typeof reportChecks)[number], DetectionResult>>;
 	session: SessionReport | null;
 }
 /** Parse only locally; the full UA never becomes part of the report. */
 export function reportBrowser(ua: string): ExperimentReport["browser"] {
 	const patterns: [ReportBrowser, RegExp][] = [
-		["quest-browser", /OculusBrowser\/(\d+)/i],
+		["quest-browser", /OculusBrowser\/(\d{1,4})(?:\.(\d{1,4}))?/i],
 		["pico-browser", /Pico\s?Browser\/(\d+)/i],
 		["wolvic", /Wolvic\/(\d+)/i],
 		["edge", /(?:Edg|EdgiOS|EdgA)\/(\d+)/i],
@@ -107,10 +107,15 @@ export function reportBrowser(ua: string): ExperimentReport["browser"] {
 		if (match)
 			return {
 				family,
-				major: Number(match[1]) <= 9999 ? Number(match[1]) : null,
+				version:
+					match[1] && Number(match[1]) <= 9999
+						? family === "quest-browser" && match[2]
+							? `${match[1]}.${match[2]}`
+							: match[1]
+						: null,
 			};
 	}
-	return { family: "other", major: null };
+	return { family: "other", version: null };
 }
 /** Best-effort model detection; ambiguous UA strings remain unclassified. */
 export function reportDevice(ua: string): ReportDevice {
@@ -158,19 +163,20 @@ export function isExperimentReport(value: unknown): value is ExperimentReport {
 			"checks",
 			"session",
 		]) ||
-		value.schemaVersion !== 1 ||
+		value.schemaVersion !== 2 ||
 		!member(value.device, reportDevices)
 	)
 		return false;
 	const b = value.browser;
 	if (
-		!fields(b, ["family", "major"]) ||
+		!fields(b, ["family", "version"]) ||
 		!member(b.family, reportBrowsers) ||
 		!(
-			b.major === null ||
-			(Number.isInteger(b.major) &&
-				Number(b.major) > 0 &&
-				Number(b.major) <= 9999)
+			b.version === null ||
+			(typeof b.version === "string" &&
+				(b.family === "quest-browser"
+					? /^[1-9]\d{0,3}(?:\.\d{1,4})?$/.test(b.version)
+					: /^[1-9]\d{0,3}$/.test(b.version)))
 		)
 	)
 		return false;

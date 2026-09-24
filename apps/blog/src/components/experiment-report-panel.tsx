@@ -10,11 +10,13 @@ import {
 	type SessionReport,
 } from "@/lib/experiment-report";
 import type { SpecCheckId, SpecSupport } from "@/lib/webxr-spec-catalog";
+import { webxrSpecCatalog } from "@/lib/webxr-spec-catalog";
 
 type SummaryRow = {
 	device: string;
 	browser: string;
-	major: number | null;
+	version?: string | null;
+	major?: number | null;
 	stage: string;
 	feature: string;
 	result: string;
@@ -128,6 +130,96 @@ const stageLabels: Record<string, string> = {
 	session: "セッション",
 	"module-error": "機能のエラー",
 };
+const stageOrder = [
+	"detection",
+	"enabled",
+	"session",
+	"observation",
+	"module-error",
+];
+const browserLabels: Record<string, string> = {
+	"quest-browser": "Meta Quest Browser",
+	"pico-browser": "PICO Browser",
+	wolvic: "Wolvic",
+	edge: "Microsoft Edge",
+	chrome: "Chrome",
+	firefox: "Firefox",
+	safari: "Safari",
+	other: "その他のブラウザ",
+};
+const featureLabels: Record<string, string> = Object.fromEntries(
+	webxrSpecCatalog.map(({ id, name }) => [id, name]),
+);
+Object.assign(featureLabels, {
+	inline: "通常のページ",
+	"immersive-vr": "VR体験",
+	"immersive-ar": "AR体験",
+	viewer: "視点を基準にした空間",
+	local: "開始位置を基準にした空間",
+	"local-floor": "床を基準にした空間",
+	"bounded-floor": "境界のある空間",
+	unbounded: "広い空間",
+	"hand-tracking": "ハンドトラッキング",
+	"dom-overlay": "DOM Overlay",
+	webgpu: "WebGPU",
+	"light-estimation": "Lighting Estimation",
+});
+
+function formatBrowser(family: string, version: string | null): string {
+	return `${browserLabels[family] ?? family}${version === null ? "" : ` ${version}`}`;
+}
+
+function summaryBrowserVersion(row: SummaryRow): string | null {
+	return row.version ?? (row.major == null ? null : String(row.major));
+}
+
+function summaryGroups(rows: SummaryRow[]) {
+	const groups = new Map<
+		string,
+		{ device: string; browser: string; rows: SummaryRow[] }
+	>();
+	for (const row of rows) {
+		const version = summaryBrowserVersion(row);
+		const key = `${row.device}:${row.browser}:${version ?? ""}`;
+		const group = groups.get(key) ?? {
+			device: deviceLabels[row.device as ReportDevice] ?? row.device,
+			browser: formatBrowser(row.browser, version),
+			rows: [],
+		};
+		group.rows.push(row);
+		groups.set(key, group);
+	}
+	return [...groups.entries()].map(([key, group]) => ({ key, ...group }));
+}
+
+function stageGroups(rows: SummaryRow[]) {
+	const groups = new Map<string, SummaryRow[]>();
+	for (const row of rows) {
+		const group = groups.get(row.stage) ?? [];
+		group.push(row);
+		groups.set(row.stage, group);
+	}
+	return [...groups.entries()]
+		.sort(([a], [b]) => stageOrder.indexOf(a) - stageOrder.indexOf(b))
+		.map(([stage, items]) => ({ stage, items }));
+}
+
+function ResultBadge({ result }: { result: string }) {
+	const tone = ["detected", "observed", "granted", "ended", "none"].includes(
+		result,
+	)
+		? "bg-emerald-50 text-emerald-800"
+		: ["not-detected", "not-observed", "not-granted", "unknown"].includes(
+					result,
+				)
+			? "bg-gray-100 text-gray-600"
+			: "bg-rose-50 text-rose-800";
+	return (
+		<span className={`rounded-full px-2.5 py-1 text-xs font-bold ${tone}`}>
+			{resultLabels[result] ?? result}
+		</span>
+	);
+}
 const button =
 	"rounded-lg border border-gray-300 px-4 py-2 text-sm font-bold hover:border-gray-900 focus-visible:outline-2 disabled:opacity-40";
 
@@ -206,7 +298,7 @@ export function ExperimentReportPanel({
 						: "unknown";
 		}
 		setPreview({
-			schemaVersion: 1,
+			schemaVersion: 2,
 			device,
 			browser: reportBrowser(navigator.userAgent),
 			checks: normalized,
@@ -268,185 +360,281 @@ export function ExperimentReportPanel({
 	}
 	return (
 		<section
-			className="mt-10 rounded-xl border border-gray-200 p-5"
+			className="mt-10 rounded-2xl border border-gray-200 bg-white p-5 sm:p-7"
 			aria-labelledby="anonymous-report-title"
 		>
-			<h2 id="anonymous-report-title" className="text-lg font-bold">
+			<h2
+				id="anonymous-report-title"
+				className="text-xl font-bold text-gray-950"
+			>
 				みんなの端末での検証結果
 			</h2>
-			<p className="mt-2 text-sm text-gray-600">
-				APIの検出結果と、このページで最後に終了した体験の結果を匿名で提供できます。送信は任意です。
+			<p className="mt-2 text-sm leading-relaxed text-gray-600">
+				ほかの端末で確認された結果を見られます。自分の結果の提供は任意です。
 			</p>
-			<p className="mt-2 text-xs leading-relaxed text-gray-500">
-				端末の種類・ブラウザのメジャーバージョン・検証結果を保存し、集計を公開します。氏名・IPアドレス・部屋や手の座標・生のUser-Agentは検証データに含めません。通信時のIPなどは配信事業者に届きます。
-			</p>
-			{!configured && (
-				<p className="mt-3 text-sm text-gray-600">
-					BANGEO
-					Analyticsの公開キーが未設定か形式が異なるため送信できません。送信内容の確認はできます。
-				</p>
-			)}
-			<div className="mt-4 flex flex-wrap items-end gap-3">
-				<label className="text-sm">
-					試した端末
-					<select
-						value={device}
-						disabled={sending}
-						onChange={(e) => {
-							setDevice(e.target.value as ReportDevice);
-							setPreview(null);
-							setConsent(false);
-							allowed.current = false;
-							abort.current?.abort();
-						}}
-						className="ml-2 rounded border p-2"
+			<section
+				className="mt-6 rounded-2xl bg-gray-50 p-4 sm:p-5"
+				aria-labelledby="public-results-title"
+			>
+				<div className="flex flex-wrap items-center justify-between gap-3">
+					<div>
+						<h3
+							id="public-results-title"
+							className="text-base font-bold text-gray-950"
+						>
+							公開された結果
+						</h3>
+						<p className="mt-1 text-sm text-gray-600">
+							端末とブラウザごとに確認できます。
+						</p>
+					</div>
+					<button
+						type="button"
+						className={button}
+						disabled={!configured || loading}
+						onClick={readSummary}
 					>
-						{reportDevices.map((d) => (
-							<option key={d} value={d}>
-								{deviceLabels[d]}
-							</option>
-						))}
-					</select>
-				</label>
-				<button
-					type="button"
-					className={button}
-					disabled={running || sending || Object.keys(checks).length === 0}
-					onClick={prepare}
+						{loading ? "取得中…" : summary ? "結果を更新" : "結果を見る"}
+					</button>
+				</div>
+				<p role="status" className="mt-3 text-sm text-rose-700">
+					{summaryError}
+				</p>
+				{summary && (
+					<div className="mt-5">
+						<p className="text-sm text-gray-600">直近{summary.days}日</p>
+						<p className="mt-1 text-3xl font-bold tabular-nums text-gray-950">
+							{summary.total}
+							<span className="ml-1 text-base font-medium">件の報告</span>
+						</p>
+						<p className="mt-1 text-sm text-gray-600">
+							人数や端末台数ではありません。
+						</p>
+						{summary.truncated && (
+							<p className="mt-2 text-sm text-amber-800">
+								表示上限に達しています。
+							</p>
+						)}
+						{summary.total === 0 ? (
+							<p className="mt-4 text-sm text-gray-600">
+								まだ報告がありません。
+							</p>
+						) : (
+							<ul className="mt-5 space-y-3">
+								{summaryGroups(summary.rows).map((group) => (
+									<li key={group.key}>
+										<details className="group rounded-xl border border-gray-200 bg-white">
+											<summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-4 focus-visible:outline-2 [&::-webkit-details-marker]:hidden">
+												<span className="min-w-0">
+													<strong className="block text-base text-gray-950">
+														{group.device}
+													</strong>
+													<span className="mt-0.5 block text-sm text-gray-600">
+														{group.browser}
+													</span>
+												</span>
+												<span className="shrink-0 text-sm font-bold text-gray-700 group-open:hidden">
+													結果を見る ＋
+												</span>
+												<span className="hidden shrink-0 text-sm font-bold text-gray-700 group-open:inline">
+													閉じる −
+												</span>
+											</summary>
+											<div className="space-y-5 border-t border-gray-100 px-4 py-4">
+												{stageGroups(group.rows).map(({ stage, items }) => (
+													<div key={stage}>
+														<h4 className="text-sm font-bold text-gray-900">
+															{stageLabels[stage] ?? stage}
+														</h4>
+														<ul className="mt-2 divide-y divide-gray-100">
+															{items.map((row) => (
+																<li
+																	key={`${row.feature}:${row.result}`}
+																	className="flex flex-wrap items-center justify-between gap-2 py-2.5 text-sm"
+																>
+																	<span className="font-medium text-gray-800">
+																		{featureLabels[row.feature] ?? row.feature}
+																	</span>
+																	<span className="flex items-center gap-2">
+																		<ResultBadge result={row.result} />
+																		<span className="tabular-nums text-gray-600">
+																			{row.reports}件
+																		</span>
+																	</span>
+																</li>
+															))}
+														</ul>
+													</div>
+												))}
+											</div>
+										</details>
+									</li>
+								))}
+							</ul>
+						)}
+					</div>
+				)}
+			</section>
+			<section
+				className="mt-6 border-t border-gray-200 pt-6"
+				aria-labelledby="send-results-title"
+			>
+				<h3
+					id="send-results-title"
+					className="text-base font-bold text-gray-950"
 				>
-					送信内容を確認
-				</button>
-			</div>
-			<p className="mt-2 text-xs text-gray-500">
-				端末とブラウザはブラウザの情報から推定します。機種が違う場合は選び直してください。判別できない場合はそのまま送信できます。
-			</p>
-			{running && (
-				<p className="mt-2 text-sm">体験を終了すると結果を確認できます。</p>
-			)}
-			{preview && (
-				<div className="mt-4 space-y-3">
-					<p className="text-sm">
-						{preview.session
-							? "最後の体験の結果を含みます。"
-							: "体験は未実施です。APIの検出結果のみ送信します。"}{" "}
-						APIの検出や許可だけでは、実データの取得を確認したことにはなりません。
+					自分の結果を送る
+				</h3>
+				<p className="mt-1 text-sm leading-relaxed text-gray-600">
+					このページで確認したAPIと、最後に終了した体験の結果を送れます。送信は任意です。
+				</p>
+				{!configured && (
+					<p className="mt-3 text-sm text-gray-600">
+						公開キーが未設定のため送信できません。送信内容の確認はできます。
 					</p>
-					<details open>
-						<summary className="cursor-pointer text-sm font-bold">
-							送信するJSON
-						</summary>
-						<pre className="mt-2 max-h-64 overflow-auto rounded bg-gray-50 p-3 text-xs">
-							{JSON.stringify(preview, null, 2)}
-						</pre>
-					</details>
-					<label className="flex items-start gap-2 text-sm">
-						<input
-							type="checkbox"
-							checked={consent}
-							disabled={Boolean(receipt)}
+				)}
+				<div className="mt-4 flex flex-wrap items-end gap-3">
+					<label className="text-sm font-medium text-gray-800">
+						<span className="mb-1 block">試した端末</span>
+						<select
+							value={device}
+							disabled={sending}
 							onChange={(e) => {
-								const checked = e.target.checked;
-								setConsent(checked);
-								allowed.current = checked;
-								if (!checked) abort.current?.abort();
+								setDevice(e.target.value as ReportDevice);
+								setPreview(null);
+								setConsent(false);
+								allowed.current = false;
+								abort.current?.abort();
 							}}
-						/>
-						この内容の保存と、匿名の集計結果の公開に同意します。
+							className="block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm"
+						>
+							{reportDevices.map((d) => (
+								<option key={d} value={d}>
+									{deviceLabels[d]}
+								</option>
+							))}
+						</select>
 					</label>
 					<button
 						type="button"
 						className={button}
-						disabled={!configured || !consent || sending || Boolean(receipt)}
-						onClick={send}
+						disabled={running || sending || Object.keys(checks).length === 0}
+						onClick={prepare}
 					>
-						{sending
-							? "送信中…"
-							: receipt
-								? "受付済み"
-								: "匿名データを送信する"}
+						送信内容を確認
 					</button>
-					<p role="status" className="break-all text-sm">
-						{notice}
-						{receipt && ` 受付ID: ${receipt.reportId}`}
-					</p>
 				</div>
-			)}
-			<div className="mt-6 border-t border-gray-100 pt-4">
-				<button
-					type="button"
-					className={button}
-					disabled={!configured || loading}
-					onClick={readSummary}
-				>
-					{loading ? "取得中…" : "匿名の集計結果を表示・更新"}
-				</button>
-				<p role="status" className="mt-2 text-sm">
-					{summaryError}
+				<p className="mt-2 text-sm text-gray-600">
+					機種が違う場合は選び直してください。判別できない場合はそのまま送信できます。
 				</p>
-				{summary && (
-					<>
-						<p className="my-3 text-sm">
-							{summary.truncated ? "表示上限に達しています。" : ""}直近
-							{summary.days}日：{summary.total}
-							件の報告。人数・端末台数ではありません。
-						</p>
-						{summary.total === 0 ? (
-							<p className="text-sm text-gray-500">まだ報告がありません。</p>
-						) : (
-							<div className="overflow-x-auto">
-								<table className="w-full text-left text-xs">
-									<thead>
-										<tr>
-											{[
-												"端末",
-												"ブラウザ",
-												"確認内容",
-												"API・機能",
-												"結果",
-												"件数",
-											].map((h) => (
-												<th key={h} className="whitespace-nowrap border-b p-2">
-													{h}
-												</th>
-											))}
-										</tr>
-									</thead>
-									<tbody>
-										{summary.rows.map((row) => (
-											<tr
-												key={[
-													row.device,
-													row.browser,
-													row.major,
-													row.stage,
-													row.feature,
-													row.result,
-												].join(":")}
-											>
-												<td className="p-2">
-													{deviceLabels[row.device as ReportDevice] ??
-														row.device}
-												</td>
-												<td className="p-2">
-													{row.browser} {row.major ?? ""}
-												</td>
-												<td className="p-2">
-													{stageLabels[row.stage] ?? row.stage}
-												</td>
-												<td className="p-2">{row.feature}</td>
-												<td className="p-2">
-													{resultLabels[row.result] ?? row.result}
-												</td>
-												<td className="p-2 tabular-nums">{row.reports}</td>
-											</tr>
-										))}
-									</tbody>
-								</table>
-							</div>
-						)}
-					</>
+				{running && (
+					<p className="mt-2 text-sm text-gray-600">
+						体験を終了すると結果を確認できます。
+					</p>
 				)}
-			</div>
+				{preview && (
+					<div className="mt-5 space-y-4 rounded-xl border border-gray-200 p-4 sm:p-5">
+						<h4 className="text-base font-bold text-gray-950">送信する内容</h4>
+						<dl className="grid gap-3 text-sm sm:grid-cols-2">
+							<div>
+								<dt className="text-gray-500">端末</dt>
+								<dd className="mt-0.5 font-medium">
+									{deviceLabels[preview.device]}
+								</dd>
+							</div>
+							<div>
+								<dt className="text-gray-500">ブラウザ</dt>
+								<dd className="mt-0.5 font-medium">
+									{formatBrowser(
+										preview.browser.family,
+										preview.browser.version,
+									)}
+								</dd>
+							</div>
+							<div>
+								<dt className="text-gray-500">APIの検出結果</dt>
+								<dd className="mt-0.5 font-medium">
+									{Object.keys(preview.checks).length}項目
+								</dd>
+							</div>
+							<div>
+								<dt className="text-gray-500">体験結果</dt>
+								<dd className="mt-0.5 font-medium">
+									{preview.session
+										? `${preview.session.mode}・${resultLabels[preview.session.outcome] ?? preview.session.outcome}`
+										: "体験なし"}
+								</dd>
+							</div>
+						</dl>
+						<p className="text-sm leading-relaxed text-gray-600">
+							APIの検出や機能の許可だけでは、実データの取得を確認したことにはなりません。
+						</p>
+						<details className="rounded-lg border border-gray-200 p-3">
+							<summary className="cursor-pointer text-sm font-medium text-gray-800">
+								APIの検出結果を確認
+							</summary>
+							<ul className="mt-3 divide-y divide-gray-100">
+								{Object.entries(preview.checks).map(([feature, result]) => (
+									<li
+										key={feature}
+										className="flex items-center justify-between gap-2 py-2 text-sm"
+									>
+										<span>{featureLabels[feature] ?? feature}</span>
+										<ResultBadge result={result ?? "unknown"} />
+									</li>
+								))}
+							</ul>
+						</details>
+						<details className="rounded-lg bg-gray-50 p-3">
+							<summary className="cursor-pointer text-sm font-medium text-gray-700">
+								送信データの詳細を見る
+							</summary>
+							<pre className="mt-3 max-h-64 overflow-auto text-xs">
+								{JSON.stringify(preview, null, 2)}
+							</pre>
+						</details>
+						<label className="flex items-start gap-2 text-sm leading-relaxed">
+							<input
+								type="checkbox"
+								className="mt-1"
+								checked={consent}
+								disabled={Boolean(receipt)}
+								onChange={(e) => {
+									const checked = e.target.checked;
+									setConsent(checked);
+									allowed.current = checked;
+									if (!checked) abort.current?.abort();
+								}}
+							/>
+							この内容の保存と、匿名の集計結果の公開に同意します。
+						</label>
+						<button
+							type="button"
+							className={button}
+							disabled={!configured || !consent || sending || Boolean(receipt)}
+							onClick={send}
+						>
+							{sending
+								? "送信中…"
+								: receipt
+									? "受付済み"
+									: "匿名データを送信する"}
+						</button>
+						<p role="status" className="break-all text-sm">
+							{notice}
+							{receipt && ` 受付ID: ${receipt.reportId}`}
+						</p>
+					</div>
+				)}
+			</section>
+			<details className="mt-5 border-t border-gray-100 pt-4">
+				<summary className="cursor-pointer text-sm font-medium text-gray-600">
+					保存される情報について
+				</summary>
+				<p className="mt-2 text-sm leading-relaxed text-gray-600">
+					端末の種類・ブラウザのバージョン・検証結果を保存し、集計を公開します。氏名・IPアドレス・部屋や手の座標・生のUser-Agentは検証データに含めません。通信時のIPなどは配信事業者に届きます。
+				</p>
+			</details>
 		</section>
 	);
 }

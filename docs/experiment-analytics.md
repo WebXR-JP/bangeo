@@ -18,7 +18,7 @@ SDKは受信サービスの`/sdk/experiments-v1.js`から、送信または集�
 
 APIの存在検出、セッションに許可された機能、実データを取得した機能を別に送ります。Reference Spaceの事前推定は送信時にunknownにし、実際に使われた空間はセッション結果に記録します。手・メッシュ・深度などは取得したかどうかだけを記録し、座標・画像・距離・形状は送りません。既存リストの簡易チェックを公式な対応保証として解釈しないでください。
 
-API契約の公開部分は`apps/blog/src/lib/experiment-report.ts`です。Analytics側のschemaVersion 1と合わせて変更します。PrivateなサーバーコードをBANGEOへ取り込む必要はありません。
+API契約の公開部分は`apps/blog/src/lib/experiment-report.ts`です。Analytics側のschemaVersion 2と合わせて変更します。ブラウザはMeta Quest Browserのメジャー・マイナーバージョン（例: `150.1`）を保存し、その他はメジャーバージョンのみを保存します。ビルド番号や生のUser-Agentは送りません。旧schemaVersion 1の報告は受信側で読み取り互換を維持します。PrivateなサーバーコードをBANGEOへ取り込む必要はありません。
 
 公開画面は報告数を表示します。人数や端末台数ではなく、同じ人が別の報告を送ることもできます。送信を選ばなくても実験機能は使えます。外部デモサイトでの操作結果は取得対象外で、このページのスターター体験のみを記録します。
 
