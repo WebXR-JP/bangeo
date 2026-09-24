@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 330" role="img" aria-labelledby="title description">
+  <title id="title">右手コントローラーの人差し指トリガー</title>
+  <desc id="description">コントローラーの前側にある人差し指のトリガーを赤く示した模式図</desc>
+  <defs>
+    <linearGradient id="shell" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#646b78"/>
+      <stop offset="0.48" stop-color="#333946"/>
+      <stop offset="1" stop-color="#151a24"/>
+    </linearGradient>
+    <linearGradient id="grip" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#444b58"/>
+      <stop offset="1" stop-color="#161b24"/>
+    </linearGradient>
+    <linearGradient id="trigger" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#fb7185"/>
+      <stop offset="1" stop-color="#be123c"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%">
+      <feDropShadow dx="0" dy="14" stdDeviation="13" flood-color="#0f172a" flood-opacity="0.23"/>
+    </filter>
+  </defs>
+  <rect width="760" height="330" rx="28" fill="#f8fafc"/>
+  <circle cx="385" cy="153" r="116" fill="#ffe4e6"/>
+  <circle cx="385" cy="153" r="84" fill="#fff1f2"/>
+  <text x="34" y="47" fill="#881337" font-family="sans-serif" font-size="18" font-weight="700">右手コントローラー（模式図）</text>
+  <g filter="url(#shadow)" transform="rotate(-13 312 160)">
+    <path d="M235 144 C227 159 225 179 223 201 L210 277 Q208 295 225 300 L269 306 Q284 307 290 290 L317 210 Q330 188 326 167 Z" fill="url(#grip)" stroke="#171c26" stroke-width="3"/>
+    <path d="M239 198 Q266 208 309 199" fill="none" stroke="#7e8796" stroke-opacity="0.55" stroke-width="5"/>
+    <path d="M248 266 Q267 271 286 264" fill="none" stroke="#68717f" stroke-opacity="0.45" stroke-width="3"/>
+    <path d="M187 107 C186 77 220 60 260 57 L352 57 C385 57 403 78 409 109 L414 138 Q412 161 391 171 L312 196 C273 207 232 193 210 168 Q189 146 187 107 Z" fill="url(#shell)" stroke="#171c26" stroke-width="4"/>
+    <path d="M211 113 C218 86 245 76 284 76 L355 77" fill="none" stroke="#a6afbd" stroke-opacity="0.55" stroke-width="7" stroke-linecap="round"/>
+    <ellipse cx="272" cy="108" rx="23" ry="15" fill="#141922" stroke="#858e9c" stroke-width="4"/>
+    <circle cx="270" cy="103" r="9" fill="#4c5564"/>
+    <circle cx="331" cy="113" r="10" fill="#161b25" stroke="#8b94a3" stroke-width="3"/>
+    <circle cx="360" cy="132" r="10" fill="#161b25" stroke="#8b94a3" stroke-width="3"/>
+    <path d="M402 143 Q427 139 430 152 L427 179 Q421 193 405 193 L390 189 Q399 170 402 143 Z" fill="url(#trigger)" stroke="#881337" stroke-width="4"/>
+    <path d="M407 150 Q421 148 423 155" fill="none" stroke="#fecdd3" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <circle cx="432" cy="141" r="34" fill="none" stroke="#e11d48" stroke-width="4"/>
+  <path d="M588 143 H481" fill="none" stroke="#be123c" stroke-width="5" stroke-linecap="round"/>
+  <path d="m483 143 15-10 v20 Z" fill="#be123c"/>
+  <text x="499" y="113" fill="#9f1239" font-family="sans-serif" font-size="20" font-weight="800">ここを押す</text>
+  <text x="499" y="182" fill="#111827" font-family="sans-serif" font-size="22" font-weight="800">人差し指の</text>
+  <text x="499" y="213" fill="#111827" font-family="sans-serif" font-size="22" font-weight="800">トリガー</text>
+  <text x="499" y="262" fill="#6b7280" font-family="sans-serif" font-size="16" font-weight="700">1回押すたびに 0 ⇄ 1</text>
+</svg>

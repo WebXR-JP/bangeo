@@ -327,6 +327,26 @@ button.quiet {
 	color: #9f1239;
 	font-weight: 700;
 }
+.controller-inline {
+	max-width: 450px;
+	margin: 16px 0 0;
+}
+.controller-inline img,
+.controller-diagram {
+	display: block;
+	width: 100%;
+	height: auto;
+	border: 1px solid #ffe4e6;
+	border-radius: 12px;
+}
+.controller-inline figcaption {
+	margin-top: 5px;
+	color: #6b7280;
+	font-size: 11px;
+}
+.controller-diagram {
+	margin-top: 16px;
+}
 .eyebrow {
 	color: #be123c;
 	font-size: 11px;

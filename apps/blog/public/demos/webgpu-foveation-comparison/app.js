@@ -1,3 +1,4 @@
+import { createControllerGuideRenderer } from "./controller-guide.js";
 import { createFishRenderer } from "./fish.js";
 import { createPatternRenderer } from "./patterns.js";
 
@@ -18,6 +19,7 @@ let referenceSpace;
 let device;
 let fishRenderer;
 let patternRenderer;
+let controllerGuideRenderer;
 let ready = false;
 let lastError = "";
 
@@ -92,6 +94,7 @@ function onFrame(_time, frame) {
 			);
 			patternRenderer.draw(pass, view, index);
 			fishRenderer.draw(pass, view, index);
+			controllerGuideRenderer.draw(pass, view, index);
 			pass.end();
 		}
 		device.queue.submit([encoder.finish()]);
@@ -117,6 +120,8 @@ async function start() {
 				binding = undefined;
 				layer = undefined;
 				patternRenderer = undefined;
+				controllerGuideRenderer?.destroy();
+				controllerGuideRenderer = undefined;
 				referenceSpace = undefined;
 				activeLevel = level;
 				actual.textContent = "VR開始前";
@@ -137,7 +142,8 @@ async function start() {
 		activeLevel = level;
 		layer.fixedFoveation = activeLevel;
 		patternRenderer = createPatternRenderer(device, format, activeLevel);
-		session.addEventListener("select", () => {
+		controllerGuideRenderer = createControllerGuideRenderer(device, format);
+		session.addEventListener("selectstart", () => {
 			if (!layer) return;
 			try {
 				const nextLevel = activeLevel === 0 ? 1 : 0;
@@ -146,7 +152,7 @@ async function start() {
 				patternRenderer.setLevel(activeLevel);
 				updateControls();
 				setStatus(
-					`設定値${activeLevel}に切り替えました。トリガーで再度切り替えられます。`,
+					`設定値${activeLevel}に変更しました。人差し指のトリガーで再度切り替えられます。`,
 				);
 			} catch (error) {
 				showError(error);
@@ -156,7 +162,7 @@ async function start() {
 		referenceSpace = await session.requestReferenceSpace("local");
 		updateControls();
 		setStatus(
-			`設定値${activeLevel}でVRを実行中です。トリガーで0と1を切り替えられます。`,
+			`設定値${activeLevel}でVRを実行中です。人差し指のトリガーで0と1を切り替えられます。`,
 		);
 		session.requestAnimationFrame(onFrame);
 	} catch (error) {

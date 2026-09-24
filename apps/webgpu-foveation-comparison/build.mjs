@@ -15,6 +15,7 @@ for (const name of [
 	"app.js",
 	"fish.js",
 	"patterns.js",
+	"controller-guide.js",
 	"style.css",
 ]) {
 	await cp(resolve(root, name), resolve(output, name));
