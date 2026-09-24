@@ -21,11 +21,23 @@ BANGEOのデモでは、設定値を変えたときの見え方をQuestで比べ
 
 <a href="/demos/webgpu-foveation-comparison/index.html" style={{display: "inline-block", padding: "0.9rem 1.4rem", borderRadius: "999px", background: "#111827", color: "white", fontWeight: 700, textDecoration: "none", margin: "0.5rem 0 1rem"}}>比較デモを開く →</a>
 
+## WebGPU対応から今回の更新まで
+
+Quest BrowserはWebXRでのWebGPU対応を段階的に進めています。
+
+| バージョン | WebXR / WebGPUの更新 |
+| --- | --- |
+| [146.0](https://developers.meta.com/horizon/downloads/package/browser/146.0/) | WebXRでのWebGPU描画を実験的にサポート |
+| [149.1](https://developers.meta.com/horizon/downloads/package/browser/149.1/) | WebGPU用Space Warp Layerに対応 |
+| [150.1](https://developers.meta.com/horizon/downloads/package/browser/150.1/) | WebGPU描画でfoveationを実験的にサポート |
+
 ## デモで見比べる
 
 ![Quest Browserで開いた比較デモのページ。VR開始ボタンが表示されている](/demos/webgpu-foveation-comparison/assets/quest-browser-demo-privacy.webp)
 
 *Quest Browserで撮影したデモ画面。現在はボタンを一つにまとめています。*
+
+![デモの3Dモデルを回転させたプレビュー](/demos/webgpu-foveation-comparison/assets/bangeo-fish-preview.gif)
 
 VRを開始したら、視野の端に注目してください。コントローラーのトリガーを押すたび、foveationの設定値が0（最小）と1（最大）で切り替わります。
 
