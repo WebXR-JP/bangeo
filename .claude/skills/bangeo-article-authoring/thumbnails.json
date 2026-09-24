@@ -175,6 +175,12 @@
 			"filename": "supersplat-editor-3-webgpu",
 			"assetDir": "tech",
 			"thumbnail": "/assets/tech/supersplat-editor-3-webgpu.webp"
+		},
+		{
+			"slug": "quest-browser-150-webgpu-foveation",
+			"filename": "quest-browser-150-webgpu-foveation",
+			"assetDir": "tech",
+			"thumbnail": "/assets/tech/quest-browser-150-webgpu-foveation.webp"
 		}
 	],
 	"experiments": [

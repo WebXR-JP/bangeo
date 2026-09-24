@@ -17,6 +17,7 @@ const blogSchema = z.object({
 	tags: z.array(z.string()).optional(),
 	author: z.string().optional(),
 	thumbnail: z.string().optional(),
+	demoUrl: z.string().optional(),
 	externalLink: z.string().optional(),
 	draft: z.boolean().optional().default(false),
 });

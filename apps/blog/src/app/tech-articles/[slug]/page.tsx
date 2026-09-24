@@ -289,7 +289,7 @@ export default async function TechArticlePage({ params }: PageProps) {
 							</p>
 						</div>
 						<Link
-							href="/experiments"
+							href={doc.demoUrl || "/experiments"}
 							className="px-6 py-3 bg-gray-950 text-white rounded-full font-bold text-sm hover:bg-[#e11d48] transition-all shadow-lg whitespace-nowrap"
 						>
 							デモを見る →
