@@ -1,6 +1,6 @@
 ---
-title: "Quest Browser 150.1のfoveationを、VRを止めずに切り替えて比べる"
-description: "WebXRのWebGPU描画でfixed foveationを実行中に変更できる。Quest Browser向けの一画面デモで、視野の端の見え方を比べます。"
+title: "Quest Browser 150.1、WebXRのWebGPU描画でfoveationを実験的にサポート"
+description: "Quest Browser 150.1の更新内容と、WebGPUで描画するWebXRデモの試し方を紹介します。"
 date: "2026年9月24日"
 category: "TECH"
 tags:
@@ -15,25 +15,35 @@ demoUrl: "/demos/webgpu-foveation-comparison/index.html"
 draft: false
 ---
 
-Metaは[Quest Browser 150.1のリリースノート](https://developers.meta.com/horizon/downloads/package/browser/150.1/)で、WebXRのWebGPU描画におけるfoveationの実験的なサポートを発表しました。foveationは、視野の周辺の描画密度を下げてGPU負荷を抑える技術です。
+[Quest Browser 150.1のリリースノート](https://developers.meta.com/horizon/downloads/package/browser/150.1/)に、WebXRのWebGPU描画におけるfoveationの実験的サポートが記載されました。foveationは、視野の周辺の描画密度を下げる仕組みです。
 
-この記事で試してほしいのは、**VRを終了せず、同じ場面を見ながら設定を切り替えること**です。[WebXR Layers APIの`XRProjectionLayer.fixedFoveation`](https://www.w3.org/TR/webxrlayers-1/#dom-xrprojectionlayer-fixedfoveation)は実行中に値を変更できます。BANGEOのデモではトリガーを押すたびに最小値0と最大値1を切り替えます。
+BANGEOでは見え方を確かめるデモを用意しました。魚型モデルと細線の背景を、Quest BrowserのVR画面に表示します。
 
-<a href="/demos/webgpu-foveation-comparison/index.html" style={{display: "inline-block", padding: "0.9rem 1.4rem", borderRadius: "999px", background: "#111827", color: "white", fontWeight: 700, textDecoration: "none", margin: "0.5rem 0 1rem"}}>Questで比較デモを開く →</a>
+<a href="/demos/webgpu-foveation-comparison/index.html" style={{display: "inline-block", padding: "0.9rem 1.4rem", borderRadius: "999px", background: "#111827", color: "white", fontWeight: 700, textDecoration: "none", margin: "0.5rem 0 1rem"}}>比較デモを開く →</a>
 
-## 試し方
+## デモの画面
 
-1. Quest Browserの`chrome://flags`で`WebXR/WebGPU Binding`を`Enabled`にし、案内に従ってブラウザを再起動します。
-2. 上のボタンからデモを開き、「VRを開始」を押します。
-3. 頭と視線の向きをなるべく保ち、コントローラーのトリガーで0と1を交互に切り替えます。魚の模様と背景の細線が視野の端でどう見えるか比べてください。
+![Quest Browserで開いたデモのページ。VR開始ボタンと魚型モデルのプレビューが表示されている](/demos/webgpu-foveation-comparison/assets/quest-browser-demo-privacy.webp)
 
-画面には設定値とAPIから読み取った値を表示します。数値が切り替わっても、画質やGPU負荷への効果が確認できたことにはなりません。見え方はヘッドセットで確かめ、負荷は計測してください。
+*Quest Browserで撮影したページ。写真は画面統合前のため、現在のボタン配置とは異なります。魚の画像はモデルのプレビューで、foveationの効果を示す画像ではありません。*
 
-## なぜ実行中に切り替えるのか
+VR内では魚を中央と左右に配置し、後ろに格子などの細い模様を描きます。視野の中央と端で、魚の模様や背景の線がどう見えるか比べてください。設定値はトリガーで0（最小）と1（最大）に切り替わります。[WebXR Layers APIの`fixedFoveation`](https://www.w3.org/TR/webxrlayers-1/#dom-xrprojectionlayer-fixedfoveation)はVRの実行中にも変更できるため、ページを開き直す必要はありません。
 
-別のページやVRセッションを開き直すと、頭の向きや比較する場面が変わります。同じシーンのまま切り替えると、視野の端の模様の変化を追いやすくなります。このデモは視線追跡を使わない**fixed foveation**を扱います。0は仕様上の最小値で、描画処理が完全に無効になることまでは保証されません。対応しない環境では`fixedFoveation`は`null`を返します。
+## Quest Browserで試す
 
-Quest Browser 150.1のサポートは実験的です。機種ごとの効果や性能向上率はリリースノートに示されていません。実際の画質と負荷は端末とシーンで確認してください。
+1. `chrome://flags`を開き、`WebXR/WebGPU Binding`を検索します。`Enabled`に変更し、ブラウザを再起動してください。
+2. [比較デモ](/demos/webgpu-foveation-comparison/index.html)で「VRを開始」を押します。
+3. トリガーで設定を切り替え、視野の端を見比べます。
+
+![Quest Browserの設定画面。WebXR/WebGPU Bindingの項目が表示されている](/demos/webgpu-foveation-comparison/assets/quest-browser-flags-privacy.webp)
+
+*設定画面の撮影例。写真は`Disabled`の状態です。デモを始める前に`Enabled`へ変更します。*
+
+## 確認できること、できないこと
+
+デモは視線追跡を使わない固定方式です。画面には指定した設定値とAPIから読み取った値を表示します。ただし、数値が切り替わっても、画質やGPU負荷への効果を確認したことにはなりません。見え方はヘッドセットで、負荷は計測して確認してください。
+
+0は仕様上の最小値で、描画処理が完全に無効になるという意味ではありません。`fixedFoveation`が`null`を返す環境では、この設定を使えません。今回の対応は実験的で、[リリースノート](https://developers.meta.com/horizon/downloads/package/browser/150.1/)に機種ごとの性能向上率は示されていません。
 
 ## 参考資料
 
