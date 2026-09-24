@@ -1,4 +1,4 @@
-import { cp, mkdir } from "node:fs/promises";
+import { cp, mkdir, rm } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -8,10 +8,11 @@ const output = resolve(
 	"../blog/public/demos/webgpu-foveation-comparison",
 );
 await mkdir(output, { recursive: true });
+for (const obsolete of ["minimum.html", "maximum.html"]) {
+	await rm(resolve(output, obsolete), { force: true });
+}
 for (const name of [
 	"index.html",
-	"minimum.html",
-	"maximum.html",
 	"app.js",
 	"fish.js",
 	"patterns.js",

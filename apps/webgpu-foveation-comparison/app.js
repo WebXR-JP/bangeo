@@ -8,7 +8,7 @@ const endButton = document.querySelector("#end");
 const status = document.querySelector("#status");
 const requested = document.querySelector("#requested");
 const actual = document.querySelector("#actual");
-const level = Number(document.documentElement.dataset.foveationLevel);
+const level = 0;
 let activeLevel = level;
 
 let session;
@@ -200,14 +200,7 @@ async function checkSupport() {
 		"開始できます。Quest Browser 150.1以降で実機の効果を確認してください。",
 	);
 }
-if (level !== 0 && level !== 1) {
-	showError(
-		new Error("設定値が正しくありません。比較ページから開き直してください。"),
-	);
+checkSupport().catch((error) => {
+	showError(error);
 	updateControls();
-} else {
-	checkSupport().catch((error) => {
-		showError(error);
-		updateControls();
-	});
-}
+});
