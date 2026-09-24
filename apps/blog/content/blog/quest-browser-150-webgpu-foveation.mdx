@@ -1,6 +1,6 @@
 ---
 title: "Quest Browser 150.1、WebXRのWebGPU描画でfoveationを実験的にサポート"
-description: "Quest Browser 150.1の更新内容と、WebGPUで描画するWebXRデモの試し方を紹介します。"
+description: "Quest Browser 150.1で追加されたfoveation（視野の周辺の描画密度を下げる技術）を、公式情報とWebGPU比較デモで解説します。"
 date: "2026年9月24日"
 category: "TECH"
 tags:
@@ -14,21 +14,22 @@ thumbnail: "/assets/tech/quest-browser-150-webgpu-foveation.webp"
 demoUrl: "/demos/webgpu-foveation-comparison/index.html"
 draft: false
 ---
+
 [Quest Browser 150.1](https://developers.meta.com/horizon/downloads/package/browser/150.1/)で、WebXRのWebGPU描画にfoveationが実験的に加わりました。画面の中心より周辺の描画密度を下げ、描画の負荷を調整する仕組みです。
 
-BANGEOのデモでは、魚型モデルと細い模様を描いた背景をQuestで見られます。まず画面を見てみたい人は、こちらからどうぞ。
+BANGEOのデモでは、設定値を変えたときの見え方をQuestで比べられます。
 
 <a href="/demos/webgpu-foveation-comparison/index.html" style={{display: "inline-block", padding: "0.9rem 1.4rem", borderRadius: "999px", background: "#111827", color: "white", fontWeight: 700, textDecoration: "none", margin: "0.5rem 0 1rem"}}>比較デモを開く →</a>
 
-## Questで見比べる
+## デモで見比べる
 
-![Quest Browserで開いたデモのページ。VR開始ボタンと魚型モデルのプレビューが表示されている](/demos/webgpu-foveation-comparison/assets/quest-browser-demo-privacy.webp)
+![Quest Browserで開いた比較デモのページ。VR開始ボタンが表示されている](/demos/webgpu-foveation-comparison/assets/quest-browser-demo-privacy.webp)
 
 *Quest Browserで撮影したデモ画面。現在はボタンを一つにまとめています。*
 
-VRでは魚が中央と左右に並び、その後ろに格子や同心円が見えます。視野の端にある魚の模様や背景の細線に注目してください。コントローラーのトリガーを押すたび、foveationの設定値が0と1で切り替わります。
+VRを開始したら、視野の端に注目してください。コントローラーのトリガーを押すたび、foveationの設定値が0（最小）と1（最大）で切り替わります。
 
-この設定は[WebXR Layers APIの`fixedFoveation`](https://www.w3.org/TR/webxrlayers-1/#dom-xrprojectionlayer-fixedfoveation)で変更しています。VRを実行したまま切り替えられるのも、このAPIの特徴です。
+[WebXR Layers APIの`fixedFoveation`](https://www.w3.org/TR/webxrlayers-1/#dom-xrprojectionlayer-fixedfoveation)は、VRの実行中にも変更できます。
 
 ## デモの始め方
 
@@ -38,7 +39,7 @@ Quest Browserで`chrome://flags`を開き、`WebXR/WebGPU Binding`を`Enabled`�
 
 *設定画面の例。写真では`Disabled`になっている項目を`Enabled`に変更します。*
 
-デモの0は設定できる最小値、1は最大値です。数字の切り替わりだけでは画質やGPU負荷の変化は分かりません。まずヘッドセットで見え方を確かめ、負荷を知りたい場合はGPUを計測してください。Quest Browser 150.1での対応は実験的です。
+設定値の変化だけでは、画質やGPU負荷への効果は判断できません。見え方はヘッドセットで確かめ、負荷はGPUの計測結果で確認してください。Quest Browser 150.1での対応は実験的です。
 
 ## 参考資料
 
