@@ -93,7 +93,7 @@ export async function createFishRenderer(device) {
 		minFilter: "linear",
 	});
 	const cameraBuffer = device.createBuffer({
-		size: 512,
+		size: 6 * 256,
 		usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
 	});
 	const primitives = glb.json.meshes[0].primitives.map((item) => {
@@ -164,7 +164,7 @@ export async function createFishRenderer(device) {
 					depthCompare: "less",
 				},
 			});
-			cameraBindGroups = [0, 1].map((index) =>
+			cameraBindGroups = Array.from({ length: 6 }, (_, index) =>
 				device.createBindGroup({
 					layout: pipeline.getBindGroupLayout(0),
 					entries: [
@@ -195,36 +195,44 @@ export async function createFishRenderer(device) {
 			const c = Math.cos(angle);
 			const s = Math.sin(angle);
 			const bob = Math.sin(time * 0.0015) * 0.035;
-			const model = [
-				c,
-				0,
-				-s,
-				0,
-				0,
-				1,
-				0,
-				0,
-				s,
-				0,
-				c,
-				0,
-				0,
-				-0.03 + bob,
-				-2.4,
-				1,
-			];
-			const matrices = new Float32Array(48);
-			matrices.set(view.projectionMatrix, 0);
-			matrices.set(view.transform.inverse.matrix, 16);
-			matrices.set(model, 32);
-			device.queue.writeBuffer(cameraBuffer, index * 256, matrices);
 			pass.setPipeline(pipeline);
-			pass.setBindGroup(0, cameraBindGroups[index]);
-			for (const primitive of primitives) {
-				pass.setBindGroup(1, primitive.bindGroup);
-				pass.setVertexBuffer(0, primitive.vertexBuffer);
-				pass.setIndexBuffer(primitive.indexBuffer, "uint32");
-				pass.drawIndexed(primitive.indexCount);
+			// World-space copies stay aligned between the two eyes.
+			for (const [instance, x, y, z, scale] of [
+				[0, -1.1, 0.02, -2.5, 0.65],
+				[1, 0, -0.03, -2.4, 1],
+				[2, 1.1, 0.02, -2.5, 0.65],
+			]) {
+				const model = [
+					scale * c,
+					0,
+					-scale * s,
+					0,
+					0,
+					scale,
+					0,
+					0,
+					scale * s,
+					0,
+					scale * c,
+					0,
+					x,
+					y + bob,
+					z,
+					1,
+				];
+				const matrices = new Float32Array(48);
+				matrices.set(view.projectionMatrix, 0);
+				matrices.set(view.transform.inverse.matrix, 16);
+				matrices.set(model, 32);
+				const slot = index * 3 + instance;
+				device.queue.writeBuffer(cameraBuffer, slot * 256, matrices);
+				pass.setBindGroup(0, cameraBindGroups[slot]);
+				for (const primitive of primitives) {
+					pass.setBindGroup(1, primitive.bindGroup);
+					pass.setVertexBuffer(0, primitive.vertexBuffer);
+					pass.setIndexBuffer(primitive.indexBuffer, "uint32");
+					pass.drawIndexed(primitive.indexCount);
+				}
 			}
 		},
 	};

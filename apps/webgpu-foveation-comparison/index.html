@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>WebGPUの描画比較デモ | BANGEO</title>
     <link rel="stylesheet" href="./style.css" />
-    <script type="module" src="./app.js"></script>
   </head>
   <body>
     <div class="page-bg"></div>
@@ -20,28 +19,44 @@
         <div class="hero-copy">
           <p class="badge"><span class="badge-dot"></span> QUEST BROWSER 150.1 / WEBGPU</p>
           <h1 id="title">視野の周辺は、<br /><span>どう見える？</span></h1>
-          <p class="lead">foveation（視野の中心より周辺の描画密度を下げる技術）を試すデモです。WebGPUで描いた3Dモデルと格子を見ながら、視線追跡を使わない固定方式の設定値を比べられます。Quest BrowserでVRを開始し、トリガーで最小値の0と最大値の1を切り替えてください。</p>
-          <div class="controls">
-            <button id="start" class="primary" type="button" disabled>対応状況を確認中</button>
-            <button id="toggle" class="secondary" type="button" disabled>最大（1）に切り替える</button>
-            <button id="end" class="quiet" type="button" disabled>VRを終了</button>
+          <p class="lead">foveation（視野の中心より周辺の描画密度を下げる技術）を試すデモです。比較したい設定を下から選び、Quest BrowserでそれぞれVRを開始してください。VR中にコントローラーを操作して設定を変える必要はありません。</p>
+          <div class="mode-choices" aria-label="比較する設定">
+            <a class="mode-link" href="./minimum.html"><span class="mode-number">0</span><span><strong>最小設定（0）を開く</strong><small>fixedFoveation = 0</small></span><span aria-hidden="true">↗</span></a>
+            <a class="mode-link" href="./maximum.html"><span class="mode-number">1</span><span><strong>最大設定（1）を開く</strong><small>fixedFoveation = 1</small></span><span aria-hidden="true">↗</span></a>
           </div>
-          <p id="status" role="status" aria-live="polite">APIを確認しています。</p>
         </div>
         <figure class="preview">
           <div class="preview-image"><img src="./assets/bangeo-fish-preview.gif" alt="BANGEOの赤い魚型3Dモデルがゆっくり向きを変えるアニメーション" width="480" height="360" /></div>
-          <figcaption><strong>VRシーンのプレビュー</strong><span>Blenderで作ったモデルのアニメーションです。描画設定による見え方の違いは示していません。</span></figcaption>
+          <figcaption><strong>3Dモデルのプレビュー</strong><span>VRではこのモデルを中央と左右に配置します。描画設定による見え方の違いは示していません。</span></figcaption>
         </figure>
       </section>
-      <section class="details" aria-label="比較の手順と状態">
-        <div class="details-heading"><p class="eyebrow">HOW TO COMPARE</p><h2>設定値を変えて、見え方を比べる</h2></div>
-        <div class="cards">
-          <div class="card"><span class="step">01</span><h3>QuestでVRを開始</h3><p>Quest BrowserでこのページをHTTPSで開き、「VRを開始」を押します。</p></div>
-          <div class="card"><span class="step">02</span><h3>トリガーで切り替え</h3><p>画面上部の帯は、最小（0）で青緑、最大（1）で赤紫になります。3Dモデルの模様や、視野周辺の細い線を比べてください。</p></div>
-          <div class="card"><span class="step">03</span><h3>同じ向きで記録</h3><p>頭の向きをなるべく保ち、両方の設定値で撮影します。Questの機種とQuest Browserのバージョンも記録してください。</p></div>
+      <section class="setup" id="setup" aria-labelledby="setup-title">
+        <div class="details-heading"><p class="eyebrow">BEFORE YOU START</p><h2 id="setup-title">Quest BrowserでWebGPUを有効にする</h2></div>
+        <div class="setup-layout">
+          <div class="setup-copy">
+            <p>このデモのVR描画には、Quest BrowserのWebGPUとWebXRでのWebGPU連携が必要です。VRを開始できない場合は、次の設定項目を確認してください。</p>
+            <ol>
+              <li>Quest Browserで <code>chrome://flags</code> を開きます。</li>
+              <li><strong>WebXR/WebGPU Binding</strong> と <strong>WebXR Projection Layers</strong> を検索し、それぞれ <strong>Enabled</strong> にします。</li>
+              <li>画面の案内に従ってQuest Browserを再起動し、デモを開き直します。</li>
+            </ol>
+            <p class="setup-caution">画像の「WebXR/WebGPU Binding」は撮影時には <strong>Disabled</strong> です。有効化前の画面例としてご覧ください。「Unsafe WebGPU Support」と「WebGPU Developer Features」は撮影時に有効でしたが、このデモに必須とは確認できていません。</p>
+          </div>
+          <figure class="setup-figure"><img src="./assets/quest-browser-flags-privacy.webp" alt="Quest Browserのchrome://flagsでWebGPU関連設定を検索した画面。WebXR/WebGPU BindingはDisabled、ほかの2項目は有効の状態" width="1672" height="941" loading="lazy" /><figcaption>Quest Browserの <code>chrome://flags</code>。画像では「WebXR/WebGPU Binding」が無効になっています。</figcaption></figure>
         </div>
-        <div class="readout"><div><span>設定値</span><strong id="requested">最小（0）</strong></div><div><span>実際に読み取った値</span><strong id="actual">VR開始前</strong></div><div><span>VR中の操作</span><strong>コントローラーのトリガー</strong></div></div>
-        <p class="note">このデモは視線追跡を使いません。0はAPIで指定できる最小値で、描画処理が完全に無効になるとは限りません。色帯と読み取り値だけでは、GPU負荷が下がったかどうかは判断できません。WebXRのWebGPU機能が見つからない場合は、Quest Browserの実験機能の設定を確認してください。</p>
+      </section>
+      <section class="details" aria-label="比較の手順">
+        <div class="details-heading"><p class="eyebrow">HOW TO COMPARE</p><h2>2つのページで見え方を比べる</h2></div>
+        <div class="cards">
+          <div class="card"><span class="step">01</span><h3>設定を選ぶ</h3><p>最小設定（0）か最大設定（1）のページを開き、Quest Browserで「VRを開始」を押します。</p></div>
+          <div class="card"><span class="step">02</span><h3>3Dモデルを見る</h3><p>視野の中央と左右に置いた魚型モデルの模様を見ます。背景の同心円や格子は表示しません。</p></div>
+          <div class="card"><span class="step">03</span><h3>もう一方も開く</h3><p>VRを終了して比較ページに戻り、別の設定を開きます。Questの機種とBrowserのバージョンも記録してください。</p></div>
+        </div>
+        <p class="note">このデモは視線追跡を使いません。0はAPIで指定できる最小値で、描画処理が完全に無効になるとは限りません。見え方の違いはヘッドセットで確認してください。</p>
+      </section>
+      <section class="quest-view" aria-labelledby="quest-view-title">
+        <div class="details-heading"><p class="eyebrow">ON QUEST</p><h2 id="quest-view-title">Quest Browserで開いた画面</h2></div>
+        <figure class="setup-figure"><img src="./assets/quest-browser-demo-privacy.webp" alt="Quest Browser内に表示されたBANGEOのWebGPUデモ" width="1672" height="941" loading="lazy" /><figcaption>2026年9月24日に撮影した画面です。現在は最小設定と最大設定を別々のページで開きます。</figcaption></figure>
       </section>
     </main>
   </body>

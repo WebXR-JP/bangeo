@@ -8,7 +8,14 @@ const output = resolve(
 	"../blog/public/demos/webgpu-foveation-comparison",
 );
 await mkdir(output, { recursive: true });
-for (const name of ["index.html", "app.js", "fish.js", "style.css"]) {
+for (const name of [
+	"index.html",
+	"minimum.html",
+	"maximum.html",
+	"app.js",
+	"fish.js",
+	"style.css",
+]) {
 	await cp(resolve(root, name), resolve(output, name));
 }
 await cp(resolve(root, "assets"), resolve(output, "assets"), {

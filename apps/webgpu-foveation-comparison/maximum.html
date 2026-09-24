@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ja" data-foveation-level="1">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>foveation 最大（1） | BANGEO</title>
+    <link rel="stylesheet" href="./style.css" />
+    <script type="module" src="./app.js"></script>
+  </head>
+  <body>
+    <div class="page-bg"></div>
+    <header class="site-header">
+      <nav aria-label="サイトナビゲーション">
+        <a class="brand" href="/"><img src="./assets/bangeo-mark.png" alt="" width="36" height="36" /> <span>BANGEO WebXR</span></a>
+        <a class="header-link" href="./index.html">比較ページに戻る <span aria-hidden="true">↗</span></a>
+      </nav>
+    </header>
+    <main>
+      <section class="hero" aria-labelledby="title">
+        <div class="hero-copy">
+          <p class="badge"><span class="badge-dot"></span> QUEST BROWSER 150.1 / WEBGPU</p>
+          <h1 id="title">foveation：<br /><span>最大設定（1）</span></h1>
+          <p class="lead">このページからVRを開始すると、fixedFoveationが最大値の1に設定されます。淡い単色の背景に、魚型の3Dモデルを中央と左右に配置しています。VRを終了したら、最小設定（0）のページも開いて見え方を比べてください。</p>
+          <div class="controls">
+            <button id="start" class="primary" type="button" disabled>対応状況を確認中</button>
+            <button id="end" class="quiet" type="button" disabled>VRを終了</button>
+            <a class="secondary-link" href="./index.html">設定を選び直す</a>
+          </div>
+          <p id="status" role="status" aria-live="polite">APIを確認しています。</p>
+          <p class="mode-setup">VRを開始できない場合は、<a href="./index.html#setup">Quest BrowserのWebGPU設定</a>を確認してください。</p>
+        </div>
+        <figure class="preview">
+          <div class="preview-image"><img src="./assets/bangeo-fish-preview.gif" alt="BANGEOの赤い魚型3Dモデルがゆっくり向きを変えるアニメーション" width="480" height="360" /></div>
+          <figcaption><strong>モデルのプレビュー</strong><span>このアニメーションは設定値による画質差を示していません。</span></figcaption>
+        </figure>
+      </section>
+      <section class="details" aria-label="設定と操作">
+        <div class="details-heading"><p class="eyebrow">CURRENT SETTING</p><h2>設定値1のVRシーン</h2></div>
+        <div class="readout"><div><span>指定値</span><strong id="requested">最大（1）</strong></div><div><span>実際に読み取った値</span><strong id="actual">VR開始前</strong></div><div><span>次の操作</span><strong>VR終了後に別の設定を開く</strong></div></div>
+        <p class="note">0はAPIで指定できる最小値で、描画処理が完全に無効になるとは限りません。読み取り値だけではGPU負荷の変化は分かりません。VRの見え方を確認し、<a href="./minimum.html">もう一方の設定</a>と比べてください。</p>
+      </section>
+    </main>
+  </body>
+</html>
