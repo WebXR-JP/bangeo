@@ -8,6 +8,13 @@ export interface Library {
 
 export const LIBRARIES: Library[] = [
 	{
+		id: "immersive-web-sdk",
+		name: "Immersive Web SDK（IWSDK）",
+		description: "Meta VR Glasses向け公式WebXR開発経路。WebXRコンテストでは公開URLで作品を提出可能。新規作成: npm create @iwsdk@latest",
+		repositoryUrl: "https://github.com/facebook/immersive-web-sdk",
+		documentationUrl: "https://developers.meta.com/horizon/documentation/iwsdk/guides/get-started-glasses/",
+	},
+	{
 		id: "three-js",
 		name: "Three.js",
 		description: "JavaScript 3D ライブラリ",

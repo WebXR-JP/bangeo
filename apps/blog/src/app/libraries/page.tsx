@@ -3,7 +3,7 @@ import { BreadcrumbStructuredData } from "@/components/breadcrumb-structured-dat
 import { LIBRARIES } from "@/data/libraries";
 
 export const metadata: Metadata = {
-	title: "WebXRライブラリ｜Three.js・Babylon.js・PlayCanvas・A-Frame",
+	title: "WebXRライブラリ｜IWSDK・Three.js・Babylon.js・PlayCanvas・A-Frame",
 	description:
 		"WebXR開発で使われるThree.js、Babylon.js、PlayCanvas、A-Frame、React Three Fiberなどの主要ライブラリと公式ドキュメント・リポジトリへの導線を整理しています。",
 	alternates: { canonical: "/libraries" },
