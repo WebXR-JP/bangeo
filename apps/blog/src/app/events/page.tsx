@@ -23,6 +23,7 @@ export const metadata: Metadata = {
 
 // Evaluate against each event's local calendar date so past events never remain upcoming.
 function eventPhase(event: (typeof WEBXR_EVENTS)[number], now: Date) {
+	if (event.endAt && now >= new Date(event.endAt)) return "past";
 	const today = new Intl.DateTimeFormat("en-CA", {
 		timeZone: event.timezone,
 		year: "numeric",
