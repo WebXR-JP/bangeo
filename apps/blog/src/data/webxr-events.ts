@@ -33,6 +33,7 @@ export interface WebXREventWatchItem {
 	category: string;
 	startDate: string;
 	endDate: string;
+	endAt?: string;
 	timezone: string;
 	location: string;
 	status: WebXREventStatus;
@@ -217,6 +218,7 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 	{
 		title: "Meta VR Start Developer Competition 2026",
 		slug: "meta-vr-start-developer-competition-2026",
+		endAt: "2026-11-18T20:00:00Z",
 		category: "Meta VR Glasses / WebXR / Developer Competition",
 		startDate: "2026-09-24",
 		endDate: "2026-11-19",
