@@ -163,7 +163,7 @@ export const WEBXR_WG_DISCUSSIONS: WebXRWgDiscussion[] = [
 ];
 
 export const WEBXR_STATUS_META = {
-	lastChecked: "2026年6月21日",
+	lastChecked: "2026年9月26日",
 	sources: {
 		standards: "https://www.w3.org/TR/?filter-tr-name=webxr",
 		docTypes: "https://www.w3.org/TR/tr/",
