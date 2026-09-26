@@ -37,6 +37,27 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 		],
 	},
 	{
+		id: "meta-vr-glasses",
+		name: "Meta VR Glasses",
+		type: "VRグラス（発売前）",
+		manufacturer: "Meta",
+		webxrSupport: {
+			status: "未確認",
+			detail: "MetaがWebXRへの公式対応を案内。発売前のため実機動作は未検証です。",
+		},
+		browsers: ["WebXR対応予定（実機のBrowserバージョンは未確認）"],
+		connectionType: "開発環境: IWSDK Emulator（IWER）。Quest 3／3Sでも入力と視野の一部を確認可能。",
+		priceRange: "未発表",
+		availability: "発売前（2027年春予定）。",
+		notes: [
+			"入力はHands-first。視線によるターゲット指定と手のピンチ操作を想定し、視線情報の扱いにはプライバシー上の制約があります。",
+			"2D Webページでは視線によるCSS :hoverやpointer hoverイベントが発火しないため、hover依存UIは利用できません。IWSDKの3D操作には別途Hovered状態があります。",
+			"WebXR Layers、Depth、Anchors、WebGPU XR、immersive-arの対応は未確認です。",
+			"出典: https://developers.meta.com/horizon/documentation/iwsdk/guides/get-started-glasses/",
+			"出典: https://developers.meta.com/horizon/documentation/web/2d-web/",
+		],
+	},
+	{
 		id: "meta-quest-3",
 		name: "Meta Quest 3",
 		type: "VR/MR",
