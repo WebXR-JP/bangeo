@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+<title id="title">WebXR開発コンテストのイメージ</title>
+<desc id="desc">暗い背景にブラウザ画面、手のピンチ操作、WebXRの文字を配置した図</desc>
+<defs>
+<linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#081326"/><stop offset="1" stop-color="#172858"/></linearGradient>
+<radialGradient id="glow"><stop stop-color="#38bdf8" stop-opacity=".34"/><stop offset="1" stop-color="#38bdf8" stop-opacity="0"/></radialGradient>
+<linearGradient id="pane" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#273e68"/><stop offset="1" stop-color="#0d1934"/></linearGradient>
+</defs>
+<rect width="1200" height="630" fill="url(#bg)"/>
+<circle cx="870" cy="285" r="350" fill="url(#glow)"/>
+<path d="M0 514c185-91 319-64 497-28s345 59 703-97" fill="none" stroke="#5dd6f7" stroke-opacity=".13" stroke-width="2"/>
+<g transform="translate(515 91) rotate(-5 295 222)">
+<rect width="590" height="444" rx="29" fill="#050b1d" stroke="#6d89c2" stroke-width="3"/>
+<rect x="13" y="13" width="564" height="418" rx="20" fill="url(#pane)"/>
+<path d="M13 74h564" stroke="#819bd0" stroke-opacity=".35"/>
+<circle cx="45" cy="44" r="7" fill="#7b9ac2"/><circle cx="68" cy="44" r="7" fill="#7b9ac2"/><circle cx="91" cy="44" r="7" fill="#7b9ac2"/>
+<rect x="119" y="29" width="306" height="30" rx="15" fill="#18294b"/>
+<path d="M209 221c50-70 120-99 186-77 49 16 86 55 101 101-30 51-74 84-133 91-71 8-125-28-154-115Z" fill="none" stroke="#52d9fb" stroke-width="5" opacity=".75"/>
+<circle cx="351" cy="237" r="93" fill="#66d9fa" opacity=".08"/>
+<circle cx="351" cy="237" r="54" fill="none" stroke="#7ad8ef" stroke-width="4"/>
+<circle cx="351" cy="237" r="10" fill="#b7f5ff"/>
+<path d="M179 362h344" stroke="#5c7fb4" stroke-width="3" stroke-linecap="round"/>
+<path d="M179 382h228" stroke="#5c7fb4" stroke-width="3" stroke-linecap="round"/>
+</g>
+<g fill="none" stroke="#effaff" stroke-width="18" stroke-linecap="round" stroke-linejoin="round">
+<path d="M711 440c-22-26-29-51-14-64 13-11 28 0 44 21l14 17"/>
+<path d="M755 414 685 297c-8-14-5-27 6-34 12-7 24-4 33 9l77 112"/>
+<path d="m800 385-20-38c-8-15-5-26 6-33 12-7 25-1 34 12l32 52"/>
+<path d="m848 375-15-28c-7-15-4-26 8-32 13-5 23 1 31 14l22 39"/>
+<path d="m887 364-7-12c-7-14-4-25 8-31 11-5 23 2 30 14 39 69 27 137-15 170-32 25-79 25-121-1"/>
+</g>
+<circle cx="716" cy="285" r="30" fill="none" stroke="#7df3e7" stroke-width="5"/>
+<circle cx="716" cy="285" r="49" fill="none" stroke="#7df3e7" stroke-opacity=".3" stroke-width="2"/>
+<text x="84" y="170" fill="#7df3e7" font-family="Arial, sans-serif" font-size="23" font-weight="700" letter-spacing="5">BUILD · TEST · SUBMIT</text>
+<text x="78" y="287" fill="#fff" font-family="Arial, sans-serif" font-size="92" font-weight="800" letter-spacing="-3">WebXR</text>
+<text x="84" y="349" fill="#c3daf2" font-family="Arial, sans-serif" font-size="31" font-weight="600">HANDS-FIRST</text>
+<rect x="83" y="413" width="270" height="55" rx="27" fill="#7df3e7"/>
+<text x="113" y="449" fill="#0c243d" font-family="Arial, sans-serif" font-size="22" font-weight="700">2026 COMPETITION</text>
+</svg>
