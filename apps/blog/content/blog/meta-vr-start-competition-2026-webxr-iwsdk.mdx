@@ -1,0 +1,79 @@
+---
+title: "Metaの開発コンテスト2026にWebXRで応募するには：IWSDK、手の操作、提出URL"
+description: "Meta VR Start Developer Competition 2026はWebXR作品も対象。IWSDKでの制作と検証、Hands-firstの条件、既存作品の扱い、公開URLと動画の提出方法を公式規約から整理します。"
+date: "2026年9月26日"
+category: "TECH"
+tags:
+  - "WebXR"
+  - "Immersive Web SDK"
+  - "Meta VR Glasses"
+  - "Meta Quest"
+  - "ハンドトラッキング"
+author: "BANGEO XR"
+thumbnail: "/assets/tech/meta-vr-start-competition-webxr-2026.svg"
+draft: false
+---
+
+Metaの「Meta VR Start Developer Competition 2026」は、VR/MR作品を約8週間で制作・更新して応募するオンラインの開発コンテストです。ゲームだけでなく、映像・音楽などのエンターテインメントや作業支援アプリも対象。賞金総額は最大100万ドルです。
+
+WebXR開発者にとって大きいのは、**Immersive Web SDK（IWSDK）で作った作品も、審査員が開ける公開URLを提出して応募できる**ことです。ネイティブアプリの提出方法であるAPKをWebXR作品に用意する必要はありません。一方で、URLを置くだけでは応募は完了しません。操作、実演動画、説明文まで審査に合わせて仕上げる必要があります。
+
+## 日程と応募の入口
+
+| 項目 | 内容 |
+| --- | --- |
+| 応募期間 | 2026年9月24日〜11月18日正午（米国太平洋時間）。締切は**日本時間11月19日午前5時** |
+| 部門 | Entertainment、Gaming、Productivity |
+| 作品区分 | 開催期間内に新しく制作した作品／既存作品を大幅に更新した作品 |
+| 賞金 | 総額最大100万ドル |
+| 参加条件 | Metaの開発者アカウントなどが必要。提出する本人、チームまたは法人の代表者は、提出時までにMeta VR Start Programの会員であること |
+
+個人、チーム、法人の応募が規約に記載されています。ただし、応募資格や作品の権利・表示に関する条件は[公式規約](https://start-developer-competition-26.devpost.com/rules)を確認してください。法人作品でも広告やロゴなどに制限があります。
+
+## WebXR作品で求められる操作は何か
+
+全カテゴリー共通の必須条件は **Hands-first** です。判定の目安は「コントローラーを一度もペアリングせず、体験の最初から最後まで完了できるか」。コントローラーへの追加対応は可能ですが、それだけで進められる作品は条件を満たしません。
+
+ここでいう「手で使える」は、作品の入口だけをピンチで押せるという意味ではありません。開始、選択、主要な操作、中断、再開、終了まで、手だけで行えるように設計します。これは規約の条件から導く実装上のチェックです。着席して使えること、すぐ始めて短時間でも満足できることは**推奨事項**として別に記されています。
+
+Meta VR Glassesは発売前ですが、Metaは[IWERを使ったグラス向け入力と視野の検証手順](https://developers.meta.com/horizon/documentation/iwsdk/guides/get-started-glasses/)を公開しています。IWSDKでは視線によるターゲット指定と手のピンチを既存のray操作につなぎます。Quest 3／3Sでも視野の一部を確認できますが、エミュレーターやQuestでの結果は発売前のグラス実機での検証ではありません。
+
+## IWSDKから公開URLまで
+
+新規プロジェクトは[IWSDKの公式リポジトリ](https://github.com/facebook/immersive-web-sdk)にあるコマンドで作成できます。
+
+```bash
+npm create @iwsdk@latest
+```
+
+まずIWERの入力モードを「Gaze + Hands」にして、コントローラーを使わず主要な流れを通します。Questを持っている場合は、端末上のブラウザでも手の操作と読みやすさを確かめます。視野の狭いグラスを想定し、重要なボタンや情報が周辺に追いやられないかも見るとよいでしょう。IWSDKの[グラス向けガイド](https://developers.meta.com/horizon/documentation/iwsdk/guides/get-started-glasses/)には、設定と検証手順があります。
+
+公開時は[Metaのビルド・デプロイ手順](https://developers.meta.com/horizon/documentation/web/iwsdk-guide-build-deploy)を参照し、`npm run build` で生成される成果物を配信します。規約はGitHub Pagesのほか、Vercelなどのホスティングも認めています。提出するURLが審査員の環境から開け、体験をテストできる状態にしておく必要があります。作品は受賞発表までアクセスできる状態を維持する条件です。
+
+ネイティブアプリの提出は別経路です。Unity、Unreal、Godot、Androidなどで作った場合は、Meta VR Developer Dashboardの新しい「Competition」リリースチャンネルにAPKをアップロードします。
+
+## 既存作品の更新で応募する場合
+
+9月24日より前からある作品は「Adapted / Significantly Updated Experience」区分です。新しい手の操作、マルチプレイ、MRの操作モード、利用者による制作機能などは、規約が挙げる大幅更新の例。一方、軽いUI調整、色替え、バグ修正、利用者向けの新機能を伴わない性能改善だけでは該当しない例に挙げられています。最終判断はMetaが行います。
+
+以前作ったWebXR作品を使うなら、「どこを直したか」より**応募期間中に利用者が新しく何をできるようになったか**を明確にするのが実務上のポイントです。既存コードを流用した作品を新規作品区分として出さないよう注意してください。
+
+## 提出前に揃えるもの
+
+[Devpostの公式規約](https://start-developer-competition-26.devpost.com/rules)は、作品URLに加えて次を求めています。
+
+- 3分未満の実演動画。Quest実機、XR Simulator、または同等のエミュレーターで作品を動かした映像を、公開設定のYouTubeかVimeoに掲載する
+- 制作の動機、作り方、今後の改善予定などを説明する文章。既存作品なら今回加えた機能も明記する
+- 応募部門と、新規制作・既存作品の大幅更新の区分
+- 英語の作品・提出資料。日本語作品なら規約が求める英語字幕や動画・説明文・テスト手順などの英訳
+
+動画は審査員が3分を超えて視聴する義務がないため、最初の数十秒で体験の核と手の操作が分かる構成にしたいところです。**Devpostへの登録と提出完了を、11月19日午前5時（日本時間）までに行う必要があります。**
+
+WebXRだから参加しにくいコンテストではありません。ただし、公開URLと手だけで完走できる体験を用意し、審査員が迷わず試せるところまで作ることが条件です。まず一つの操作を完成させ、それを入口から終了までつなげるのがよい出発点になります。
+
+### 参照
+
+- [Metaの開催案内](https://developers.meta.com/blog/meta-connect-2026-vr-start-developer-competition/)
+- [公式規約と提出要件](https://start-developer-competition-26.devpost.com/rules)
+- [Meta VR Glasses向けIWSDK開発ガイド](https://developers.meta.com/horizon/documentation/iwsdk/guides/get-started-glasses/)
+- [IWSDKのビルドと公開](https://developers.meta.com/horizon/documentation/web/iwsdk-guide-build-deploy)
