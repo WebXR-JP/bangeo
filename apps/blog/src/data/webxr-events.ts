@@ -77,7 +77,7 @@ export const WEBXR_EVENT_IMPORTANCE_LABELS: Record<
 	low: "低",
 };
 
-export const WEBXR_EVENTS_LAST_UPDATED = "2026-09-14";
+export const WEBXR_EVENTS_LAST_UPDATED = "2026-09-26";
 
 export const WEBXR_DEVICE_WATCH_TARGETS = [
 	"Meta / Quest / Quest Browser / Horizon OS",
@@ -184,7 +184,7 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		endDate: "2026-09-24",
 		timezone: "America/Los_Angeles",
 		location: "オンライン配信",
-		status: "schedule-live",
+		status: "recap-needed",
 		importance: "high",
 		confidence: "high",
 		sourceUrl: "https://www.meta.com/connect/",
@@ -208,11 +208,40 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		],
 		affectedBangeoPages: ["/webxr-status", "/notes/quest-browser"],
 		recommendedAction:
-			"イベント前は公式ページと開発者セッションを確認。イベント後はQuest Browser、Horizon OS、WebXR関連発表を一次情報で確認して記事化する。",
-		lastCheckedAt: "2026-09-14",
-		nextCheckAt: "2026-07-15",
+			"開催終了。公式オンデマンド配信と開発者資料からQuest Browser、Horizon OS、WebXR関連発表を確認する。",
+		lastCheckedAt: "2026-09-26",
+		nextCheckAt: "2026-10-03",
 		notes:
-			"Meta公式Connectページでは2026年9月23〜24日開催とライブ配信登録が案内されている。",
+			"9月23〜24日の開催は終了。Meta公式ページから基調講演・開発者向けセッションをオンデマンドで視聴できる。",
+	},
+	{
+		title: "Meta VR Start Developer Competition 2026",
+		slug: "meta-vr-start-developer-competition-2026",
+		category: "Meta VR Glasses / WebXR / Developer Competition",
+		startDate: "2026-09-24",
+		endDate: "2026-11-19",
+		timezone: "Asia/Tokyo",
+		location: "オンライン応募（締切: 11月19日午前5時・日本時間）",
+		status: "live",
+		importance: "high",
+		confidence: "high",
+		sourceUrl: "https://start-developer-competition-26.devpost.com/rules",
+		sourceType: "primary",
+		entityTags: ["Meta VR Start", "Meta VR Glasses", "WebXR", "IWSDK"],
+		watchTopics: [
+			"IWSDKを使ったWebXR作品は公開URLで応募可能",
+			"コントローラーなしで完結するHands-first操作が必須",
+			"賞金総額100万ドル。代表者は提出時までにMeta VR Start Programへの参加が必要",
+		],
+		affectedBangeoPages: ["/events", "/devices", "/libraries"],
+		recommendedAction: "応募規約でWebXRの提出方法、操作条件、締切を確認する。",
+		lastCheckedAt: "2026-09-26",
+		nextCheckAt: "2026-10-03",
+		notes: "応募期間は9月24日から11月18日正午（太平洋時間）まで。日本時間では11月19日午前5時。IWSDK / WebXR作品は公開URLを提出できる。",
+		region: "global",
+		organizerType: "developer_conference",
+		webxrRelevance: "direct",
+		developerRelevance: "high",
 	},
 	{
 		title: "W3C TPAC 2026",
