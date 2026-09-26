@@ -184,7 +184,7 @@ function EventCard({
 				</p>
 				<p className="text-xs font-bold text-rose-700">
 					{phase === "past"
-						? "開催日程終了"
+						? event.slug === "meta-connect-2026" ? "開催終了／オンデマンド公開" : "開催日程終了"
 						: phase === "live"
 							? "開催中"
 							: "開催予定"}
@@ -203,7 +203,7 @@ function EventCard({
 				</div>
 				<p className="text-sm leading-6 text-gray-700">
 					<span className="font-black text-gray-950">注目テーマ: </span>
-					{event.watchTopics.slice(0, 2).join(" / ")}
+					{event.watchTopics.slice(0, event.slug === "meta-vr-start-developer-competition-2026" ? 3 : 2).join(" / ")}
 				</p>
 			</div>
 
