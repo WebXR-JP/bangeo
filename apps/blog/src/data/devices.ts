@@ -23,7 +23,7 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 		webxrSupport: {
 			status: "未確認",
 			detail:
-				"SteamOS上のブラウザからのWebXR利用と、PCからストリーミングした際のWebXR動作は実機未確認（2026年9月22日時点）。SteamVR・OpenXR対応だけではWebXR対応を判断できません。",
+				"SteamOS上のブラウザからのWebXR利用と、PCからストリーミングした際のWebXR動作は実機未確認（2026年9月28日時点）。SteamVR・OpenXR対応だけではWebXR対応を判断できません。",
 		},
 		browsers: ["WebXRを利用できるブラウザは未確認"],
 		connectionType:
@@ -47,7 +47,7 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 		},
 		browsers: ["WebXR対応予定（実機のBrowserバージョンは未確認）"],
 		connectionType: "開発環境: IWSDK Emulator（IWER）。Quest 3／3Sでも入力と視野の一部を確認可能。",
-		priceRange: "未発表",
+		priceRange: "1,299.99米ドル（日本円価格未定）",
 		availability: "発売前（2027年春予定）。",
 		notes: [
 			"入力はHands-first。視線によるターゲット指定と手のピンチ操作を想定し、視線情報の扱いにはプライバシー上の制約があります。",
@@ -55,6 +55,7 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 			"WebXR Layers、Depth、Anchors、WebGPU XR、immersive-arの対応は未確認です。",
 			"出典: https://developers.meta.com/horizon/documentation/iwsdk/guides/get-started-glasses/",
 			"出典: https://developers.meta.com/horizon/documentation/web/2d-web/",
+			"価格の出典: https://about.fb.com/ja/news/2026/09/meta-vr-glasses/",
 		],
 	},
 	{
@@ -64,10 +65,10 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 		manufacturer: "Meta",
 		webxrSupport: {
 			status: "対応",
-			detail: "標準ブラウザ「Oculus Browser」でWebXRコンテンツのVR表示が可能。",
+			detail: "標準ブラウザ「Meta Quest Browser」でWebXRコンテンツのVR表示が可能。",
 		},
 		browsers: [
-			"Oculus Browser（Chromium系）",
+			"Meta Quest Browser（Chromium系）",
 			"Wolvic（旧Firefox Reality後継）",
 			"PC接続時はChrome/EdgeなどPCブラウザ",
 		],
@@ -93,7 +94,7 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 			detail: "Quest 3と同じブラウザ環境でWebXRが利用可能。",
 		},
 		browsers: [
-			"Oculus Browser（Chromium系）",
+			"Meta Quest Browser（Chromium系）",
 			"WolvicなどサードパーティVRブラウザ",
 		],
 		connectionType: "スタンドアロン。PC接続（Link/Air Link）対応。",
@@ -115,10 +116,10 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 		manufacturer: "Meta",
 		webxrSupport: {
 			status: "対応",
-			detail: "標準のOculus BrowserでWebXR利用可。",
+			detail: "標準のMeta Quest BrowserでWebXR利用可。",
 		},
 		browsers: [
-			"Oculus Browser",
+			"Meta Quest Browser",
 			"Firefox Reality（現在はWolvicへ移行）",
 			"PC接続時はChrome/EdgeなどPCブラウザ",
 		],
@@ -139,10 +140,10 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 		manufacturer: "Meta",
 		webxrSupport: {
 			status: "対応",
-			detail: "Questシリーズ共通のOculus BrowserでWebXR利用可。",
+			detail: "Questシリーズ共通のMeta Quest BrowserでWebXR利用可。",
 		},
 		browsers: [
-			"Oculus Browser（標準）",
+			"Meta Quest Browser（標準）",
 			"WolvicなどのVRブラウザ",
 			"PC接続時はPCブラウザ",
 		],

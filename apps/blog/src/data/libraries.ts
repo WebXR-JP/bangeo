@@ -10,7 +10,7 @@ export const LIBRARIES: Library[] = [
 	{
 		id: "immersive-web-sdk",
 		name: "Immersive Web SDK（IWSDK）",
-		description: "Meta VR Glasses向け公式WebXR開発経路。WebXRコンテストでは公開URLで作品を提出可能。新規作成: npm create @iwsdk@latest",
+		description: "Meta VR Glasses向け公式WebXR開発経路。確認版: 1.0.0。2026年9月28日時点、npmのlatestは1.0.0-rc.2、nextは1.0.0です。正式版を指定して新規作成する場合: npm create @iwsdk@1.0.0。CIや応募用ビルドではバージョンを固定してください。",
 		repositoryUrl: "https://github.com/facebook/immersive-web-sdk",
 		documentationUrl: "https://developers.meta.com/horizon/documentation/iwsdk/guides/get-started-glasses/",
 	},
