@@ -78,7 +78,7 @@ export const WEBXR_EVENT_IMPORTANCE_LABELS: Record<
 	low: "低",
 };
 
-export const WEBXR_EVENTS_LAST_UPDATED = "2026-09-26";
+export const WEBXR_EVENTS_LAST_UPDATED = "2026-09-28";
 
 export const WEBXR_DEVICE_WATCH_TARGETS = [
 	"Meta / Quest / Quest Browser / Horizon OS",
@@ -488,7 +488,7 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		endDate: "2026-09-21",
 		timezone: "Asia/Tokyo",
 		location: "Makuhari Messe, Chiba",
-		status: "upcoming",
+		status: "recap-needed",
 		importance: "medium",
 		confidence: "high",
 		sourceUrl: "https://tgs.cesa.or.jp/2026/en",
@@ -510,11 +510,11 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		],
 		affectedBangeoPages: ["/devices", "/platforms", "/tech-articles"],
 		recommendedAction:
-			"出展社一覧と公式番組を確認し、XRデバイス、ブラウザ対応、ゲーム由来の空間UI事例、国内向けデバイス販売情報を回収する。",
-		lastCheckedAt: "2026-09-14",
-		nextCheckAt: "2026-07-15",
+			"開催終了。公式番組と出展社発表から、XRデバイス、ブラウザ対応、空間UI事例、国内向け販売情報を回収する。",
+		lastCheckedAt: "2026-09-28",
+		nextCheckAt: "2026-10-05",
 		notes:
-			"CESA/Nikkei BPの公式発表PDFでは2026年9月17〜21日に幕張メッセで開催予定とされている。",
+			"公式日程は9月17〜21日。台風25号に伴う9月20〜21日の開催変更・払い戻し案内があるため、該当日の展示や発表は公式記録を確認する。",
 	},
 	{
 		title: "CEATEC 2026",
