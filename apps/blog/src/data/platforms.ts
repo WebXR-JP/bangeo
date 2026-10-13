@@ -9,6 +9,18 @@ export interface PlatformProfile {
 
 export const WEBXR_PLATFORMS: PlatformProfile[] = [
 	{
+		id: "chrome-android-xr",
+		name: "Google Chrome（Android XR）",
+		link: "https://developer.android.com/develop/xr/web",
+		category: "browser",
+		features: [
+			"ヘッドセットと有線XRグラスを対象にWebXRを案内。機器例はSamsung Galaxy XR、XREAL AURA",
+			"公式一覧: Device API / AR / Gamepads / Hit Test / Hand Input / Anchors / Depth Sensing / Light Estimation",
+		],
+		notes:
+			"2026年10月13日確認。AURAは公式WebXRデモあり・製品版の実機検証待ち。プラットフォーム対応は各機器・モード・機能の実測を保証しません。",
+	},
+	{
 		id: "meta-quest-browser",
 		name: "Meta Quest Browser",
 		link: "https://developers.meta.com/horizon/release-notes/web/",
