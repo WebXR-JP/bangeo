@@ -15,6 +15,12 @@
 	],
 	"articles": [
 		{
+			"slug": "xreal-aura-webxr-android-xr",
+			"filename": "xreal-aura-webxr",
+			"assetDir": "tech",
+			"thumbnail": "/assets/tech/xreal-aura-webxr.webp"
+		},
+		{
 			"slug": "unity-webxr-sample",
 			"filename": "unity-webxr-build-guide",
 			"assetDir": "tech",

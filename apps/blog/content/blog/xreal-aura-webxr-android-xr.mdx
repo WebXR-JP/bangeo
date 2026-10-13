@@ -1,0 +1,112 @@
+---
+title: "XREAL AURAでWebXRを開発するには？Android XRの対応範囲と実機確認の進め方"
+description: "XREAL AURAの公式WebXRデモとAndroid XRの対応範囲を整理。セッション診断、手入力、ステレオ深度、光学シースルーの確認手順を解説します。"
+date: "2026-10-13"
+category: "TECH"
+tags: ["WebXR", "Android XR", "XREAL", "Chrome", "Hand Tracking"]
+author: "BANGEO Team"
+thumbnail: "/assets/tech/xreal-aura-webxr.webp"
+---
+
+## AURAをWebXRの開発対象にする前提
+
+XREAL AURAは、Android XRを搭載する有線XRグラスです。WebXRを使えば、ブラウザから空間に3Dコンテンツを表示し、手入力を取り込む体験を開発できます。ただし、Android XRの対応一覧だけでAURAの全機能が動くとは判断できません。本記事は2026年10月13日に確認した公式情報と仕様に基づく技術解説で、**BANGEOではAURA実機を検証していません**。掲載コードも実機検証済みではありません。
+
+XREALは2026年5月19日のGoogle I/O報告で、旧称Project Aura上のWebXRによる3Dペイントデモを紹介しています。これは公式デモの根拠になりますが、製品版での各セッションモード、OS・Chromeの版数、必要なフラグまで示す互換性試験ではありません。[XREALの公式デモ報告](https://www.xreal.com/uk/blog/project-aura-google-io-2026)を出発点に、実際の配信環境で段階的に確認します。
+
+## グラスと専用コンピュートパックの構成
+
+[AURAの製品ページ](https://www.xreal.com/us/aura)は、視野角70°の光学シースルー、専用コンピュートパックとの有線構成、6DoFトラッキングとハンドトラッキングを案内し、アプリ一覧にChromeを含めています。6DoFは頭の回転だけでなく位置の変化も扱う方式です。開発時はグラスだけをPCの外部ディスプレイにした経路と、コンピュートパック上のAndroid XR・ChromeでWebXRを開始する経路を区別してください。価格や出荷日は本記事では断定せず、地域ごとの公式案内を確認してください。
+
+従来のXREAL Air・One・Beamシリーズは補足として区別が必要です。[XREAL SDK](https://docs.xreal.com/)のネイティブ機能や3DoFで画面を固定する機能は、ChromeがWebXRのセッションを提供する証拠にはなりません。AURAの公式デモをこれらの製品へ読み替えず、端末・接続経路・ブラウザごとに判断します。
+
+## Android XRの対応範囲とAURAの未確認事項
+
+[Android DevelopersのWeb開発ガイド](https://developer.android.com/develop/xr/web)は、2026年8月31日更新版でヘッドセットとWired XR Glassesを対象に含めています。Chrome on Android XRの対応一覧はDevice API、AR Module、Gamepads、Hit Test、Hand Input、Anchors、Depth Sensing、Light Estimationです。これはプラットフォームの案内です。AURA製品版の個別実測とは分けて扱います。
+
+| 確認する対象 | 現時点の根拠と次の確認 |
+| --- | --- |
+| AURAでのWebXR体験 | 公式3Dペイントデモあり。製品版の実機検証待ち |
+| `immersive-ar`・`immersive-vr` | 両モードの個別実測は未確認。ブラウザでそれぞれ診断 |
+| 手入力・コントローラー | プラットフォーム対応と製品の手追跡案内あり。入力プロファイルや実データは未確認 |
+| 深度・アンカー | Android XRの一覧に記載。AURAの許可条件・取得条件は未確認 |
+| Layers・WebGPUのXR連携 | AURAでの対応は未確認。通常のWebGPU対応から推定しない |
+
+## HTTPS上でのセッション診断
+
+まずHTTPSで配信し、AURAのChromeで開きます。`localhost`の開発用例外は端末自身に対するものなので、PCのHTTP URLへ接続するだけでは同じ条件になりません。iframeの場合は埋め込み元のPermissions Policyによる`xr-spatial-tracking`の許可も確認します。
+
+次のHTMLは**描画を行わず、ARセッションの開始と終了だけを診断する例**です。両モードの対応照会はページ読込時に行い、開始要求はクリックから直接呼びます。照会が成功しても、権限拒否や端末の状態によって開始は失敗し得ます。
+
+```html
+<button id="start" disabled>ARセッションを診断</button>
+<pre id="log"></pre>
+<script type="module">
+  const button = document.querySelector('#start');
+  const output = document.querySelector('#log');
+  const log = (value) => { output.textContent += `${value}\n`; };
+  const xr = navigator.xr;
+  log(`secure context: ${window.isSecureContext}`);
+
+  if (!window.isSecureContext || !xr) {
+    log('HTTPSとnavigator.xrを確認してください');
+  } else {
+    for (const mode of ['immersive-ar', 'immersive-vr']) {
+      try {
+        log(`${mode}: ${await xr.isSessionSupported(mode)}`);
+      } catch (error) {
+        log(`${mode}: ${error.name}: ${error.message}`);
+      }
+    }
+    button.disabled = false;
+  }
+
+  button.addEventListener('click', async () => {
+    button.disabled = true;
+    let session;
+    let ended = false;
+    try {
+      session = await xr.requestSession('immersive-ar', {
+        optionalFeatures: ['hand-tracking'],
+      });
+      session.addEventListener('end', () => { ended = true; });
+      log(`blend mode: ${session.environmentBlendMode}`);
+      log(`enabled features: ${session.enabledFeatures
+        ? Array.from(session.enabledFeatures).join(', ')
+        : 'このブラウザでは参照不可'}`);
+      log('開始成功。描画・手の実データは検証していません');
+    } catch (error) {
+      log(`${error.name}: ${error.message}`);
+    } finally {
+      if (session && !ended) {
+        try {
+          await session.end();
+        } catch (error) {
+          log(`終了処理: ${error.name}: ${error.message}`);
+        }
+      }
+      button.disabled = !window.isSecureContext || !xr;
+    }
+  });
+</script>
+```
+
+`optionalFeatures`は未対応でも開始を妨げない指定です。開始成功だけで`hand-tracking`の有効化を保証しません。`enabledFeatures`が参照可能なら許可された機能を確認し、描画するサンプルでは実際に手のデータが届くかも調べます。参照不可なら「未確認」と記録し、有効になったと推定しないでください。セッションとユーザー操作の要件は[WebXR Device API仕様](https://immersive-web.github.io/webxr/)を参照できます。
+
+## 描画と入力を切り分ける実機確認
+
+診断後は[公式WebXR Samples](https://immersive-web.github.io/webxr-samples/)を使います。AndroidのガイドにはAR開始例とVRの手入力サンプルがあるため、AR・VRを別々に試してください。頭の回転・移動に対して世界に置いた物体の見え方が変わるか、左右両眼に正しく描画されるか、終了後に通常のページ操作へ戻れるかを確認します。単眼のスマートフォンARから移植する場合、両眼それぞれの`XRView`に対応した描画が必要です。
+
+手入力では各`XRInputSource`の`hand`、`handedness`、`profiles`を記録します。手が存在しても、遮蔽や追跡範囲外では関節poseが欠測するため、`getJointPose()`が`null`のフレームを処理してください。左右の手の識別とコントローラー入力を固定の配列順に頼らず、入力ソースの追加・削除にも対応します。[Hand Input仕様](https://immersive-web.github.io/webxr-hand-input/)に沿って、追跡を失った手で操作を継続させない設計にします。
+
+深度センシングは単眼の深度画像を両眼へ流用せず、`pose.views`の各viewに対応する深度データを扱います。viewer poseや深度がないフレームはスキップし、取得方式・解像度・更新頻度も記録します。アンカーの生成・追跡と、セッションを越える永続化は別の能力です。アンカーが作れたことだけで、再起動後も同じ位置が復元されるとは判断できません。
+
+## 光学シースルーでの見え方と確認記録
+
+光学シースルーでは現実を直接見るため、カメラ映像を背景に合成するパススルーとは異なります。`session.environmentBlendMode`を実際に読み、加算合成など返された方式に合わせて背景や色を設計します。黒い背景で現実を完全に隠せると仮定せず、明るい場所での文字の可読性、薄い色の視認性、視野の端での欠けを確認してください。製品の調光機能がWebXRから制御できるとも断定できません。
+
+確認記録には端末名、OSとChromeの版数、URL、セッションモード、フラグの状態、要求機能・許可機能、入力プロファイル、実データの有無、エラーを残します。WebGPUが通常ページで使えてもXRの描画経路が使えるとは限りません。LayersやWebGPU連携は別項目として、利用するフレームワークとブラウザの組合せで試します。
+
+## まとめ
+
+AURAにはWebXRの公式デモがあり、Android XRのChromeには手入力や空間情報を扱うAPIの対応案内があります。開発はHTTPSでの存在確認、モード別の対応照会、ユーザー操作による開始、描画・実データ取得の順に進めると原因を切り分けやすくなります。公式のプラットフォーム対応とAURA製品版の実測を分け、欠測や権限拒否も含めて記録することが、移植可能なWebXR体験を作る第一歩です。

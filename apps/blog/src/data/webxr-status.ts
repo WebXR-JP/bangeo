@@ -164,6 +164,14 @@ export const WEBXR_WG_DISCUSSIONS: WebXRWgDiscussion[] = [
 
 export const WEBXR_STATUS_META = {
 	lastChecked: "2026年9月28日",
+	deviceNotes: {
+		xrealAura: {
+			lastChecked: "2026年10月13日",
+			summary:
+				"XREAL AURAは公式WebXRデモあり・製品版の実機検証待ち。Android XRのAPI対応一覧は、AURAの各モードや実データ取得を実測した結果ではありません。",
+			sourceUrl: "https://www.xreal.com/uk/blog/project-aura-google-io-2026",
+		},
+	},
 	sources: {
 		standards: "https://www.w3.org/TR/?filter-tr-name=webxr",
 		docTypes: "https://www.w3.org/TR/tr/",

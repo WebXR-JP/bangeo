@@ -128,6 +128,16 @@ export default function WebXRStatusPage() {
 					</div>
 					<div className="text-xs text-gray-500 space-y-1">
 						<p>最終確認: {WEBXR_STATUS_META.lastChecked}</p>
+						<p>
+							{WEBXR_STATUS_META.deviceNotes.xrealAura.summary}
+							（{WEBXR_STATUS_META.deviceNotes.xrealAura.lastChecked}確認）
+							<a
+								className="underline"
+								href={WEBXR_STATUS_META.deviceNotes.xrealAura.sourceUrl}
+							>
+								XREALの公式デモ報告
+							</a>
+						</p>
 						<p>Quest Browserの確認対象: 150.1。Metaのv207は開発用SDKの版数で、Browserの版数ではありません。</p>
 						<p>Meta VR Glassesは将来デバイスで、公式WebXR対応予定です。実機未検証のため、現在利用可能な対応端末には含めません。</p>
 						<p>入力互換性: Meta VR Glassesの2D Webページでは視線によるCSS :hoverやpointer hoverイベントが発火しません。hoverに依存する操作を避けてください。IWSDKの3D操作には独自のHovered状態があります。</p>

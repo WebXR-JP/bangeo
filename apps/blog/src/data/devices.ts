@@ -295,6 +295,28 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 
 export const AR_DEVICES: DeviceWebxrSummary[] = [
 	{
+		id: "xreal-aura",
+		name: "XREAL AURA（旧Project Aura）",
+		type: "光学シースルーXRグラス",
+		manufacturer: "XREAL",
+		webxrSupport: {
+			status: "未確認",
+			detail:
+				"公式WebXR 3Dペイントデモあり・製品版の実機検証待ち（2026年10月13日確認）。Android XRの対応一覧とAURAの個別実測は区別します。",
+		},
+		browsers: ["Chrome（製品のアプリ一覧に記載。OS・Chrome版数は未確認）"],
+		connectionType: "専用コンピュートパックと有線接続（Android XR）。",
+		priceRange: "地域・構成によって異なる（公式案内で要確認）",
+		availability: "予約・出荷状況は地域ごとの公式案内で要確認。",
+		notes: [
+			"視野角70°の光学シースルー。6DoFとハンドトラッキングを案内。カメラパススルーとは表示方式が異なります。",
+			"immersive-ar / immersive-vr、flags、入力プロファイル、コントローラー、Depth / Anchorsの取得条件は実機未確認。",
+			"LayersとWebGPUのWebXR連携は未確認。通常ページのWebGPU対応から推定できません。",
+			"出典: https://www.xreal.com/us/aura",
+			"公式デモ: https://www.xreal.com/uk/blog/project-aura-google-io-2026",
+		],
+	},
+	{
 		id: "android-arcore",
 		name: "Androidスマートフォン（ARCore対応）",
 		type: "AR",
