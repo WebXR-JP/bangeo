@@ -27,10 +27,10 @@ export const WEBXR_PLATFORMS: PlatformProfile[] = [
 		category: "browser",
 		features: [
 			"Chromium ベースの Quest シリーズ標準ブラウザ。immersive-vr / immersive-ar に対応",
-			"Hand Input Module（15.1+）、Depth Sensing（146.0+ / depth projection）、Experimental WebGPU（146.0+）に対応",
+			"Hand Input Module（15.1+）、Depth Sensing（146.0+ / depth projection）、WebGPU composition layers（152.1 / 実験機能）を案内",
 		],
 		notes:
-			"Meta Quest 2 / 3 / 3S / Pro に標準搭載。WebXR コンテンツの主要な配信先として継続的に更新されています。",
+			"2026年10月14日確認。152.1の公式リリースノート（10月2日）は WebGPU composition layers に chrome://flags の webxr experiments を要求します。端末別の配布・実測は未確認。一次情報: https://developers.meta.com/vr/downloads/package/browser/152.1/?view=full_width",
 	},
 	{
 		id: "wolvic",
@@ -73,11 +73,11 @@ export const WEBXR_PLATFORMS: PlatformProfile[] = [
 		link: "https://developer.apple.com/visionos/",
 		category: "browser",
 		features: [
-			"Apple Vision Pro の Safari で immersive-vr / immersive-ar に対応",
+			"Apple Vision Pro の Safari で immersive-vr に対応。immersive-ar は対応未確認",
 			"視線・ジェスチャー操作による WebXR 体験が可能",
 		],
 		notes:
-			"iOS Safari は WebXR AR 非対応。Apple Vision Pro の Safari 経由で WebXR を体験できます。",
+			"2026年10月14日確認。WebKit issue 305459 は visionOS の immersive-ar 未対応時の誤判定修正を記録しています。iOS/macOS の Safari とは区別し、拡張機能は OS・ブラウザ版ごとに確認してください。一次情報: https://bugs.webkit.org/show_bug.cgi?id=305459",
 	},
 	{
 		id: "chrome-android",

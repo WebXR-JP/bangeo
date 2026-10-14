@@ -1,0 +1,84 @@
+---
+title: "PlayCanvasのVision Pro向けWebXR修正案：描画の揺れと視線＋ピンチ入力を読み解く"
+description: "Vision Proで報告されたWebGPU XR描画と入力の修正案を解説。再投影用の深度、最初のXRフレーム、transient-pointer、移動操作の確認方法を整理します。"
+date: "2026-10-14"
+category: "TECH"
+tags: ["WebXR", "WebGPU", "PlayCanvas", "visionOS", "Apple Vision Pro"]
+author: "BANGEO Team"
+thumbnail: "/assets/tech/playcanvas-visionpro-webgpu-input-fixes.webp"
+draft: false
+---
+
+Apple Vision Pro向けのWebXR開発では、セッションを開始できたあとにも確認することがあります。頭を動かしたときの表示、最初のフレーム、視線とピンチによる操作は、それぞれ異なる処理を通ります。
+
+2026年10月14日（JST）、PlayCanvas Engineにこの切り分けに役立つ二つの修正案が追加されました。[#9748](https://github.com/playcanvas/engine/pull/9748)はWebGPUによるXR描画、[#9750](https://github.com/playcanvas/engine/pull/9750)はXRスクリプトの移動と入力を扱います。**10月14日の確認時点ではどちらも未マージ**です。以下は作者の実機報告と提案コードに基づく解説で、BANGEOによる実機検証ではありません。
+
+![ヘッドセットを着けたマスコットがピンチ操作を行い、別のマスコットが両眼の描画面を整える概念図](/assets/tech/playcanvas-visionpro-webgpu-input-fixes.webp)
+
+## 深度を描いていなくても、表示側が読み取ることがある
+
+#9748の作者は、visionOSのSafariから渡されるWebGPU projection layerの深度テクスチャが、表示に遅れたフレームの再投影に使われると報告しています。再投影は描画後の頭の動きを反映して表示を補正する処理です。エンジンがその深度を書き込んでいないと、無関係な内容が補正に使われ、二重像や横移動時の揺れにつながり得ます。
+
+提案では、深度テクスチャが渡されたviewごとに遠方の面、far planeの値でクリアします。作者はシーンの深度を渡す方法とも比較し、遠方へクリアする方式を選んだとしています。これは描画と表示を接続するための深度処理であり、現実空間の距離を取得する**WebXR Depth Sensingの追加ではありません**。
+
+アプリ側で確認するときも、現実の物体との遮蔽と、頭を動かしたときの再投影を分けてください。今回の処理を「実空間の深度精度が上がる修正」と読むと、問題の所在を取り違えます。
+
+## XR開始と最初のview到着は同時とは限らない
+
+同じPRでは、XRセッション開始後にまだviewが届いていないカメラの扱いも変更します。view配列が空なのに複数view向けの処理へ入ると、描画に必要なバインドグループが設定されず、最初のフレームのコマンドが無効になり得るためです。提案はviewが届くまで単一viewとして扱うものです。
+
+アプリのXRフレーム処理でも、poseが取れる前に左右のviewが必ず存在すると決め付けないことが基本になります。次は既存の描画ループへ組み込む考え方を示す例です。完全な起動サンプルではなく、実機未検証です。
+
+```js
+function onXRFrame(time, frame) {
+  const session = frame.session;
+  session.requestAnimationFrame(onXRFrame);
+  const pose = frame.getViewerPose(referenceSpace);
+  if (!pose || pose.views.length === 0) return;
+
+  for (const view of pose.views) {
+    // このviewの投影・viewportに合わせて描画する。
+    renderView(view, frame);
+  }
+}
+```
+
+この例の`referenceSpace`と`renderView`はアプリ側で用意します。エンジン内部の修正をアプリのガードだけで代替できるという意味ではありません。
+
+## 視線＋ピンチの入力をモデル表示から切り離す
+
+#9750では、操作時に一時的に現れる`transient-pointer`にコントローラーモデルを読み込まないようにします。視線とピンチで選択する入力を、常に手持ちコントローラーとして表示すると、不要なモデル取得や表示が起きるためです。
+
+また、`handedness`が`none`の入力で、存在しない`nonenone.glb`を取得しようとする経路を`none.glb`へ修正します。操作の見た目に加え、ピンチのたびにネットワークエラーが出ていないかも確認したい点です。
+
+WebXRの入力設計では、入力ソースの名前や配列順だけで操作方式を決めず、`targetRayMode`、`handedness`、`profiles`などを確認します。`transient-pointer`だから手の関節データが必ず取得できる、とも判断できません。
+
+## 移動の修正も別々に検証する
+
+#9750は入力モデルだけでなく、テレポートの弧をヒット地点までの飛行時間で取り直す処理、拡大縮小したrigの旋回でカメラの世界座標を保つ処理、床の変更を`currentGroundHeight`で通知する仕組みを含みます。
+
+| 確認する場面 | 記録したいこと |
+| --- | --- |
+| 頭の回転・横移動 | 二重像と揺れを分け、描画負荷を揃えて比較 |
+| XR開始直後 | 最初の描画とコンソールのエラー |
+| 視線＋ピンチ | 選択イベント、モデル取得、入力ソースの追加・削除 |
+| テレポート | 弧の先端、フェード、着地点 |
+| rigの旋回 | 等倍と拡大縮小時のカメラ位置 |
+| 床の変更 | アプリが変更を通知した後の移動基準 |
+
+OS・Safari・PlayCanvasの版数、WebGLかWebGPUか、要求したセッションモードを一緒に残すと比較しやすくなります。PR本文にはSafariとvisionOSの版数が記載されていないため、別環境で同じ効果が得られるとは断定できません。
+
+## 試す前にマージと収録版を確認する
+
+今回の二つの変更は修正提案です。PRがマージされることと、正式リリースへ収録されることは別の段階です。[PlayCanvasのリリース一覧](https://github.com/playcanvas/engine/releases)で収録版を確認し、同じ条件で比較してください。
+
+Vision Pro上のWebXRも機能ごとの確認が必要です。Safariの`immersive-vr`対応から、`immersive-ar`やWebGPUとの連携を一括で推定できません。通常のWebGPU APIが存在することも、XRの描画経路が動作する証拠にはなりません。
+
+描画の揺れ、開始直後、入力、移動を分けて見ると、端末・ブラウザ・エンジン・アプリのどの層を調べるべきかが明確になります。今回のPRは、その切り分けを具体的な実装から学べる材料です。
+
+## 一次参照
+
+- [PlayCanvas #9748：WebGPU XRの深度クリアと最初のview処理](https://github.com/playcanvas/engine/pull/9748)
+- [PlayCanvas #9750：Vision Proで見つかったXR移動・入力の修正](https://github.com/playcanvas/engine/pull/9750)
+- [WebXR Device API](https://immersive-web.github.io/webxr/)
+- [PlayCanvas正式リリース](https://github.com/playcanvas/engine/releases)

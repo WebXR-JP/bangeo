@@ -15,6 +15,18 @@
 	],
 	"articles": [
 		{
+			"slug": "webxr-ar-stability-layers-linux-20261014",
+			"filename": "webxr-ar-stability-layers-linux-20261014",
+			"assetDir": "tech",
+			"thumbnail": "/assets/tech/webxr-ar-stability-layers-linux-20261014.webp"
+		},
+		{
+			"slug": "playcanvas-visionpro-webgpu-input-fixes",
+			"filename": "playcanvas-visionpro-webgpu-input-fixes",
+			"assetDir": "tech",
+			"thumbnail": "/assets/tech/playcanvas-visionpro-webgpu-input-fixes.webp"
+		},
+		{
 			"slug": "xreal-aura-webxr-android-xr",
 			"filename": "xreal-aura-webxr",
 			"assetDir": "tech",
