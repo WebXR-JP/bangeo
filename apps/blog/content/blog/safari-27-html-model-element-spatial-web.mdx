@@ -2,6 +2,7 @@
 title: "Safari 27のHTML model要素とは何か──Webページに3Dモデルを置く新しい標準"
 description: "Safari 27 betaでiOS、iPadOS、macOSにも広がったHTML model要素を解説。USDZ、sourceフォールバック、ready promise、orbit操作、AR Quick Look、Spatial Webでの位置づけを整理します。"
 date: "2026年6月12日"
+updated: "2026-10-14"
 category: "TECH"
 tags:
   - "HTML model"
@@ -210,3 +211,14 @@ Safari 27 betaの `<model>` 対応拡大は、Web 3Dにとってかなり象徴�
 - [What’s new in WebKit for Safari 27（WWDC26）](https://developer.apple.com/videos/play/wwdc2026/204/)
 - [The `<model>` Element（Immersive Web Community Group）](https://immersive-web.github.io/model-element/)
 - [BANGEO：Safari 27 betaでvisionOS向けImmersive Webが前進](/tech-articles/safari-27-beta-visionos-immersive-website-environments-webxr)
+
+
+## 2026年10月14日追記：HTMLの寸法とモデルの物理単位
+
+10月13日付の[Immersive Web CG議事録](https://www.w3.org/2026/10/13-immersive-web-minutes.html)では、モデル内のメートル単位とCSS基準の要素空間の関係が議論されました。会議の予定はJSTでは10月14日03:00です。議事録はDRAFTで、明示的な正式決議としては扱えません。
+
+議論の焦点は、モデルのboundsをメートルで扱っても、CSS上の長さと物理空間の実寸を固定対応させないことです。ブラウザ窓の見かけの大きさを変える操作と、ページのレイアウト変更によるfitの再計算も区別しています。モデルが1メートルの資産だから、Webページ内でも常に実寸で表示されるとは限りません。
+
+会議後、[width/height属性の定義を明確化するPR #159](https://github.com/immersive-web/model-element/pull/159)が10月14日07:44 JSTにマージされました。属性は非負整数で、CSSピクセルによる希望寸法を表し、0も許可するという追記です。これは仕様ソースの変更であり、各ブラウザへの実装配布を示すものではありません。
+
+[fit計算のPR #158](https://github.com/immersive-web/model-element/pull/158)は10月14日の確認時点で未マージです。単位や配置の詳細は継続中の議論として扱い、商品モデルの実寸とHTML上の表示領域を別々に記録してください。[ReSpecからBikeshedへの移行 #156](https://github.com/immersive-web/model-element/pull/156)もマージされましたが、こちらは仕様の編集・公開形式の変更です。

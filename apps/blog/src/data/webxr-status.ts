@@ -82,6 +82,39 @@ export const WEBXR_SPEC_UPDATES: WebXRSpecUpdate[] = [
 
 export const WEBXR_WG_DISCUSSIONS: WebXRWgDiscussion[] = [
 	{
+		title: "Layers の packed stereo viewport",
+		publishedAt: "2026-10-14",
+		status: "議論中",
+		sourceUrl: "https://github.com/immersive-web/layers/issues/343",
+		summary:
+			"左右・上下に詰めた立体映像の getSubImage 手順が、両眼に先頭側の領域を返し得るという仕様記述の指摘です。修正済み仕様や全ブラウザで再現する不具合としては扱いません。",
+		topics: [
+			"stereo-left-right / stereo-top-bottom の両眼 viewport",
+			"eye=none と invertStereo の定義",
+			"実装への影響と修正案は未確認",
+		],
+		relatedFeatures: ["WebXR Layers API Level 1"],
+		articleCandidate: false,
+	},
+	{
+		title: "model 要素の単位と CSS サイズ",
+		publishedAt: "2026-10-14",
+		status: "追跡中",
+		sourceUrl: "https://www.w3.org/2026/10/13-immersive-web-minutes.html",
+		issueUrl: "https://github.com/immersive-web/model-element/issues/155",
+		summary:
+			"10月13日表記の CG 会議（JST 10月14日）の草案議事録は、モデル内のメートルと CSS 基準の要素空間を区別する議論を記録しています。WebXR 本体の新仕様や正式決議ではありません。",
+		topics: [
+			"width/height を CSS ピクセルの非負整数とする PR #159 は仕様リポジトリへマージ済み",
+			"fitting の計算修正 PR #158 は提案段階",
+			"Bikeshed への編集形式移行 PR #156 はマージ済み",
+			"CSS サイズと物理表示サイズの固定対応を保証しない方向の議論",
+		],
+		relatedFeatures: ["HTML model element", "Immersive Web CG"],
+		articleCandidate: false,
+	},
+
+	{
 		title: "Sneeze / Open Metaverse Browser Engine",
 		publishedAt: "2026-06-15",
 		status: "追跡中",
@@ -163,7 +196,7 @@ export const WEBXR_WG_DISCUSSIONS: WebXRWgDiscussion[] = [
 ];
 
 export const WEBXR_STATUS_META = {
-	lastChecked: "2026年9月28日",
+	lastChecked: "2026年10月14日",
 	deviceNotes: {
 		xrealAura: {
 			lastChecked: "2026年10月13日",
@@ -179,7 +212,7 @@ export const WEBXR_STATUS_META = {
 		chromeStatus: "https://chromestatus.com/features?q=webxr",
 		mdnBcd: "https://github.com/mdn/browser-compat-data",
 		metaHorizonReleaseNotes:
-			"https://developers.meta.com/horizon/release-notes/web/",
+			"https://developers.meta.com/vr/downloads/package/browser/152.1/?view=full_width",
 	},
 };
 
@@ -316,7 +349,7 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 			safari: "未対応",
 		},
 		description:
-			"W3C のワーキングドラフト（2026-06-01）。コンポジターが管理するレイヤーを使い、描画効率や視認性、遅延の改善を目指す仕様です。Space Warp（space-warp）の記述も更新されています。",
+			"W3C のワーキングドラフト（2026-08-11）。コンポジターが管理するレイヤーを使い、描画効率や視認性、遅延の改善を目指す仕様です。Space Warp（space-warp）の記述も更新されています。",
 		specUrl: "https://www.w3.org/TR/webxrlayers-1/",
 	},
 	{
@@ -330,7 +363,7 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 			safari: "未対応",
 		},
 		description:
-			"エディターズドラフト（2025-12-11）。空間内に基準点となるアンカーを作成し、オブジェクトの位置を安定して固定するための仕様です。",
+			"WG のエディターズドラフト（2026-04-27）。空間内に基準点となるアンカーを作成し、オブジェクトの位置を安定して固定するための仕様です。",
 		specUrl: "https://immersive-web.github.io/anchors/",
 	},
 	{
@@ -368,12 +401,12 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 		support: {
 			chromeDesktop: "未対応",
 			chromeAndroid: "未対応",
-			quest: "146.0+（Experimental）",
+			quest: "152.1（Experimental）",
 			safari: "未対応",
 		},
 		description:
-			"エディターズドラフト（2025-04-09）。WebGPU を使って WebXR セッションに描画するための連携方法を定める仕様です。Meta Horizon OS Developers release notes では、Quest Browser 146.0（2026-04-21）で Experimental WebGPU support が追加されたと案内されています。",
-		specUrl: "https://www.w3.org/TR/webxr-webgpu-binding-1/",
+			"WG のエディターズドラフト（2026-08-12）。WebGPU を使って WebXR セッションに描画するための連携方法を定める仕様です。Quest Browser 152.1（2026-10-02）の公式リリースノートは WebGPU composition layers を実験機能として案内しています。chrome://flags の webxr experiments が必要です。通常の WebGPU と WebXR の連携・各レイヤーの対応は分けて確認します。",
+		specUrl: "https://immersive-web.github.io/webxr-webgpu-binding/",
 	},
 	{
 		name: "WebXR Depth Sensing Module",
@@ -386,7 +419,7 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 			safari: "未対応",
 		},
 		description:
-			"W3C のワーキングドラフト（2025-12-10）。深度情報を取得し、オクルージョンなどの表現に活用するための仕様です。Quest Browser 146.0（2026-04-21）では in-browser WebXR depth projection support が追加されましたが、BANGEOでは実験・Lab扱いで追跡します。",
+			"W3C のワーキングドラフト（2026-08-25）。深度情報を取得し、オクルージョンなどの表現に活用するための仕様です。Quest Browser 146.0（2026-04-21）では in-browser WebXR depth projection support が追加されましたが、BANGEOでは実験・Lab扱いで追跡します。",
 		specUrl: "https://www.w3.org/TR/webxr-depth-sensing-1/",
 	},
 	{
@@ -400,7 +433,7 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 			safari: "未対応",
 		},
 		description:
-			"Community Group の草案（2025-12-10）。デバイスが検出した床や壁などの平面情報を取得するための拡張仕様です。",
+			"WG のエディターズドラフト（2026-03-30）。デバイスが検出した床や壁などの平面情報を取得するための拡張仕様です。",
 		specUrl: "https://immersive-web.github.io/plane-detection/",
 	},
 	{
@@ -414,8 +447,8 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 			safari: "未対応",
 		},
 		description:
-			"Community Group の草案（2023-08-08）。周囲の環境メッシュを取得し、遮蔽や衝突判定に使うための拡張仕様です。",
-		specUrl: "https://github.com/immersive-web/real-world-meshing/",
+			"Community Group の草案（2026-02-02）。周囲の環境メッシュを取得し、遮蔽や衝突判定に使うための拡張仕様です。",
+		specUrl: "https://immersive-web.github.io/real-world-meshing/",
 	},
 	{
 		name: "Raw Camera Access",

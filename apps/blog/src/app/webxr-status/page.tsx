@@ -127,10 +127,14 @@ export default function WebXRStatusPage() {
 						</span>
 					</div>
 					<div className="text-xs text-gray-500 space-y-1">
-						<p>最終確認: {WEBXR_STATUS_META.lastChecked}</p>
 						<p>
-							{WEBXR_STATUS_META.deviceNotes.xrealAura.summary}
-							（{WEBXR_STATUS_META.deviceNotes.xrealAura.lastChecked}確認）
+							最終確認: {WEBXR_STATUS_META.lastChecked}
+							（仕様の日付・参照先、Quest
+							Browser公式リリースノート）。対応表は各端末での実測を保証しません。
+						</p>
+						<p>
+							{WEBXR_STATUS_META.deviceNotes.xrealAura.summary}（
+							{WEBXR_STATUS_META.deviceNotes.xrealAura.lastChecked}確認）
 							<a
 								className="underline"
 								href={WEBXR_STATUS_META.deviceNotes.xrealAura.sourceUrl}
@@ -138,10 +142,37 @@ export default function WebXRStatusPage() {
 								XREALの公式デモ報告
 							</a>
 						</p>
-						<p>Quest Browserの確認対象: 150.1。Metaのv207は開発用SDKの版数で、Browserの版数ではありません。</p>
-						<p>Meta VR Glassesは将来デバイスで、公式WebXR対応予定です。実機未検証のため、現在利用可能な対応端末には含めません。</p>
-						<p>入力互換性: Meta VR Glassesの2D Webページでは視線によるCSS :hoverやpointer hoverイベントが発火しません。hoverに依存する操作を避けてください。IWSDKの3D操作には独自のHovered状態があります。</p>
-						<p>出典: <a className="underline" href="https://developers.meta.com/horizon/documentation/web/2d-web/">MetaのWeb向けガイド</a>、<a className="underline" href="https://developers.meta.com/horizon/documentation/iwsdk/guides/get-started-glasses/">IWSDKのVR Glassesガイド</a></p>
+						<p>
+							Quest Browserの確認対象: 152.1（公式リリースノート:
+							2026年10月2日）。WebGPU composition
+							layersは実験機能で、chrome://flags の webxr
+							experimentsが必要です。Metaのv207は開発用SDKの版数で、Browserの版数ではありません。
+						</p>
+						<p>
+							Meta VR
+							Glassesは将来デバイスで、公式WebXR対応予定です。実機未検証のため、現在利用可能な対応端末には含めません。
+						</p>
+						<p>
+							入力互換性: Meta VR Glassesの2D Webページでは視線によるCSS
+							:hoverやpointer
+							hoverイベントが発火しません。hoverに依存する操作を避けてください。IWSDKの3D操作には独自のHovered状態があります。
+						</p>
+						<p>
+							出典:{" "}
+							<a
+								className="underline"
+								href="https://developers.meta.com/horizon/documentation/web/2d-web/"
+							>
+								MetaのWeb向けガイド
+							</a>
+							、
+							<a
+								className="underline"
+								href="https://developers.meta.com/horizon/documentation/iwsdk/guides/get-started-glasses/"
+							>
+								IWSDKのVR Glassesガイド
+							</a>
+						</p>
 						<p>
 							凡例: 79+ = 対応を確認できる最小バージョン、OT = Origin
 							Trial、Flag = フラグ有効、Exp = 実験的機能、対応 =

@@ -43,10 +43,12 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 		manufacturer: "Meta",
 		webxrSupport: {
 			status: "未確認",
-			detail: "MetaがWebXRへの公式対応を案内。発売前のため実機動作は未検証です。",
+			detail:
+				"MetaがWebXRへの公式対応を案内。発売前のため実機動作は未検証です。",
 		},
 		browsers: ["WebXR対応予定（実機のBrowserバージョンは未確認）"],
-		connectionType: "開発環境: IWSDK Emulator（IWER）。Quest 3／3Sでも入力と視野の一部を確認可能。",
+		connectionType:
+			"開発環境: IWSDK Emulator（IWER）。Quest 3／3Sでも入力と視野の一部を確認可能。",
 		priceRange: "1,299.99米ドル（日本円価格未定）",
 		availability: "発売前（2027年春予定）。",
 		notes: [
@@ -65,7 +67,8 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 		manufacturer: "Meta",
 		webxrSupport: {
 			status: "対応",
-			detail: "標準ブラウザ「Meta Quest Browser」でWebXRコンテンツのVR表示が可能。",
+			detail:
+				"標準ブラウザ「Meta Quest Browser」でWebXRコンテンツのVR表示が可能。",
 		},
 		browsers: [
 			"Meta Quest Browser（Chromium系）",
@@ -277,7 +280,7 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 		webxrSupport: {
 			status: "対応",
 			detail:
-				"Android XR上のChromeがWebXRを完全サポート（Hand Input / Depth Sensing含む）。",
+				"Chrome on Android XRの公式API一覧に基づくWebXR対応。端末・モード・機能の取得条件は個別確認が必要です（2026年10月14日確認）。",
 		},
 		browsers: ["Chrome for Android XR", "Samsung Internet（Android XR向け）"],
 		connectionType: "スタンドアロン（Android XR）。",
@@ -286,6 +289,7 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 			"米国・韓国で2025年10月22日発売。日本では現時点で発売日・国内価格は未発表。",
 		notes: [
 			"GoogleのAndroid XR OSを初めて搭載したフラッグシップ機。",
+			"公式WebXR API一覧: https://developer.android.com/develop/xr/web 。API一覧は端末別の実測結果ではありません。",
 			"Snapdragon XR2+ Gen 2、片目4K Micro-OLEDを採用。",
 			"コントローラー／ハンドトラッキング／視線＋ピンチ操作の3方式に対応。",
 			"Gemini統合により音声アシスタント体験を強化。",
@@ -366,7 +370,8 @@ export const AR_DEVICES: DeviceWebxrSummary[] = [
 		manufacturer: "Apple",
 		webxrSupport: {
 			status: "対応",
-			detail: "visionOSのSafariでWebXR体験が可能。",
+			detail:
+				"visionOSのSafariでimmersive-vrを利用可能。immersive-arと各拡張機能は分けて確認します。",
 		},
 		browsers: ["Safari on visionOS"],
 		connectionType: "スタンドアロン（visionOS）",
@@ -375,7 +380,8 @@ export const AR_DEVICES: DeviceWebxrSummary[] = [
 		availability: "販売中（2025年10月22日にM5チップ搭載モデルが発売）。",
 		notes: [
 			"視線・ジェスチャー中心の操作体験。",
-			"WebXRのimmersive-vr/immersive-arに対応。",
+			"一次情報: https://bugs.webkit.org/show_bug.cgi?id=305459 （2026年1月、immersive-ar未対応時の誤判定を修正）",
+			"visionOSのSafariはimmersive-vrに対応。immersive-arの対応は確認できていません（2026年10月14日確認）。",
 			"M5チップ搭載で最大120Hzリフレッシュレートに対応（2025年10月発売）。",
 			"新設計のデュアルニットバンドで装着感を改善。",
 		],
