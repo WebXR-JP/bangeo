@@ -1,3 +1,5 @@
+import { STEAM_FRAME_WEBXR } from "./steam-frame-webxr";
+
 export interface PlatformProfile {
 	id: string;
 	name: string;
@@ -101,6 +103,17 @@ export const WEBXR_PLATFORMS: PlatformProfile[] = [
 		],
 		notes:
 			"Chrome と同じ Chromium ベースで、Android 端末での WebXR 体験を広げています。",
+	},
+	{
+		id: "chromium-steam-frame",
+		name: "Chromium（Steam Frame / SteamOS Beta）",
+		link: STEAM_FRAME_WEBXR.articleUrl,
+		category: "browser",
+		features: [
+			STEAM_FRAME_WEBXR.summary,
+			"OSのBeta設定: Settings > System > System Update Channel",
+		],
+		notes: `${STEAM_FRAME_WEBXR.limitations}（${STEAM_FRAME_WEBXR.lastChecked}公式情報確認）。一次情報: ${STEAM_FRAME_WEBXR.sourceUrl}`,
 	},
 	{
 		id: "chrome-edge-desktop",
