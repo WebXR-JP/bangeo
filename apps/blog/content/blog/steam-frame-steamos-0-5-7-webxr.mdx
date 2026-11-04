@@ -1,0 +1,80 @@
+---
+title: "Steam FrameがWebXR対応へ：SteamOS 0.5.7 BetaとChromium 157以降の利用条件"
+description: "SteamOS 0.5.7 BetaでSteam Frame向けのWebXR対応が有効化されました。Chromium 157以降という条件、Chrome試験ビルドでの実機報告、開発者が確認すべき範囲を整理します。"
+date: "2026-11-05"
+category: "NEWS"
+tags: ["WebXR", "Steam Frame", "SteamVR", "Chromium", "Chrome"]
+author: "BANGEO Team"
+thumbnail: "/assets/tech/pcvr-webxr-guide.webp"
+---
+
+## Steam FrameのBetaで有効になったWebXR対応
+
+ValveはSteam Frame向けにSteamOS 0.5.7 Betaを公開し、**Chromium 157以降でWebXRを利用するための対応を有効化した**と発表しました。WebXRは、WebページからVR/AR体験を提供するためのAPIです。今回の更新は、Steam Frame本体のブラウザでWebXRコンテンツを試す開発者にとって重要な変更です。
+
+[公式リリースノート](https://store.steampowered.com/news/app/4165890/view/694276363007298391?l=english)のOS項目には、次の一文があります。
+
+> Enable support for WebXR in Chromium 157 & up
+
+対象は**Steam FrameのBetaチャネル**です。安定版への提供や、ブラウザを開くだけで全コンテンツが動くことを意味する発表ではありません。本記事は2026年11月5日（日本時間）に確認した情報を基にしており、BANGEOではSteam Frame実機での動作検証は行っていません。
+
+公開日は日本時間で2026年11月4日です。Steamニュースに含まれる投稿時刻データを日本時間へ換算すると同日に当たり、表示地域によっては11月3日と表示されます。
+
+## 公式発表の対象と利用条件
+
+| 項目 | 公式リリースノートで確認できる内容 |
+| --- | --- |
+| 対象端末・OS | Steam Frame向けSteamOS 0.5.7 Beta |
+| OSの更新チャネル | Steam Frame Beta |
+| ブラウザの条件 | Chromium 157以降 |
+| 同梱SteamVR | 2.19.1への更新 |
+| OSのBeta参加設定 | `Settings > System > System Update Channel` |
+
+SteamOSの更新チャネルと、Chrome・Chromiumの配布チャネルやバージョンは別々に確認する必要があります。OSをBetaに変更しただけで、インストール済みブラウザが条件を満たすとは限りません。
+
+同じリリースにはマイク処理の設定追加も含まれ、その機能にはSteam Client Betaが必要とされています。これはWebXRの項目とは別の条件です。Steam Clientの更新チャネルとSteamOSの更新チャネルを混同しないようにしてください。
+
+## Chrome試験ビルドによる条件付きの実機報告
+
+[Redditの実機報告](https://www.reddit.com/r/SteamFrame/comments/1xniho3/got_webxr_working_in_google_chrome_on_the_steam/)では、投稿者がSteam Frame上でWebXRサンプルを起動したと説明しています。ただし、使用したOSチャネルは**Preview Candidate**で、公式発表のBetaチャネルと同一条件ではありません。
+
+投稿者が示した条件は次のとおりです。
+
+- Flathubのプルリクエストで提供されていたChrome 157の試験ビルドを使用。
+- Flatpak版Chromeをユーザー単位ではなくシステム全体へインストール。
+- SteamVRのログ保存先へ書き込めるよう、ChromeのFlatpak権限を追加調整。
+- ブラウザ再起動後にWebXR Samplesを開き、「Enter VR」から起動。
+
+投稿者の環境では、SteamVRが参照するログ保存先と、Flatpakに許可された保存先が一致していなかったとされています。これは特定環境での原因切り分けです。**同じ権限変更がすべてのSteam FrameやChromiumに必要だと確認されたわけではありません。**
+
+試験ビルドの配布先や権限設定は変わり得るため、この報告のコマンドをそのまま一般向けの導入手順とは扱いません。まず現在の公式案内と自分の環境を確認し、起動に失敗する場合に元投稿の条件とエラーを照合するのがよいでしょう。
+
+投稿では拡張機能を使った360度YouTube動画のVR表示も試されていますが、描画の乱れや不快感が報告されています。WebXRサンプルの起動と、動画視聴を快適に継続できることは分けて評価する必要があります。
+
+## 開発者が実機で確かめたい範囲
+
+公式発表はWebXR対応の有効化を示していますが、個別APIの対応表や互換性試験の結果までは示していません。既存コンテンツをSteam Frame向けに検証する際は、次の順で切り分けると状況を記録しやすくなります。
+
+1. **環境の記録**：SteamOSの版数と更新チャネル、SteamVR、ブラウザの版数、配布元、Flatpakのインストール範囲を控えます。
+2. **基本VRサンプルの起動**：[WebXR Samples](https://immersive-web.github.io/webxr-samples/)を開き、対応表示だけでなく「Enter VR」から実際に開始できるか確認します。
+3. **描画・入力・終了の確認**：左右の表示、頭の動きへの追従、コントローラー操作、セッション終了後のブラウザへの復帰を試します。
+4. **自分のコンテンツの検証**：利用する機能を一つずつ確認し、失敗した場合は要求機能とエラー、再現条件を記録します。
+
+| 確認対象 | 今回の情報から判断できる範囲 |
+| --- | --- |
+| Chromium 157以降のWebXR対応 | SteamOS 0.5.7 Betaでの有効化をValveが明記 |
+| VRサンプルの実行 | Preview CandidateとChrome試験ビルドによる第三者報告あり |
+| 安定版での利用・追加設定なしの起動 | 今回の公式発表と実機報告だけでは未確認 |
+| `immersive-ar`、ハンドトラッキング、深度センシング | Steam Frameでの個別対応・実データ取得は本記事では未確認 |
+| WebXR Layers・WebGPUによるXR描画 | 今回の発表だけでは未確認 |
+
+APIが見つかること、セッションが始まること、必要なデータが取得できることは別の確認項目です。今回の更新は実機検証を始める根拠になりますが、既存のQuestやPC向けWebXR体験がそのまま同じ機能で動くと判断するには、コンテンツごとの確認が必要です。
+
+PC上のブラウザとVRランタイムを組み合わせる構成については、[PC + VRヘッドセットでWebXRを体験するガイド](/tech-articles/pcvr-webxr-guide)も参照できます。今回取り上げたSteam Frame本体上のブラウザとは実行環境が異なるため、設定手順をそのまま流用しないでください。
+
+## 参考情報
+
+- [Valve：SteamOS 0.5.7 Beta for Steam Frame（Steamニュース）](https://store.steampowered.com/news/app/4165890/view/694276363007298391?l=english)
+- [Valve：Steam Communityのリリースノート](https://steamcommunity.com/app/4165890/announcements/detail/527161296156696117?l=english)
+- [Reddit：Steam Frame上のChromeでWebXRを起動した実機報告](https://www.reddit.com/r/SteamFrame/comments/1xniho3/got_webxr_working_in_google_chrome_on_the_steam/)
+- [Immersive Web：WebXR Samples](https://immersive-web.github.io/webxr-samples/)

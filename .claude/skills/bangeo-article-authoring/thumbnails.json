@@ -15,6 +15,12 @@
 	],
 	"articles": [
 		{
+			"slug": "steam-frame-steamos-0-5-7-webxr",
+			"filename": "pcvr-webxr-guide",
+			"assetDir": "tech",
+			"thumbnail": "/assets/tech/pcvr-webxr-guide.webp"
+		},
+		{
 			"slug": "webxr-ar-stability-layers-linux-20261014",
 			"filename": "webxr-ar-stability-layers-linux-20261014",
 			"assetDir": "tech",
