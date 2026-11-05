@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 function DeviceCard({ device }: { device: DeviceWebxrSummary }) {
 	const statusClasses = {
 		対応: "bg-emerald-50 text-emerald-700 border-emerald-100",
+		条件付き対応: "bg-amber-50 text-amber-800 border-amber-200",
 		非対応: "bg-rose-50 text-rose-700 border-rose-100",
 		未確認: "bg-amber-50 text-amber-800 border-amber-200",
 	} as const;
@@ -53,7 +54,9 @@ function DeviceCard({ device }: { device: DeviceWebxrSummary }) {
 							{device.browsers.map((browser) => (
 								<li key={browser} className="flex min-w-0 gap-2">
 									<span className="text-[#e11d48] mt-1">&bull;</span>
-									<span className="min-w-0 [overflow-wrap:anywhere]">{browser}</span>
+									<span className="min-w-0 [overflow-wrap:anywhere]">
+										{browser}
+									</span>
 								</li>
 							))}
 						</ul>
@@ -93,7 +96,9 @@ function DeviceCard({ device }: { device: DeviceWebxrSummary }) {
 							{device.notes.map((note) => (
 								<li key={note} className="flex min-w-0 gap-2">
 									<span className="text-[#e11d48] mt-1">&bull;</span>
-									<span className="min-w-0 [overflow-wrap:anywhere]">{note}</span>
+									<span className="min-w-0 [overflow-wrap:anywhere]">
+										{note}
+									</span>
 								</li>
 							))}
 						</ul>

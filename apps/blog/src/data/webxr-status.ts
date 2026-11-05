@@ -18,6 +18,8 @@ export interface WebXRFeature {
 	support: BrowserSupport;
 	description: string;
 	specUrl?: string;
+	specLastChecked: string;
+	supportLastChecked?: string;
 }
 
 export interface WebXRSpecUpdate {
@@ -63,11 +65,11 @@ export const WEBXR_BROWSER_COLUMNS: Array<{ key: BrowserKey; label: string }> =
 export const WEBXR_SPEC_UPDATES: WebXRSpecUpdate[] = [
 	{
 		specName: "WebXR Device API",
-		publishedAt: "2026-06-09",
+		publishedAt: "2026-10-29",
 		docType: "勧告候補草案（CRD）",
-		specUrl: "https://www.w3.org/TR/2026/CRD-webxr-20260609/",
+		specUrl: "https://www.w3.org/TR/2026/CRD-webxr-20261029/",
 		summary:
-			"WebXR Device API は W3C Recommendation を目指している段階の Candidate Recommendation Draft です。実装状況を確認しながら利用する必要があります。",
+			"2026年10月29日公開の勧告候補草案です。以下はChanges節にある2022年3月31日の勧告候補スナップショットからの累積差分で、今回の版だけで追加された機能ではありません。ブラウザでの実装・利用可能時期は別途確認が必要です。",
 		changes: [
 			"inline-stereo session features の追加",
 			"XRSession の granted features（enabledFeatures）の公開",
@@ -196,7 +198,7 @@ export const WEBXR_WG_DISCUSSIONS: WebXRWgDiscussion[] = [
 ];
 
 export const WEBXR_STATUS_META = {
-	lastChecked: "2026年10月14日",
+	browserReferencesLastChecked: "2026年10月14日",
 	deviceNotes: {
 		xrealAura: {
 			lastChecked: "2026年10月13日",
@@ -269,6 +271,7 @@ export const WEBXR_STAGE_BY_ID = WEBXR_STAGES.reduce(
 
 export const WEBXR_FEATURES: WebXRFeature[] = [
 	{
+		specLastChecked: "2026年11月5日",
 		name: "WebXR Device API",
 		stage: 4,
 		category: "Core",
@@ -279,10 +282,11 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 			safari: "未対応",
 		},
 		description:
-			"W3C の勧告候補草案（CRD、2026-06-09）。VR/AR デバイスのセンサーやヘッドマウントディスプレイへのアクセス方法を定める中核仕様です。W3C Recommendation ではなく、実装とテストを通じて勧告に向けた確認段階にあります。",
-		specUrl: "https://www.w3.org/TR/2026/CRD-webxr-20260609/",
+			"W3C の勧告候補草案（CRD、2026-10-29）。VR/AR デバイスのセンサーやヘッドマウントディスプレイへのアクセス方法を定める中核仕様です。W3C Recommendation ではなく、実装とテストを通じて勧告に向けた確認段階にあります。",
+		specUrl: "https://www.w3.org/TR/2026/CRD-webxr-20261029/",
 	},
 	{
+		specLastChecked: "2026年10月14日",
 		name: "WebXR Augmented Reality Module - Level 1",
 		stage: 4,
 		category: "Core",
@@ -297,6 +301,7 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 		specUrl: "https://www.w3.org/TR/webxr-ar-module-1/",
 	},
 	{
+		specLastChecked: "2026年10月14日",
 		name: "WebXR Gamepads Module - Level 1",
 		stage: 3,
 		category: "Input",
@@ -311,6 +316,7 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 		specUrl: "https://www.w3.org/TR/webxr-gamepads-module-1/",
 	},
 	{
+		specLastChecked: "2026年10月14日",
 		name: "WebXR Hit Test Module",
 		stage: 3,
 		category: "AR",
@@ -325,6 +331,7 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 		specUrl: "https://www.w3.org/TR/webxr-hit-test-1/",
 	},
 	{
+		specLastChecked: "2026年10月14日",
 		name: "WebXR DOM Overlays Module",
 		stage: 3,
 		category: "AR",
@@ -339,6 +346,7 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 		specUrl: "https://www.w3.org/TR/webxr-dom-overlays-1/",
 	},
 	{
+		specLastChecked: "2026年10月14日",
 		name: "WebXR Layers API Level 1",
 		stage: 3,
 		category: "Rendering",
@@ -353,6 +361,7 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 		specUrl: "https://www.w3.org/TR/webxrlayers-1/",
 	},
 	{
+		specLastChecked: "2026年10月14日",
 		name: "Anchors",
 		stage: 2,
 		category: "AR",
@@ -367,6 +376,7 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 		specUrl: "https://immersive-web.github.io/anchors/",
 	},
 	{
+		specLastChecked: "2026年10月14日",
 		name: "WebXR Lighting Estimation API Level 1",
 		stage: 3,
 		category: "AR",
@@ -381,6 +391,7 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 		specUrl: "https://www.w3.org/TR/webxr-lighting-estimation-1/",
 	},
 	{
+		specLastChecked: "2026年10月14日",
 		name: "WebXR Hand Input Module - Level 1",
 		stage: 3,
 		category: "Input",
@@ -395,6 +406,7 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 		specUrl: "https://www.w3.org/TR/webxr-hand-input-1/",
 	},
 	{
+		specLastChecked: "2026年10月14日",
 		name: "WebXR/WebGPU Binding Module - Level 1",
 		stage: 2,
 		category: "Rendering",
@@ -409,6 +421,7 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 		specUrl: "https://immersive-web.github.io/webxr-webgpu-binding/",
 	},
 	{
+		specLastChecked: "2026年10月14日",
 		name: "WebXR Depth Sensing Module",
 		stage: 3,
 		category: "AR",
@@ -423,6 +436,7 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 		specUrl: "https://www.w3.org/TR/webxr-depth-sensing-1/",
 	},
 	{
+		specLastChecked: "2026年10月14日",
 		name: "Plane Detection",
 		stage: 2,
 		category: "AR",
@@ -437,6 +451,7 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 		specUrl: "https://immersive-web.github.io/plane-detection/",
 	},
 	{
+		specLastChecked: "2026年10月14日",
 		name: "Mesh Detection",
 		stage: 2,
 		category: "AR",
@@ -451,6 +466,7 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 		specUrl: "https://immersive-web.github.io/real-world-meshing/",
 	},
 	{
+		specLastChecked: "2026年10月14日",
 		name: "Raw Camera Access",
 		stage: 2,
 		category: "AR",
@@ -465,6 +481,7 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 		specUrl: "https://immersive-web.github.io/raw-camera-access/",
 	},
 	{
+		specLastChecked: "2026年10月14日",
 		name: "Navigation",
 		stage: 2,
 		category: "Session",
@@ -480,6 +497,7 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 			"https://github.com/immersive-web/webxr/blob/master/designdocs/navigation.md",
 	},
 	{
+		specLastChecked: "2026年10月14日",
 		name: "Body Tracking",
 		stage: 1,
 		category: "Input",
@@ -494,6 +512,7 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 		specUrl: "https://immersive-web.github.io/body-tracking/",
 	},
 	{
+		specLastChecked: "2026年10月14日",
 		name: "Face Tracking",
 		stage: 1,
 		category: "Input",
@@ -508,6 +527,7 @@ export const WEBXR_FEATURES: WebXRFeature[] = [
 		specUrl: "https://github.com/immersive-web/webxr-face-tracking-1/",
 	},
 	{
+		specLastChecked: "2026年10月14日",
 		name: "Eye Tracking",
 		stage: 1,
 		category: "Input",

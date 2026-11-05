@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { BreadcrumbStructuredData } from "@/components/breadcrumb-structured-data";
+import { STEAM_FRAME_WEBXR } from "@/data/steam-frame-webxr";
 import {
 	type BrowserKey,
 	type Stage,
@@ -128,9 +129,26 @@ export default function WebXRStatusPage() {
 					</div>
 					<div className="text-xs text-gray-500 space-y-1">
 						<p>
-							最終確認: {WEBXR_STATUS_META.lastChecked}
-							（仕様の日付・参照先、Quest
-							Browser公式リリースノート）。対応表は各端末での実測を保証しません。
+							ブラウザ参照情報の確認:{" "}
+							{WEBXR_STATUS_META.browserReferencesLastChecked}
+							（Quest
+							Browser公式リリースノートなど）。仕様の確認日は各項目に記載しています。ブラウザ対応の個別確認日が未記録の項目は、今回再確認したものではありません。対応表は各端末での実測を保証しません。
+						</p>
+						<p>
+							<strong>Steam Frame（Beta条件付き）: </strong>
+							{STEAM_FRAME_WEBXR.summary} {STEAM_FRAME_WEBXR.limitations}（
+							{STEAM_FRAME_WEBXR.lastChecked}公式情報確認）{" "}
+							<a className="underline" href={STEAM_FRAME_WEBXR.sourceUrl}>
+								Valve公式発表
+							</a>
+							{" / "}
+							<a className="underline" href={STEAM_FRAME_WEBXR.articleUrl}>
+								利用条件と実機報告の解説
+							</a>
+						</p>
+						<p>
+							Chrome（デスクトップ）欄の版数を、Steam
+							FrameやすべてのOSでの動作条件として読み替えないでください。
 						</p>
 						<p>
 							{WEBXR_STATUS_META.deviceNotes.xrealAura.summary}（
@@ -176,7 +194,8 @@ export default function WebXRStatusPage() {
 						<p>
 							凡例: 79+ = 対応を確認できる最小バージョン、OT = Origin
 							Trial、Flag = フラグ有効、Exp = 実験的機能、対応 =
-							対応済み（版数不明）、未対応 = 未実装、未確認 = 公開情報なし
+							対応情報あり（版数不明）、未対応 = 対象環境で未実装、未確認 =
+							対応を判断できる根拠が未確認。公式発表あり・実機未検証は、発表を確認できてもBANGEOでの動作確認は行っていない状態です。
 						</p>
 					</div>
 
@@ -225,6 +244,11 @@ export default function WebXRStatusPage() {
 													)}
 													<span className="text-xs text-gray-500 font-medium">
 														{f.description}
+													</span>
+													<span className="text-xs text-gray-500">
+														仕様確認: {f.specLastChecked} /
+														ブラウザ対応の個別確認:{" "}
+														{f.supportLastChecked ?? "日付未記録"}
 													</span>
 												</div>
 											</td>
@@ -321,8 +345,8 @@ export default function WebXRStatusPage() {
 				<section className="space-y-6">
 					<h2 className="text-2xl font-black text-gray-950">仕様差分メモ</h2>
 					<p className="text-sm text-gray-600 font-medium">
-						W3C TR の Changes
-						セクションをもとに、直近の仕様更新を短く整理しています。
+						W3C
+						TRの公開版とChanges節の比較対象を示します。仕様への記載とブラウザへの実装は別です。
 					</p>
 					<div className="space-y-4">
 						{WEBXR_SPEC_UPDATES.map((update) => (

@@ -1,10 +1,12 @@
+import { STEAM_FRAME_WEBXR } from "./steam-frame-webxr";
+
 export type DeviceWebxrSummary = {
 	id: string;
 	name: string;
 	type: string;
 	manufacturer: string;
 	webxrSupport: {
-		status: "対応" | "非対応" | "未確認";
+		status: "対応" | "条件付き対応" | "非対応" | "未確認";
 		detail: string;
 	};
 	browsers: string[];
@@ -21,18 +23,20 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 		type: "VR",
 		manufacturer: "Valve",
 		webxrSupport: {
-			status: "未確認",
-			detail:
-				"SteamOS上のブラウザからのWebXR利用と、PCからストリーミングした際のWebXR動作は実機未確認（2026年9月28日時点）。SteamVR・OpenXR対応だけではWebXR対応を判断できません。",
+			status: "条件付き対応",
+			detail: `${STEAM_FRAME_WEBXR.summary} ${STEAM_FRAME_WEBXR.limitations}（${STEAM_FRAME_WEBXR.lastChecked}公式情報確認）`,
 		},
-		browsers: ["WebXRを利用できるブラウザは未確認"],
+		browsers: [
+			"Chromium 157以降（SteamOS 0.5.7 Beta。配布元・設定条件は個別確認）",
+		],
 		connectionType:
 			"スタンドアロン（SteamOS）。PCからVRコンテンツを無線ストリーミング可能。",
 		priceRange: "地域・構成によって異なる（公式ストアで要確認）",
 		availability: "販売状況は地域によって異なる（公式ストアで要確認）。",
 		notes: [
 			"Valveはスタンドアロン動作とSteamVR・OpenXRへの対応を案内しています。",
-			"WebXRの対応状況はブラウザ・実行経路ごとに確認が必要です。",
+			"Preview CandidateとChrome 157試験ビルド・権限調整による第三者の起動報告があります。Betaの標準状態での動作保証ではありません。",
+			`WebXR対応の公式発表: ${STEAM_FRAME_WEBXR.sourceUrl}`,
 			"出典: https://partner.steamgames.com/doc/steamhardware/steamframe",
 		],
 	},
