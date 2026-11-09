@@ -27,11 +27,12 @@ pnpm check
 
 ## コンテンツ運用
 
-- 記事は `content/blog/*.mdx`
-- デモは `content/experiments/*.mdx`
+- 技術記事は `content/blog/*.mdx`
+- デモは `public/demos/<slug>/` の静的HTML（`index.html` / `app.html` / `demo.html`）として配信し、`/demos/<slug>` から開ける
+- `content/experiments/*.mdx` がある場合は `/experiments/<slug>` の解説ページを生成する（現在のデモ本体は `public/demos/` 側）
 - ポッドキャストは `content/podcast/*.mdx`
 - `draft: true` を付けたコンテンツは公開対象から除外
-- RSS フィードは `/rss.xml` で配信し、公開済みの技術記事・デモ・ポッドキャストを更新日順に通知
+- RSS フィードは `/rss.xml` で配信し、公開済みの技術記事を公開日（`pubDate` または `date`）の新しい順に通知（デモとポッドキャストは含まない）
 
 ## 環境変数
 
