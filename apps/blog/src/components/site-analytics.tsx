@@ -41,7 +41,13 @@ export function SiteAnalytics() {
 	}, []);
 
 	useEffect(() => {
-		if (!liveHost || !client || !pathname || lastTrackedPath.current === pathname) return;
+		if (
+			!liveHost ||
+			!client ||
+			!pathname ||
+			lastTrackedPath.current === pathname
+		)
+			return;
 		lastTrackedPath.current = pathname;
 		client.track("page_view", { props: { path: pathname } });
 		// The SDK attaches the current URL when it flushes. Send each route's

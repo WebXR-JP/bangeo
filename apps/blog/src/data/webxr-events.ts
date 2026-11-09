@@ -239,7 +239,8 @@ export const WEBXR_EVENTS: WebXREventWatchItem[] = [
 		recommendedAction: "応募規約でWebXRの提出方法、操作条件、締切を確認する。",
 		lastCheckedAt: "2026-09-26",
 		nextCheckAt: "2026-10-03",
-		notes: "応募期間は9月24日から11月18日正午（太平洋時間）まで。日本時間では11月19日午前5時。IWSDK / WebXR作品は公開URLを提出できる。",
+		notes:
+			"応募期間は9月24日から11月18日正午（太平洋時間）まで。日本時間では11月19日午前5時。IWSDK / WebXR作品は公開URLを提出できる。",
 		region: "global",
 		organizerType: "developer_conference",
 		webxrRelevance: "direct",

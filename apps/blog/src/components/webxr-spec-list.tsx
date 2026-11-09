@@ -2,7 +2,6 @@
 
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import type { SessionReport } from "@/lib/experiment-report";
-import { checkWebXRSupport } from "@/lib/webxr-support";
 import { SITE_URL } from "@/lib/site-url";
 import {
 	maturityTitle,
@@ -16,6 +15,7 @@ import {
 	type StarterSessionHandle,
 	startStarterSession,
 } from "@/lib/webxr-starter/session";
+import { checkWebXRSupport } from "@/lib/webxr-support";
 import { ExperimentReportPanel } from "./experiment-report-panel";
 
 type XRSessionMode = "inline" | "immersive-vr" | "immersive-ar";
