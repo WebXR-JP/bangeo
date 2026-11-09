@@ -29,6 +29,9 @@ coverage
 .claude/settings.local.json
 .husky/_/
 
+# Local Windows pnpm fallback (not part of the project)
+/pnpm.cmd
+
 # Cloudflare
 .DS_Store
 Thumbs.db
