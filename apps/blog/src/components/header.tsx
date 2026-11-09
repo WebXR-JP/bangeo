@@ -63,6 +63,8 @@ export function Header() {
 							<div key={cat.label} className="relative">
 								<button
 									type="button"
+									aria-expanded={openCategory === i}
+									aria-controls={`nav-category-${i}`}
 									className={`whitespace-nowrap flex items-center gap-1 px-3 py-2 rounded-full border shadow-xs cursor-default transition-colors ${
 										openCategory === i
 											? "text-[#e11d48] bg-rose-50/80 border-rose-100"
@@ -88,7 +90,10 @@ export function Header() {
 								</button>
 
 								{openCategory === i && (
-									<div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 backdrop-blur-md bg-white/95 rounded-2xl shadow-xl border border-rose-100/80 p-2 z-50">
+									<div
+										id={`nav-category-${i}`}
+										className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 backdrop-blur-md bg-white/95 rounded-2xl shadow-xl border border-rose-100/80 p-2 z-50"
+									>
 										{cat.items.map((item) => (
 											<Link
 												key={item.name}
@@ -154,7 +159,11 @@ export function Header() {
 							type="button"
 							className="md:hidden p-2 text-rose-500 hover:text-gray-900 transition-colors"
 							onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-							aria-label="メニューを開く"
+							aria-expanded={mobileMenuOpen}
+							aria-controls="mobile-menu"
+							aria-label={
+								mobileMenuOpen ? "メニューを閉じる" : "メニューを開く"
+							}
 						>
 							<svg
 								className="w-6 h-6"
@@ -193,7 +202,31 @@ export function Header() {
 						onKeyDown={() => {}}
 						role="presentation"
 					/>
-					<div className="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-white border-l border-rose-100 shadow-[-20px_0_50px_-20px_rgba(225,29,72,0.16)] z-50 overflow-y-auto md:hidden">
+					<div
+						id="mobile-menu"
+						className="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-white border-l border-rose-100 shadow-[-20px_0_50px_-20px_rgba(225,29,72,0.16)] z-50 overflow-y-auto md:hidden"
+					>
+						<button
+							type="button"
+							onClick={() => setMobileMenuOpen(false)}
+							aria-label="メニューを閉じる"
+							className="absolute right-4 top-4 z-10 inline-flex h-11 w-11 items-center justify-center rounded-full border border-rose-100 bg-white text-rose-500 shadow-sm transition-colors hover:bg-rose-50 hover:text-gray-950"
+						>
+							<svg
+								className="h-5 w-5"
+								fill="none"
+								viewBox="0 0 24 24"
+								aria-hidden="true"
+								strokeWidth="2"
+								stroke="currentColor"
+							>
+								<path
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									d="M6 18L18 6M6 6l12 12"
+								/>
+							</svg>
+						</button>
 						<div className="p-6 pt-24 space-y-8">
 							{NAV_CATEGORIES.map((cat) => (
 								<nav

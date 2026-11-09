@@ -60,6 +60,12 @@ export default function TechArticlesIndexPage() {
 					WebXRの仕様更新、ブラウザ対応、Meta Quest・iOS
 					Safari・WebGPUの実装ノウハウ、イベント情報を日本語で整理しています
 				</p>
+				<Link
+					href="/tech-articles/categories"
+					className="mt-4 inline-flex min-h-9 items-center text-sm font-bold text-gray-600 transition-colors hover:text-[#e11d48]"
+				>
+					カテゴリ別に見る →
+				</Link>
 			</header>
 
 			<div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">

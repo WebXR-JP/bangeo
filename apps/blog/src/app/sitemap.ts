@@ -12,7 +12,7 @@ type SitemapDoc = {
 	info: { path: string };
 };
 
-const SITE_STRUCTURE_UPDATED = new Date("2026-11-05T00:00:00Z");
+const SITE_STRUCTURE_UPDATED = new Date("2026-11-09T00:00:00Z");
 
 export default function sitemap(): MetadataRoute.Sitemap {
 	const blogDocs = getDocs(blog);
@@ -47,6 +47,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
 			),
 			changeFrequency: "weekly",
 			priority: 0.9,
+		},
+		{
+			url: `${SITE_URL}/tech-articles/categories`,
+			lastModified: latestContentModified,
+			changeFrequency: "weekly",
+			priority: 0.7,
 		},
 		{
 			url: `${SITE_URL}/experiments`,

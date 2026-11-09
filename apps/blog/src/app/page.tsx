@@ -4,6 +4,7 @@ import Link from "next/link";
 import { CollectionStructuredData } from "@/components/collection-structured-data";
 import { OptimizedImage } from "@/components/optimized-image";
 import { contentDateValue } from "@/lib/content-dates";
+import { getDemoCatalog } from "@/lib/demo-catalog";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
 import { CARD_IMAGE_SIZES, NO_IMAGE } from "@/lib/image-defaults";
 
@@ -129,7 +130,7 @@ export default function HomePage() {
 			return dateB - dateA;
 		});
 
-	const experimentsList = getDocs(experiments)
+	const experimentDocs = getDocs(experiments)
 		.filter((exp) => !exp.draft)
 		.sort((a, b) => {
 			const dateA = contentDateValue(a.updated ?? a.date);
@@ -137,11 +138,39 @@ export default function HomePage() {
 			return dateB - dateA;
 		});
 
+	const experimentSlugs = new Set(
+		experimentDocs.map((exp) => getSlugFromPath(exp.info.path)),
+	);
+	const demoItems = [
+		...getDemoCatalog()
+			.filter((demo) => !experimentSlugs.has(demo.slug))
+			.map((demo) => ({
+				key: `demo-${demo.slug}`,
+				href: demo.href,
+				title: demo.title,
+				description: demo.description,
+				category: demo.category,
+				thumbnail: undefined as string | undefined,
+			})),
+		...experimentDocs.map((exp) => {
+			const slug = getSlugFromPath(exp.info.path);
+			return {
+				key: `experiment-${slug}`,
+				href: `/experiments/${slug}`,
+				title: exp.title,
+				description: exp.description,
+				category: exp.category ? String(exp.category) : undefined,
+				thumbnail: exp.thumbnail ? String(exp.thumbnail) : undefined,
+			};
+		}),
+	];
 	const podcastEpisodes = getDocs(podcast);
-	const hasExperiments = experimentsList.length > 0;
-
-	const formatCount = (count: number): string =>
-		count >= 10 ? `${count}+` : `${count}`;
+	const hasDemos = demoItems.length > 0;
+	const blogCategories = new Set(
+		blogPosts
+			.map((post) => (post.category ? String(post.category) : null))
+			.filter((category): category is string => Boolean(category)),
+	);
 
 	return (
 		<div className="overflow-x-hidden">
@@ -170,21 +199,12 @@ export default function HomePage() {
 									: undefined,
 						};
 					}),
-					...experimentsList.slice(0, 3).map((exp) => {
-						const slug = getSlugFromPath(exp.info.path);
-						return {
-							name: exp.title,
-							path: `/experiments/${slug}`,
-							description: exp.description,
-							image: exp.thumbnail ? String(exp.thumbnail) : undefined,
-							datePublished: exp.date ? String(exp.date) : undefined,
-							dateModified: exp.updated
-								? String(exp.updated)
-								: exp.date
-									? String(exp.date)
-									: undefined,
-						};
-					}),
+					...demoItems.slice(0, 3).map((demo) => ({
+						name: demo.title,
+						path: demo.href,
+						description: demo.description,
+						image: demo.thumbnail,
+					})),
 				]}
 			/>
 			{/* Hero */}
@@ -221,7 +241,7 @@ export default function HomePage() {
 									href="/experiments"
 									className="inline-flex items-center justify-center gap-2 px-7 py-4 bg-[#e11d48] text-white text-sm font-bold rounded-xl hover:bg-[#be1b3e] transition-all duration-200 shadow-lg shadow-[#e11d48]/20"
 								>
-									{hasExperiments ? "デモを体験する" : "デモ一覧を見る"}
+									{hasDemos ? "デモを体験する" : "デモ一覧を見る"}
 									<svg
 										className="w-4 h-4"
 										fill="none"
@@ -253,7 +273,7 @@ export default function HomePage() {
 								className="group p-6 bg-white/75 backdrop-blur-xs border border-rose-100/80 rounded-2xl shadow-sm shadow-rose-100/50 hover:bg-white hover:border-rose-200 hover:-translate-y-0.5 transition-all duration-200"
 							>
 								<div className="text-4xl font-black text-gray-950 mb-2 tracking-tight">
-									{formatCount(experimentsList.length)}
+									{demoItems.length}
 								</div>
 								<div className="text-sm text-gray-500 font-medium group-hover:text-[#e11d48] transition-colors">
 									デモ
@@ -264,7 +284,7 @@ export default function HomePage() {
 								className="group p-6 bg-white/75 backdrop-blur-xs border border-rose-100/80 rounded-2xl shadow-sm shadow-rose-100/50 hover:bg-white hover:border-rose-200 hover:-translate-y-0.5 transition-all duration-200"
 							>
 								<div className="text-4xl font-black text-gray-950 mb-2 tracking-tight">
-									{formatCount(blogPosts.length)}
+									{blogPosts.length}
 								</div>
 								<div className="text-sm text-gray-500 font-medium group-hover:text-[#e11d48] transition-colors">
 									ブログ記事
@@ -275,18 +295,18 @@ export default function HomePage() {
 								className="group p-6 bg-white/75 backdrop-blur-xs border border-rose-100/80 rounded-2xl shadow-sm shadow-rose-100/50 hover:bg-white hover:border-rose-200 hover:-translate-y-0.5 transition-all duration-200"
 							>
 								<div className="text-4xl font-black text-gray-950 mb-2 tracking-tight">
-									{formatCount(podcastEpisodes.length)}
+									{podcastEpisodes.length}
 								</div>
 								<div className="text-sm text-gray-500 font-medium group-hover:text-[#e11d48] transition-colors">
 									ポッドキャスト
 								</div>
 							</Link>
 							<Link
-								href="/tags"
+								href="/tech-articles/categories"
 								className="group p-6 bg-white/75 backdrop-blur-xs border border-rose-100/80 rounded-2xl shadow-sm shadow-rose-100/50 hover:bg-white hover:border-rose-200 hover:-translate-y-0.5 transition-all duration-200"
 							>
 								<div className="text-4xl font-black text-gray-950 mb-2 tracking-tight">
-									3
+									{blogCategories.size}
 								</div>
 								<div className="text-sm text-gray-500 font-medium group-hover:text-[#e11d48] transition-colors">
 									カテゴリ
@@ -528,50 +548,47 @@ export default function HomePage() {
 					</div>
 
 					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-						{hasExperiments ? (
-							experimentsList.slice(0, 6).map((exp) => {
-								const slug = getSlugFromPath(exp.info.path);
-								return (
-									<Link
-										href={`/experiments/${slug}`}
-										className="group block bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-2xl hover:shadow-gray-200/50 hover:border-transparent hover:-translate-y-1 transition-all duration-300"
-										key={slug}
-									>
-										<div className="aspect-video bg-gray-100 relative overflow-hidden">
-											{exp.thumbnail ? (
-												<OptimizedImage
-													src={String(exp.thumbnail)}
-													alt={exp.title}
-													fill
-													sizes={CARD_IMAGE_SIZES}
-													className="object-cover group-hover:scale-105 transition-transform duration-500"
-												/>
-											) : (
-												<div className="w-full h-full flex items-center justify-center">
-													<span className="text-4xl text-gray-200">
-														&#x1f9ea;
-													</span>
-												</div>
-											)}
-											{exp.category && (
-												<span className="absolute top-4 left-4 px-2.5 py-1 bg-white/95 backdrop-blur-xs text-[10px] font-black text-rose-700 rounded-md uppercase tracking-wide">
-													{String(exp.category)}
+						{hasDemos ? (
+							demoItems.slice(0, 6).map((demo) => (
+								<a
+									href={demo.href}
+									className="group block bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-2xl hover:shadow-gray-200/50 hover:border-transparent hover:-translate-y-1 transition-all duration-300"
+									key={demo.key}
+								>
+									<div className="aspect-video bg-gray-100 relative overflow-hidden">
+										{demo.thumbnail ? (
+											<OptimizedImage
+												src={demo.thumbnail}
+												alt={demo.title}
+												fill
+												sizes={CARD_IMAGE_SIZES}
+												className="object-cover group-hover:scale-105 transition-transform duration-500"
+											/>
+										) : (
+											<div className="w-full h-full flex items-center justify-center">
+												<span className="text-4xl text-gray-200">
+													&#x1f9ea;
 												</span>
-											)}
-										</div>
-										<div className="p-6">
-											<h3 className="font-black text-lg text-gray-950 group-hover:text-[#e11d48] transition-colors mb-2 leading-snug">
-												{exp.title}
-											</h3>
-											{exp.description && (
-												<p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">
-													{exp.description}
-												</p>
-											)}
-										</div>
-									</Link>
-								);
-							})
+											</div>
+										)}
+										{demo.category && (
+											<span className="absolute top-4 left-4 px-2.5 py-1 bg-white/95 backdrop-blur-xs text-[10px] font-black text-rose-700 rounded-md uppercase tracking-wide">
+												{demo.category}
+											</span>
+										)}
+									</div>
+									<div className="p-6">
+										<h3 className="font-black text-lg text-gray-950 group-hover:text-[#e11d48] transition-colors mb-2 leading-snug">
+											{demo.title}
+										</h3>
+										{demo.description && (
+											<p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">
+												{demo.description}
+											</p>
+										)}
+									</div>
+								</a>
+							))
 						) : (
 							<div className="md:col-span-2 lg:col-span-3 rounded-[2rem] border border-dashed border-rose-200 bg-white px-8 py-14 text-center">
 								<p className="text-xs font-black tracking-[0.3em] text-rose-500">
