@@ -205,6 +205,12 @@
 			"filename": "quest-browser-150-webgpu-foveation",
 			"assetDir": "tech",
 			"thumbnail": "/assets/tech/quest-browser-150-webgpu-foveation.webp"
+		},
+		{
+			"slug": "webxr-to-native-quest-runtime",
+			"filename": "webxr-to-native-quest-runtime",
+			"assetDir": "tech",
+			"thumbnail": "/assets/tech/webxr-to-native-quest-runtime.webp"
 		}
 	],
 	"experiments": [
