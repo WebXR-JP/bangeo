@@ -1,0 +1,148 @@
+---
+title: "WebXRをQuestのネイティブAPKへ：webxr-to-nativeの仕組みと移植前の確認点"
+description: "WebXRゲームをブラウザなしでMeta Quest上に動かす「webxr-to-native」を紹介。V8・WebGL 2・OpenXRの構成、APK化の手順、HTML UIやWebGPUの制約、性能比較の確認点を整理します。"
+category: TECH
+tags: [WebXR, Meta Quest, OpenXR, WebGL, IWER]
+date: "2026年11月10日"
+author: "BANGEO Team"
+draft: true
+---
+
+WebXRで作ったゲームを、Meta Quest向けのネイティブアプリとして配布したい。そんな用途に向けたオープンソースのランタイム「[webxr-to-native](https://github.com/Srile/webxr-to-native)」が公開されています。
+
+JavaScriptやWebGLで作ったゲームを、V8とOpenXRを組み合わせた実行環境で動かし、AndroidのAPKにまとめるプロジェクトです。WebViewは使わず、ゲームのWeb向けビルドと必要なアセットをアプリに同梱します。
+
+主な対象はMeta Questです。[README](https://github.com/Srile/webxr-to-native/blob/main/README.md)ではthree.js／Immersive Web SDK（IWSDK）やWonderland Engineのゲームについて、Quest 2とQuest 3での動作が説明されています。
+
+この記事は2026年11月10日に確認した公開READMEと実装を基にしています。BANGEOでは実機での動作検証や性能測定は行っていません。
+
+## V8とOpenXRをつなぐ実行環境
+
+webxr-to-nativeが用意するのは、WebXRゲームを動かすための実行環境です。主な役割分担は次のようになっています。
+
+- JavaScript：V8で実行
+- 描画：WebGL 2の呼び出しをOpenGL ESへ接続
+- XR：IWERのhost modeを通じてWebXR APIを提供し、OpenXRのフレームや入力情報を渡す
+- 音声：ネイティブの音声グラフでWebAudioを処理
+- アセット取得：同梱ファイルや許可されたネットワーク接続先から読み込み
+
+ゲーム側は、index.html、JavaScriptのモジュール、画像やモデルなどのWeb向けビルドを使います。その下にJavaScriptの互換層とC++のホストが入り、ヘッドセットの描画や入力につなぐ構成です。
+
+WebXRの実装には、MetaのImmersive Web Emulation RuntimeであるIWER 2.8.0を利用しています。[公開コード](https://github.com/Srile/webxr-to-native/blob/main/runtime/src/webxr/index.js)でもIWERのhost向けモジュールを読み込み、ネイティブ側のスワップチェーンやフレーム情報に接続する処理を確認できます。
+
+QuestではGL呼び出しを専用スレッドで実行する構成が標準です。JavaScriptの実行、音声処理、描画処理をそれぞれの役割に分けています。
+
+## 移植前に確認したいHTML UIへの依存
+
+READMEは、既存のWebXRゲームを変更せずに実行することを掲げています。ただし、一般的なブラウザと同じ機能がそろっているわけではありません。
+
+特に大きい違いは、HTMLとCSSのレイアウトや描画を行わないことです。documentやイベントなどの軽量なDOMはありますが、HTMLで作ったメニューやボタンは表示されません。メニューを3Dシーン内に用意するなど、コンテンツ側の設計を確認する必要があります。
+
+起動時にHTMLの「VRを開始」ボタンなどで行っていた処理には、ゲームのエントリーポイントより先に読み込むweb.injectという設定が用意されています。ただし、ゲームごとの起動処理に合わせた調整が必要になる場合があります。
+
+ほかにも、READMEは次の制約を明記しています。
+
+- WebGPUには未対応
+- video要素・audio要素による再生には未対応
+- Canvas 2Dは一部機能に対応
+- Quest向けV8にはICUが含まれず、Intlは利用不可
+
+音声については、audio要素による再生とWebAudioによる処理を分けて考える必要があります。WebAudioの音声グラフやdecodeAudioDataは対応機能として挙げられています。
+
+また、APKを作るツールには、V8が処理できないUnicodeプロパティエスケープを含む正規表現を書き換える処理があります。元のゲームを大きく作り直さずに持ち込める構成でも、すべてのブラウザ機能との互換性が保証されるわけではありません。
+
+## Questが主対象。ほかの環境は開発中・実験的な位置づけ
+
+Quest向けには、コントローラー、ハンドトラッキング、マルチビュー、WebXR Layersの投影レイヤーなどが対応項目として記載されています。パススルーARや平面・メッシュ検出も実装されていますが、作者は検証が少ない機能として区別しています。
+
+READMEにある72〜120Hzという記述は、ヘッドセットのリフレッシュレートに合わせた動作の説明です。あらゆるゲームが120fpsで動くことを示すものではありません。
+
+ほかのホスト環境の位置づけは次のとおりです。
+
+- Androidスマートフォン：開発中。Pixel 7 Proで、画面上のタッチ操作を使う平面表示のゲームが動作すると説明
+- macOS・Windows・Linux：実験的。ウィンドウ上でヘッドセットをエミュレート
+- Linuxの追加構成：MonadoやWiVRnを使うOpenXRホストも用意
+- iOS：実験的。READMEの動作説明はシミュレーター
+- Apple Vision Pro：実験的で、シミュレーターのみ
+
+特にApple Vision Proについては、実機での対応や配布実績まで確認されたものとして扱わないようにしてください。
+
+## 既存のWebビルドをAPKにまとめる流れ
+
+Quest向けの導入には、Macまたはx86_64 Linux、Node.js 18以降、CMake 3.22以降、Ninjaなどが必要です。Questは開発者モードを有効にし、USB接続して使います。
+
+基本的な流れは次のとおりです。
+
+1. リポジトリを取得し、npm ciでJavaScriptの依存関係を導入する
+2. tools/setup.shでAndroid SDK、NDK、V8などを準備する
+3. いつもどおりWebアプリをビルドする
+4. host.jsonにアプリID、Webビルドの場所、ネットワーク接続先などを書く
+5. tools/pack.mjsでAPKを作り、Questへインストールする
+
+host.jsonでは、app.packageにAndroidのアプリID、web.distにビルド済みファイルの場所を指定します。外部APIなどへ接続する場合は、network.allowに接続先のoriginを列挙します。初期値は空で、許可していない接続先は拒否されます。
+
+たとえば、ゲームのリポジトリに`native/host.json`を置き、その隣の`dist/`にWebビルドを出力する場合は、次のように設定できます。パスは`host.json`からの相対指定です。これはREADMEを基にした設定例で、実機での検証済みコードではありません。
+
+```json
+{
+  "app": { "name": "My Game", "package": "com.example.mygame" },
+  "web": { "dist": "../dist" },
+  "network": { "allow": [] },
+  "xr": { "autoEnter": true, "preferredRate": 90 }
+}
+```
+
+`xr.autoEnter`は、ページが要求した`offerSession`を起動時に許可する設定です。HTMLボタンで`requestSession`を呼び出すアプリの起動処理を、自動的に置き換えるものではありません。
+
+セットアップと環境変数の読み込み（`source tools/env.sh`）を済ませた後、webxr-to-nativeのディレクトリから次のように実行します。パスとアプリIDは自分のプロジェクトに合わせて変更してください。
+
+```bash
+node tools/pack.mjs ../my-game/native/host.json --install --run
+```
+
+[pack.mjs](https://github.com/Srile/webxr-to-native/blob/main/tools/pack.mjs)はWebビルドをAPKのassetsにコピーし、index.htmlからモジュールのエントリーポイントを取り出します。その後、ランタイムとネイティブライブラリを組み合わせてパッケージ化します。
+
+なお、tools/setup.shはAndroid SDKのライセンスへの同意を自動実行します。実行前にREADMEが案内する[Android SDKの利用条件](https://developer.android.com/studio/terms)を確認してください。
+
+リリースビルドは自分のキーストアで署名する仕組みです。ストアへのアップロードは開発者側で行う必要があり、APKを作成できることとMeta Horizon Storeの審査を通過することは別です。
+
+## ブラウザ版との性能比較のポイント
+
+作者は、WebGLの負荷が高いページではQuest Browserよりフレームあたりの処理時間が短くなることが多いと説明しています。WebGLの呼び出しをネイティブの描画処理につなぎ、ブラウザの実行環境を介さずに動かす構成が背景にあります。
+
+リポジトリには[比較用のベンチマーク](https://github.com/Srile/webxr-to-native/blob/main/apps/bench/README.md)も含まれています。IWSDKを使った5種類のシーンで、ドローコール、マテリアル切り替え、スキニング、インスタンシング、複数要素を組み合わせた負荷を測定する設計です。
+
+ブラウザ側とホスト側はともに72Hzを要求し、JavaScriptの処理時間、フレーム間隔、ドロップ率などを記録します。ベンチマークの説明でも、CPUとGPUのクロックをそろえて比較するよう注意されています。
+
+導入を判断するときは、同じシーン、同じ描画設定で比較することが重要です。API呼び出しの負荷が減っても、GPU側の描画負荷が支配的なら、同じ割合でフレームレートが改善するとは限りません。
+
+gl.pipelineを有効にすると、描画中のフレームと次のフレームの記録を重ねられますが、READMEには1フレーム分の遅延が増えると明記されています。速度だけでなく、頭や手の動きに対する応答も確認したい設定です。
+
+## 配布前に確認したいライセンスとデバッグ設定
+
+プロジェクト本体は[MITライセンス](https://github.com/Srile/webxr-to-native/blob/main/LICENSE)です。ただし、同梱するV8、IWER、OpenXR loaderなどには、それぞれのライセンスが適用されます。
+
+ビルドにはTHIRD_PARTY_NOTICES.txtが含まれる仕組みになっており、作者は配布時にもそのファイルを残すよう案内しています。WebRTCを有効にした構成ではMPL-2.0のコンポーネントも含まれるため、[THIRD_PARTY_NOTICES.md](https://github.com/Srile/webxr-to-native/blob/main/THIRD_PARTY_NOTICES.md)を確認してください。
+
+デバッグビルドにも注意が必要です。Questではインスペクターがローカルネットワークからの接続を受け付けるため、READMEはデバッグビルドを配布しないよう警告しています。リリースビルドではインスペクターを無効にする処理が入っています。
+
+## Webで作った体験の配布先を広げる選択肢
+
+注目したいのは、WebXRで作った体験を、Web向けの開発資産を使いながらQuestのインストール型アプリへ展開できる点です。
+
+URLからすぐに体験できるWeb版と、APKとして配布する版では、導入方法や更新方法が変わります。どちらが適しているかは、体験を届けたい相手や運用方法によって判断できます。
+
+まずはHTML UIへの依存が少ないWebGL 2ベースの小さなシーンで、起動、左右の描画、コントローラーや手の入力、音声、保存、通信を順に確認するとよいでしょう。そのうえで、ブラウザ版との性能差と配布に必要な作業を比較するのが現実的です。
+
+## 参考情報
+
+- [webxr-to-native：GitHubリポジトリ](https://github.com/Srile/webxr-to-native)
+- [webxr-to-native：README](https://github.com/Srile/webxr-to-native/blob/main/README.md)
+- [パッケージ化の実装：tools/pack.mjs](https://github.com/Srile/webxr-to-native/blob/main/tools/pack.mjs)
+- [WebXRとIWERの接続実装](https://github.com/Srile/webxr-to-native/blob/main/runtime/src/webxr/index.js)
+- [起動スクリプトの実装](https://github.com/Srile/webxr-to-native/blob/main/runtime/src/boot.js)
+- [ベンチマークの説明](https://github.com/Srile/webxr-to-native/blob/main/apps/bench/README.md)
+- [ベンチマークツール](https://github.com/Srile/webxr-to-native/blob/main/tools/bench.mjs)
+- [MITライセンス](https://github.com/Srile/webxr-to-native/blob/main/LICENSE)
+- [第三者ソフトウェアのライセンス](https://github.com/Srile/webxr-to-native/blob/main/THIRD_PARTY_NOTICES.md)
+- [Android SDK利用条件](https://developer.android.com/studio/terms)
