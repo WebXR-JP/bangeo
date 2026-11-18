@@ -5,12 +5,16 @@ date: "2026-11-18"
 category: "NEWS"
 tags: ["Meta Quest", "Quest Browser", "WebXR", "WebGPU", "Chromium"]
 author: "BANGEO Team"
-thumbnail: "/assets/tech/webgpu-webxr-quest-browser.webp"
+thumbnail: "/assets/news/quest-browser-156-webgpu-webxr.webp"
 ---
 
 Metaは、2026年11月13日付の[Browser 156.0リリースノート](https://developers.meta.com/vr/downloads/package/browser/156.0/)で、**WebXRにおけるWebGPUのサポート**を新機能として記載しました。あわせて、Chromium 156への更新と、OS全体を更新せずにWebViewを更新する実験機能を案内しています。
 
 WebGPU in WebXR自体が156.0で初めて登場したわけではありません。146.0では実験的な対応として案内されており、今回はその経緯と156.0の記述を分けて見ていきます。
+
+![VRヘッドセットを着けたキャラクターとGPUを持つキャラクターが、ブラウザ内の3Dシーンを囲む概念イラスト](/assets/news/quest-browser-156-webgpu-webxr.webp)
+
+*WebGPUとWebXRの連携を表すイメージ。実機画面ではありません。*
 
 ## 156.0の主な更新
 
@@ -28,6 +32,10 @@ WebViewの更新は、WebXRでWebGPUを使うための条件として記載さ�
 WebXRはVR・ARセッションや姿勢・入力を扱うAPI、WebGPUはGPUによる描画や計算処理を扱うAPIです。両者を組み合わせることで、WebGPUの描画結果をXR体験に利用できます。
 
 Meta Browserでは、これまでも関連機能が段階的に追加されてきました。
+
+![146.0の実験対応から、Space Warp Layer、foveation、Composition Layersを経て、156.0のサポート記載に至る時系列](/assets/news/quest-browser-156-webgpu-webxr-timeline.webp)
+
+*各版の公式リリースノートを基に作成。日付は公式ページの表記です。*
 
 | バージョン・公式ページの日付 | WebXR / WebGPU関連の更新 |
 | --- | --- |

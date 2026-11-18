@@ -15,6 +15,12 @@
 	],
 	"articles": [
 		{
+			"slug": "quest-browser-156-webgpu-webxr",
+			"filename": "quest-browser-156-webgpu-webxr",
+			"assetDir": "news",
+			"thumbnail": "/assets/news/quest-browser-156-webgpu-webxr.webp"
+		},
+		{
 			"slug": "steam-frame-steamos-0-5-7-webxr",
 			"filename": "pcvr-webxr-guide",
 			"assetDir": "tech",
