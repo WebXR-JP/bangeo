@@ -6,7 +6,8 @@ import { getExperimentGuide } from "./experiment-guides";
  * `public/demos/<slug>/` に置かれた静的デモのカタログ。
  *
  * デモ本体の正は public/demos 側のHTMLなので、ディレクトリの実体から
- * 一覧・ホーム・検索インデックスを作り、件数やリンク先が実装とずれないようにする。
+ * 検索インデックスを作り、件数やリンク先が実装とずれないようにする。
+ * （/experiments とホームの一覧は取り外した。記事からのリンクと検索では引き続き開ける）
  */
 export interface DemoCatalogEntry {
 	slug: string;
@@ -20,7 +21,7 @@ export interface DemoCatalogEntry {
 
 const ENTRY_FILES = ["index.html", "app.html", "demo.html"] as const;
 
-/** ホームの先頭に並べるデモ。ここにないものは名前順で後ろに続く。 */
+/** 先頭に並べるデモ。ここにないものは名前順で後ろに続く。 */
 const FEATURED_ORDER = [
 	"hit-test-advanced",
 	"hand-tracking-advanced",

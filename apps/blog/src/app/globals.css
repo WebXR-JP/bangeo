@@ -17,6 +17,13 @@
 	--color-primary-800: #9f1239;
 	--color-primary-900: #881337;
 	--color-primary-950: #4c0519;
+	/* 判定を表す色。対応=青 / 要確認=アンバーの2色と灰だけを使い、ブランドの rose は判定に使わない。
+	   -ink は淡い面の上に載せる文字色（小さい文字でもコントラスト4.5:1以上） */
+	--color-data-yes: #2a78d6;
+	--color-data-yes-ink: #1c5ca8;
+	--color-data-yes-soft: #eaf2fc;
+	--color-data-ask: #b45309;
+	--color-data-ask-soft: #fdf1e3;
 	--radius-2xl: 1rem;
 }
 

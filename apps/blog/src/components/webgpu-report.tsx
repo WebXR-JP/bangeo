@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { limitRatioToDefault } from "@/lib/report/summary";
+import {
+	type AdapterInfoLike,
+	adapterDisplayName,
+	type PowerPreference,
+} from "@/lib/report/webgpu";
 import { SITE_URL } from "@/lib/site-url";
 import {
 	adapterInfoFields,
@@ -14,76 +20,8 @@ import {
 	webgpuLimitCatalog,
 	wgslLanguageFeatureByName,
 } from "@/lib/webgpu-report-catalog";
-
-type PowerPreference = "high-performance" | "low-power";
-
-interface MinimalAdapterInfo {
-	vendor?: string;
-	architecture?: string;
-	device?: string;
-	description?: string;
-	subgroupMinSize?: number;
-	subgroupMaxSize?: number;
-	isFallbackAdapter?: boolean;
-}
-
-interface MinimalAdapter {
-	features: { has(name: string): boolean } & Iterable<string>;
-	limits: Record<string, unknown>;
-	info?: MinimalAdapterInfo;
-	isFallbackAdapter?: boolean;
-	requestAdapterInfo?: () => Promise<MinimalAdapterInfo>;
-}
-
-interface MinimalGPU {
-	requestAdapter(options?: {
-		powerPreference?: PowerPreference;
-	}): Promise<MinimalAdapter | null>;
-	getPreferredCanvasFormat?: () => string;
-	wgslLanguageFeatures?: Iterable<string>;
-}
-
-interface ReportData {
-	info: MinimalAdapterInfo;
-	isFallbackAdapter: boolean;
-	features: string[];
-	limits: Record<string, number>;
-	preferredCanvasFormat: string | null;
-	wgslFeatures: string[];
-}
-
-type Status = "checking" | "ready" | "unsupported" | "error";
-
-function getGPU(): MinimalGPU | null {
-	if (typeof navigator === "undefined") return null;
-	const nav = navigator as Navigator & { gpu?: MinimalGPU };
-	return nav.gpu ?? null;
-}
-
-function describeEnvironment(ua: string): string {
-	if (/OculusBrowser/i.test(ua)) return "Meta Quest / Quest Browser";
-	if (/PicoBrowser|Pico\s?Browser/i.test(ua)) return "PICO / PICO Browser";
-	if (/Wolvic/i.test(ua)) return "Wolvic";
-
-	let os = "不明なOS";
-	if (/Windows/i.test(ua)) os = "Windows";
-	else if (/Android/i.test(ua)) os = "Android";
-	else if (/iPhone|iPad/i.test(ua)) os = "iOS";
-	else if (/Macintosh/i.test(ua)) os = "macOS";
-	else if (/Linux/i.test(ua)) os = "Linux";
-
-	let browser = "不明なブラウザ";
-	const edge = ua.match(/Edg\/(\d+)/);
-	const chrome = ua.match(/Chrome\/(\d+)/);
-	const firefox = ua.match(/Firefox\/(\d+)/);
-	const safari = ua.match(/Version\/(\d+).*Safari/);
-	if (edge) browser = `Edge ${edge[1]}`;
-	else if (firefox) browser = `Firefox ${firefox[1]}`;
-	else if (chrome) browser = `Chrome ${chrome[1]}`;
-	else if (safari) browser = `Safari ${safari[1]}`;
-
-	return `${os} / ${browser}`;
-}
+import { MarkBadge } from "./report/report-mark";
+import { useReport } from "./report/report-provider";
 
 function formatBytes(value: number): string {
 	if (value < 1024) return `${value} B`;
@@ -103,13 +41,7 @@ function formatLimitValue(entry: WebGPULimitEntry, value: number): string {
 	return value.toLocaleString();
 }
 
-/** 既定値に対する余裕。maximum は大きいほど、alignment は小さいほど良い。 */
-function ratioToDefault(entry: WebGPULimitEntry, value: number): number {
-	if (value <= 0) return 0;
-	return entry.limitClass === "alignment"
-		? entry.default / value
-		: value / entry.default;
-}
+const ratioToDefault = limitRatioToDefault;
 
 function ratioLabel(ratio: number): string {
 	if (ratio >= 100) return `標準の${Math.round(ratio)}倍`;
@@ -122,11 +54,6 @@ function ratioLabel(ratio: number): string {
 function ratioBarWidth(ratio: number): number {
 	return Math.max(4, Math.min(100, (ratio / 4) * 100));
 }
-
-const badgeClass = {
-	supported: "bg-emerald-50 text-emerald-700",
-	unsupported: "bg-gray-100 text-gray-400",
-};
 
 const sectionLabelClass =
 	"mt-10 text-[11px] font-black tracking-[0.14em] text-gray-400";
@@ -143,86 +70,21 @@ const buttonClass =
 const PAGE_URL = `${SITE_URL}/webgpu-report`;
 
 export function WebGPUReport() {
-	const [status, setStatus] = useState<Status>("checking");
-	const [errorMessage, setErrorMessage] = useState<string | null>(null);
-	const [report, setReport] = useState<ReportData | null>(null);
-	const [envLabel, setEnvLabel] = useState<string | null>(null);
-	const [userAgent, setUserAgent] = useState("");
-	const [power, setPower] = useState<PowerPreference>("high-performance");
-	const [hasXRGPUBinding, setHasXRGPUBinding] = useState(false);
+	// 取得はレポートのレイアウトで1回だけ行い、結果画像と同じ結果をここで使う
+	const {
+		userAgent,
+		environment,
+		webxr,
+		webgpu: { status, report, errorMessage, power, switchPower },
+	} = useReport();
 	const [copied, setCopied] = useState(false);
+	const copiedTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+		undefined,
+	);
+	useEffect(() => () => clearTimeout(copiedTimer.current), []);
 
-	const collect = useCallback(async (powerPreference: PowerPreference) => {
-		const gpu = getGPU();
-		if (!gpu) {
-			setStatus("unsupported");
-			return;
-		}
-
-		setStatus("checking");
-		try {
-			const adapter = await gpu.requestAdapter({ powerPreference });
-			if (!adapter) {
-				setStatus("error");
-				setErrorMessage(
-					"navigator.gpu はありますが、使えるGPUアダプターを取得できませんでした。ドライバーの制限や、ブラウザ側でGPUが拒否リストに入っている可能性があります。",
-				);
-				return;
-			}
-
-			let info: MinimalAdapterInfo = adapter.info ?? {};
-			if (!adapter.info && adapter.requestAdapterInfo) {
-				try {
-					info = await adapter.requestAdapterInfo();
-				} catch {
-					info = {};
-				}
-			}
-
-			const features = [...adapter.features].sort();
-			const limits: Record<string, number> = {};
-			for (const entry of webgpuLimitCatalog) {
-				const value = adapter.limits[entry.name];
-				if (typeof value === "number") limits[entry.name] = value;
-			}
-
-			setReport({
-				info,
-				isFallbackAdapter: Boolean(
-					adapter.isFallbackAdapter ?? info.isFallbackAdapter,
-				),
-				features,
-				limits,
-				preferredCanvasFormat: gpu.getPreferredCanvasFormat?.() ?? null,
-				wgslFeatures: gpu.wgslLanguageFeatures
-					? [...gpu.wgslLanguageFeatures].sort()
-					: [],
-			});
-			setStatus("ready");
-		} catch (error) {
-			setStatus("error");
-			setErrorMessage(
-				error instanceof Error
-					? `GPU情報の取得に失敗しました: ${error.message}`
-					: "GPU情報の取得に失敗しました。",
-			);
-		}
-	}, []);
-
-	useEffect(() => {
-		setUserAgent(navigator.userAgent);
-		setEnvLabel(describeEnvironment(navigator.userAgent));
-		setHasXRGPUBinding(
-			typeof (window as unknown as Record<string, unknown>).XRGPUBinding !==
-				"undefined",
-		);
-		collect("high-performance");
-	}, [collect]);
-
-	function switchPower(next: PowerPreference) {
-		setPower(next);
-		collect(next);
-	}
+	const envLabel = environment?.label ?? null;
+	const xrBinding = webxr.results["webgpu-binding"];
 
 	const supportedFeatures = new Set(report?.features ?? []);
 	const knownSupportedCount = webgpuFeatureCatalog.filter((entry) =>
@@ -232,19 +94,12 @@ export function WebGPUReport() {
 		(name) => !webgpuFeatureByName.has(name),
 	);
 
-	const adapterName =
-		[report?.info.vendor, report?.info.architecture]
-			.filter(Boolean)
-			.join(" / ") ||
-		report?.info.description ||
-		"GPU名は非公開";
-
 	function buildSummaryText(): string {
 		if (!report) return "";
 		const lines = [
 			"WebGPU対応レポート (BANGEO)",
 			`環境: ${envLabel ?? "不明"}`,
-			`GPU: ${adapterName}`,
+			`GPU: ${adapterDisplayName(report.info) ?? "GPU名は非公開"}`,
 			`対応feature: ${knownSupportedCount} / ${webgpuFeatureCatalog.length}`,
 			`対応feature一覧: ${report.features.join(", ") || "なし"}`,
 			`preferredCanvasFormat: ${report.preferredCanvasFormat ?? "不明"}`,
@@ -269,36 +124,42 @@ export function WebGPUReport() {
 		try {
 			await navigator.clipboard.writeText(buildSummaryText());
 			setCopied(true);
-			setTimeout(() => setCopied(false), 2000);
+			clearTimeout(copiedTimer.current);
+			copiedTimer.current = setTimeout(() => setCopied(false), 1600);
 		} catch {
 			setCopied(false);
 		}
 	}
 
-	const shareText = report
-		? `私の環境（${envLabel ?? "不明"}）のWebGPU対応は ${knownSupportedCount}/${webgpuFeatureCatalog.length} でした`
-		: "WebGPUの対応状況を日本語の解説つきで確認できます";
-	const shareHref = `https://x.com/intent/tweet?text=${encodeURIComponent(
-		shareText,
-	)}&url=${encodeURIComponent(PAGE_URL)}`;
-
 	function renderFeatureRow(name: string) {
 		const entry = webgpuFeatureByName.get(name);
 		const supported = supportedFeatures.has(name);
 		const category: WebGPUFeatureCategory | null = entry?.category ?? null;
+		// アダプターを取得できなかったときは「未対応」と言い切らない
+		const mark =
+			status === "checking"
+				? "checking"
+				: status === "error"
+					? "unknown"
+					: supported
+						? "yes"
+						: "no";
 		return (
 			<li
 				key={name}
-				className="grid grid-cols-[3.5rem_minmax(0,1fr)] gap-x-4 px-5 py-5"
+				id={`feature-${name}`}
+				className="grid scroll-mt-28 grid-cols-[4.5rem_minmax(0,1fr)] gap-x-4 px-5 py-5"
 			>
 				<span className="pt-0.5">
-					<span
-						className={`inline-flex w-full justify-center rounded-full px-2 py-1 text-[11px] font-bold ${
-							supported ? badgeClass.supported : badgeClass.unsupported
-						}`}
-					>
-						{supported ? "対応" : "未対応"}
-					</span>
+					<MarkBadge mark={mark} className="w-full">
+						{mark === "yes"
+							? "対応"
+							: mark === "no"
+								? "未対応"
+								: mark === "unknown"
+									? "未確認"
+									: ""}
+					</MarkBadge>
 				</span>
 				<div className="min-w-0">
 					<p className="flex flex-wrap items-center gap-2 text-base font-bold leading-snug text-gray-950">
@@ -407,42 +268,14 @@ export function WebGPUReport() {
 
 	return (
 		<div>
-			<div className="flex flex-wrap items-center gap-x-4 gap-y-3 rounded-2xl bg-gray-50 px-5 py-4">
-				<div className="min-w-0">
-					<p className="text-sm font-bold text-gray-950">
-						{envLabel ?? "環境を確認中…"}
-					</p>
-					<p className="mt-0.5 text-xs text-gray-400">
-						{status === "ready"
-							? `${adapterName} ／ ${knownSupportedCount} / ${webgpuFeatureCatalog.length} の機能がこのGPUで使えます`
-							: "GPU情報を取得中…"}
-					</p>
-				</div>
-				{status === "ready" && (
-					<div className="ml-auto flex items-center gap-2">
-						<button type="button" onClick={copyResult} className={buttonClass}>
-							{copied ? "コピーしました" : "結果をコピー"}
-						</button>
-						<a
-							href={shareHref}
-							target="_blank"
-							rel="noopener noreferrer"
-							className={buttonClass}
-						>
-							Xでシェア
-						</a>
-					</div>
-				)}
-			</div>
-
 			{status === "error" && (
-				<p className="mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm leading-relaxed text-amber-900">
+				<p className="mb-4 rounded-2xl border border-amber-200 bg-data-ask-soft px-5 py-4 text-sm leading-relaxed text-amber-900">
 					{errorMessage}
 				</p>
 			)}
 
-			<div className="mt-4 flex flex-wrap items-center gap-2">
-				<span className="text-xs font-bold text-gray-400">
+			<div className="flex flex-wrap items-center gap-2">
+				<span className="text-xs font-bold text-gray-500">
 					アダプターの選び方
 				</span>
 				{(
@@ -455,6 +288,7 @@ export function WebGPUReport() {
 						key={value}
 						type="button"
 						onClick={() => switchPower(value)}
+						aria-pressed={power === value}
 						className={`rounded-full px-3.5 py-1.5 text-xs font-bold transition ${
 							power === value
 								? "bg-gray-950 text-white"
@@ -464,8 +298,8 @@ export function WebGPUReport() {
 						{label}
 					</button>
 				))}
-				<span className="text-xs text-gray-400">
-					（GPUが2つある端末では結果が変わります）
+				<span className="text-xs text-gray-500">
+					（GPUが2つある端末では結果が変わり、上の画像にも反映されます）
 				</span>
 			</div>
 
@@ -476,7 +310,7 @@ export function WebGPUReport() {
 			</p>
 			<ul className="mt-3 divide-y divide-gray-100 rounded-2xl border border-gray-100">
 				{adapterInfoFields.map((field) => {
-					const raw = report?.info[field.key as keyof MinimalAdapterInfo];
+					const raw = report?.info[field.key as keyof AdapterInfoLike];
 					const value = raw === undefined || raw === "" ? null : String(raw);
 					return (
 						<li key={field.key} className="px-5 py-4">
@@ -501,9 +335,11 @@ export function WebGPUReport() {
 						<code className={codeClass}>isFallbackAdapter</code>
 					</div>
 					<p className="mt-1 text-base font-black text-gray-950">
-						{report?.isFallbackAdapter
-							? "はい（CPU側のフォールバック）"
-							: "いいえ（GPUで動作）"}
+						{!report
+							? "取得できません"
+							: report.isFallbackAdapter
+								? "はい（CPU側のフォールバック）"
+								: "いいえ（GPUで動作）"}
 					</p>
 					<p className="mt-1 text-xs leading-relaxed text-gray-500">
 						true
@@ -534,7 +370,13 @@ export function WebGPUReport() {
 						<code className={codeClass}>XRGPUBinding</code>
 					</div>
 					<p className="mt-1 text-base font-black text-gray-950">
-						{hasXRGPUBinding ? "利用できます" : "利用できません"}
+						{xrBinding === "supported"
+							? "利用できます"
+							: xrBinding === "unsupported"
+								? "利用できません"
+								: xrBinding === "unknown"
+									? "判定できませんでした"
+									: "確認中…"}
 					</p>
 					<p className="mt-1 text-xs leading-relaxed text-gray-500">
 						WebGPUで描いた映像をそのままWebXRのセッションに出すための橋渡しです。未対応の環境では、XR側の描画はWebGLで行うことになります。
@@ -605,9 +447,20 @@ export function WebGPUReport() {
 				</ul>
 			)}
 
+			{status === "ready" && (
+				<div className="mt-8 flex flex-wrap items-center gap-x-3 gap-y-2">
+					<button type="button" onClick={copyResult} className={buttonClass}>
+						{copied ? "コピーしました" : "全項目をテキストでコピー"}
+					</button>
+					<p className="text-xs leading-relaxed text-gray-500">
+						不具合の報告や比較用に、機能と上限値の一覧を文字でコピーします。
+					</p>
+				</div>
+			)}
+
 			{userAgent && (
-				<details className="mt-8">
-					<summary className="cursor-pointer text-xs font-bold text-gray-400 transition hover:text-gray-600">
+				<details className="mt-4">
+					<summary className="cursor-pointer text-xs font-bold text-gray-500 transition hover:text-gray-700">
 						User Agent を表示
 					</summary>
 					<p className="mt-2 break-all rounded-xl bg-gray-50 px-3 py-2 font-mono text-[11px] leading-relaxed text-gray-500">
