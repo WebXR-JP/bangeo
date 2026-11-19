@@ -19,9 +19,9 @@ WebXRに関する日本語情報サイト。配信アプリは `apps/blog/`（Ne
 | --- | --- |
 | 記事の新規作成・内容改訂・公開前レビュー | `.claude/skills/bangeo-article-authoring/SKILL.md` |
 | 新規デモ・デモの機能変更 | `docs/agent-guides/demos.md` → 選んだ方式のスキル |
-| 仕様カタログ・スターターの変更 | `docs/agent-guides/catalog.md` |
+| レポート・仕様カタログ・スターターの変更 | `docs/agent-guides/catalog.md` |
 | 定期ウォッチ・イベント更新 | `docs/agent-guides/event-watch.md` |
-| 匿名実験レポート連携 | `docs/experiment-analytics.md` |
+| 匿名実験レポート連携（停止中） | `docs/experiment-analytics.md` |
 
 軽微な誤字修正に全スキルや参照文書を読まない。スキル本体は `.claude/skills/` に一本化し、Codexは `.agents/skills/` のリンクから発見する。
 

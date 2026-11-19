@@ -9,13 +9,27 @@ export interface NavCategory {
 	items: NavItem[];
 }
 
+/**
+ * サイトの主機能。カテゴリのドロップダウンに入れず、ヘッダーに常に出す。
+ */
+export const NAV_PRIMARY: NavItem = { name: "レポート", href: "/report" };
+
+/**
+ * レポート内の表示切り替え。この端末の結果画像の下に並ぶタブで、
+ * モバイルメニューにも同じ順で出す。
+ */
+export const REPORT_NAV_ITEMS: NavItem[] = [
+	{ name: "概要", href: "/report" },
+	{ name: "WebXR", href: "/experiments" },
+	{ name: "WebGPU", href: "/webgpu-report" },
+];
+
 export const NAV_CATEGORIES: NavCategory[] = [
 	{
 		label: "ガイド",
 		items: [
 			{ name: "WebXRとは", href: "/webxr-explainer" },
 			{ name: "標準化・対応状況", href: "/webxr-status" },
-			{ name: "WebGPU対応レポート", href: "/webgpu-report" },
 			{ name: "イベントウォッチ", href: "/events" },
 			{ name: "活用事例集", href: "/platforms" },
 			{ name: "対応デバイス一覧", href: "/devices" },
@@ -24,7 +38,6 @@ export const NAV_CATEGORIES: NavCategory[] = [
 	{
 		label: "作る・学ぶ",
 		items: [
-			{ name: "デモ", href: "/experiments" },
 			{ name: "技術記事", href: "/tech-articles" },
 			{ name: "ポッドキャスト", href: "/podcast" },
 			{ name: "ライブラリ", href: "/libraries" },
@@ -63,11 +76,12 @@ export const NAV_CATEGORIES: NavCategory[] = [
 ];
 
 export const FOOTER_MAIN_LINKS = [
-	{ name: "デモ", href: "/experiments" },
+	{ name: "レポート", href: "/report" },
+	{ name: "WebXRレポート", href: "/experiments" },
+	{ name: "WebGPUレポート", href: "/webgpu-report" },
 	{ name: "技術記事", href: "/tech-articles" },
 	{ name: "ポッドキャスト", href: "/podcast" },
 	{ name: "標準化状況", href: "/webxr-status" },
-	{ name: "WebGPU対応レポート", href: "/webgpu-report" },
 	{ name: "イベント", href: "/events" },
 	{ name: "デバイス", href: "/devices" },
 	{ name: "ライブラリ", href: "/libraries" },

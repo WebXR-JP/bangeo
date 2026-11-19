@@ -22,7 +22,7 @@ export default function PrivacyPolicyPage() {
 					<span className="text-[#e11d48]">。</span>
 				</h1>
 				<p className="text-xl text-gray-500 font-medium leading-relaxed">
-					最終更新日: 2026年9月23日
+					最終更新日: 2026年11月19日
 				</p>
 			</header>
 
@@ -78,7 +78,10 @@ export default function PrivacyPolicyPage() {
 					<p className="text-gray-600 leading-relaxed">
 						BANGEO Analytics の受信先は Cloudflare
 						上で運用しています。計測データに
-						IPアドレスを記録する項目はありませんが、通信時のIPアドレスなどは配信事業者に届きます。匿名のWebXR検証結果は通常計測とは別で、利用者が送信内容を確認し、同意して送信した場合にのみ受け付けます。
+						IPアドレスを記録する項目はありませんが、通信時のIPアドレスなどは配信事業者に届きます。
+					</p>
+					<p className="text-gray-600 leading-relaxed">
+						対応レポートの結果画像は、ご利用のブラウザの中で作成します。BANGEOが画像を受け取ることはなく、保存や共有は利用者ご自身の操作で行います。画像には端末名・ブラウザ・GPUの種類が含まれます。
 					</p>
 					<p className="text-gray-600 leading-relaxed">
 						当サイトでは、環境設定に応じて Google Tag Manager

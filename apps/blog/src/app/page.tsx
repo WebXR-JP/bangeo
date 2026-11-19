@@ -1,12 +1,16 @@
-import { blog, experiments, podcast } from "fumadocs-mdx:collections/server";
+import { blog, podcast } from "fumadocs-mdx:collections/server";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CollectionStructuredData } from "@/components/collection-structured-data";
 import { OptimizedImage } from "@/components/optimized-image";
 import { contentDateValue } from "@/lib/content-dates";
-import { getDemoCatalog } from "@/lib/demo-catalog";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
 import { CARD_IMAGE_SIZES, NO_IMAGE } from "@/lib/image-defaults";
+import {
+	webgpuFeatureCatalog,
+	webgpuLimitCatalog,
+} from "@/lib/webgpu-report-catalog";
+import { webxrSpecCatalog } from "@/lib/webxr-spec-catalog";
 
 export const metadata: Metadata = {
 	title: "WebXRを日本語で学ぶ｜VR・ARデモ・対応ブラウザ・実装ガイド",
@@ -57,11 +61,11 @@ const startGuides = [
 		label: "対応状況を見る",
 	},
 	{
-		title: "WebXRデモを試す",
+		title: "この端末の対応を確かめる",
 		description:
-			"ヘッドセット、スマートフォン、PCで動くBANGEOのWebXR実験を一覧から体験。",
-		href: "/experiments",
-		label: "デモへ進む",
+			"いま開いている端末でWebXRとWebGPUのどの機能が使えるかを判定し、共有できる1枚の画像にまとめます。",
+		href: "/report",
+		label: "レポートを見る",
 	},
 	{
 		title: "iPhoneでWebXRを動かす",
@@ -121,6 +125,31 @@ const learningQuestions = [
 	"DOM Overlay、Hit Test、Depth SensingなどAR機能を整理したい",
 ] as const;
 
+const reportLinks = [
+	{
+		title: "結果の概要と画像",
+		description:
+			"WebXRとWebGPUの判定を1画面で見渡せます。結果は画像として保存・共有できます。",
+		href: "/report",
+	},
+	{
+		title: "WebXR対応レポート",
+		description: `${webxrSpecCatalog.length}件の仕様について、この端末での対応状況と、動かして確かめられるデモを並べています。`,
+		href: "/experiments",
+	},
+	{
+		title: "WebGPU対応レポート",
+		description: `機能（features）${webgpuFeatureCatalog.length}件と上限値（limits）${webgpuLimitCatalog.length}件を、1項目ずつ日本語の解説つきで確認できます。`,
+		href: "/webgpu-report",
+	},
+] as const;
+
+/** レポートが1台の端末について確かめる項目の数（カタログの実数） */
+const reportCheckCount =
+	webxrSpecCatalog.length +
+	webgpuFeatureCatalog.length +
+	webgpuLimitCatalog.length;
+
 export default function HomePage() {
 	const blogPosts = getDocs(blog)
 		.filter((post) => !post.draft)
@@ -130,42 +159,7 @@ export default function HomePage() {
 			return dateB - dateA;
 		});
 
-	const experimentDocs = getDocs(experiments)
-		.filter((exp) => !exp.draft)
-		.sort((a, b) => {
-			const dateA = contentDateValue(a.updated ?? a.date);
-			const dateB = contentDateValue(b.updated ?? b.date);
-			return dateB - dateA;
-		});
-
-	const experimentSlugs = new Set(
-		experimentDocs.map((exp) => getSlugFromPath(exp.info.path)),
-	);
-	const demoItems = [
-		...getDemoCatalog()
-			.filter((demo) => !experimentSlugs.has(demo.slug))
-			.map((demo) => ({
-				key: `demo-${demo.slug}`,
-				href: demo.href,
-				title: demo.title,
-				description: demo.description,
-				category: demo.category,
-				thumbnail: undefined as string | undefined,
-			})),
-		...experimentDocs.map((exp) => {
-			const slug = getSlugFromPath(exp.info.path);
-			return {
-				key: `experiment-${slug}`,
-				href: `/experiments/${slug}`,
-				title: exp.title,
-				description: exp.description,
-				category: exp.category ? String(exp.category) : undefined,
-				thumbnail: exp.thumbnail ? String(exp.thumbnail) : undefined,
-			};
-		}),
-	];
 	const podcastEpisodes = getDocs(podcast);
-	const hasDemos = demoItems.length > 0;
 	const blogCategories = new Set(
 		blogPosts
 			.map((post) => (post.category ? String(post.category) : null))
@@ -177,7 +171,7 @@ export default function HomePage() {
 			<CollectionStructuredData
 				name="BANGEO WebXR主要コンテンツ"
 				path="/"
-				description="WebXRの基礎、対応状況、技術記事、ブラウザで試せるデモへの主要導線。"
+				description="WebXRの基礎、対応状況、技術記事、この端末の対応レポートへの主要導線。"
 				items={[
 					...startGuides.map((guide) => ({
 						name: guide.title,
@@ -199,12 +193,6 @@ export default function HomePage() {
 									: undefined,
 						};
 					}),
-					...demoItems.slice(0, 3).map((demo) => ({
-						name: demo.title,
-						path: demo.href,
-						description: demo.description,
-						image: demo.thumbnail,
-					})),
 				]}
 			/>
 			{/* Hero */}
@@ -234,14 +222,14 @@ export default function HomePage() {
 							<p className="text-lg md:text-xl text-gray-600 leading-relaxed max-w-xl">
 								BANGEOは、ブラウザで動くVR/ARの考え方、対応環境、実装上の注意点を
 								<span className="text-gray-950 font-semibold">日本語</span>
-								で整理する技術リソースです。まず試せるデモから入り、必要に応じて仕様や実装記事へ進めます。
+								で整理する技術リソースです。まずこの端末で何が動くかをレポートで確かめ、必要に応じて仕様や実装記事へ進めます。
 							</p>
 							<div className="flex flex-col sm:flex-row gap-4 pt-2">
 								<Link
-									href="/experiments"
+									href="/report"
 									className="inline-flex items-center justify-center gap-2 px-7 py-4 bg-[#e11d48] text-white text-sm font-bold rounded-xl hover:bg-[#be1b3e] transition-all duration-200 shadow-lg shadow-[#e11d48]/20"
 								>
-									{hasDemos ? "デモを体験する" : "デモ一覧を見る"}
+									この端末のレポートを見る
 									<svg
 										className="w-4 h-4"
 										fill="none"
@@ -269,14 +257,14 @@ export default function HomePage() {
 						{/* Right: Stats */}
 						<div className="lg:col-span-2 grid grid-cols-2 gap-4">
 							<Link
-								href="/experiments"
+								href="/report"
 								className="group p-6 bg-white/75 backdrop-blur-xs border border-rose-100/80 rounded-2xl shadow-sm shadow-rose-100/50 hover:bg-white hover:border-rose-200 hover:-translate-y-0.5 transition-all duration-200"
 							>
 								<div className="text-4xl font-black text-gray-950 mb-2 tracking-tight">
-									{demoItems.length}
+									{reportCheckCount}
 								</div>
 								<div className="text-sm text-gray-500 font-medium group-hover:text-[#e11d48] transition-colors">
-									デモ
+									レポートの確認項目
 								</div>
 							</Link>
 							<Link
@@ -513,119 +501,36 @@ export default function HomePage() {
 				</div>
 			</section>
 
-			{/* Demos Section */}
+			{/* Report Section */}
 			<section className="py-20 md:py-28 bg-gray-50/80">
 				<div className="max-w-6xl mx-auto px-6 md:px-8">
-					<div className="flex justify-between items-end mb-12">
-						<div>
-							<h2 className="text-3xl font-black tracking-tight text-gray-950">
-								デモ
-							</h2>
-							<p className="text-base text-gray-500 mt-2">
-								ヘッドセット・スマートフォン・PC で試せます
-							</p>
-						</div>
-						<Link
-							href="/experiments"
-							className="text-sm font-bold text-gray-600 hover:text-[#e11d48] transition-colors hidden md:flex items-center gap-1"
-						>
-							すべて見る
-							<svg
-								className="w-4 h-4"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-								aria-hidden="true"
-							>
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									strokeWidth={2}
-									d="M9 5l7 7-7 7"
-								/>
-							</svg>
-						</Link>
+					<div className="max-w-3xl mb-12">
+						<p className="text-xs font-black tracking-[0.28em] text-rose-600 mb-3">
+							REPORT
+						</p>
+						<h2 className="text-3xl font-black tracking-tight text-gray-950">
+							この端末の対応レポート
+						</h2>
+						<p className="mt-4 text-base leading-relaxed text-gray-500">
+							いま開いている端末とブラウザで、WebXRとWebGPUのどの機能が使えるかをその場で判定します。確かめたいヘッドセットやスマートフォンのブラウザで開くと、その端末の結果になります。
+						</p>
 					</div>
 
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-						{hasDemos ? (
-							demoItems.slice(0, 6).map((demo) => (
-								<a
-									href={demo.href}
-									className="group block bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-2xl hover:shadow-gray-200/50 hover:border-transparent hover:-translate-y-1 transition-all duration-300"
-									key={demo.key}
-								>
-									<div className="aspect-video bg-gray-100 relative overflow-hidden">
-										{demo.thumbnail ? (
-											<OptimizedImage
-												src={demo.thumbnail}
-												alt={demo.title}
-												fill
-												sizes={CARD_IMAGE_SIZES}
-												className="object-cover group-hover:scale-105 transition-transform duration-500"
-											/>
-										) : (
-											<div className="w-full h-full flex items-center justify-center">
-												<span className="text-4xl text-gray-200">
-													&#x1f9ea;
-												</span>
-											</div>
-										)}
-										{demo.category && (
-											<span className="absolute top-4 left-4 px-2.5 py-1 bg-white/95 backdrop-blur-xs text-[10px] font-black text-rose-700 rounded-md uppercase tracking-wide">
-												{demo.category}
-											</span>
-										)}
-									</div>
-									<div className="p-6">
-										<h3 className="font-black text-lg text-gray-950 group-hover:text-[#e11d48] transition-colors mb-2 leading-snug">
-											{demo.title}
-										</h3>
-										{demo.description && (
-											<p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">
-												{demo.description}
-											</p>
-										)}
-									</div>
-								</a>
-							))
-						) : (
-							<div className="md:col-span-2 lg:col-span-3 rounded-[2rem] border border-dashed border-rose-200 bg-white px-8 py-14 text-center">
-								<p className="text-xs font-black tracking-[0.3em] text-rose-500">
-									準備中
-								</p>
-								<h3 className="mt-4 text-2xl font-black tracking-tight text-gray-950">
-									デモはこれから順次公開します
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+						{reportLinks.map((link) => (
+							<Link
+								key={link.href}
+								href={link.href}
+								className="group p-7 bg-white rounded-2xl hover:shadow-2xl hover:shadow-gray-200/50 hover:-translate-y-1 transition-all duration-300 border border-gray-100"
+							>
+								<h3 className="font-black text-lg text-gray-950 group-hover:text-[#e11d48] transition-colors mb-2">
+									{link.title}
 								</h3>
-								<p className="mt-4 max-w-2xl mx-auto text-base leading-relaxed text-gray-500">
-									未完成のデモはいったん外しています。公開できる品質まで整ったものから、ここに
-									1 件ずつ追加していきます。
+								<p className="text-sm text-gray-500 leading-relaxed">
+									{link.description}
 								</p>
-							</div>
-						)}
-					</div>
-
-					<div className="mt-12 text-center md:hidden">
-						<Link
-							href="/experiments"
-							className="inline-flex items-center gap-1 text-sm font-bold text-gray-600 hover:text-[#e11d48] transition-colors"
-						>
-							すべて見る
-							<svg
-								className="w-4 h-4"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-								aria-hidden="true"
-							>
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									strokeWidth={2}
-									d="M9 5l7 7-7 7"
-								/>
-							</svg>
-						</Link>
+							</Link>
+						))}
 					</div>
 				</div>
 			</section>
@@ -705,14 +610,14 @@ export default function HomePage() {
 							</p>
 						</Link>
 						<Link
-							href="/experiments"
+							href="/devices"
 							className="group p-7 bg-white rounded-2xl hover:shadow-2xl hover:shadow-gray-200/50 hover:-translate-y-1 transition-all duration-300 border border-gray-100"
 						>
 							<h3 className="font-black text-lg text-gray-950 group-hover:text-[#e11d48] transition-colors mb-2">
-								デモ一覧
+								対応デバイス一覧
 							</h3>
 							<p className="text-sm text-gray-500 leading-relaxed">
-								公開中の WebXR デモを試す
+								ヘッドセットやスマートフォンごとの WebXR 対応を確認
 							</p>
 						</Link>
 					</div>
