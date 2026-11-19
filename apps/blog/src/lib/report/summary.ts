@@ -44,6 +44,18 @@ export interface ReportItem {
 	mark: ReportMark;
 }
 
+/** 結果画像に載せる代表的な上限値の1行 */
+export interface ReportLimitHighlight {
+	/** GPUSupportedLimits のプロパティ名 */
+	name: string;
+	title: string;
+	/** 表示用に整えた値（例: 16,384 / 4 GiB） */
+	value: string;
+	/** 仕様の既定値との比（例: 標準の2倍） */
+	ratioLabel: string;
+	aboveDefault: boolean;
+}
+
 export interface ReportSummary {
 	/** すべての判定が終わったか。false の間は画像を作らない */
 	ready: boolean;
@@ -71,14 +83,28 @@ export interface ReportSummary {
 		/** 仕様の既定値を上回っている limit の数 */
 		limitsAboveDefault: number;
 		limitTotal: number;
+		/** カタログ順の feature ごとの判定。WebGPU を使えないときは全件が同じ判定になる */
+		features: ReportItem[];
+		/** 代表的な上限値。値を取得できたものだけ */
+		limitHighlights: ReportLimitHighlight[];
 	};
 }
 
 export interface LimitDefinition {
 	name: string;
+	title: string;
 	default: number;
 	limitClass: "maximum" | "alignment";
+	/** バイト数として表示するか */
+	bytes?: boolean;
 }
+
+/** 結果画像に載せる上限値。テクスチャ・バッファ・コンピュートから1つずつ選ぶ */
+export const LIMIT_HIGHLIGHT_NAMES: readonly string[] = [
+	"maxTextureDimension2D",
+	"maxBufferSize",
+	"maxComputeInvocationsPerWorkgroup",
+];
 
 /** 既定値に対する余裕。maximum は大きいほど、alignment は小さいほど良い。 */
 export function limitRatioToDefault(
@@ -93,6 +119,37 @@ export function limitRatioToDefault(
 
 /** 表示の丸め誤差で「標準どおり」が上回り扱いにならないよう、5%の幅を持たせる */
 export const LIMIT_ABOVE_DEFAULT_RATIO = 1.05;
+const LIMIT_BELOW_DEFAULT_RATIO = 0.95;
+
+/** 仕様の既定値との比を言葉にする。既定値ちょうどの前後5%は「標準どおり」 */
+export function limitRatioLabel(ratio: number): string {
+	if (ratio >= 100) return `標準の${Math.round(ratio)}倍`;
+	if (ratio > LIMIT_ABOVE_DEFAULT_RATIO) {
+		// 2.0倍 のような末尾の .0 は付けない
+		const rounded = ratio < 10 ? Number(ratio.toFixed(1)) : Math.round(ratio);
+		return `標準の${rounded}倍`;
+	}
+	if (ratio >= LIMIT_BELOW_DEFAULT_RATIO) return "標準どおり";
+	return "標準を下回る";
+}
+
+export function formatBytes(value: number): string {
+	if (value < 1024) return `${value} B`;
+	const units = ["KiB", "MiB", "GiB"];
+	let scaled = value;
+	let unitIndex = -1;
+	while (scaled >= 1024 && unitIndex < units.length - 1) {
+		scaled /= 1024;
+		unitIndex += 1;
+	}
+	const rounded = Number.isInteger(scaled) ? String(scaled) : scaled.toFixed(1);
+	return `${rounded} ${units[unitIndex]}`;
+}
+
+/** 3桁区切り。端末の言語設定で表記が変わらないよう、区切り方を固定する */
+export function formatCount(value: number): string {
+	return value.toLocaleString("en-US");
+}
 
 function toMark(support: SpecSupport | undefined): ReportMark {
 	if (support === "supported") return "yes";
@@ -170,6 +227,31 @@ export function buildReportSummary(input: ReportSummaryInput): ReportSummary {
 					? "unknown"
 					: "checking";
 
+	// アダプターを取得できなかったときは、feature を1件ずつ「未対応」と言い切らない
+	const features: ReportItem[] = input.webgpuFeatureNames.map((name) => ({
+		id: name,
+		name,
+		mark: report ? (supportedFeatures.has(name) ? "yes" : "no") : webgpuMark,
+	}));
+
+	const limitHighlights: ReportLimitHighlight[] = report
+		? LIMIT_HIGHLIGHT_NAMES.flatMap((name) => {
+				const entry = input.webgpuLimits.find((limit) => limit.name === name);
+				const value = report.limits[name];
+				if (!entry || typeof value !== "number") return [];
+				const ratio = limitRatioToDefault(entry, value);
+				return [
+					{
+						name,
+						title: entry.title,
+						value: entry.bytes ? formatBytes(value) : formatCount(value),
+						ratioLabel: limitRatioLabel(ratio),
+						aboveDefault: ratio > LIMIT_ABOVE_DEFAULT_RATIO,
+					},
+				];
+			})
+		: [];
+
 	return {
 		ready:
 			input.environment !== null &&
@@ -189,16 +271,16 @@ export function buildReportSummary(input: ReportSummaryInput): ReportSummary {
 		webgpu: {
 			status: input.webgpuStatus,
 			mark: webgpuMark,
-			featureYes: input.webgpuFeatureNames.filter((name) =>
-				supportedFeatures.has(name),
-			).length,
-			featureTotal: input.webgpuFeatureNames.length,
+			featureYes: features.filter((item) => item.mark === "yes").length,
+			featureTotal: features.length,
 			adapterVendor: report?.info.vendor || null,
 			adapterDetail:
 				report?.info.architecture || report?.info.description || null,
 			isFallbackAdapter: report?.isFallbackAdapter ?? false,
 			limitsAboveDefault,
 			limitTotal: input.webgpuLimits.length,
+			features,
+			limitHighlights,
 		},
 	};
 }
@@ -235,6 +317,6 @@ export function reportAltText(summary: ReportSummary): string {
 export function reportShareText(summary: ReportSummary): string {
 	const environment = summary.environment?.label;
 	return environment
-		? `${environment} のWebXR・WebGPU対応を、BANGEOのレポートで確認しました`
-		: "WebXR・WebGPU対応を、BANGEOのレポートで確認しました";
+		? `${environment} のWebXR・WebGPU対応を、BANGEOレポートで確認しました`
+		: "WebXR・WebGPU対応を、BANGEOレポートで確認しました";
 }

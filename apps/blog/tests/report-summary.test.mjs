@@ -5,6 +5,9 @@ import { test } from "node:test";
 import { describeReportEnvironment } from "../src/lib/report/environment.ts";
 import {
 	buildReportSummary,
+	formatBytes,
+	formatCount,
+	limitRatioLabel,
 	limitRatioToDefault,
 	reportAltText,
 	reportShareText,
@@ -186,6 +189,66 @@ test("WebGPU counts only catalog features and limits above the spec default", ()
 			`WebGPUは対応で、${webgpuFeatureCatalog.length}機能のうち2機能を検出。$`,
 		),
 	);
+
+	// 画像の2ページ目に並べる一覧は、仕様の並びのまま全件を持つ
+	assert.deepEqual(
+		summary.webgpu.features.map((item) => item.name),
+		featureNames,
+	);
+	assert.deepEqual(
+		summary.webgpu.features
+			.filter((item) => item.mark === "yes")
+			.map((item) => item.name),
+		["timestamp-query", "shader-f16"],
+	);
+	assert.deepEqual(summary.webgpu.limitHighlights, [
+		{
+			name: "maxTextureDimension2D",
+			title: "2Dテクスチャの最大辺",
+			value: "16,384",
+			ratioLabel: "標準の2倍",
+			aboveDefault: true,
+		},
+		{
+			name: "maxBufferSize",
+			title: "バッファ1本の最大サイズ",
+			value: "256 MiB",
+			ratioLabel: "標準どおり",
+			aboveDefault: false,
+		},
+		{
+			name: "maxComputeInvocationsPerWorkgroup",
+			title: "1ワークグループの最大スレッド数",
+			value: "256",
+			ratioLabel: "標準どおり",
+			aboveDefault: false,
+		},
+	]);
+});
+
+test("limit values and ratios are worded the same way everywhere", () => {
+	assert.deepEqual([64, 65536, 1536, 268435456, 4294967296].map(formatBytes), [
+		"64 B",
+		"64 KiB",
+		"1.5 KiB",
+		"256 MiB",
+		"4 GiB",
+	]);
+	assert.equal(formatCount(1048576), "1,048,576");
+	assert.deepEqual(
+		[0.5, 0.96, 1, 1.05, 2, 2.5, 9.96, 16, 150].map(limitRatioLabel),
+		[
+			"標準を下回る",
+			"標準どおり",
+			"標準どおり",
+			"標準どおり",
+			"標準の2倍",
+			"標準の2.5倍",
+			"標準の10倍",
+			"標準の16倍",
+			"標準の150倍",
+		],
+	);
 });
 
 test("status labels say 対応 / 未対応 and keep inconclusive results apart", () => {
@@ -210,10 +273,15 @@ test("a failed adapter request is reported as inconclusive, not unsupported", ()
 	assert.equal(failed.webgpu.mark, "unknown");
 	assert.equal(failed.webgpu.featureYes, 0);
 	assert.equal(failed.ready, true);
-	assert.equal(
-		summarize({ webxr: webxrResults("unsupported") }).webgpu.mark,
-		"no",
-	);
+	// feature を1件ずつ「未対応」と言い切らず、上限値も載せない
+	assert.equal(failed.webgpu.features.length, webgpuFeatureCatalog.length);
+	assert.ok(failed.webgpu.features.every((item) => item.mark === "unknown"));
+	assert.deepEqual(failed.webgpu.limitHighlights, []);
+
+	const unsupported = summarize({ webxr: webxrResults("unsupported") });
+	assert.equal(unsupported.webgpu.mark, "no");
+	assert.ok(unsupported.webgpu.features.every((item) => item.mark === "no"));
+	assert.deepEqual(unsupported.webgpu.limitHighlights, []);
 });
 
 test("alt text and share text describe the environment without raw identifiers", () => {
@@ -229,7 +297,7 @@ test("alt text and share text describe the environment without raw identifiers",
 	assert.match(alt, /WebGPUは未対応。$/);
 	assert.equal(
 		reportShareText(summary),
-		"Meta Quest 3 / Quest Browser 150.1 のWebXR・WebGPU対応を、BANGEOのレポートで確認しました",
+		"Meta Quest 3 / Quest Browser 150.1 のWebXR・WebGPU対応を、BANGEOレポートで確認しました",
 	);
 	// ビルド番号などUser-Agentの生の値は出さない
 	assert.doesNotMatch(alt, /150\.1\.0\.23/);

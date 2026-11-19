@@ -18,7 +18,9 @@
 
 /report・/experiments・/webgpu-report はルートグループ `(report)` の同じレイアウトを使う。判定はレイアウトの `ReportProvider` で1回だけ行い、結果画像・概要・WebXR・WebGPUの各タブは同じ結果を読む。タブごとに `navigator.xr` や `navigator.gpu` を呼び直さない。
 
-結果画像はブラウザ内のCanvasで作り、サーバーには送らない。画像と概要は `apps/blog/src/lib/report/summary.ts` の要約を共有するので、載せる内容を変えるときは要約・画像の描画・概要の表示を合わせて直す。isSessionSupported（セッションモード）とAPIの有無（機能モジュール）は意味が違うため、合算した数字を画像の主役にしない。
+結果画像（BANGEOレポート）はブラウザ内のCanvasで作り、サーバーには送らない。横長の見開き2ページで、左ページに確認した環境とWebXR、右ページにWebGPUを置く。画像の中央がページの境目で、幅の狭い画面では左右を切り出して1ページずつ見せるため、境目をまたぐ要素を描かない。文字の大きさ・太さ・字間は `apps/blog/src/lib/report/card-image.ts` の `type` にまとめ、描画の途中で個別の値を書かない。
+
+画像と概要は `apps/blog/src/lib/report/summary.ts` の要約を共有するので、載せる内容を変えるときは要約・画像の描画・概要の表示を合わせて直す。isSessionSupported（セッションモード）とAPIの有無（機能モジュール）は意味が違うため、合算した数字を画像の主役にしない。
 
 判定を表す色は `apps/blog/src/app/globals.css` の `data-*` トークン（対応=青、要確認=アンバー）と灰に限り、記号と文字を必ず添える。
 

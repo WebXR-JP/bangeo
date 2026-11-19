@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { limitRatioToDefault, reportStatusLabel } from "@/lib/report/summary";
+import {
+	formatBytes,
+	formatCount,
+	limitRatioLabel,
+	limitRatioToDefault,
+	reportStatusLabel,
+} from "@/lib/report/summary";
 import {
 	type AdapterInfoLike,
 	adapterDisplayName,
@@ -23,32 +29,14 @@ import {
 import { MarkBadge, supportToMark } from "./report/report-mark";
 import { useReport } from "./report/report-provider";
 
-function formatBytes(value: number): string {
-	if (value < 1024) return `${value} B`;
-	const units = ["KiB", "MiB", "GiB"];
-	let v = value;
-	let unitIndex = -1;
-	while (v >= 1024 && unitIndex < units.length - 1) {
-		v /= 1024;
-		unitIndex += 1;
-	}
-	const rounded = Number.isInteger(v) ? String(v) : v.toFixed(1);
-	return `${rounded} ${units[unitIndex]}`;
-}
-
+// 値の整え方と既定値との比の言い方は、結果画像と同じ関数を使う
 function formatLimitValue(entry: WebGPULimitEntry, value: number): string {
-	if (entry.bytes) return `${formatBytes(value)}（${value.toLocaleString()}）`;
-	return value.toLocaleString();
+	if (entry.bytes) return `${formatBytes(value)}（${formatCount(value)}）`;
+	return formatCount(value);
 }
 
 const ratioToDefault = limitRatioToDefault;
-
-function ratioLabel(ratio: number): string {
-	if (ratio >= 100) return `標準の${Math.round(ratio)}倍`;
-	if (ratio > 1.05) return `標準の${ratio.toFixed(ratio < 10 ? 1 : 0)}倍`;
-	if (ratio >= 0.95) return "標準どおり";
-	return "標準を下回る";
-}
+const ratioLabel = limitRatioLabel;
 
 /** 既定値ちょうどを25%として、4倍以上で満杯になるバー */
 function ratioBarWidth(ratio: number): number {

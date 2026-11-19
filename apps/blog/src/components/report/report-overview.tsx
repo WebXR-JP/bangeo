@@ -7,7 +7,6 @@ import {
 	type ReportMark,
 	reportStatusLabel,
 } from "@/lib/report/summary";
-import { webgpuFeatureCatalog } from "@/lib/webgpu-report-catalog";
 import { MarkDot } from "./report-mark";
 import { useReport } from "./report-provider";
 
@@ -95,14 +94,6 @@ function PillList({ children }: { children: ReactNode }) {
  */
 export function ReportOverview() {
 	const { summary, webgpu } = useReport();
-	const supportedFeatures = new Set(webgpu.report?.features ?? []);
-	const featureMark = (name: string): ReportMark => {
-		if (webgpu.status === "ready") {
-			return supportedFeatures.has(name) ? "yes" : "no";
-		}
-		if (webgpu.status === "unsupported") return "no";
-		return webgpu.status === "error" ? "unknown" : "checking";
-	};
 	const xrItemHref = (item: ReportItem) => `/experiments#spec-${item.id}`;
 
 	return (
@@ -251,20 +242,17 @@ export function ReportOverview() {
 					に渡せる名前です。押すと、その機能の解説へ移動します。
 				</p>
 				<PillList>
-					{webgpuFeatureCatalog.map((entry) => {
-						const mark = featureMark(entry.name);
-						return (
-							<ItemPill
-								key={entry.name}
-								href={`/webgpu-report#feature-${entry.name}`}
-								mark={mark}
-								status={reportStatusLabel(mark)}
-								mono
-							>
-								{entry.name}
-							</ItemPill>
-						);
-					})}
+					{summary.webgpu.features.map((item) => (
+						<ItemPill
+							key={item.id}
+							href={`/webgpu-report#feature-${item.id}`}
+							mark={item.mark}
+							status={reportStatusLabel(item.mark)}
+							mono
+						>
+							{item.name}
+						</ItemPill>
+					))}
 				</PillList>
 
 				<h3 className={groupLabelClass}>上限値（limits）</h3>
