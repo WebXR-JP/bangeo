@@ -5,19 +5,11 @@ import type { ReactNode } from "react";
 import {
 	type ReportItem,
 	type ReportMark,
-	sessionStatusLabel,
-	webgpuStatusLabel,
+	reportStatusLabel,
 } from "@/lib/report/summary";
 import { webgpuFeatureCatalog } from "@/lib/webgpu-report-catalog";
 import { MarkDot } from "./report-mark";
 import { useReport } from "./report-provider";
-
-const moduleStatusLabel: Record<ReportMark, string> = {
-	yes: "対応",
-	no: "未対応",
-	unknown: "未確認",
-	checking: "確認中",
-};
 
 const groupLabelClass =
 	"mt-7 text-[11px] font-black tracking-[0.14em] text-gray-500";
@@ -125,7 +117,7 @@ export function ReportOverview() {
 
 				<h3 className={groupLabelClass}>セッションモード</h3>
 				<p className={groupNoteClass}>
-					この端末とブラウザで、そのモードの体験を開始できるかどうかです。
+					この端末とブラウザで、そのモードの体験を開始できるかを判定した結果です。
 				</p>
 				<ul className="mt-3 grid gap-2 sm:grid-cols-3">
 					{summary.webxr.sessions.map((item) => (
@@ -140,7 +132,7 @@ export function ReportOverview() {
 										{item.name}
 									</span>
 									<span className="mt-0.5 block text-xs text-gray-600">
-										{sessionStatusLabel(item.mark)}
+										{reportStatusLabel(item.mark)}
 									</span>
 								</span>
 							</Link>
@@ -161,7 +153,7 @@ export function ReportOverview() {
 							key={item.id}
 							href={xrItemHref(item)}
 							mark={item.mark}
-							status={moduleStatusLabel[item.mark]}
+							status={reportStatusLabel(item.mark)}
 						>
 							{item.name}
 						</ItemPill>
@@ -178,7 +170,7 @@ export function ReportOverview() {
 							key={item.id}
 							href={xrItemHref(item)}
 							mark={item.mark}
-							status={moduleStatusLabel[item.mark]}
+							status={reportStatusLabel(item.mark)}
 							mono
 						>
 							{item.name}
@@ -203,7 +195,7 @@ export function ReportOverview() {
 								WebGPU
 							</span>
 							<span className="mt-0.5 block text-xs text-gray-600">
-								{webgpuStatusLabel(summary.webgpu.mark)}
+								{reportStatusLabel(summary.webgpu.mark)}
 							</span>
 						</span>
 					</li>
@@ -266,7 +258,7 @@ export function ReportOverview() {
 								key={entry.name}
 								href={`/webgpu-report#feature-${entry.name}`}
 								mark={mark}
-								status={moduleStatusLabel[mark]}
+								status={reportStatusLabel(mark)}
 								mono
 							>
 								{entry.name}

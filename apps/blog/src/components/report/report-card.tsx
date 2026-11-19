@@ -7,11 +7,11 @@ import {
 	drawReportCard,
 } from "@/lib/report/card-image";
 import {
+	type ReportMark,
 	type ReportSummary,
 	reportAltText,
 	reportShareText,
-	sessionStatusLabel,
-	webgpuStatusLabel,
+	reportStatusLabel,
 } from "@/lib/report/summary";
 import { SITE_URL } from "@/lib/site-url";
 import { MarkBadge } from "./report-mark";
@@ -54,9 +54,13 @@ async function loadCardFonts(fontFamily: string, sample: string) {
 	]);
 }
 
+const CARD_MARKS: readonly ReportMark[] = ["yes", "no", "unknown", "checking"];
+
 function cardTextSample(summary: ReportSummary): string {
 	return [
-		"BANGEO対応レポートこの端末のWebXR・WebGPU対応機能モジュールAPIを検出（features）非公開ソフトウェア描画ブラウザAPIの検出に基づく簡易チェック開始できるない判定ず利用取得確認中不明な",
+		"BANGEO対応レポートこの端末のWebXR・WebGPU対応機能モジュールAPIを検出（features）非公開ソフトウェア描画ブラウザAPIの検出に基づく簡易チェック不明な",
+		// 判定の言葉は表示名の定義から取る（言い回しを変えたときに読み込み漏れを出さない）
+		...CARD_MARKS.map(reportStatusLabel),
 		summary.environment?.label ?? "",
 		summary.webgpu.adapterVendor ?? "",
 		summary.webgpu.adapterDetail ?? "",
@@ -276,7 +280,7 @@ export function ReportCard() {
 								<MarkBadge key={item.id} mark={item.mark}>
 									{item.name}
 									<span className="sr-only">
-										：{sessionStatusLabel(item.mark)}
+										：{reportStatusLabel(item.mark)}
 									</span>
 								</MarkBadge>
 							))}
@@ -298,10 +302,10 @@ export function ReportCard() {
 						</dt>
 						<dd className="font-bold text-gray-950">
 							{webgpu.mark === "yes"
-								? `利用できる（${webgpu.featureTotal}機能中 ${webgpu.featureYes}機能に対応）`
+								? `対応（${webgpu.featureTotal}機能中 ${webgpu.featureYes}機能を検出）`
 								: webgpu.mark === "checking"
 									? "確認中…"
-									: webgpuStatusLabel(webgpu.mark)}
+									: reportStatusLabel(webgpu.mark)}
 						</dd>
 					</div>
 				</dl>

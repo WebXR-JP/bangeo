@@ -8,6 +8,7 @@ import {
 	limitRatioToDefault,
 	reportAltText,
 	reportShareText,
+	reportStatusLabel,
 } from "../src/lib/report/summary.ts";
 import {
 	webgpuFeatureCatalog,
@@ -179,6 +180,26 @@ test("WebGPU counts only catalog features and limits above the spec default", ()
 		limitRatioToDefault({ default: 256, limitClass: "alignment" }, 64),
 		4,
 	);
+	assert.match(
+		reportAltText(summary),
+		new RegExp(
+			`WebGPUは対応で、${webgpuFeatureCatalog.length}機能のうち2機能を検出。$`,
+		),
+	);
+});
+
+test("status labels say 対応 / 未対応 and keep inconclusive results apart", () => {
+	assert.deepEqual(
+		["yes", "no", "unknown", "checking"].map(reportStatusLabel),
+		["対応", "未対応", "未確認", "確認中"],
+	);
+
+	// 判定できなかったものは「未対応」と書かない
+	const inconclusive = reportAltText(
+		summarize({ webxr: webxrResults("unknown"), webgpuStatus: "error" }),
+	);
+	assert.match(inconclusive, /VRは未確認、ARは未確認、inlineは未確認。/);
+	assert.match(inconclusive, /WebGPUは未確認。$/);
 });
 
 test("a failed adapter request is reported as inconclusive, not unsupported", () => {
@@ -204,8 +225,8 @@ test("alt text and share text describe the environment without raw identifiers",
 		alt,
 		/^Meta Quest 3 \/ Quest Browser 150\.1 のWebXR・WebGPU対応レポート。/,
 	);
-	assert.match(alt, /VRは開始できる、ARは開始できない、inlineは開始できない/);
-	assert.match(alt, /WebGPUは利用できない/);
+	assert.match(alt, /VRは対応、ARは未対応、inlineは未対応。/);
+	assert.match(alt, /WebGPUは未対応。$/);
 	assert.equal(
 		reportShareText(summary),
 		"Meta Quest 3 / Quest Browser 150.1 のWebXR・WebGPU対応を、BANGEOのレポートで確認しました",

@@ -35,7 +35,7 @@ const sessionLabel: Record<(typeof SESSION_MODE_IDS)[number], string> = {
 	inline: "inline",
 };
 
-/** yes: 確認できた / no: 使えない / unknown: 判定できなかった / checking: 判定中 */
+/** yes: 対応 / no: 未対応 / unknown: 判定できなかった（未確認） / checking: 確認中 */
 export type ReportMark = "yes" | "no" | "unknown" | "checking";
 
 export interface ReportItem {
@@ -203,38 +203,31 @@ export function buildReportSummary(input: ReportSummaryInput): ReportSummary {
 	};
 }
 
-const sessionStatusText: Record<ReportMark, string> = {
-	yes: "開始できる",
-	no: "開始できない",
-	unknown: "判定できず",
+const statusText: Record<ReportMark, string> = {
+	yes: "対応",
+	no: "未対応",
+	unknown: "未確認",
 	checking: "確認中",
 };
 
-export function sessionStatusLabel(mark: ReportMark): string {
-	return sessionStatusText[mark];
-}
-
-const webgpuStatusText: Record<ReportMark, string> = {
-	yes: "利用できる",
-	no: "利用できない",
-	unknown: "取得できず",
-	checking: "確認中",
-};
-
-export function webgpuStatusLabel(mark: ReportMark): string {
-	return webgpuStatusText[mark];
+/**
+ * 判定の表示名。結果画像・概要・詳細の一覧で同じ言葉にそろえる。
+ * 判定できなかったもの（unknown）は「未対応」と言い切らず「未確認」にする。
+ */
+export function reportStatusLabel(mark: ReportMark): string {
+	return statusText[mark];
 }
 
 /** 結果画像の代替テキスト。画像に描いた内容を文章で言い直す */
 export function reportAltText(summary: ReportSummary): string {
 	const environment = summary.environment?.label ?? "この端末";
 	const sessions = summary.webxr.sessions
-		.map((item) => `${item.name}は${sessionStatusLabel(item.mark)}`)
+		.map((item) => `${item.name}は${reportStatusLabel(item.mark)}`)
 		.join("、");
 	const webgpu =
 		summary.webgpu.mark === "yes"
-			? `WebGPUは利用でき、${summary.webgpu.featureTotal}機能のうち${summary.webgpu.featureYes}機能に対応`
-			: `WebGPUは${webgpuStatusLabel(summary.webgpu.mark)}`;
+			? `WebGPUは対応で、${summary.webgpu.featureTotal}機能のうち${summary.webgpu.featureYes}機能を検出`
+			: `WebGPUは${reportStatusLabel(summary.webgpu.mark)}`;
 	return `${environment} のWebXR・WebGPU対応レポート。${sessions}。WebXRの機能モジュールは${summary.webxr.modules.length}件のうち${summary.webxr.moduleYes}件のAPIを検出。${webgpu}。`;
 }
 

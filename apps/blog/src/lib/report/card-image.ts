@@ -11,8 +11,7 @@ import {
 	type ReportItem,
 	type ReportMark,
 	type ReportSummary,
-	sessionStatusLabel,
-	webgpuStatusLabel,
+	reportStatusLabel,
 } from "./summary";
 
 export const CARD_WIDTH = 1080;
@@ -250,7 +249,7 @@ export function drawReportCard(
 	ctx.fillStyle = color.muted;
 	ctx.fillText(browser, MARGIN, 344);
 
-	// WebXR: セッションモード（実際に開始できるか）
+	// WebXR: セッションモード（isSessionSupported の結果）
 	const tileWidth = (CONTENT_WIDTH - TILE_GAP * 2) / 3;
 	text("WebXR", MARGIN, 428, 900, 36, color.ink);
 	summary.webxr.sessions.forEach((item, index) => {
@@ -259,7 +258,7 @@ export function drawReportCard(
 			462,
 			tileWidth,
 			item.name,
-			sessionStatusLabel(item.mark),
+			reportStatusLabel(item.mark),
 			item.mark,
 		);
 	});
@@ -298,7 +297,7 @@ export function drawReportCard(
 		webgpuTop,
 		tileWidth,
 		"WebGPU",
-		webgpuStatusLabel(webgpu.mark),
+		reportStatusLabel(webgpu.mark),
 		webgpu.mark,
 	);
 

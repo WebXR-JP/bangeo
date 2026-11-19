@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { limitRatioToDefault } from "@/lib/report/summary";
+import { limitRatioToDefault, reportStatusLabel } from "@/lib/report/summary";
 import {
 	type AdapterInfoLike,
 	adapterDisplayName,
@@ -20,7 +20,7 @@ import {
 	webgpuLimitCatalog,
 	wgslLanguageFeatureByName,
 } from "@/lib/webgpu-report-catalog";
-import { MarkBadge } from "./report/report-mark";
+import { MarkBadge, supportToMark } from "./report/report-mark";
 import { useReport } from "./report/report-provider";
 
 function formatBytes(value: number): string {
@@ -151,14 +151,9 @@ export function WebGPUReport() {
 				className="grid scroll-mt-28 grid-cols-[4.5rem_minmax(0,1fr)] gap-x-4 px-5 py-5"
 			>
 				<span className="pt-0.5">
+					{/* 確認中は記号（…）だけを出す */}
 					<MarkBadge mark={mark} className="w-full">
-						{mark === "yes"
-							? "対応"
-							: mark === "no"
-								? "未対応"
-								: mark === "unknown"
-									? "未確認"
-									: ""}
+						{mark === "checking" ? "" : reportStatusLabel(mark)}
 					</MarkBadge>
 				</span>
 				<div className="min-w-0">
@@ -241,7 +236,7 @@ export function WebGPUReport() {
 		return (
 			<div className="rounded-2xl border border-gray-100 bg-gray-50 px-5 py-6">
 				<p className="text-sm font-bold text-gray-950">
-					このブラウザではWebGPUを利用できません
+					このブラウザはWebGPUに未対応です
 				</p>
 				<p className="mt-2 text-sm leading-relaxed text-gray-600">
 					{envLabel ? `${envLabel} では ` : ""}
@@ -370,13 +365,7 @@ export function WebGPUReport() {
 						<code className={codeClass}>XRGPUBinding</code>
 					</div>
 					<p className="mt-1 text-base font-black text-gray-950">
-						{xrBinding === "supported"
-							? "利用できます"
-							: xrBinding === "unsupported"
-								? "利用できません"
-								: xrBinding === "unknown"
-									? "判定できませんでした"
-									: "確認中…"}
+						{reportStatusLabel(supportToMark(xrBinding))}
 					</p>
 					<p className="mt-1 text-xs leading-relaxed text-gray-500">
 						WebGPUで描いた映像をそのままWebXRのセッションに出すための橋渡しです。未対応の環境では、XR側の描画はWebGLで行うことになります。

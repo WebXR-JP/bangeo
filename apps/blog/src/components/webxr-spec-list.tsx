@@ -1,7 +1,11 @@
 "use client";
 
 import { type ReactNode, useRef, useState } from "react";
-import { REFERENCE_SPACE_IDS, SESSION_MODE_IDS } from "@/lib/report/summary";
+import {
+	REFERENCE_SPACE_IDS,
+	reportStatusLabel,
+	SESSION_MODE_IDS,
+} from "@/lib/report/summary";
 import {
 	maturityTitle,
 	type SpecCheckId,
@@ -23,13 +27,6 @@ const sessionIds: readonly SpecCheckId[] = SESSION_MODE_IDS;
 
 /** 体験スペース（Reference Spaces）として別セクションに出す仕様 */
 const referenceSpaceIds: readonly SpecCheckId[] = REFERENCE_SPACE_IDS;
-
-const supportLabel: Record<SpecSupport, string> = {
-	supported: "対応",
-	unsupported: "未対応",
-	unknown: "未確認",
-	checking: "",
-};
 
 const supportTitle: Record<SpecSupport, string> = {
 	supported: "APIまたはセッションモードの対応を確認しました",
@@ -352,6 +349,7 @@ export function WebXRSpecList() {
 
 	function renderEntry(entry: WebXRSpecEntry) {
 		const support = results[entry.id] ?? "checking";
+		const mark = supportToMark(support);
 		const isSession = sessionIds.includes(entry.id);
 		return (
 			<li
@@ -360,8 +358,9 @@ export function WebXRSpecList() {
 				className="grid scroll-mt-28 grid-cols-[4.5rem_minmax(0,1fr)] gap-x-4 gap-y-4 px-5 py-6 md:grid-cols-[4.5rem_minmax(0,1fr)_17rem] md:gap-x-6"
 			>
 				<span className="pt-0.5" title={supportTitle[support]}>
-					<MarkBadge mark={supportToMark(support)} className="w-full">
-						{supportLabel[support]}
+					{/* 確認中は記号（…）だけを出す */}
+					<MarkBadge mark={mark} className="w-full">
+						{mark === "checking" ? "" : reportStatusLabel(mark)}
 					</MarkBadge>
 				</span>
 				<div className="min-w-0">
