@@ -25,6 +25,17 @@
 	--color-data-ask: #b45309;
 	--color-data-ask-soft: #fdf1e3;
 	--radius-2xl: 1rem;
+	/* レポートの判定中→結果の動き（components/report/report-card.tsx）。
+	   減速して止まる cubic-bezier(0.2, 0.7, 0.2, 1) にそろえ、400ms を超えない。
+	   終わりの形は要素の通常の見た目なので、keyframes には始まりだけを書く */
+	--ease-settle: cubic-bezier(0.2, 0.7, 0.2, 1);
+	--animate-report-pop: report-pop 300ms cubic-bezier(0.2, 0.7, 0.2, 1)
+		backwards;
+	--animate-report-rise: report-rise 200ms cubic-bezier(0.2, 0.7, 0.2, 1)
+		backwards;
+	--animate-report-check: report-check 200ms cubic-bezier(0.2, 0.7, 0.2, 1)
+		backwards;
+	--animate-report-ring: report-ring 400ms cubic-bezier(0.2, 0.7, 0.2, 1) 140ms;
 }
 
 :root {
@@ -162,6 +173,45 @@ body {
 
 @utility animate-float {
 	animation: float 6s ease-in-out infinite;
+}
+
+/* レポートの結果画像が、判定中の枠に重なってせり出し、同じ位置に収まる */
+@keyframes report-pop {
+	from {
+		opacity: 0;
+		transform: translateY(12px) scale(0.96);
+	}
+}
+
+/* 判定が終わって差し替わった見出し */
+@keyframes report-rise {
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+}
+
+/* 段階ごとに付く完了の印 */
+@keyframes report-check {
+	from {
+		opacity: 0;
+		transform: scale(0.6);
+	}
+}
+
+/* 結果画像が収まった直後に、外周を一度だけ縁取って「ここに出た」と示す */
+@keyframes report-ring {
+	0% {
+		opacity: 0;
+		transform: scale(1);
+	}
+	25% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+		transform: scale(1.02);
+	}
 }
 
 .nav-link {
