@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { BreadcrumbStructuredData } from "@/components/breadcrumb-structured-data";
 import { ReportOverview } from "@/components/report/report-overview";
+import { ReportTopAnchor } from "@/components/report/report-top-anchor";
 
 const title = "WebXR・WebGPU対応レポート｜この端末で使える機能を画像で確認";
 const description =
@@ -29,6 +30,7 @@ export const metadata: Metadata = {
 export default function ReportOverviewPage() {
 	return (
 		<>
+			<ReportTopAnchor />
 			<BreadcrumbStructuredData
 				items={[{ name: "レポート", path: "/report" }]}
 			/>

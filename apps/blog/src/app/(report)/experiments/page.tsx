@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BreadcrumbStructuredData } from "@/components/breadcrumb-structured-data";
+import { ReportTopAnchor } from "@/components/report/report-top-anchor";
 import { WebXRSpecList } from "@/components/webxr-spec-list";
 
 const title = "WebXR対応レポート｜仕様ごとの対応状況とデモをこの端末で確かめる";
@@ -22,6 +23,7 @@ export const metadata: Metadata = {
 export default function WebXRReportPage() {
 	return (
 		<>
+			<ReportTopAnchor />
 			<BreadcrumbStructuredData
 				items={[
 					{ name: "レポート", path: "/report" },

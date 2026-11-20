@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BreadcrumbStructuredData } from "@/components/breadcrumb-structured-data";
+import { ReportTopAnchor } from "@/components/report/report-top-anchor";
 import { WebGPUReport } from "@/components/webgpu-report";
 
 const title = "WebGPU対応レポート｜この端末のGPU機能と上限値を日本語で確認";
@@ -22,6 +23,7 @@ export const metadata: Metadata = {
 export default function WebGPUReportPage() {
 	return (
 		<>
+			<ReportTopAnchor />
 			<BreadcrumbStructuredData
 				items={[
 					{ name: "レポート", path: "/report" },

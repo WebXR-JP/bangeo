@@ -107,7 +107,15 @@ export default function RootLayout({
 	children: React.ReactNode;
 }) {
 	return (
-		<html lang="ja" className={notoSansJP.variable} suppressHydrationWarning>
+		// data-scroll-behavior: globals.css の scroll-behavior: smooth を、ページ遷移の間だけ
+		// Next.js に切ってもらう指定。無いと遷移後の「先頭へ戻す」処理が滑らかなスクロールと
+		// 競合し、下までスクロールした状態から開いたページの先頭がヘッダーの裏に隠れる
+		<html
+			lang="ja"
+			data-scroll-behavior="smooth"
+			className={notoSansJP.variable}
+			suppressHydrationWarning
+		>
 			<head>
 				<link rel="preconnect" href="https://i.ytimg.com" />
 				<link rel="dns-prefetch" href="https://i.ytimg.com" />
