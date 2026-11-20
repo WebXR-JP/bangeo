@@ -199,7 +199,7 @@ export default function WebXRStatusPage() {
 						</p>
 					</div>
 
-					<div className="bg-white/80 border border-white rounded-[2.5rem] shadow-xs overflow-hidden">
+					<div className="bg-white/80 border border-gray-200 rounded-[2.5rem] shadow-xs overflow-hidden">
 						<div className="overflow-x-auto">
 							<table className="w-full text-sm">
 								<thead>
@@ -270,7 +270,7 @@ export default function WebXRStatusPage() {
 				</section>
 
 				{/* Standards Process Card */}
-				<div className="p-8 bg-white/80 border border-white rounded-[2.5rem] shadow-xs">
+				<div className="p-8 bg-white/80 border border-gray-200 rounded-[2.5rem] shadow-xs">
 					<h2 className="text-2xl font-black text-gray-950 mb-6">
 						標準化プロセス
 					</h2>

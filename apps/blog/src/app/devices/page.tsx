@@ -24,7 +24,7 @@ function DeviceCard({ device }: { device: DeviceWebxrSummary }) {
 	} as const;
 
 	return (
-		<article className="min-w-0 p-5 sm:p-8 md:p-10 bg-white/70 border border-white rounded-[2.5rem] shadow-xs hover:shadow-xl transition-all duration-500">
+		<article className="min-w-0 p-5 sm:p-8 md:p-10 bg-white/70 border border-gray-200 rounded-[2.5rem] shadow-xs hover:shadow-xl transition-all duration-500">
 			<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 				<div className="min-w-0 space-y-2">
 					<div className="text-[10px] font-black text-[#e11d48] uppercase tracking-widest">
