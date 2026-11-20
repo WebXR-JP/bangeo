@@ -18,6 +18,10 @@
 
 /report・/experiments・/webgpu-report はルートグループ `(report)` の同じレイアウトを使う。判定はレイアウトの `ReportProvider` で1回だけ行い、結果画像・概要・WebXR・WebGPUの各タブは同じ結果を読む。タブごとに `navigator.xr` や `navigator.gpu` を呼び直さない。
 
+各ページは先頭に `ReportTopAnchor`（`apps/blog/src/components/report/report-top-anchor.tsx`）を描く。Next.jsはリンクで開いたページの先頭要素までスクロールするため、これが無いと共通レイアウトの結果画像を飛び越えて本文から始まる。`(report)` にページを足すときも同じようにする。
+
+結果画像は、開いた直後に判定の段階（端末とブラウザ、WebXR、WebGPU、画像の作成）を上から順に見せ、すべて終わってから出す。段階の印は実際の完了を追い越さない。動きの長さは `apps/blog/src/app/globals.css` の `--animate-report-*` と `report-card.tsx` の定数で合わせ、`prefers-reduced-motion` では間を空けずに結果を出す。GPUの切り替えなど2回目以降の作り直しでは、段階を見せ直さず画像だけを差し替える。
+
 結果画像（BANGEOレポート）はブラウザ内のCanvasで作り、サーバーには送らない。横長の見開き2ページで、左ページに確認した環境とWebXR、右ページにWebGPUを置く。画像の中央がページの境目で、幅の狭い画面では左右を切り出して1ページずつ見せるため、境目をまたぐ要素を描かない。文字の大きさ・太さ・字間は `apps/blog/src/lib/report/card-image.ts` の `type` にまとめ、描画の途中で個別の値を書かない。
 
 画像と概要は `apps/blog/src/lib/report/summary.ts` の要約を共有するので、載せる内容を変えるときは要約・画像の描画・概要の表示を合わせて直す。isSessionSupported（セッションモード）とAPIの有無（機能モジュール）は意味が違うため、合算した数字を画像の主役にしない。
