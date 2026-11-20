@@ -86,7 +86,7 @@ function PlatformSection({
 			<h2 className="text-2xl font-black tracking-tight text-gray-800 border-l-4 border-gray-200 pl-6 ml-2">
 				{title}
 			</h2>
-			<div className="bg-white/80 border border-white rounded-[2.5rem] overflow-hidden shadow-xs">
+			<div className="bg-white/80 border border-gray-200 rounded-[2.5rem] overflow-hidden shadow-xs">
 				<div className="divide-y divide-gray-100">
 					{platforms.map((platform) => (
 						<PlatformRow key={platform.id} platform={platform} />
