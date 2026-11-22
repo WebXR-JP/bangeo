@@ -61,8 +61,12 @@
 	--radius: 1rem;
 }
 
-* {
-	border-color: hsl(var(--border));
+/* 枠線の既定色。レイヤーの外に置くと utilities より優先され、
+   border-gray-950 や hover:border-* などの色クラスがすべて効かなくなるので、必ず base に入れる */
+@layer base {
+	* {
+		border-color: hsl(var(--border));
+	}
 }
 
 html {

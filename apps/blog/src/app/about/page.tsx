@@ -122,7 +122,7 @@ export default function AboutPage() {
 
 				{/* Features */}
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-					<div className="p-10 bg-white/60 border border-white rounded-[3rem] space-y-6">
+					<div className="p-10 bg-white/60 border border-gray-200 rounded-[3rem] space-y-6">
 						<div className="mb-6 h-20">
 							<OptimizedImage
 								src="/assets/mascot/vr.png"
@@ -146,7 +146,7 @@ export default function AboutPage() {
 							デモ集を見る →
 						</Link>
 					</div>
-					<div className="p-10 bg-white/60 border border-white rounded-[3rem] space-y-6">
+					<div className="p-10 bg-white/60 border border-gray-200 rounded-[3rem] space-y-6">
 						<div className="mb-6 h-20">
 							<OptimizedImage
 								src="/assets/mascot/tech.png"
