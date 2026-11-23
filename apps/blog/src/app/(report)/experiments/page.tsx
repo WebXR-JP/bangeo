@@ -31,24 +31,24 @@ export default function WebXRReportPage() {
 				]}
 			/>
 
-			<header className="mb-2">
-				<h1 className="text-balance text-2xl font-black tracking-tight text-gray-950 md:text-3xl">
+			<header>
+				<h1 className="text-2xl font-black text-gray-950 md:text-3xl">
 					WebXR対応レポート
 				</h1>
-				<p className="mt-3 text-sm leading-relaxed text-gray-600">
-					WebXRの各仕様を、この端末でどこまで使えるかを確認しながら、公式サンプルやライブラリのデモを開いて、そのまま動かして確かめられます。
+				<p className="mt-3 max-w-[40em] break-phrase text-sm leading-[1.8] text-gray-600">
+					WebXRの仕様ごとに、この端末での対応を判定しています。公式サンプルやライブラリのデモを開いて、その場で動きを確かめられます。
 				</p>
 			</header>
 
 			<WebXRSpecList />
 
-			<footer className="mt-12 border-t border-gray-100 pt-6">
-				<p className="text-xs leading-relaxed text-gray-500">
+			<footer className="mt-12 border-t border-gray-200 pt-6">
+				<p className="max-w-[40em] text-xs leading-relaxed text-gray-500">
 					このページはW3C標準のWebXR仕様を対象としています。カメラベースのWebAR（8th
 					Wall系）は対象外です。ブラウザ横断の対応状況は
 					<Link
 						href="/webxr-status"
-						className="text-gray-600 underline decoration-gray-300 underline-offset-2 transition hover:text-primary-600"
+						className="whitespace-nowrap text-gray-600 underline decoration-gray-300 underline-offset-2 transition-colors hover:text-primary-600 hover:decoration-current"
 					>
 						標準化・対応状況
 					</Link>

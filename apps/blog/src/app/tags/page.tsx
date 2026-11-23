@@ -2,6 +2,7 @@ import { blog, experiments } from "fumadocs-mdx:collections/server";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { BreadcrumbStructuredData } from "@/components/breadcrumb-structured-data";
+import { PageHeader } from "@/components/page-header";
 import { getDocs } from "@/lib/fumadocs-utils";
 
 export const metadata: Metadata = {
@@ -13,9 +14,9 @@ export const metadata: Metadata = {
 };
 
 export default function TagsPage() {
-	const allDocs = [...getDocs(blog), ...getDocs(experiments)].filter(
-		(doc) => !doc.draft,
-	);
+	const publishedPosts = getDocs(blog).filter((doc) => !doc.draft);
+	const publishedDemos = getDocs(experiments).filter((doc) => !doc.draft);
+	const allDocs = [...publishedPosts, ...publishedDemos];
 
 	const tagCounts = new Map<string, number>();
 	for (const doc of allDocs) {
@@ -30,42 +31,59 @@ export default function TagsPage() {
 		.map(([tag, count]) => ({ tag, count }))
 		.sort((a, b) => b.count - a.count);
 
+	// タグが付いている中身を、実際にあるものだけで言う（いまデモにタグはない）。
+	// 記事だけなら数は「本」、デモも含むなら「件」で数える
+	const demoHasTags = publishedDemos.some(
+		(doc) => Array.isArray(doc.tags) && doc.tags.length > 0,
+	);
+	const lead = demoHasTags
+		? `技術記事とデモに付いているタグ${sortedTags.length}件を、付いている数の多い順に並べています。タグの横の数字が、その件数です。`
+		: `技術記事に付いているタグ${sortedTags.length}件を、付いている本数の多い順に並べています。タグの横の数字が、その本数です。`;
+	const countUnit = demoHasTags ? "件" : "本";
+
 	return (
-		<div className="max-w-6xl mx-auto px-6 md:px-8 py-16 md:py-20">
+		<div className="max-w-6xl mx-auto px-5 md:px-8 pt-8 md:pt-12">
 			<BreadcrumbStructuredData items={[{ name: "タグ一覧", path: "/tags" }]} />
-			<header className="mb-12">
-				<h1 className="text-3xl font-black tracking-tight text-gray-950 mb-2">
-					タグ一覧
-				</h1>
-				<p className="text-base text-gray-500">
-					全 {sortedTags.length} 件のタグがあります
-				</p>
-			</header>
+			<PageHeader
+				title="タグ一覧"
+				lead={sortedTags.length > 0 ? lead : undefined}
+				className="mb-8 md:mb-10"
+			/>
 
 			{sortedTags.length === 0 ? (
-				<p className="text-gray-500">タグが見つかりませんでした。</p>
-			) : (
-				<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-					{sortedTags.map(({ tag, count }) => (
-						<Link
-							key={tag}
-							href={`/tags/${encodeURIComponent(tag)}`}
-							className="group block p-6 bg-white rounded-2xl border border-gray-100 hover:shadow-2xl hover:shadow-gray-200/50 hover:border-transparent hover:-translate-y-1 transition-all duration-300"
-						>
-							<div className="flex items-center justify-between">
-								<h2 className="font-black text-lg text-gray-950 group-hover:text-[#e11d48] transition-colors">
-									{tag}
-								</h2>
-								<span className="inline-flex items-center justify-center w-8 h-8 text-xs font-black bg-rose-50 text-rose-700 rounded-full">
-									{count}
-								</span>
-							</div>
-							<p className="text-sm text-gray-500 mt-2">
-								{count} 件のコンテンツ
-							</p>
-						</Link>
-					))}
+				<div>
+					<p className="text-base leading-[1.8] text-gray-700">
+						タグの付いた技術記事はまだありません。
+					</p>
+					<Link
+						href="/tech-articles"
+						className="text-link mt-2 inline-flex min-h-11 items-center whitespace-nowrap text-sm font-bold"
+					>
+						技術記事の一覧を見る
+					</Link>
 				</div>
+			) : (
+				<ul className="flex flex-wrap gap-x-2">
+					{sortedTags.map(({ tag, count }) => (
+						<li key={tag}>
+							{/* 押せる範囲は高さ 44px（PCは 40px）、見た目はチップ。輪はチップに出す */}
+							<Link
+								href={`/tags/${encodeURIComponent(tag)}`}
+								prefetch={false}
+								className="group inline-flex min-h-11 items-center rounded-full focus-visible:outline-none md:min-h-10"
+							>
+								<span className="chip min-h-8 gap-1.5 px-3 text-[13px] transition-colors group-hover:bg-gray-200 group-hover:text-gray-950 group-focus-visible:outline-2 group-focus-visible:outline-offset-2 group-focus-visible:outline-primary-600">
+									{tag}
+									{/* チップの灰の地の上でも 4.5:1 を超える濃さ（gray-600） */}
+									<span className="font-medium tabular-nums text-gray-600">
+										{count}
+										<span className="sr-only">{countUnit}</span>
+									</span>
+								</span>
+							</Link>
+						</li>
+					))}
+				</ul>
 			)}
 		</div>
 	);

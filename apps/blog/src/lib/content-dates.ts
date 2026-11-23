@@ -23,6 +23,18 @@ export function contentDateTime(value?: string): string | undefined {
 	return `${year}-${month}-${day}T00:00:00+09:00`;
 }
 
+/**
+ * 画面に出す日付。フロントマターの「2026-11-18」も「2026年11月18日」も、
+ * 「2026年11月18日」の形にそろえる（月日は0で埋めない）。
+ * parseContentDate と同じく UTC の年月日で読むので、サーバーとブラウザで同じ文字列になる
+ */
+export function formatContentDate(value?: string): string | undefined {
+	const date = parseContentDate(value);
+	if (!date) return undefined;
+
+	return `${date.getUTCFullYear()}年${date.getUTCMonth() + 1}月${date.getUTCDate()}日`;
+}
+
 export function contentDateValue(value?: string): number {
 	return parseContentDate(value)?.getTime() ?? 0;
 }

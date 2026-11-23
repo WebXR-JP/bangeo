@@ -10,16 +10,20 @@ import {
 import { MarkDot } from "./report-mark";
 import { useReport } from "./report-provider";
 
-const groupLabelClass =
-	"mt-7 text-[11px] font-black tracking-[0.14em] text-gray-500";
+const groupLabelClass = "mt-8 text-sm font-bold text-gray-950";
 
-const groupNoteClass = "mt-1.5 text-xs leading-relaxed text-gray-500";
+// 注記は文節で折る（「ます。」だけの行や語の途中での改行を出さない）
+const groupNoteClass =
+	"mt-1 max-w-[40em] break-phrase text-xs leading-relaxed text-gray-500";
 
 const tileClass =
 	"flex min-h-[4.5rem] items-center gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-3";
 
 const detailLinkClass =
-	"inline-flex min-h-10 items-center whitespace-nowrap text-sm font-bold text-primary-600 underline decoration-primary-200 underline-offset-4 transition hover:decoration-primary-600";
+	"text-link inline-flex min-h-11 items-center whitespace-nowrap text-sm font-bold";
+
+const codeClass =
+	"rounded bg-gray-100 px-1 py-0.5 font-mono text-xs text-gray-700";
 
 function SectionHeader({
 	id,
@@ -36,7 +40,7 @@ function SectionHeader({
 		<div className="flex flex-wrap items-center justify-between gap-x-4">
 			<h2
 				id={id}
-				className="text-xl font-black tracking-tight text-gray-950 md:text-2xl"
+				className="text-xl font-bold text-gray-950 md:text-2xl md:font-black"
 			>
 				{title}
 			</h2>
@@ -68,13 +72,14 @@ function ItemPill({
 		<li className="min-w-0 max-w-full">
 			<Link
 				href={href}
-				className={`inline-flex min-h-10 max-w-full items-center gap-2 rounded-full border border-gray-200 bg-white py-1.5 pl-2 pr-3.5 text-xs transition hover:border-gray-950 active:scale-[0.98] ${
+				// タッチで押しやすいよう、スマートフォンでは高さ44px
+				className={`inline-flex min-h-11 max-w-full items-center gap-2 rounded-full border border-gray-200 bg-white py-1.5 pl-2 pr-3.5 text-xs transition-[border-color,transform] hover:border-gray-950 active:scale-[0.98] sm:min-h-10 ${
 					mark === "no" ? "text-gray-500" : "text-gray-950"
 				}`}
 			>
 				<MarkDot mark={mark} />
 				<span
-					className={`min-w-0 truncate ${mono ? "font-mono text-[11px]" : "font-bold"}`}
+					className={`min-w-0 truncate ${mono ? "font-mono" : "font-bold"}`}
 				>
 					{children}
 				</span>
@@ -115,11 +120,11 @@ export function ReportOverview() {
 						<li key={item.id} className="min-w-0">
 							<Link
 								href={xrItemHref(item)}
-								className={`${tileClass} transition hover:border-gray-950 active:scale-[0.99]`}
+								className={`${tileClass} transition-[border-color,transform] hover:border-gray-950 active:scale-[0.99]`}
 							>
 								<MarkDot mark={item.mark} />
 								<span className="min-w-0">
-									<span className="block text-base font-black leading-tight text-gray-950">
+									<span className="block text-base font-bold leading-tight text-gray-950">
 										{item.name}
 									</span>
 									<span className="mt-0.5 block text-xs text-gray-600">
@@ -136,7 +141,7 @@ export function ReportOverview() {
 					{summary.ready
 						? `${summary.webxr.modules.length}件のうち${summary.webxr.moduleYes}件のAPIを検出しました。`
 						: "確認中です。"}
-					ブラウザにAPIがあるかを見た簡易チェックで、実際に動くかどうかはセッションを開始して確かめます。
+					ブラウザにAPIがあるかを見た簡易判定で、実際に動くかどうかはセッションを開始して確かめます。
 				</p>
 				<PillList>
 					{summary.webxr.modules.map((item) => (
@@ -170,7 +175,7 @@ export function ReportOverview() {
 				</PillList>
 			</section>
 
-			<section aria-labelledby="overview-webgpu" className="mt-14">
+			<section aria-labelledby="overview-webgpu" className="mt-16">
 				<SectionHeader
 					id="overview-webgpu"
 					title="WebGPU"
@@ -182,7 +187,7 @@ export function ReportOverview() {
 					<li className={tileClass}>
 						<MarkDot mark={summary.webgpu.mark} />
 						<span className="min-w-0">
-							<span className="block text-base font-black leading-tight text-gray-950">
+							<span className="block text-base font-bold leading-tight text-gray-950">
 								WebGPU
 							</span>
 							<span className="mt-0.5 block text-xs text-gray-600">
@@ -192,7 +197,7 @@ export function ReportOverview() {
 					</li>
 					<li className={tileClass}>
 						<span className="min-w-0">
-							<span className="block text-base font-black leading-tight text-gray-950">
+							<span className="block text-base font-bold leading-tight text-gray-950">
 								{summary.webgpu.mark === "yes"
 									? `${summary.webgpu.featureYes} / ${summary.webgpu.featureTotal}`
 									: "—"}
@@ -204,7 +209,7 @@ export function ReportOverview() {
 					</li>
 					<li className={tileClass}>
 						<span className="min-w-0">
-							<span className="block truncate text-base font-black leading-tight text-gray-950">
+							<span className="block truncate text-base font-bold leading-tight text-gray-950">
 								{summary.webgpu.mark === "yes"
 									? (summary.webgpu.adapterVendor ?? "非公開")
 									: "—"}
@@ -225,20 +230,21 @@ export function ReportOverview() {
 				</ul>
 
 				{webgpu.status === "unsupported" && (
-					<p className="mt-4 rounded-2xl bg-gray-50 px-5 py-4 text-sm leading-relaxed text-gray-600">
-						このブラウザでは navigator.gpu
+					<p className="mt-4 break-phrase rounded-2xl bg-gray-50 px-5 py-4 text-sm leading-relaxed text-gray-600">
+						このブラウザでは<code className={codeClass}>navigator.gpu</code>
 						が見つかりませんでした。WebGPUに対応したブラウザで開くと、GPUが持つ機能と上限値を確認できます。
 					</p>
 				)}
 				{webgpu.status === "error" && webgpu.errorMessage && (
-					<p className="mt-4 rounded-2xl border border-amber-200 bg-data-ask-soft px-5 py-4 text-sm leading-relaxed text-amber-900">
+					<p className="mt-4 break-phrase rounded-2xl bg-data-ask-soft px-5 py-4 text-sm leading-relaxed text-data-ask">
 						{webgpu.errorMessage}
 					</p>
 				)}
 
 				<h3 className={groupLabelClass}>機能（features）</h3>
 				<p className={groupNoteClass}>
-					requestDevice の requiredFeatures
+					<code className={codeClass}>requestDevice</code>の
+					<code className={codeClass}>requiredFeatures</code>
 					に渡せる名前です。押すと、その機能の解説へ移動します。
 				</p>
 				<PillList>
@@ -256,7 +262,7 @@ export function ReportOverview() {
 				</PillList>
 
 				<h3 className={groupLabelClass}>上限値（limits）</h3>
-				<p className="mt-1.5 text-sm leading-relaxed text-gray-700">
+				<p className="mt-1 max-w-[40em] break-phrase text-sm leading-relaxed text-gray-700">
 					{summary.webgpu.mark === "yes"
 						? `${summary.webgpu.limitTotal}項目のうち${summary.webgpu.limitsAboveDefault}項目が、仕様の既定値を上回っています。`
 						: summary.webgpu.mark === "checking"

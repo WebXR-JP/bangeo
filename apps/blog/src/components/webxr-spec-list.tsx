@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import {
 	REFERENCE_SPACE_IDS,
 	reportStatusLabel,
@@ -35,11 +35,31 @@ const supportTitle: Record<SpecSupport, string> = {
 	checking: "確認中",
 };
 
-const sectionLabelClass =
-	"mt-10 text-[11px] font-black tracking-[0.14em] text-gray-400";
+/** 判定の記号。結果画像・概要の印（report-mark.tsx）と同じ記号を使う */
+const markSymbol: Record<SpecSupport, string> = {
+	supported: "✓",
+	unsupported: "–",
+	unknown: "?",
+	checking: "…",
+};
+
+const markSymbolTone: Record<SpecSupport, string> = {
+	supported: "text-data-yes",
+	unsupported: "text-gray-500",
+	unknown: "text-data-ask",
+	checking: "text-gray-400",
+};
+
+const sectionHeadingClass =
+	"mt-12 text-lg font-bold leading-snug text-gray-950";
+
+const sectionNoteClass =
+	"mt-2 max-w-[40em] break-phrase text-xs leading-relaxed text-gray-500";
+
+const fieldLabelClass = "text-[13px] font-bold text-gray-700";
 
 const noteCodeClass =
-	"rounded bg-gray-100 px-1 py-0.5 font-mono text-[11px] text-gray-600";
+	"rounded bg-gray-100 px-1 py-0.5 font-mono text-xs text-gray-700";
 
 /** スターター体験（ランナー）でセッション内可視化があるfeature */
 const runnerVisualized = new Set([
@@ -56,8 +76,17 @@ const runnerVisualized = new Set([
 /** スターター体験で実際に requestSession へ渡してよいfeature */
 const runnerEnabledFeatures = runnerVisualized;
 
+// 名前を省略せずに出すため、幅は中身に合わせて折り返す。タッチで押しやすいよう、スマートフォンでは高さ44px
 const demoButtonClass =
-	"flex min-h-10 items-center justify-between gap-2 rounded-xl border border-gray-200 bg-white px-3.5 py-2 text-xs font-bold text-gray-700 transition hover:border-gray-950 hover:bg-gray-950 hover:text-white";
+	"inline-flex min-h-11 items-center gap-2 whitespace-nowrap rounded-xl border border-gray-200 bg-white px-3.5 py-2 text-xs font-bold text-gray-700 transition-[background-color,border-color,color,transform] hover:border-gray-950 hover:bg-gray-950 hover:text-white active:scale-[0.98] sm:min-h-10";
+
+/** モード・体験スペースの選択肢。選んでいるものは黒く塗る（スマートフォンでは高さ44px） */
+const choiceClass = (selected: boolean) =>
+	`inline-flex min-h-11 items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-bold transition-[background-color,border-color,color,transform] active:scale-[0.98] sm:min-h-10 ${
+		selected
+			? "border-gray-950 bg-gray-950 text-white"
+			: "border-gray-200 bg-white text-gray-700 hover:border-gray-950 hover:text-gray-950"
+	}`;
 
 export function WebXRSpecList() {
 	// 判定はレポートのレイアウトで1回だけ行い、結果画像と同じ結果をここで使う
@@ -67,10 +96,14 @@ export function WebXRSpecList() {
 	const [mode, setMode] = useState<XRSessionMode>("immersive-vr");
 	const [refSpace, setRefSpace] = useState<string>("local-floor");
 	const [features, setFeatures] = useState<string[]>([]);
-	const [codeCopied, setCodeCopied] = useState(false);
+	const [codeCopy, setCodeCopy] = useState<"idle" | "done" | "failed">("idle");
+	const codeCopyTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+		undefined,
+	);
 	const [xrRunning, setXrRunning] = useState(false);
 	const [xrError, setXrError] = useState<string | null>(null);
 	const xrSessionRef = useRef<StarterSessionHandle | null>(null);
+	useEffect(() => () => clearTimeout(codeCopyTimer.current), []);
 
 	const sessionEntries = webxrSpecCatalog.filter((entry) =>
 		sessionIds.includes(entry.id),
@@ -167,7 +200,8 @@ export function WebXRSpecList() {
 	const tokKw = "text-fuchsia-400";
 	const tokFn = "text-sky-300";
 	const tokProp = "text-amber-200";
-	const tokCmt = "text-gray-500";
+	// 暗い面の上のコメント。白地の下限（gray-500）では暗すぎるので、明るい gray-400 で読める濃さにする
+	const tokCmt = "text-gray-400";
 	const tokHl =
 		"rounded bg-emerald-400/15 px-1 text-emerald-300 ring-1 ring-emerald-400/30";
 
@@ -290,7 +324,7 @@ export function WebXRSpecList() {
 		setXrError(null);
 		if (selectedUnsupported.length > 0) {
 			setXrError(
-				`この端末では ${selectedUnsupported.join("・")} が未対応のため、この構成では開始できません。チェックを外すか、対応している端末でお試しください。`,
+				`この端末では${selectedUnsupported.join("・")}が未対応のため、この構成では開始できません。選び直すか、対応している端末でお試しください。`,
 			);
 			return;
 		}
@@ -308,7 +342,7 @@ export function WebXRSpecList() {
 					xrSessionRef.current = null;
 					setXrError(
 						message
-							? `セッションが終了しました（${message}）`
+							? `セッションが終了しました（${message}）。`
 							: "セッションを終了しました。",
 					);
 				},
@@ -317,7 +351,9 @@ export function WebXRSpecList() {
 			setXrRunning(false);
 			xrSessionRef.current = null;
 			setXrError(
-				err instanceof Error ? err.message : "体験を開始できませんでした",
+				err instanceof Error
+					? err.message
+					: "体験を開始できませんでした。ページを開き直すか、対応している端末でお試しください。",
 			);
 		}
 	}
@@ -327,23 +363,38 @@ export function WebXRSpecList() {
 	}
 
 	async function copyBuilderCode() {
+		let result: "done" | "failed" = "done";
 		try {
 			await navigator.clipboard.writeText(builderCode);
-			setCodeCopied(true);
-			setTimeout(() => setCodeCopied(false), 2000);
 		} catch {
-			// クリップボードが使えない環境では何もしない
+			// クリップボードが使えない環境でも、押した結果は伝える
+			result = "failed";
 		}
+		setCodeCopy(result);
+		clearTimeout(codeCopyTimer.current);
+		codeCopyTimer.current = setTimeout(() => setCodeCopy("idle"), 1600);
 	}
 
-	function supportDot(id: SpecCheckId) {
-		const ok = results[id] === "supported";
+	/** 選択肢に添える判定の印。色だけに頼らないよう記号で出す（読み上げは supportStatus） */
+	function supportSymbol(id: SpecCheckId) {
+		const support = results[id] ?? "checking";
 		return (
 			<span
 				aria-hidden="true"
-				className={`inline-block h-1.5 w-1.5 shrink-0 rounded-full ${ok ? "bg-data-yes" : "bg-gray-300"}`}
-				title={supportTitle[results[id] ?? "checking"]}
-			/>
+				title={supportTitle[support]}
+				className={`w-3 shrink-0 text-center text-xs font-bold ${markSymbolTone[support]}`}
+			>
+				{markSymbol[support]}
+			</span>
+		);
+	}
+
+	/** 選択肢の名前のあとに読み上げる判定の言葉 */
+	function supportStatus(id: SpecCheckId) {
+		return (
+			<span className="sr-only">
+				（{reportStatusLabel(supportToMark(results[id] ?? "checking"))}）
+			</span>
 		);
 	}
 
@@ -355,39 +406,42 @@ export function WebXRSpecList() {
 			<li
 				key={entry.id}
 				id={`spec-${entry.id}`}
-				className="grid scroll-mt-28 grid-cols-[4.5rem_minmax(0,1fr)] gap-x-4 gap-y-4 px-5 py-6 md:grid-cols-[4.5rem_minmax(0,1fr)_17rem] md:gap-x-6"
+				// スマートフォンでは判定の印を名前の上に置き、説明に幅を回す
+				className="grid scroll-mt-28 grid-cols-1 gap-y-3 px-5 py-6 sm:grid-cols-[4.5rem_minmax(0,1fr)] sm:gap-x-4 sm:gap-y-4 md:grid-cols-[4.5rem_minmax(0,1fr)_17rem] md:gap-x-6"
 			>
 				<span className="pt-0.5" title={supportTitle[support]}>
 					{/* 確認中は記号（…）だけを出す */}
-					<MarkBadge mark={mark} className="w-full">
+					<MarkBadge mark={mark} className="sm:w-full">
 						{mark === "checking" ? "" : reportStatusLabel(mark)}
 					</MarkBadge>
 				</span>
 				<div className="min-w-0">
-					<p className="text-base font-bold leading-snug text-gray-950">
+					{/* 名前とコード表記は、入りきらないときに語の途中で割らず、まとまりごと次の行へ送る */}
+					<p className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-base font-bold leading-snug text-gray-950">
 						{entry.name}
 						{entry.featureName && (
 							<code
 								title={
 									isSession
-										? "requestSession に渡すセッションモード名"
-										: "requestSession の requiredFeatures / optionalFeatures に渡す機能名"
+										? "requestSessionに渡すセッションモード名"
+										: "requestSessionのrequiredFeatures / optionalFeaturesに渡す機能名"
 								}
-								className="ml-2.5 rounded bg-gray-100 px-1.5 py-0.5 font-mono text-[11px] font-normal text-gray-600"
+								className="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-xs font-normal text-gray-600"
 							>
 								{entry.featureName}
 							</code>
 						)}
 					</p>
-					<p className="mt-1.5 text-sm leading-relaxed text-gray-600">
+					<p className="mt-1.5 break-phrase text-sm leading-relaxed text-gray-600">
 						{entry.description}
 					</p>
 					{entry.whyNote && (
-						<details className="mt-1.5">
-							<summary className="cursor-pointer text-xs font-bold text-gray-400 transition hover:text-gray-600">
-								なぜ必要？
+						<details className="mt-1">
+							{/* タッチで押しやすいよう、スマートフォンでは高さ44px（文字16px + 上下14px） */}
+							<summary className="cursor-pointer py-3.5 text-xs font-bold text-gray-500 transition-colors hover:text-gray-800 sm:py-1">
+								必要な理由
 							</summary>
-							<p className="mt-1 rounded-xl bg-gray-50 px-3 py-2 text-xs leading-relaxed text-gray-500">
+							<p className="mt-1 rounded-xl bg-gray-50 px-3 py-2 text-xs leading-relaxed text-gray-600">
 								{entry.whyNote}
 							</p>
 						</details>
@@ -398,22 +452,24 @@ export function WebXRSpecList() {
 							target="_blank"
 							rel="noopener noreferrer"
 							title={maturityTitle[entry.maturity]}
-							className="mt-1.5 inline-block text-xs text-gray-400 transition hover:text-gray-600 hover:underline"
+							aria-label={`${entry.specName}（新しいタブで開く）`}
+							// 押せる範囲を上下に4pxずつ広げる（高さ24px）
+							className="inline-block py-1 text-xs text-gray-500 underline decoration-gray-300 underline-offset-2 transition-colors hover:text-gray-800 hover:decoration-current"
 						>
 							{entry.specName}
 						</a>
 					) : (
 						<span
-							className="mt-1.5 inline-block text-xs text-gray-400"
+							className="inline-block py-1 text-xs text-gray-500"
 							title={maturityTitle[entry.maturity]}
 						>
 							{entry.specName}
 						</span>
 					)}
 				</div>
-				<div className="col-span-2 md:col-span-1">
+				<div className="sm:col-span-2 md:col-span-1">
 					{entry.demos && entry.demos.length > 0 ? (
-						<div className="grid grid-cols-2 gap-2">
+						<div className="flex flex-wrap gap-2">
 							{entry.demos.map((demo) => (
 								<a
 									key={demo.href}
@@ -421,18 +477,19 @@ export function WebXRSpecList() {
 									target="_blank"
 									rel="noopener noreferrer"
 									title={`${demo.label}の${entry.name}デモを開く`}
+									aria-label={`${demo.name ?? demo.label}：${entry.name}のデモ（新しいタブで開く）`}
 									className={demoButtonClass}
 								>
-									<span className="truncate">{demo.name ?? demo.label}</span>
-									<span aria-hidden="true" className="shrink-0 text-[10px]">
+									{demo.name ?? demo.label}
+									<span aria-hidden="true" className="text-xs">
 										↗
 									</span>
 								</a>
 							))}
 						</div>
 					) : (
-						<p className="flex min-h-10 items-center justify-center rounded-xl border border-dashed border-gray-200 text-xs text-gray-300">
-							デモは近日公開
+						<p className="flex min-h-10 items-center justify-center rounded-xl border border-dashed border-gray-200 px-3 text-xs text-gray-500">
+							動かせるデモはまだありません
 						</p>
 					)}
 				</div>
@@ -447,9 +504,9 @@ export function WebXRSpecList() {
 	) {
 		return (
 			<>
-				<p className={sectionLabelClass}>{label}</p>
-				<p className="mt-1.5 text-xs leading-relaxed text-gray-500">{note}</p>
-				<ul className="mt-3 divide-y divide-gray-100 rounded-2xl border border-gray-100">
+				<h2 className={sectionHeadingClass}>{label}</h2>
+				<p className={sectionNoteClass}>{note}</p>
+				<ul className="mt-4 divide-y divide-gray-100 rounded-2xl border border-gray-200">
 					{entries.map(renderEntry)}
 				</ul>
 			</>
@@ -461,21 +518,21 @@ export function WebXRSpecList() {
 			{renderSection(
 				"セッションモード",
 				<>
-					XR体験の入口です。体験を始めるときに{" "}
+					XR体験の入口です。体験を始めるときに
 					<code className={noteCodeClass}>
 						navigator.xr.requestSession("モード名")
-					</code>{" "}
+					</code>
 					で、この中から1つを選びます。
 				</>,
 				sessionEntries,
 			)}
 			{renderSection(
-				"モジュール",
+				"機能モジュール",
 				<>
-					体験に足せる機能です。使いたい機能のfeature名を{" "}
-					<code className={noteCodeClass}>requiredFeatures</code>（必須）または{" "}
+					体験に足せる機能です。使いたい機能のfeature名を
+					<code className={noteCodeClass}>requiredFeatures</code>（必須）または
 					<code className={noteCodeClass}>optionalFeatures</code>
-					（任意）に入れて <code className={noteCodeClass}>requestSession</code>{" "}
+					（任意）に入れて<code className={noteCodeClass}>requestSession</code>
 					に渡すと有効になります。
 				</>,
 				sortedModules,
@@ -483,28 +540,28 @@ export function WebXRSpecList() {
 			{renderSection(
 				"体験スペース",
 				<>
-					体験の基準になる座標系です。セッション開始後に{" "}
+					体験の基準になる座標系です。セッション開始後に
 					<code className={noteCodeClass}>
 						session.requestReferenceSpace("名前")
-					</code>{" "}
-					で選びます。bounded-floor などは{" "}
-					<code className={noteCodeClass}>optionalFeatures</code>{" "}
+					</code>
+					で選びます。<code className={noteCodeClass}>bounded-floor</code>
+					などは<code className={noteCodeClass}>optionalFeatures</code>
 					への指定も必要です。
 				</>,
 				referenceSpaceEntries,
 			)}
 
-			<p className={sectionLabelClass}>スターターコードを組み立てる</p>
-			<p className="mt-1.5 text-xs leading-relaxed text-gray-500">
+			<h2 className={sectionHeadingClass}>スターターコードを組み立てる</h2>
+			<p className={sectionNoteClass}>
 				モード・機能・体験スペースを選ぶと、WebXRを開始するコードがその場で組み上がります。未対応の端末でも、実装の形をそのまま確認できます。
 			</p>
-			<div className="mt-3 rounded-2xl border border-gray-100 p-5">
+			<div className="mt-4 rounded-2xl border border-gray-200 p-5">
 				<div className="flex flex-wrap items-center gap-2">
 					{loaded && (
 						<button
 							type="button"
 							onClick={buildForDevice}
-							className="rounded-full bg-gray-950 px-4 py-2 text-xs font-bold text-white transition hover:bg-[#e11d48]"
+							className="btn btn-dark rounded-full"
 						>
 							この端末向けに構成する
 						</button>
@@ -513,105 +570,118 @@ export function WebXRSpecList() {
 						<button
 							type="button"
 							onClick={xrRunning ? endExperience : startExperience}
-							className="rounded-full bg-emerald-600 px-4 py-2 text-xs font-bold text-white transition hover:bg-emerald-700"
+							className="btn btn-primary rounded-full"
 						>
-							{xrRunning ? "体験を終了する" : "この構成で体験を開始"}
+							{xrRunning ? "体験を終了する" : "この構成で体験を始める"}
 						</button>
 					)}
 				</div>
 				{xrError && (
-					<p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-xs leading-relaxed text-red-600">
+					<p
+						role="alert"
+						className="mt-3 break-phrase rounded-xl bg-gray-50 px-3 py-2 text-xs leading-relaxed text-gray-700"
+					>
 						{xrError}
 					</p>
 				)}
-				<p className="mt-4 text-[11px] font-bold text-gray-400">モード</p>
-				<div className="mt-2 flex flex-wrap gap-2">
-					{sessionEntries.map((entry) => (
-						<button
-							key={entry.id}
-							type="button"
-							onClick={() => setMode(entry.id as XRSessionMode)}
-							className={`flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-bold transition ${
-								mode === entry.id
-									? "border-gray-950 bg-gray-950 text-white"
-									: "border-gray-200 bg-white text-gray-700 hover:border-gray-400"
-							}`}
-						>
-							{supportDot(entry.id)}
-							{entry.name}
-						</button>
-					))}
-				</div>
-				<p className="mt-4 text-[11px] font-bold text-gray-400">
-					機能（optionalFeatures）
-				</p>
-				<div className="mt-2 grid grid-cols-1 gap-1.5 sm:grid-cols-2 md:grid-cols-3">
-					{featureOptions.map((entry) => (
-						<label
-							key={entry.id}
-							className="flex cursor-pointer items-center gap-2 rounded-xl border border-gray-100 px-3 py-2 text-xs text-gray-700 transition hover:border-gray-300"
-						>
-							<input
-								type="checkbox"
-								checked={
-									entry.featureName
-										? features.includes(entry.featureName)
-										: false
-								}
-								onChange={() =>
-									entry.featureName && toggleFeature(entry.featureName)
-								}
-								className="h-3.5 w-3.5 accent-gray-950"
-							/>
-							{supportDot(entry.id)}
-							<span className="min-w-0 truncate font-bold">{entry.name}</span>
-							<code className="ml-auto shrink-0 font-mono text-[10px] text-gray-400">
-								{entry.featureName}
-							</code>
-							{entry.featureName &&
-								!runnerVisualized.has(entry.featureName) && (
-									<span
-										title="BANGEOのスターター体験ではまだ可視化されず、体験開始時のセッション要求にも入れません"
-										className="shrink-0 rounded bg-gray-100 px-1.5 py-0.5 text-[10px] text-gray-400"
-									>
-										可視化なし
+				{/* 選択肢の群ごとに fieldset で囲み、群の名前（legend）を読み上げで結び付ける。
+				    min-w-0 は、fieldset の既定の最小幅（中身の幅）で狭い画面からはみ出さないため */}
+				<fieldset className="mt-5 min-w-0">
+					<legend className={fieldLabelClass}>モード</legend>
+					<div className="mt-2 flex flex-wrap gap-2">
+						{sessionEntries.map((entry) => (
+							<button
+								key={entry.id}
+								type="button"
+								onClick={() => setMode(entry.id as XRSessionMode)}
+								aria-pressed={mode === entry.id}
+								className={choiceClass(mode === entry.id)}
+							>
+								{supportSymbol(entry.id)}
+								{entry.name}
+								{supportStatus(entry.id)}
+							</button>
+						))}
+					</div>
+				</fieldset>
+				<fieldset className="mt-5 min-w-0">
+					<legend className={fieldLabelClass}>機能（optionalFeatures）</legend>
+					<div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
+						{featureOptions.map((entry) => (
+							<label
+								key={entry.id}
+								className="flex cursor-pointer items-start gap-2.5 rounded-xl border border-gray-200 px-3 py-2.5 text-xs text-gray-700 transition-colors hover:border-gray-400"
+							>
+								<input
+									type="checkbox"
+									checked={
+										entry.featureName
+											? features.includes(entry.featureName)
+											: false
+									}
+									onChange={() =>
+										entry.featureName && toggleFeature(entry.featureName)
+									}
+									className="mt-px h-4 w-4 shrink-0 accent-gray-950"
+								/>
+								{/* 名前を省略しないよう、機能名と「可視化なし」は2行目に置く */}
+								<span className="min-w-0">
+									<span className="flex items-center gap-1.5 font-bold text-gray-950">
+										{supportSymbol(entry.id)}
+										{entry.name}
+										{supportStatus(entry.id)}
 									</span>
-								)}
-						</label>
-					))}
-				</div>
-				<p className="mt-4 text-[11px] font-bold text-gray-400">体験スペース</p>
-				<div className="mt-2 flex flex-wrap gap-2">
-					{referenceSpaceEntries.map((entry) => (
-						<button
-							key={entry.id}
-							type="button"
-							onClick={() => setRefSpace(entry.id)}
-							className={`flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-bold transition ${
-								refSpace === entry.id
-									? "border-gray-950 bg-gray-950 text-white"
-									: "border-gray-200 bg-white text-gray-700 hover:border-gray-400"
-							}`}
-						>
-							{supportDot(entry.id)}
-							{entry.name}
-						</button>
-					))}
-				</div>
-				<div className="mt-5 overflow-hidden rounded-xl bg-gray-950">
-					<div className="flex items-center gap-1.5 border-b border-white/10 px-4 py-2.5">
-						<span className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
-						<span className="h-2.5 w-2.5 rounded-full bg-amber-400/80" />
-						<span className="h-2.5 w-2.5 rounded-full bg-emerald-400/80" />
-						<span className="ml-3 font-mono text-[11px] text-gray-500">
-							starter.js
-						</span>
+									<span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+										<code className="font-mono text-gray-500">
+											{entry.featureName}
+										</code>
+										{entry.featureName &&
+											!runnerVisualized.has(entry.featureName) && (
+												<span
+													title="BANGEOのスターター体験ではまだ可視化されず、体験開始時のセッション要求にも入れません"
+													className="rounded bg-gray-100 px-1.5 py-0.5 text-gray-600"
+												>
+													可視化なし
+												</span>
+											)}
+									</span>
+								</span>
+							</label>
+						))}
+					</div>
+				</fieldset>
+				<fieldset className="mt-5 min-w-0">
+					<legend className={fieldLabelClass}>体験スペース</legend>
+					<div className="mt-2 flex flex-wrap gap-2">
+						{referenceSpaceEntries.map((entry) => (
+							<button
+								key={entry.id}
+								type="button"
+								onClick={() => setRefSpace(entry.id)}
+								aria-pressed={refSpace === entry.id}
+								className={choiceClass(refSpace === entry.id)}
+							>
+								{supportSymbol(entry.id)}
+								{entry.name}
+								{supportStatus(entry.id)}
+							</button>
+						))}
+					</div>
+				</fieldset>
+				<div className="mt-6 overflow-hidden rounded-xl bg-gray-950">
+					<div className="flex min-h-12 items-center gap-3 border-b border-white/10 py-1 pl-4 pr-2 sm:py-2">
+						<span className="font-mono text-xs text-gray-400">starter.js</span>
+						{/* タッチで押しやすいよう、スマートフォンでは高さ44px */}
 						<button
 							type="button"
 							onClick={copyBuilderCode}
-							className="ml-auto rounded-full border border-white/15 px-3 py-1 text-[11px] font-bold text-white/70 transition hover:bg-white/10 hover:text-white"
+							className="ml-auto inline-flex min-h-11 items-center whitespace-nowrap rounded-full border border-white/20 px-3 text-xs font-bold text-white/80 transition-[background-color,color,transform] hover:bg-white/10 hover:text-white active:scale-[0.98] sm:min-h-8"
 						>
-							{codeCopied ? "コピーしました" : "コピー"}
+							{codeCopy === "done"
+								? "コピーしました"
+								: codeCopy === "failed"
+									? "コピーできませんでした"
+									: "コードをコピー"}
 						</button>
 					</div>
 					<div className="overflow-x-auto p-4">
@@ -619,7 +689,7 @@ export function WebXRSpecList() {
 							<code>
 								{codeJsxLines.map((line, index) => (
 									<span key={line.id} className="flex gap-4">
-										<span className="w-5 shrink-0 select-none text-right text-gray-600">
+										<span className="w-5 shrink-0 select-none text-right text-gray-500">
 											{index + 1}
 										</span>
 										<span className="whitespace-pre text-gray-200">
@@ -631,17 +701,17 @@ export function WebXRSpecList() {
 						</pre>
 					</div>
 				</div>
-				<p className="mt-3 text-[11px] leading-relaxed text-gray-400">
+				<p className="mt-3 max-w-[40em] text-xs leading-relaxed text-gray-500">
 					体験を開始すると、VRでは安定性を優先した暗背景、ARではパススルーを背景に、hit-test（面マーカー）・anchors（選択操作で固定キューブを設置）・hand-tracking（関節の点表示）・bounded-floor（境界線）・mesh-detection（部屋メッシュの点群）・depth-sensing（視線の先の実測距離マーカー）・light-estimation（主光源の方向線）・body-tracking（全身関節の点表示）がセッションの中で確認できます。Layersなど「可視化なし」の機能は、体験開始時のセッション要求には入れません。
 				</p>
 				{skippedStarterFeatures.length > 0 && (
-					<p className="mt-3 rounded-xl bg-gray-50 px-3 py-2 text-xs leading-relaxed text-gray-500">
-						BANGEOのスターター体験では未実装のため、開始時には{" "}
-						{skippedStarterFeatures.join("・")} をセッション要求から外します。
+					<p className="mt-3 break-phrase rounded-xl bg-gray-50 px-3 py-2 text-xs leading-relaxed text-gray-600">
+						BANGEOのスターター体験では未実装のため、開始時には
+						{skippedStarterFeatures.join("・")}をセッション要求から外します。
 					</p>
 				)}
 				{selectedUnsupported.length > 0 && (
-					<p className="mt-3 rounded-xl bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-700">
+					<p className="mt-3 break-phrase rounded-xl bg-data-ask-soft px-3 py-2 text-xs leading-relaxed text-data-ask">
 						この構成には、この端末では未対応のものが含まれます（
 						{selectedUnsupported.join("・")}
 						）。コードの形はそのまま学べます。
@@ -649,10 +719,10 @@ export function WebXRSpecList() {
 				)}
 			</div>
 
-			<p className="mt-4 text-xs leading-relaxed text-gray-400">
-				対応表示はブラウザのAPI実装有無に基づく簡易チェックです。各行のコードは、requestSession
-				のモード名または requiredFeatures / optionalFeatures
-				に渡す機能名です。最終的な動作は各デモページでご確認ください。
+			<p className="mt-4 max-w-[40em] text-xs leading-relaxed text-gray-500">
+				対応表示はブラウザのAPI実装有無に基づく簡易判定です。各行のコードは、requestSessionのモード名またはrequiredFeatures
+				/
+				optionalFeaturesに渡す機能名です。最終的な動作は各デモページでご確認ください。
 			</p>
 		</div>
 	);

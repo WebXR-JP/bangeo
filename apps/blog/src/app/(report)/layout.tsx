@@ -10,11 +10,12 @@ import { ReportTabs } from "@/components/report/report-tabs";
  *
  * 外枠の relative は、各ページの先頭に置く ReportTopAnchor の基準。
  * リンクで開いたときに、結果画像を飛び越えずに上端から見えるようにしている。
+ * 下の余白はフッター側（mt-16 md:mt-24）が持つので、ここでは付けない。
  */
 export default function ReportLayout({ children }: { children: ReactNode }) {
 	return (
 		<ReportProvider>
-			<div className="relative mx-auto max-w-4xl px-6 pt-8 pb-16 md:px-8 md:pt-10 md:pb-20">
+			<div className="relative mx-auto max-w-4xl px-5 pt-8 md:px-8 md:pt-12">
 				<ReportCard />
 				<ReportTabs />
 				<div id="report-content" className="scroll-mt-28 pt-8">

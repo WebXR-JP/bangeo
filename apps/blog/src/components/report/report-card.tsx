@@ -19,15 +19,16 @@ const REPORT_URL = `${SITE_URL}/report`;
 const HASHTAG = "bangeo_webxr";
 const MASCOT_SRC = "/favicon.png";
 
+// タッチで押しやすいよう高さは44px。押せる文字を2行に折らない
 const primaryButtonClass =
-	"inline-flex min-h-10 items-center justify-center whitespace-nowrap rounded-full bg-primary-600 px-5 py-2 text-sm font-bold text-white transition hover:bg-primary-700 active:scale-[0.98] disabled:cursor-default disabled:opacity-45 disabled:hover:bg-primary-600 disabled:active:scale-100";
+	"inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-full bg-primary-600 px-5 py-2 text-sm font-bold text-white transition-[background-color,transform] hover:bg-primary-700 active:scale-[0.98] disabled:cursor-default disabled:opacity-45 disabled:hover:bg-primary-600 disabled:active:scale-100";
 
 const secondaryButtonClass =
-	"inline-flex min-h-10 items-center justify-center whitespace-nowrap rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-bold text-gray-700 transition hover:border-gray-950 hover:text-gray-950 active:scale-[0.98] disabled:cursor-default disabled:opacity-45 disabled:hover:border-gray-200 disabled:hover:text-gray-700 disabled:active:scale-100";
+	"inline-flex min-h-11 items-center justify-center whitespace-nowrap rounded-full border border-gray-300 bg-white px-4 py-2 text-sm font-bold text-gray-700 transition-[border-color,color,transform] hover:border-gray-950 hover:text-gray-950 active:scale-[0.98] disabled:cursor-default disabled:opacity-45 disabled:hover:border-gray-300 disabled:hover:text-gray-700 disabled:active:scale-100";
 
 /** 画像の枠。見開き1枚のときも、1ページずつ切り出すときも同じ見た目にする */
 const frameClass =
-	"overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-[0_1px_2px_rgba(9,9,11,0.06),0_8px_24px_-12px_rgba(9,9,11,0.2)] transition-colors group-hover:border-gray-400";
+	"overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lift transition-colors group-hover:border-gray-400";
 
 const pageFrameClass = `block aspect-[1000/1414] ${frameClass}`;
 
@@ -59,7 +60,7 @@ const stepTone: Record<StepState, string> = {
 	done: "text-gray-700",
 	failed: "text-gray-700",
 	active: "text-gray-950",
-	pending: "text-gray-400",
+	pending: "text-gray-500",
 };
 
 const stepStatusText: Record<StepState, string> = {
@@ -74,14 +75,14 @@ const stepIconClass =
 
 /**
  * 段階の印。判定の色（青・アンバー）は結果のためのものなので、進み具合には無彩色だけを使う。
- * globals.css が全要素の border-color を固定しているため、輪は枠線ではなく SVG の線で描く
+ * 待機中の輪と、確認中に回す弧は、太さと位置がそろうよう同じ SVG の中に線で描く
  */
 function StepIcon({ state }: { state: StepState }) {
 	if (state === "done" || state === "failed") {
 		return (
 			<span
 				aria-hidden="true"
-				className={`${stepIconClass} text-xs font-black motion-safe:animate-report-check ${
+				className={`${stepIconClass} text-xs font-bold motion-safe:animate-report-check ${
 					state === "done"
 						? "bg-gray-950 text-white"
 						: "bg-gray-200 text-gray-600"
@@ -496,19 +497,20 @@ export function ReportCard() {
 		<section aria-label="この端末の結果">
 			<div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
 				<div className="min-w-0">
-					{/* 「判定完了」が出ても下がずれないよう、行の高さを先に取っておく */}
-					<p className="flex min-h-5 items-center gap-2 text-[11px] font-black tracking-[0.14em] text-primary-600">
+					{/* 「判定完了」が出ても下がずれないよう、行の高さを先に取っておく（印の高さ 20px） */}
+					<p className="flex min-h-5 items-center gap-2 text-[13px] font-bold leading-5 text-primary-700">
 						BANGEOレポート
 						{revealed && (
-							<span className="inline-flex items-center gap-1 rounded-full bg-gray-950 px-2 py-1 text-[10px] leading-none tracking-[0.08em] text-white motion-safe:animate-report-check">
+							<span className="inline-flex h-5 items-center gap-1 rounded-full bg-gray-950 px-2 text-xs leading-none text-white motion-safe:animate-report-check">
 								<span aria-hidden="true">✓</span>
 								判定完了
 							</span>
 						)}
 					</p>
+					{/* 見出しと同じ詰め組み（palt）。土台は h1〜h4 にだけ掛けているので、ここで指定する */}
 					<p
 						aria-live="polite"
-						className="mt-1.5 text-2xl font-black tracking-tight text-gray-950 md:text-3xl"
+						className="mt-1.5 text-2xl font-black text-gray-950 [font-feature-settings:'palt'] md:text-3xl"
 					>
 						<span
 							key={revealed ? "result" : "judging"}
@@ -612,7 +614,7 @@ export function ReportCard() {
 
 			<p
 				role="status"
-				className="mt-3 min-h-5 text-xs leading-relaxed text-gray-700"
+				className="mt-3 min-h-5 break-phrase text-xs leading-relaxed text-gray-700"
 			>
 				{notice}
 				{blockedShareHref && (
@@ -622,7 +624,8 @@ export function ReportCard() {
 							href={blockedShareHref}
 							target="_blank"
 							rel="noopener noreferrer"
-							className="font-bold text-primary-600 underline underline-offset-2 hover:no-underline"
+							aria-label="Xの投稿画面を開く（新しいタブで開く）"
+							className="text-link font-bold"
 						>
 							Xの投稿画面を開く
 						</a>

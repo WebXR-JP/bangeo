@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { BreadcrumbStructuredData } from "@/components/breadcrumb-structured-data";
-import { OptimizedImage } from "@/components/optimized-image";
+import { PageHeader } from "@/components/page-header";
+import { MarkBadge } from "@/components/report/report-mark";
 import {
 	AR_DEVICES,
 	type DeviceWebxrSummary,
@@ -15,182 +17,294 @@ export const metadata: Metadata = {
 	alternates: { canonical: "/devices" },
 };
 
-function DeviceCard({ device }: { device: DeviceWebxrSummary }) {
-	const statusClasses = {
-		対応: "bg-emerald-50 text-emerald-700 border-emerald-100",
-		条件付き対応: "bg-amber-50 text-amber-800 border-amber-200",
-		非対応: "bg-rose-50 text-rose-700 border-rose-100",
-		未確認: "bg-amber-50 text-amber-800 border-amber-200",
-	} as const;
+/* BANGEO design · 骨格: 結論先出し（デバイスと判定の早見表）→ 1台1枚のカード（定義リスト）·
+   自己採点は報告に記載 */
 
+const GROUPS = [
+	{
+		id: "vr-headsets",
+		title: "VRヘッドセットのWebXR対応",
+		short: "VRヘッドセット",
+		lead: "Meta Quest、HTC VIVE、Picoの各シリーズなど、主要なヘッドセットにはWebXRを利用できる環境があります。Valve IndexとWindows MRも同様です。一方で、PlayStation VR/VR2やHTC VIVE Flowのように、ブラウザ経由での利用が難しいデバイスもあります。",
+		devices: VR_DEVICES,
+	},
+	{
+		id: "smartphones-ar",
+		title: "スマートフォン・ARデバイスのWebXR対応",
+		short: "スマートフォン・ARデバイス",
+		lead: "スマートフォンでのWebXR ARは、端末とブラウザの組み合わせによって利用条件が大きく変わります。特にiOSでは、ブラウザ以外の手段が必要になることもあります。",
+		devices: AR_DEVICES,
+	},
+];
+
+type DeviceStatus = DeviceWebxrSummary["webxrSupport"]["status"];
+
+/**
+ * WebXR の判定。/report と同じ印（対応=青の✓ / 未対応=灰の– / 未確認=アンバーの?）にそろえる。
+ * データの「非対応」は判定の4語に合わせて「未対応」と出す。
+ * 「条件付き対応」は MarkBadge にない状態なので、同じ形のアンバーに △ を付けて区別する
+ */
+function StatusBadge({ status }: { status: DeviceStatus }) {
+	switch (status) {
+		case "対応":
+			return <MarkBadge mark="yes">対応</MarkBadge>;
+		case "非対応":
+			return <MarkBadge mark="no">未対応</MarkBadge>;
+		case "未確認":
+			return <MarkBadge mark="unknown">未確認</MarkBadge>;
+		case "条件付き対応":
+			return (
+				<span className="inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-full bg-data-ask-soft px-2.5 py-1 text-xs font-bold text-data-ask">
+					<span aria-hidden="true">△</span>
+					条件付き対応
+				</span>
+			);
+		default: {
+			const exhaustiveCheck: never = status;
+			return exhaustiveCheck;
+		}
+	}
+}
+
+/** 外向きの矢印（フッターと同じ形）。読み上げない */
+function ExternalIcon() {
 	return (
-		<article className="min-w-0 p-5 sm:p-8 md:p-10 bg-white/70 border border-gray-200 rounded-[2.5rem] shadow-xs hover:shadow-xl transition-all duration-500">
-			<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-				<div className="min-w-0 space-y-2">
-					<div className="text-[10px] font-black text-[#e11d48] uppercase tracking-widest">
-						{device.type} / {device.manufacturer}
-					</div>
-					<h3 className="text-2xl md:text-3xl font-black text-gray-900">
+		<svg
+			className="ml-0.5 inline-block size-3 shrink-0 align-[-0.05em]"
+			viewBox="0 0 12 12"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={1.5}
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			aria-hidden="true"
+		>
+			<path d="M3.5 8.5l5-5M4.5 3.5h4v4" />
+		</svg>
+	);
+}
+
+const URL_PATTERN = /https?:\/\/[^\s（）()「」、。]+/g;
+
+/**
+ * 生の URL の見せ方。パスの ID や版番号まで出すと読めないので、ホスト名と、語になっている末尾だけを出す
+ * （developers.meta.com/…/2d-web、store.steampowered.com）。href はデータの URL のまま
+ */
+function shortUrl(url: string) {
+	try {
+		const { hostname, pathname } = new URL(url);
+		const host = hostname.replace(/^www\./, "");
+		const segments = pathname.split("/").filter(Boolean);
+		const last = segments[segments.length - 1] ?? "";
+		if (!/^(?!\d+$)[\w-]+$/.test(last)) return host;
+		return segments.length > 1 ? `${host}/…/${last}` : `${host}/${last}`;
+	} catch {
+		return url.replace(/^https?:\/\//, "").replace(/\/$/, "");
+	}
+}
+
+/** データの文に入っている生の URL を、押せるリンクにする（前後の文字はデータのまま。表示は shortUrl） */
+function Linkified({ text }: { text: string }) {
+	const parts: ReactNode[] = [];
+	let cursor = 0;
+	for (const match of text.matchAll(URL_PATTERN)) {
+		const url = match[0];
+		const start = match.index ?? 0;
+		if (start > cursor) parts.push(text.slice(cursor, start));
+		const shown = shortUrl(url);
+		// 外向きの印だけが次の行に送られないよう、末尾の語と印を折らずにつなげる
+		const tailStart = Math.max(shown.search(/[^/.\-…]+$/), 0);
+		parts.push(
+			<a
+				key={start}
+				href={url}
+				target="_blank"
+				rel="noopener noreferrer"
+				aria-label={`${shown}（新しいタブで開く）`}
+				className="text-link [overflow-wrap:anywhere]"
+			>
+				{shown.slice(0, tailStart)}
+				<span className="whitespace-nowrap">
+					{shown.slice(tailStart)}
+					<ExternalIcon />
+				</span>
+			</a>,
+		);
+		cursor = start + url.length;
+	}
+	if (cursor < text.length) parts.push(text.slice(cursor));
+	return <>{parts}</>;
+}
+
+const LABEL = "text-xs font-bold leading-[1.6] text-gray-500";
+const VALUE =
+	"mt-1 text-sm leading-[1.7] text-gray-700 [overflow-wrap:anywhere]";
+
+function BulletList({ items }: { items: string[] }) {
+	return (
+		<ul className="space-y-1.5">
+			{items.map((item) => (
+				<li key={item} className="flex min-w-0 gap-2.5">
+					<span
+						aria-hidden="true"
+						className="mt-[0.7em] size-1 shrink-0 rounded-full bg-gray-400"
+					/>
+					<span className="min-w-0 [overflow-wrap:anywhere]">
+						<Linkified text={item} />
+					</span>
+				</li>
+			))}
+		</ul>
+	);
+}
+
+function DeviceCard({ device }: { device: DeviceWebxrSummary }) {
+	return (
+		<article
+			id={device.id}
+			aria-labelledby={`${device.id}-name`}
+			className="card min-w-0 scroll-mt-24 p-5 md:p-8"
+		>
+			<div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between md:gap-6">
+				<div className="min-w-0">
+					<p className="flex flex-wrap gap-1.5">
+						<span className="chip">{device.type}</span>
+						<span className="chip">{device.manufacturer}</span>
+					</p>
+					<h3
+						id={`${device.id}-name`}
+						className="mt-3 text-xl font-bold leading-snug text-gray-950 md:text-2xl"
+					>
 						{device.name}
 					</h3>
 				</div>
-				<span
-					className={`inline-flex items-center px-4 py-2 rounded-full text-xs font-black border ${statusClasses[device.webxrSupport.status]}`}
-				>
-					WebXR: {device.webxrSupport.status}
-				</span>
+				<p className="flex items-center gap-2">
+					<span className="text-xs font-bold text-gray-500">WebXR</span>
+					<StatusBadge status={device.webxrSupport.status} />
+				</p>
 			</div>
-			<p className="mt-4 text-sm text-gray-600 leading-relaxed [overflow-wrap:anywhere]">
-				{device.webxrSupport.detail}
+			<p className="mt-3 max-w-[48em] text-sm leading-[1.7] text-gray-700 [overflow-wrap:anywhere]">
+				<Linkified text={device.webxrSupport.detail} />
 			</p>
 
-			<div className="mt-8 grid min-w-0 grid-cols-1 gap-8 md:grid-cols-2">
-				<div className="min-w-0 space-y-6">
+			<div className="mt-6 grid min-w-0 gap-6 border-t border-gray-100 pt-6 md:grid-cols-2 md:gap-10">
+				<dl className="min-w-0 space-y-4">
 					<div>
-						<h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
-							対応ブラウザ
-						</h4>
-						<ul className="mt-2 space-y-2 text-sm text-gray-600 leading-relaxed">
-							{device.browsers.map((browser) => (
-								<li key={browser} className="flex min-w-0 gap-2">
-									<span className="text-[#e11d48] mt-1">&bull;</span>
-									<span className="min-w-0 [overflow-wrap:anywhere]">
-										{browser}
-									</span>
-								</li>
-							))}
-						</ul>
+						<dt className={LABEL}>対応ブラウザ</dt>
+						<dd className={VALUE}>
+							<BulletList items={device.browsers} />
+						</dd>
 					</div>
 					<div>
-						<h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
-							接続タイプ
-						</h4>
-						<p className="mt-2 text-sm text-gray-600 leading-relaxed [overflow-wrap:anywhere]">
-							{device.connectionType}
-						</p>
+						<dt className={LABEL}>接続方式</dt>
+						<dd className={VALUE}>{device.connectionType}</dd>
 					</div>
 					<div>
-						<h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
-							価格帯
-						</h4>
-						<p className="mt-2 text-sm text-gray-600 leading-relaxed [overflow-wrap:anywhere]">
-							{device.priceRange}
-						</p>
+						<dt className={LABEL}>価格</dt>
+						<dd className={`${VALUE} tabular-nums`}>{device.priceRange}</dd>
 					</div>
 					<div>
-						<h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
-							入手可能性
-						</h4>
-						<p className="mt-2 text-sm text-gray-600 leading-relaxed [overflow-wrap:anywhere]">
-							{device.availability}
-						</p>
+						<dt className={LABEL}>販売状況</dt>
+						<dd className={VALUE}>{device.availability}</dd>
 					</div>
-				</div>
-
-				<div className="min-w-0 space-y-6">
-					<div>
-						<h4 className="text-[10px] font-black text-gray-500 uppercase tracking-widest">
-							特徴・注意点
-						</h4>
-						<ul className="mt-2 space-y-2 text-sm text-gray-600 leading-relaxed">
-							{device.notes.map((note) => (
-								<li key={note} className="flex min-w-0 gap-2">
-									<span className="text-[#e11d48] mt-1">&bull;</span>
-									<span className="min-w-0 [overflow-wrap:anywhere]">
-										{note}
-									</span>
-								</li>
-							))}
-						</ul>
-					</div>
-				</div>
+				</dl>
+				<dl className="min-w-0">
+					<dt className={LABEL}>特徴と注意点</dt>
+					<dd className={VALUE}>
+						<BulletList items={device.notes} />
+					</dd>
+				</dl>
 			</div>
 		</article>
 	);
 }
 
 export default function DevicesPage() {
+	const deviceCount = GROUPS.reduce(
+		(total, group) => total + group.devices.length,
+		0,
+	);
+
 	return (
-		<div className="relative px-4 md:px-6 py-16 md:py-20 max-w-7xl mx-auto overflow-hidden">
+		<div className="mx-auto max-w-6xl px-5 pt-8 md:px-8 md:pt-12">
 			<BreadcrumbStructuredData
 				items={[{ name: "対応デバイス一覧", path: "/devices" }]}
 			/>
-			<OptimizedImage
-				src="/assets/mascot/hero.png"
-				alt=""
-				width={384}
-				height={384}
-				sizes="384px"
-				className="absolute top-20 -left-20 w-96 h-96 opacity-[0.02] pointer-events-none -rotate-12"
-			/>
-			<div className="space-y-24 relative z-10">
-				{/* Header */}
-				<header className="text-center max-w-4xl mx-auto space-y-8">
-					<h1 className="text-4xl md:text-6xl font-black tracking-tighter flex items-center justify-center gap-4">
-						対応デバイス一覧
-					</h1>
-					<p className="text-xl md:text-2xl text-gray-500 font-medium leading-relaxed">
-						VRヘッドセットやスマートフォンのWebXR対応状況を、未確認の機種も含め、ブラウザや接続方式とあわせて確認できます。
-					</p>
-					<Link
-						href="/devices/submit"
-						className="inline-flex items-center gap-2 px-6 py-3 bg-gray-900 text-white rounded-full font-bold hover:bg-[#e11d48] transition-all shadow-lg"
-					>
-						<svg
-							className="w-5 h-5"
-							fill="none"
-							stroke="currentColor"
-							viewBox="0 0 24 24"
-							aria-hidden="true"
-						>
-							<path
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								strokeWidth={2}
-								d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-							/>
-						</svg>
-						お使いのデバイスのWebXR対応状況を確認
+			<PageHeader
+				title="対応デバイス一覧"
+				lead={`VRヘッドセットやスマートフォンなど${deviceCount}件のWebXR対応状況を、対応ブラウザと接続方式とあわせて一覧にしています。未確認のデバイスも含みます。`}
+				actions={
+					<Link href="/devices/submit" className="btn btn-dark">
+						この端末の対応を確かめる
 					</Link>
-				</header>
+				}
+			/>
 
-				{/* VR Section */}
-				<section className="space-y-10">
-					<h2 className="text-3xl font-black tracking-tight border-l-4 border-[#e11d48] pl-6 ml-2">
-						VRヘッドセットのWebXR対応まとめ
-					</h2>
-					<div className="min-w-0 space-y-6">
-						{VR_DEVICES.map((device) => (
-							<DeviceCard key={device.id} device={device} />
-						))}
-					</div>
-					<div className="max-w-4xl text-sm text-gray-500 leading-relaxed">
-						<p>
-							現時点では、Quest 系、HTC Vive 系、Pico 系、Valve Index、Windows
-							MR などの主要 HMD では、WebXR
-							を利用できる環境が用意されています。一方で、PlayStation VR/VR2 や
-							HTC Vive Flow
-							のように、ブラウザ経由での利用が難しい機種もあります。
+			{/* 早見表: デバイス名と判定を先に並べ、各カードへ飛べるようにする */}
+			<nav aria-labelledby="device-index-heading" className="card p-5 md:p-8">
+				<h2
+					id="device-index-heading"
+					className="text-lg font-bold leading-snug text-gray-950"
+				>
+					デバイスとWebXR対応の早見表
+				</h2>
+				<div className="mt-4 grid gap-8 md:grid-cols-2 md:gap-10">
+					{GROUPS.map((group) => (
+						<div key={group.id} className="min-w-0">
+							<p className="flex items-center gap-2 text-[13px] font-bold leading-[1.6] text-gray-500">
+								<a
+									href={`#${group.id}`}
+									className="inline-flex min-h-11 items-center text-gray-950 underline decoration-gray-300 underline-offset-4 transition-colors hover:text-primary-700 hover:decoration-current md:min-h-0"
+								>
+									{group.short}
+								</a>
+								<span className="tabular-nums">{group.devices.length}件</span>
+							</p>
+							<ul className="mt-2 divide-y divide-gray-100 border-t border-gray-100">
+								{group.devices.map((device) => (
+									<li key={device.id}>
+										<a
+											href={`#${device.id}`}
+											className="-mx-2 flex min-h-11 items-center justify-between gap-3 rounded-lg px-2 py-2 text-sm leading-snug text-gray-800 transition-colors hover:text-primary-700"
+										>
+											<span className="min-w-0">{device.name}</span>
+											<StatusBadge status={device.webxrSupport.status} />
+										</a>
+									</li>
+								))}
+							</ul>
+						</div>
+					))}
+				</div>
+			</nav>
+
+			<div className="mt-16 space-y-16 md:mt-20 md:space-y-20">
+				{GROUPS.map((group) => (
+					<section
+						key={group.id}
+						id={group.id}
+						aria-labelledby={`${group.id}-heading`}
+						className="scroll-mt-24"
+					>
+						<h2
+							id={`${group.id}-heading`}
+							className="text-2xl font-black leading-snug text-gray-950 md:text-[1.75rem]"
+						>
+							{group.title}
+							<span className="ml-3 text-base font-bold text-gray-500 tabular-nums">
+								{group.devices.length}件
+							</span>
+						</h2>
+						<p className="mt-3 max-w-[40em] text-base leading-[1.8] text-gray-700">
+							{group.lead}
 						</p>
-					</div>
-				</section>
-
-				{/* AR Section */}
-				<section className="space-y-10">
-					<h2 className="text-3xl font-black tracking-tight border-l-4 border-[#e11d48] pl-6 ml-2">
-						スマートフォン/ARデバイスのWebXR対応
-					</h2>
-					<p className="text-sm text-gray-500 leading-relaxed max-w-4xl">
-						スマートフォンでの WebXR AR
-						は、端末とブラウザの組み合わせによって利用条件が大きく変わります。特に
-						iOS では、ブラウザ以外の手段を検討する必要があるケースもあります。
-					</p>
-					<div className="min-w-0 space-y-6">
-						{AR_DEVICES.map((device) => (
-							<DeviceCard key={device.id} device={device} />
-						))}
-					</div>
-				</section>
+						<div className="mt-6 min-w-0 space-y-4 md:space-y-6">
+							{group.devices.map((device) => (
+								<DeviceCard key={device.id} device={device} />
+							))}
+						</div>
+					</section>
+				))}
 			</div>
 		</div>
 	);

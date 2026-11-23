@@ -2,9 +2,11 @@ import { blog, experiments } from "fumadocs-mdx:collections/server";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArticleCard } from "@/components/article-card";
 import { CollectionStructuredData } from "@/components/collection-structured-data";
+import { PageHeader } from "@/components/page-header";
 import { collectTags, tagPath } from "@/lib/collect-tags";
-import { contentDateTime, contentDateValue } from "@/lib/content-dates";
+import { contentDateValue } from "@/lib/content-dates";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
 
 interface PageProps {
@@ -53,6 +55,9 @@ export async function generateMetadata({
 	};
 }
 
+/** 1 / 2 / 3列のカードのグリッド（/tech-articles と同じ） */
+const GRID_CLASS = "grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3";
+
 export default async function TagDetailPage({ params }: PageProps) {
 	const { tag: rawTag } = await params;
 	const tag = normalizeTagParam(rawTag);
@@ -79,12 +84,26 @@ export default async function TagDetailPage({ params }: PageProps) {
 			return dB - dA;
 		});
 
+	// 0件のタグ（存在しないタグ、下書きにだけ付いたタグ）は not-found.tsx を出す
 	if (blogPosts.length === 0 && experimentsList.length === 0) {
 		notFound();
 	}
 
+	const hasBoth = blogPosts.length > 0 && experimentsList.length > 0;
+	// 見出しは中身を言う（記事だけなら「◯◯の技術記事」）
+	const subject = hasBoth
+		? "技術記事とデモ"
+		: blogPosts.length > 0
+			? "技術記事"
+			: "デモ";
+	const countText = hasBoth
+		? `技術記事${blogPosts.length}本とデモ${experimentsList.length}件`
+		: blogPosts.length > 0
+			? `技術記事${blogPosts.length}本`
+			: `デモ${experimentsList.length}件`;
+
 	return (
-		<div className="max-w-6xl mx-auto px-6 md:px-8 py-16 md:py-20">
+		<div className="max-w-6xl mx-auto px-5 md:px-8 pt-8 md:pt-12">
 			<CollectionStructuredData
 				name={`${tag} の記事・デモ一覧`}
 				path={tagPath(tag)}
@@ -124,123 +143,114 @@ export default async function TagDetailPage({ params }: PageProps) {
 					}),
 				]}
 			/>
-			<div className="mb-8">
-				<Link
-					href="/tags"
-					className="text-sm font-bold text-gray-600 hover:text-[#e11d48] transition-colors mb-4 inline-block"
-				>
-					← すべてのタグに戻る
-				</Link>
-				<h1 className="text-3xl font-black tracking-tight text-gray-950 mb-2">
-					{tag} の記事・デモ一覧
-				</h1>
-				<p className="text-base text-gray-500">
-					WebXRの技術記事、ニュース、デモを「{tag}」タグでまとめています。全
-					{blogPosts.length + experimentsList.length}件。
-				</p>
-			</div>
+			<PageHeader
+				kicker="タグ"
+				title={`${tag}の${subject}`}
+				lead={`「${tag}」タグが付いた${countText}を、新しい順に並べています。`}
+				actions={
+					<Link
+						href="/tags"
+						className="text-link inline-flex min-h-11 items-center gap-1 whitespace-nowrap text-sm font-bold"
+					>
+						タグ一覧を見る
+						<svg
+							className="size-4"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+							aria-hidden="true"
+						>
+							<path
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								strokeWidth={2}
+								d="M9 5l7 7-7 7"
+							/>
+						</svg>
+					</Link>
+				}
+			/>
 
-			{blogPosts.length > 0 && (
-				<section className="mb-16">
-					<h2 className="text-xl font-black text-gray-950 mb-6">
-						ブログ記事 ({blogPosts.length}件)
-					</h2>
-					<div className="space-y-4">
-						{blogPosts.map((post) => {
+			{blogPosts.length > 0 ? (
+				<section
+					aria-labelledby={hasBoth ? "tag-articles" : undefined}
+					className={hasBoth ? "mb-16 md:mb-24" : undefined}
+				>
+					{hasBoth ? (
+						<h2
+							id="tag-articles"
+							className="mb-6 text-2xl font-black leading-snug text-gray-950 md:text-[1.75rem]"
+						>
+							技術記事
+							<span className="ml-2 text-base font-bold text-gray-500 tabular-nums">
+								{blogPosts.length}本
+							</span>
+						</h2>
+					) : null}
+					<ul className={GRID_CLASS}>
+						{blogPosts.map((post, index) => {
 							const slug = getSlugFromPath(post.info.path);
 							return (
-								<Link
-									key={slug}
-									href={`/tech-articles/${slug}`}
-									className="group block p-6 bg-white rounded-2xl border border-gray-100 hover:shadow-2xl hover:shadow-gray-200/50 hover:border-transparent hover:-translate-y-1 transition-all duration-300"
-								>
-									<div className="mb-3 flex items-center gap-2">
-										{post.category && (
-											<span className="px-2.5 py-1 bg-rose-50 text-rose-700 rounded-md text-[10px] font-black uppercase tracking-wide">
-												{post.category}
-											</span>
-										)}
-										{post.date && (
-											<time
-												dateTime={contentDateTime(
-													post.date ? String(post.date) : undefined,
-												)}
-												className="text-xs text-gray-500 font-medium"
-											>
-												{post.date}
-											</time>
-										)}
-									</div>
-									<h3 className="font-black text-lg text-gray-950 group-hover:text-[#e11d48] transition-colors mb-2">
-										{post.title}
-									</h3>
-									{post.description && (
-										<p className="text-sm text-gray-500 line-clamp-2">
-											{post.description}
-										</p>
-									)}
-								</Link>
+								<li key={slug} className="min-w-0">
+									<ArticleCard
+										href={`/tech-articles/${slug}`}
+										title={post.title}
+										description={post.description}
+										thumbnail={
+											post.thumbnail ? String(post.thumbnail) : undefined
+										}
+										category={post.category ? String(post.category) : undefined}
+										date={post.date ? String(post.date) : undefined}
+										updated={post.updated ? String(post.updated) : undefined}
+										tags={post.tags}
+										headingLevel={hasBoth ? "h3" : "h2"}
+										priority={index === 0}
+									/>
+								</li>
 							);
 						})}
-					</div>
+					</ul>
 				</section>
-			)}
+			) : null}
 
-			{experimentsList.length > 0 && (
-				<section>
-					<h2 className="text-xl font-black text-gray-950 mb-6">
-						デモ ({experimentsList.length}件)
-					</h2>
-					<div className="space-y-4">
-						{experimentsList.map((exp) => {
+			{experimentsList.length > 0 ? (
+				<section aria-labelledby={hasBoth ? "tag-demos" : undefined}>
+					{hasBoth ? (
+						<h2
+							id="tag-demos"
+							className="mb-6 text-2xl font-black leading-snug text-gray-950 md:text-[1.75rem]"
+						>
+							デモ
+							<span className="ml-2 text-base font-bold text-gray-500 tabular-nums">
+								{experimentsList.length}件
+							</span>
+						</h2>
+					) : null}
+					<ul className={GRID_CLASS}>
+						{experimentsList.map((exp, index) => {
 							const slug = getSlugFromPath(exp.info.path);
 							return (
-								<Link
-									key={slug}
-									href={`/experiments/${slug}`}
-									className="group block p-6 bg-white rounded-2xl border border-gray-100 hover:shadow-2xl hover:shadow-gray-200/50 hover:border-transparent hover:-translate-y-1 transition-all duration-300"
-								>
-									<div className="mb-3 flex items-center gap-2 flex-wrap">
-										{exp.category && (
-											<span className="px-2.5 py-1 bg-rose-50 text-rose-700 rounded-md text-[10px] font-black uppercase tracking-wide">
-												{exp.category}
-											</span>
-										)}
-										{exp.difficulty && (
-											<span className="px-2.5 py-1 bg-gray-100 text-gray-600 rounded-md text-[10px] font-bold">
-												{String(exp.difficulty)}
-											</span>
-										)}
-										{exp.date && (
-											<time
-												dateTime={contentDateTime(
-													exp.date ? String(exp.date) : undefined,
-												)}
-												className="text-xs text-gray-500 font-medium"
-											>
-												{exp.date}
-											</time>
-										)}
-									</div>
-									<h3 className="font-black text-lg text-gray-950 group-hover:text-[#e11d48] transition-colors mb-2">
-										{exp.title}
-									</h3>
-									{exp.description && (
-										<p className="text-sm text-gray-500 line-clamp-2 mb-3">
-											{exp.description}
-										</p>
-									)}
-									{exp.estimatedTime && (
-										<span className="text-xs text-gray-500 font-medium">
-											約{exp.estimatedTime}分
-										</span>
-									)}
-								</Link>
+								<li key={slug} className="min-w-0">
+									<ArticleCard
+										href={`/experiments/${slug}`}
+										title={exp.title}
+										description={exp.description}
+										thumbnail={
+											exp.thumbnail ? String(exp.thumbnail) : undefined
+										}
+										category={exp.category ? String(exp.category) : undefined}
+										date={exp.date ? String(exp.date) : undefined}
+										updated={exp.updated ? String(exp.updated) : undefined}
+										tags={exp.tags}
+										headingLevel={hasBoth ? "h3" : "h2"}
+										priority={!hasBoth && index === 0}
+									/>
+								</li>
 							);
 						})}
-					</div>
+					</ul>
 				</section>
-			)}
+			) : null}
 		</div>
 	);
 }

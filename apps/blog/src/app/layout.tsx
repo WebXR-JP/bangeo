@@ -10,9 +10,11 @@ import { StructuredData } from "@/components/structured-data";
 import { SITE_URL } from "@/lib/site-url";
 import { ADSENSE_CLIENT, HAS_ADSENSE, HAS_GTM } from "@/lib/third-party";
 
+// weight を指定しない = 可変フォント（wght 100〜900）として1組の @font-face で読む。
+// ウェイトごとに @font-face を並べるより CSS が約1/3になり、font-medium(500) なども
+// 400 に丸められずに効く（フォントファイル自体は、ウェイトを指定していたときも同じ可変フォント）
 const notoSansJP = Noto_Sans_JP({
 	subsets: ["latin"],
-	weight: ["400", "700", "900"],
 	variable: "--font-noto-sans-jp",
 	display: "swap",
 	preload: true,
@@ -139,7 +141,17 @@ export default function RootLayout({
 				)}
 				<StructuredData />
 			</head>
-			<body className="font-sans min-h-screen flex flex-col">
+			<body className="relative font-sans min-h-screen flex flex-col">
+				{/* キーボードで操作する人がヘッダーのリンクを飛ばして本文へ移れるようにする。
+				    ふだんは隠し、Tab でフォーカスしたときだけ左上に出す。
+				    focus-visible:not-sr-only は padding: 0 も付けて btn の余白を消すので、
+				    「フォーカスしていない間だけ sr-only」と書く */}
+				<a
+					href="#main"
+					className="btn btn-dark fixed left-4 top-4 z-[60] not-focus-visible:sr-only"
+				>
+					本文へ移動
+				</a>
 				<GTMNoScript />
 				{HAS_ADSENSE && (
 					<Script
@@ -148,9 +160,15 @@ export default function RootLayout({
 						strategy="afterInteractive"
 					/>
 				)}
-				<div className="mesh-bg" />
+				<div className="page-wash" aria-hidden="true" />
 				<Header />
-				<main className="flex-1 pt-24 md:pt-28">{children}</main>
+				<main
+					id="main"
+					tabIndex={-1}
+					className="flex-1 pt-24 md:pt-28 outline-none"
+				>
+					{children}
+				</main>
 				<Footer />
 				<Analytics />
 				<SiteAnalytics />
