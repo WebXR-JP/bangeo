@@ -1,4 +1,5 @@
 import { blog, experiments, podcast } from "fumadocs-mdx:collections/server";
+import { contentDateValue } from "@/lib/content-dates";
 import { getDemoCatalog } from "@/lib/demo-catalog";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
 
@@ -13,16 +14,16 @@ export interface SearchIndexItem {
 	category?: string;
 }
 
-function getTimestamp(date?: string): number {
-	return date ? new Date(date).getTime() || 0 : 0;
-}
+// フロントマターの日付は "2026-11-18" と "2026年11月10日" の両方があるので、
+// 両方を読める contentDateValue で並べる（new Date() は和文の日付を読めず、該当の記事が末尾に回る）
+const getTimestamp = contentDateValue;
 
 export function getSearchIndex(): SearchIndexItem[] {
 	const blogItems = getDocs(blog)
 		.filter((doc) => !doc.draft)
 		.map((doc) => ({
 			type: "blog" as const,
-			typeLabel: "ブログ",
+			typeLabel: "技術記事",
 			title: doc.title,
 			description: String(doc.description || ""),
 			slug: `/tech-articles/${getSlugFromPath(doc.info.path)}`,

@@ -1,7 +1,11 @@
+import { CopyUrlButton } from "@/components/copy-url-button";
+
 type SocialShareProps = {
 	url: string;
 	title: string;
 	className?: string;
+	/** ボタンの並びの寄せ方。既定は中央（デモのページ）。記事の末尾では "start" */
+	align?: "center" | "start";
 };
 
 function hatenaEntryUrl(url: string): string {
@@ -11,40 +15,56 @@ function hatenaEntryUrl(url: string): string {
 	return `https://b.hatena.ne.jp/${entryPath}${urlWithoutScheme}`;
 }
 
-export function SocialShare({ url, title, className = "" }: SocialShareProps) {
+/**
+ * 共有のボタン。X とはてなブックマークは新しいタブで開き（左のロゴが行き先の印）、
+ * URL のコピーはその場で結果を出す
+ */
+export function SocialShare({
+	url,
+	title,
+	className = "",
+	align = "center",
+}: SocialShareProps) {
 	const encodedTitle = encodeURIComponent(title);
 	const encodedUrl = encodeURIComponent(url);
 
 	return (
-		<section className={`flex flex-wrap justify-center gap-3 ${className}`}>
+		<div
+			className={`flex flex-wrap gap-2 ${align === "start" ? "justify-start" : "justify-center"} ${className}`}
+		>
 			<a
 				href={`https://x.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`}
 				target="_blank"
 				rel="noopener noreferrer"
-				className="inline-flex min-h-11 items-center gap-2.5 rounded-full border border-gray-200 bg-white px-5 py-2.5 text-sm font-bold text-gray-800 shadow-xs transition-all hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm"
+				className="btn btn-secondary"
 			>
 				<svg
-					className="h-4 w-4"
+					className="size-4 shrink-0"
 					viewBox="0 0 24 24"
 					fill="currentColor"
 					aria-hidden="true"
 				>
 					<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
 				</svg>
-				Xでシェア
+				Xで共有する
+				<span className="sr-only">（新しいタブで開く）</span>
 			</a>
 			<a
 				href={hatenaEntryUrl(url)}
 				target="_blank"
 				rel="noopener noreferrer"
-				className="inline-flex min-h-11 items-center gap-2.5 rounded-full border border-[#00a4de]/20 bg-[#00a4de] px-5 py-2.5 text-sm font-bold text-white shadow-xs transition-all hover:bg-[#008fc2] hover:shadow-sm"
-				title="このページをはてなブックマークに追加"
+				className="btn btn-secondary"
 			>
-				<span className="flex h-5 w-5 items-center justify-center rounded bg-white text-[12px] font-black leading-none text-[#00a4de]">
+				<span
+					className="flex size-5 shrink-0 items-center justify-center rounded bg-gray-950 text-xs font-bold leading-none text-white"
+					aria-hidden="true"
+				>
 					B!
 				</span>
-				はてブする
+				はてなブックマークに追加する
+				<span className="sr-only">（新しいタブで開く）</span>
 			</a>
-		</section>
+			<CopyUrlButton url={url} size="md" />
+		</div>
 	);
 }

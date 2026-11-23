@@ -1,11 +1,12 @@
 import { blog } from "fumadocs-mdx:collections/server";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ArticleCard } from "@/components/article-card";
 import { CollectionStructuredData } from "@/components/collection-structured-data";
-import { OptimizedImage } from "@/components/optimized-image";
-import { contentDateTime, contentDateValue } from "@/lib/content-dates";
+import { PageHeader } from "@/components/page-header";
+import { contentDateValue } from "@/lib/content-dates";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
-import { CARD_IMAGE_SIZES, NO_IMAGE } from "@/lib/image-defaults";
+import { NO_IMAGE } from "@/lib/image-defaults";
 
 export const metadata: Metadata = {
 	title: "WebXR技術記事・ニュース｜実装ガイド・ブラウザ更新",
@@ -30,7 +31,7 @@ export default function TechArticlesIndexPage() {
 		});
 
 	return (
-		<div className="max-w-6xl mx-auto px-6 md:px-8 py-16 md:py-20">
+		<div className="max-w-6xl mx-auto px-5 md:px-8 pt-8 md:pt-12">
 			<CollectionStructuredData
 				name="BANGEO 技術記事一覧"
 				path="/tech-articles"
@@ -52,93 +53,69 @@ export default function TechArticlesIndexPage() {
 					};
 				})}
 			/>
-			<header className="mb-12">
-				<h1 className="text-3xl font-black tracking-tight text-gray-950 mb-2">
-					WebXR技術記事・ニュース
-				</h1>
-				<p className="text-base text-gray-500">
-					WebXRの仕様更新、ブラウザ対応、Meta Quest・iOS
-					Safari・WebGPUの実装ノウハウ、イベント情報を日本語で整理しています
-				</p>
-				<Link
-					href="/tech-articles/categories"
-					className="mt-4 inline-flex min-h-9 items-center text-sm font-bold text-gray-600 transition-colors hover:text-[#e11d48]"
-				>
-					カテゴリ別に見る →
-				</Link>
-			</header>
-
-			<div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-				{posts.map((post) => {
-					const slug = getSlugFromPath(post.info.path);
-					const tags = post.tags as string[] | undefined;
-					return (
-						<Link
-							key={slug}
-							href={`/tech-articles/${slug}`}
-							className="group block bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-2xl hover:shadow-gray-200/50 hover:border-transparent hover:-translate-y-1 transition-all duration-300"
+			<PageHeader
+				kicker={posts.length > 0 ? `全${posts.length}本` : undefined}
+				title="WebXR技術記事・ニュース"
+				lead="ブラウザやライブラリのニュース、実装の技術解説、実機で試すガイドを新しい順に並べています。"
+				actions={
+					<Link
+						href="/tech-articles/categories"
+						className="text-link inline-flex min-h-11 items-center gap-1 whitespace-nowrap text-sm font-bold"
+					>
+						カテゴリ一覧を見る
+						<svg
+							className="size-4"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+							aria-hidden="true"
 						>
-							<div className="aspect-video bg-gray-100 overflow-hidden relative">
-								<OptimizedImage
-									src={post.thumbnail ? String(post.thumbnail) : NO_IMAGE}
-									alt={post.title}
-									fill
-									sizes={CARD_IMAGE_SIZES}
-									className="object-cover group-hover:scale-105 transition-transform duration-500"
-								/>
-							</div>
-							<div className="p-6">
-								<div className="flex items-center gap-2 mb-4">
-									{post.category && (
-										<span className="px-2.5 py-1 bg-rose-50 text-rose-700 rounded-md text-[10px] font-black uppercase tracking-wide">
-											{String(post.category)}
-										</span>
-									)}
-									{post.date && (
-										<time
-											dateTime={contentDateTime(
-												post.date ? String(post.date) : undefined,
-											)}
-											className="text-xs text-gray-500 font-medium"
-										>
-											{String(post.date)}
-										</time>
-									)}
-								</div>
-								<h2 className="font-black text-lg text-gray-950 group-hover:text-[#e11d48] transition-colors mb-2 leading-snug">
-									{post.title}
-								</h2>
-								{post.description && (
-									<p className="text-sm text-gray-500 line-clamp-2 leading-relaxed mb-3">
-										{post.description}
-									</p>
-								)}
-								{tags && tags.length > 0 && (
-									<div className="flex flex-wrap gap-1.5">
-										{tags.slice(0, 3).map((tag) => (
-											<span
-												key={tag}
-												className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded text-xs font-medium"
-											>
-												#{tag}
-											</span>
-										))}
-										{tags.length > 3 && (
-											<span className="text-xs text-gray-500">
-												+{tags.length - 3}
-											</span>
-										)}
-									</div>
-								)}
-							</div>
-						</Link>
-					);
-				})}
-			</div>
+							<path
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								strokeWidth={2}
+								d="M9 5l7 7-7 7"
+							/>
+						</svg>
+					</Link>
+				}
+			/>
 
-			{posts.length === 0 && (
-				<div className="py-12 text-center">
-					<p className="text-gray-500">まだブログ記事がありません。</p>
+			{posts.length > 0 ? (
+				<ul className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+					{posts.map((post, index) => {
+						const slug = getSlugFromPath(post.info.path);
+						return (
+							<li key={slug} className="min-w-0">
+								<ArticleCard
+									href={`/tech-articles/${slug}`}
+									title={post.title}
+									description={post.description}
+									thumbnail={
+										post.thumbnail ? String(post.thumbnail) : undefined
+									}
+									category={post.category ? String(post.category) : undefined}
+									date={post.date ? String(post.date) : undefined}
+									updated={post.updated ? String(post.updated) : undefined}
+									tags={post.tags}
+									headingLevel="h2"
+									priority={index === 0}
+								/>
+							</li>
+						);
+					})}
+				</ul>
+			) : (
+				<div>
+					<p className="text-base leading-[1.8] text-gray-700">
+						公開している技術記事はまだありません。
+					</p>
+					<Link
+						href="/report"
+						className="text-link mt-2 inline-flex min-h-11 items-center whitespace-nowrap text-sm font-bold"
+					>
+						この端末のレポートを見る
+					</Link>
 				</div>
 			)}
 		</div>

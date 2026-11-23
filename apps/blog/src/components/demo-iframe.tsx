@@ -38,10 +38,25 @@ export function DemoIframe({
 					{caption && <p>{caption}</p>}
 					{fullHref && (
 						<p className="demo-embed-actions">
-							<a href={fullHref}>全画面でデモを開く →</a>
-							<span>
-								Meta Quest / PICO
-								では全画面リンクから開くと権限確認が安定します。
+							<a href={fullHref}>
+								全画面でデモを開く
+								<svg
+									width="16"
+									height="16"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									strokeWidth={2}
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									aria-hidden="true"
+								>
+									<path d="M9 5l7 7-7 7" />
+								</svg>
+							</a>
+							<span className="block">
+								Meta Quest /
+								PICOでは、全画面のリンクから開くと権限の確認が安定します。
 							</span>
 						</p>
 					)}

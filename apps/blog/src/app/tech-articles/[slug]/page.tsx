@@ -2,16 +2,31 @@ import { blog } from "fumadocs-mdx:collections/server";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import {
+	ArticleCard,
+	articleCategoryLabel,
+	articleListDate,
+} from "@/components/article-card";
 import { ArticleStructuredData } from "@/components/article-structured-data";
 import { mdxComponents } from "@/components/mdx-components";
 import { OptimizedImage } from "@/components/optimized-image";
 import { SocialShare } from "@/components/social-share";
-import { contentDateTime, contentDateValue } from "@/lib/content-dates";
+import {
+	contentDateTime,
+	contentDateValue,
+	formatContentDate,
+} from "@/lib/content-dates";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
-import { NO_IMAGE, THUMB_IMAGE_SIZES } from "@/lib/image-defaults";
+import { NO_IMAGE } from "@/lib/image-defaults";
 import { SITE_URL } from "@/lib/site-url";
 
 const BASE_PATH = "/tech-articles";
+
+/**
+ * 記事の頭の画像の表示幅。本文カラム（40rem = 640px）と同じ幅で、
+ * それより狭い画面ではコンテナの左右 20px を引いた幅
+ */
+const HERO_IMAGE_SIZES = "(min-width: 680px) 640px, calc(100vw - 40px)";
 const ARTICLE_FAQS: Record<
 	string,
 	Array<{ question: string; answer: string }>
@@ -129,9 +144,21 @@ export default async function TechArticlePage({ params }: PageProps) {
 		.slice(0, 3);
 
 	const shareUrl = `${SITE_URL}${BASE_PATH}/${slug}`;
+	const categoryLabel = doc.category
+		? articleCategoryLabel(String(doc.category))
+		: "";
+	const publishedText = formatContentDate(publishedDate);
+	// 公開日より後の更新日があるときだけ「◯年◯月◯日更新」を添える（一覧のカードと同じ決まり）
+	const revision = articleListDate(
+		publishedDate,
+		doc.updated ? String(doc.updated) : undefined,
+	);
+	const uniqueTags = tags ? [...new Set(tags)] : [];
+	const authorName = doc.author ? String(doc.author) : "BANGEO";
+	const demoUrl = doc.demoUrl ? String(doc.demoUrl) : undefined;
 
 	return (
-		<div className="max-w-3xl mx-auto px-5 md:px-8 py-16 md:py-24">
+		<div className="max-w-6xl mx-auto px-5 md:px-8 pt-8 md:pt-12">
 			<ArticleStructuredData
 				title={doc.title}
 				description={doc.description}
@@ -145,158 +172,171 @@ export default async function TechArticlePage({ params }: PageProps) {
 				tags={tags}
 				faqs={ARTICLE_FAQS[slug]}
 			/>
-			<article>
-				{/* Header */}
-				<header className="mb-12">
-					<div className="flex flex-col md:flex-row gap-6 md:gap-10 items-start">
-						<div className="w-full md:w-56 md:min-w-56 aspect-video overflow-hidden rounded-xl bg-gray-100 shrink-0 relative">
-							<OptimizedImage
-								src={doc.thumbnail ? String(doc.thumbnail) : NO_IMAGE}
-								alt={doc.title}
-								fill
-								sizes={THUMB_IMAGE_SIZES}
-								priority
-								className="object-cover"
-							/>
-						</div>
-						<div className="flex-1 min-w-0">
-							<div className="mb-4 flex flex-wrap items-center gap-3">
-								{doc.category && (
-									<span className="px-2.5 py-1 bg-rose-50 text-rose-700 rounded-md text-[10px] font-black uppercase tracking-widest">
-										{String(doc.category)}
-									</span>
-								)}
-								{doc.date && (
-									<time
-										dateTime={contentDateTime(publishedDate)}
-										className="text-[11px] text-gray-500 font-medium tracking-wide"
-									>
-										{String(doc.date)}
-									</time>
-								)}
-								{doc.updated && doc.updated !== doc.date && (
-									<time
-										dateTime={contentDateTime(modifiedDate)}
-										className="text-[11px] text-gray-500 font-medium tracking-wide"
-									>
-										更新: {String(doc.updated)}
-									</time>
-								)}
-								{doc.author && (
-									<span className="text-[11px] text-gray-500 font-medium tracking-wide">
-										{String(doc.author)}
-									</span>
-								)}
-							</div>
-							<h1 className="text-2xl md:text-[1.75rem] font-black tracking-[-0.02em] text-gray-950 mb-4 leading-[1.35]">
-								{doc.title}
-							</h1>
-							{doc.description && (
-								<p className="text-[14px] text-gray-500 leading-[1.9] tracking-[0.02em]">
-									{doc.description}
-								</p>
-							)}
-						</div>
+			<article className="mx-auto max-w-[40rem]">
+				<header>
+					<div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] leading-[1.6] text-gray-500">
+						{categoryLabel ? (
+							<span className="chip chip-brand">{categoryLabel}</span>
+						) : null}
+						{publishedText ? (
+							<time dateTime={contentDateTime(publishedDate)}>
+								{publishedText}
+							</time>
+						) : null}
+						{revision.isRevised && revision.text ? (
+							<span>
+								<time dateTime={contentDateTime(revision.value)}>
+									{revision.text}
+								</time>
+								更新
+							</span>
+						) : null}
+						{doc.author ? <span>{String(doc.author)}</span> : null}
 					</div>
-					{tags && tags.length > 0 && (
-						<div className="flex flex-wrap gap-1.5 mt-6 pt-6 border-t border-gray-100">
-							{tags.map((tag) => (
-								<Link
-									key={tag}
-									href={`/tags/${encodeURIComponent(tag)}`}
-									className="px-2.5 py-0.5 bg-gray-50 text-gray-500 rounded-md text-xs font-medium hover:bg-rose-50 hover:text-[#e11d48] transition-colors"
-								>
-									#{tag}
-								</Link>
+					<h1 className="mt-3 text-2xl font-black leading-snug text-gray-950 md:text-[2rem]">
+						{doc.title}
+					</h1>
+					{doc.description ? (
+						<p className="mt-4 text-base leading-[1.8] text-gray-700 md:text-lg">
+							{doc.description}
+						</p>
+					) : null}
+					{uniqueTags.length > 0 ? (
+						<ul aria-label="タグ" className="mt-3 flex flex-wrap gap-x-2">
+							{uniqueTags.map((tag) => (
+								<li key={tag}>
+									{/* 押せる範囲は高さ 44px（PCは 36px）、見た目はチップ。輪はチップに出す */}
+									<Link
+										href={`/tags/${encodeURIComponent(tag)}`}
+										prefetch={false}
+										className="group inline-flex min-h-11 items-center rounded-full focus-visible:outline-none md:min-h-9"
+									>
+										<span className="chip transition-colors group-hover:bg-gray-200 group-hover:text-gray-950 group-focus-visible:outline-2 group-focus-visible:outline-offset-2 group-focus-visible:outline-primary-600">
+											{tag}
+										</span>
+									</Link>
+								</li>
 							))}
-						</div>
-					)}
+						</ul>
+					) : null}
 				</header>
 
-				{/* Content */}
-				<div className="tech-article-content">
+				{/* 最初の1画面でいちばん大きい画像なので、ここだけ優先して読み込む */}
+				<div className="relative mt-6 aspect-video overflow-hidden rounded-2xl bg-gray-100">
+					<OptimizedImage
+						src={doc.thumbnail ? String(doc.thumbnail) : NO_IMAGE}
+						alt=""
+						fill
+						sizes={HERO_IMAGE_SIZES}
+						priority
+						className="object-cover"
+					/>
+				</div>
+
+				<div className="tech-article-content mt-10 md:mt-12">
 					<MDX components={mdxComponents} />
 				</div>
 
-				{/* Author Section */}
-				<section className="mt-20 pt-10 border-t border-gray-100">
-					<div className="p-8 bg-gray-50/80 rounded-2xl">
-						<div className="flex items-center gap-5">
-							<div className="w-16 h-16 rounded-full overflow-hidden bg-white border-2 border-gray-100 flex-shrink-0 relative">
-								<OptimizedImage
-									src="/images/authors/bangeo-team.webp"
-									alt={doc.author ? String(doc.author) : "BANGEO"}
-									fill
-									sizes="64px"
-									className="object-cover"
-								/>
-							</div>
-							<div className="flex-1">
-								<p className="text-[10px] font-bold tracking-widest text-gray-500 uppercase mb-0.5">
-									この記事を書いた人
-								</p>
-								<h3 className="text-lg font-black text-gray-900 mb-1">
-									{doc.author ? String(doc.author) : "BANGEO"}
-								</h3>
-								<p className="text-[13px] text-gray-500 leading-relaxed">
-									WebXRの技術情報を日本語でまとめているチームです。デモやガイドを公開しています。
-								</p>
-							</div>
+				<footer className="mt-16 border-t border-gray-200 pt-8">
+					<SocialShare url={shareUrl} title={doc.title} align="start" />
+
+					<div className="mt-10 flex items-start gap-4">
+						<div className="relative size-12 shrink-0 overflow-hidden rounded-full border border-gray-200 bg-white">
+							<OptimizedImage
+								src="/images/authors/bangeo-team.webp"
+								alt=""
+								fill
+								sizes="48px"
+								className="object-cover"
+							/>
 						</div>
-
-						{relatedArticles.length > 0 && (
-							<div className="mt-6 pt-6 border-t border-gray-200/60">
-								<h4 className="text-[10px] font-bold tracking-widest text-gray-500 uppercase mb-3">
-									関連する記事
-								</h4>
-								<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-									{relatedArticles.map((a) => {
-										const aSlug = getSlugFromPath(a.info.path);
-										return (
-											<Link
-												key={aSlug}
-												href={`${BASE_PATH}/${aSlug}`}
-												className="group block p-3.5 bg-white rounded-xl border border-gray-100 hover:border-[#e11d48]/30 hover:shadow-sm transition-all"
-											>
-												<h5 className="font-bold text-[13px] text-gray-900 group-hover:text-[#e11d48] transition-colors line-clamp-2 mb-1.5 leading-snug">
-													{a.title}
-												</h5>
-												{a.date && (
-													<p className="text-[10px] text-gray-500">
-														{String(a.date)}
-													</p>
-												)}
-											</Link>
-										);
-									})}
-								</div>
-							</div>
-						)}
-					</div>
-				</section>
-
-				<SocialShare url={shareUrl} title={doc.title} className="mt-12" />
-
-				{/* Footer CTA */}
-				<footer className="mt-12 pt-10 border-t border-gray-100">
-					<div className="bg-gray-50 p-8 md:p-10 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6">
-						<div className="space-y-1.5 text-center md:text-left">
-							<h3 className="text-xl font-black tracking-tight">
-								デモを実際に試してみる
-							</h3>
-							<p className="text-sm text-gray-500">
-								この技術を使用した実例を、ブラウザですぐに体験できます。
+						<div className="min-w-0">
+							<p className="text-[13px] leading-[1.6] text-gray-500">
+								この記事を書いた人
+							</p>
+							<p className="text-base font-bold leading-snug text-gray-950">
+								{authorName}
+							</p>
+							<p className="mt-1 break-phrase text-sm leading-[1.7] text-gray-600">
+								WebXRの技術情報を日本語でまとめているチームです。デモやガイドを公開しています。
 							</p>
 						</div>
-						<Link
-							href={doc.demoUrl || "/experiments"}
-							className="px-6 py-3 bg-gray-950 text-white rounded-full font-bold text-sm hover:bg-[#e11d48] transition-all shadow-lg whitespace-nowrap"
-						>
-							デモを見る →
-						</Link>
 					</div>
+
+					<section
+						aria-labelledby="article-next-step"
+						className="card mt-12 flex flex-col gap-5 p-6 md:flex-row md:items-center md:justify-between md:p-8"
+					>
+						<div className="min-w-0">
+							<h2
+								id="article-next-step"
+								className="text-lg font-bold leading-snug text-gray-950"
+							>
+								{demoUrl ? "この記事のデモ" : "この端末でWebXRが動くか確かめる"}
+							</h2>
+							<p className="mt-1 break-phrase text-sm leading-[1.7] text-gray-600">
+								{demoUrl
+									? "記事で取り上げた内容を、ブラウザで動かして確かめられます。"
+									: "WebXR対応レポートは、仕様ごとにこの端末の対応を判定します。デモがある仕様は、その場で動かして確かめられます。"}
+							</p>
+						</div>
+						{demoUrl ? (
+							<a
+								href={demoUrl}
+								className="btn btn-dark shrink-0 self-start md:self-auto"
+							>
+								デモを開く
+							</a>
+						) : (
+							<Link
+								href="/experiments"
+								className="btn btn-dark shrink-0 self-start md:self-auto"
+							>
+								WebXR対応レポートを見る
+							</Link>
+						)}
+					</section>
 				</footer>
 			</article>
+
+			{relatedArticles.length > 0 ? (
+				<section
+					aria-labelledby="related-articles"
+					className="mt-16 border-t border-gray-200 pt-12 md:mt-24 md:pt-16"
+				>
+					<h2
+						id="related-articles"
+						className="text-2xl font-black leading-snug text-gray-950 md:text-[1.75rem]"
+					>
+						関連する技術記事
+					</h2>
+					<ul className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+						{relatedArticles.map((article) => {
+							const articleSlug = getSlugFromPath(article.info.path);
+							return (
+								<li key={articleSlug} className="min-w-0">
+									<ArticleCard
+										href={`${BASE_PATH}/${articleSlug}`}
+										title={article.title}
+										description={article.description}
+										thumbnail={
+											article.thumbnail ? String(article.thumbnail) : undefined
+										}
+										category={
+											article.category ? String(article.category) : undefined
+										}
+										date={article.date ? String(article.date) : undefined}
+										updated={
+											article.updated ? String(article.updated) : undefined
+										}
+										tags={article.tags}
+									/>
+								</li>
+							);
+						})}
+					</ul>
+				</section>
+			) : null}
 		</div>
 	);
 }
