@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { BreadcrumbStructuredData } from "@/components/breadcrumb-structured-data";
+import { PageHeader } from "@/components/page-header";
+import { DISCORD_URL, GITHUB_URL } from "@/lib/navigation";
 
 export const metadata: Metadata = {
 	title: "WebXR開発参加・技術相談｜Issue・PR・Discord",
@@ -8,93 +11,112 @@ export const metadata: Metadata = {
 	alternates: { canonical: "/consulting" },
 };
 
-const services = [
-	{
-		title: "Issue で相談",
-		description:
-			"不具合報告、機能提案、設計相談は GitHub Issues へまとめてください。公開トラッキングで状況を共有しやすくなります。",
-	},
-	{
-		title: "Pull Request で改善",
-		description:
-			"コード、コンテンツ、ドキュメントの修正は Pull Request で歓迎します。小さな改善でもそのままコントリビュートできます。",
-	},
-	{
-		title: "Discord で壁打ち",
-		description:
-			"実装前の相談や方針の壁打ちは Discord が最短です。公開しにくい話題以外は、できるだけオープンに進めます。",
-	},
-];
+/** 外向きの矢印。ボタンの中では既定、文中では className で行の高さに合わせる */
+function ExternalIcon({
+	className = "size-3 shrink-0",
+}: {
+	className?: string;
+}) {
+	return (
+		<svg
+			className={className}
+			viewBox="0 0 12 12"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={1.5}
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			aria-hidden="true"
+		>
+			<path d="M3.5 8.5l5-5M4.5 3.5h4v4" />
+		</svg>
+	);
+}
 
 export default function ConsultingPage() {
 	return (
-		<div className="max-w-6xl mx-auto px-6 md:px-8 py-16 md:py-20">
+		<div className="mx-auto max-w-6xl px-5 pt-8 md:px-8 md:pt-12">
 			<BreadcrumbStructuredData
 				items={[{ name: "開発参加・技術相談", path: "/consulting" }]}
 			/>
-			{/* Hero */}
-			<header className="space-y-8 text-center max-w-4xl mx-auto mb-20">
-				<h1 className="text-4xl md:text-5xl font-black tracking-tight text-gray-950">
-					開発参加・技術相談<span className="text-[#e11d48]">。</span>
-				</h1>
-				<p className="text-xl text-gray-500 font-medium leading-relaxed">
-					BANGEO は OSS として公開しており、個別の受託窓口ではなく GitHub
-					とコミュニティを中心に改善を進めています。実装相談、要望、不具合報告は、できるだけ公開の場に集約し、知見を共有できる形で扱います。
-				</p>
-				<p className="text-base md:text-lg text-gray-500 font-medium leading-relaxed">
-					公開リポジトリ:{" "}
-					<a
-						href="https://github.com/WebXR-JP/bangeo"
-						target="_blank"
-						rel="noopener noreferrer"
-						className="text-[#e11d48] hover:underline"
-					>
-						https://github.com/WebXR-JP/bangeo
-					</a>
-				</p>
-			</header>
+			<PageHeader
+				title="開発参加・技術相談"
+				lead="BANGEOはオープンソースのサイトで、受託開発の窓口はありません。相談はGitHubとDiscordの公開の場で受け付けています。"
+			/>
 
-			{/* Services */}
-			<div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
-				{services.map((service) => (
-					<div
-						key={service.title}
-						className="p-10 bg-white rounded-3xl border border-gray-100 space-y-6"
-					>
-						<h2 className="text-2xl font-black text-gray-950">
-							{service.title}
-						</h2>
-						<p className="text-lg text-gray-500 leading-relaxed font-medium">
-							{service.description}
-						</p>
-					</div>
-				))}
-			</div>
-
-			{/* CTA */}
-			<section className="bg-gray-950 text-white p-12 md:p-20 rounded-3xl text-center space-y-10">
-				<p className="text-xl text-gray-300 font-medium leading-relaxed max-w-2xl mx-auto">
-					まずは GitHub リポジトリまたは Discord から参加してください
-				</p>
-				<div className="flex flex-col sm:flex-row gap-4 justify-center">
-					<a
-						href="https://github.com/WebXR-JP/bangeo"
-						target="_blank"
-						rel="noopener noreferrer"
-						className="inline-block px-12 py-5 bg-[#e11d48] text-white rounded-full font-black text-lg hover:bg-[#be185d] transition-all"
-					>
-						GitHub を開く
-					</a>
-					<a
-						href="https://discord.com/invite/9WyRvAwX7B"
-						target="_blank"
-						rel="noopener noreferrer"
-						className="inline-block px-12 py-5 bg-white/10 text-white border border-white/20 rounded-full font-black text-lg hover:bg-white/20 transition-all"
-					>
-						Discord で相談する
-					</a>
+			{/* 相談できること、連絡の方法、用意するもの。
+			    3つとも最初の1画面に入れる */}
+			<dl className="max-w-4xl border-t border-gray-200">
+				<div className="grid gap-1 border-b border-gray-200 py-5 md:grid-cols-[12rem_minmax(0,1fr)] md:gap-8 md:py-6">
+					<dt className="text-[15px] font-bold leading-[1.8] text-gray-950">
+						相談できること
+					</dt>
+					<dd className="break-phrase text-base leading-[1.8] text-gray-700">
+						実装と設計の相談、機能やデモの提案、記事とサイトの不具合の報告
+					</dd>
 				</div>
-			</section>
+				<div className="grid gap-1 border-b border-gray-200 py-5 md:grid-cols-[12rem_minmax(0,1fr)] md:gap-8 md:py-6">
+					<dt className="text-[15px] font-bold leading-[1.8] text-gray-950">
+						連絡の方法
+					</dt>
+					{/* 空白を含む名前（GitHub Issues、Pull Request）は行をまたがせない */}
+					<dd className="break-phrase text-base leading-[1.8] text-gray-700">
+						記録を残して進めたい相談は
+						<span className="whitespace-nowrap">GitHub Issues</span>
+						で、実装前の相談や方針の意見交換はDiscordで受け付けています。修正を書けるときは、
+						<a
+							href={GITHUB_URL}
+							target="_blank"
+							rel="noopener noreferrer"
+							aria-label="GitHubのリポジトリ（新しいタブで開く）"
+							className="text-link whitespace-nowrap"
+						>
+							GitHubのリポジトリ
+							<ExternalIcon className="ml-0.5 inline-block size-3 align-[-0.05em]" />
+						</a>
+						に<span className="whitespace-nowrap">Pull Request</span>
+						を送ってください。
+					</dd>
+				</div>
+				<div className="grid gap-1 border-b border-gray-200 py-5 md:grid-cols-[12rem_minmax(0,1fr)] md:gap-8 md:py-6">
+					<dt className="text-[15px] font-bold leading-[1.8] text-gray-950">
+						用意するとよいもの
+					</dt>
+					<dd className="break-phrase text-base leading-[1.8] text-gray-700">
+						対象のページのURL、使っている端末とブラウザ、起きたこと。端末とブラウザは、
+						<Link href="/report" className="text-link whitespace-nowrap">
+							この端末のレポート
+						</Link>
+						の結果画像を添えると1枚で伝わります。
+					</dd>
+				</div>
+			</dl>
+
+			<div className="mt-8 flex flex-wrap gap-3">
+				<a
+					href={`${GITHUB_URL}/issues`}
+					target="_blank"
+					rel="noopener noreferrer"
+					aria-label="GitHub Issuesで相談する（新しいタブで開く）"
+					className="btn btn-primary"
+				>
+					GitHub Issuesで相談する
+					<ExternalIcon />
+				</a>
+				<a
+					href={DISCORD_URL}
+					target="_blank"
+					rel="noopener noreferrer"
+					aria-label="Discordに参加する（新しいタブで開く）"
+					className="btn btn-secondary"
+				>
+					Discordに参加する
+					<ExternalIcon />
+				</a>
+			</div>
+			<p className="mt-4 max-w-[40em] text-[13px] leading-[1.6] text-gray-500">
+				公開しにくい話題を除き、相談はできるだけ公開の場で進めます。
+			</p>
 		</div>
 	);
 }

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import { BreadcrumbStructuredData } from "@/components/breadcrumb-structured-data";
+import { PageHeader } from "@/components/page-header";
 
 export const metadata: Metadata = {
 	title: "プライバシーポリシー",
@@ -9,54 +11,129 @@ export const metadata: Metadata = {
 	robots: { index: false, follow: true },
 };
 
+/**
+ * 本文中の外部リンク。新しいタブで開き、
+ * 外向きの矢印と読み上げの補足を付ける。
+ * リンクの文字は途中で折らず、行に入らなければ次の行へ送る。
+ * wrap は生の URL だけに使う。1行に入る幅なら次の行に1行で出し、
+ * 入らない幅（320px）でだけ URL の中で折る。そのとき矢印だけが
+ * 次の行に落ちないよう、最後の1文字と矢印を折れない1組にする
+ */
+function ExternalLink({
+	href,
+	children,
+	wrap = false,
+}: {
+	href: string;
+	children: string;
+	wrap?: boolean;
+}) {
+	const icon = (
+		<svg
+			className="ml-0.5 inline-block size-3 align-[-0.05em]"
+			viewBox="0 0 12 12"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={1.5}
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			aria-hidden="true"
+		>
+			<path d="M3.5 8.5l5-5M4.5 3.5h4v4" />
+		</svg>
+	);
+	return (
+		<a
+			href={href}
+			target="_blank"
+			rel="noopener noreferrer"
+			aria-label={`${children}（新しいタブで開く）`}
+			className={
+				wrap
+					? "text-link inline-block wrap-anywhere"
+					: "text-link whitespace-nowrap"
+			}
+		>
+			{wrap ? (
+				<>
+					{children.slice(0, -1)}
+					<span className="whitespace-nowrap">
+						{children.slice(-1)}
+						{icon}
+					</span>
+				</>
+			) : (
+				<>
+					{children}
+					{icon}
+				</>
+			)}
+		</a>
+	);
+}
+
+/**
+ * 見出しと本文のまとまり。
+ * 本文は 16px・行間1.8・1行40字まで
+ */
+function PolicySection({
+	title,
+	children,
+}: {
+	title: string;
+	children: ReactNode;
+}) {
+	return (
+		<section className="mt-12 first:mt-0">
+			<h2 className="text-xl font-bold leading-normal text-gray-950 md:text-2xl md:leading-snug">
+				{title}
+			</h2>
+			<div className="mt-3 space-y-4 text-base leading-[1.8] text-gray-700">
+				{children}
+			</div>
+		</section>
+	);
+}
+
+const listClassName = "list-disc space-y-2 pl-6 marker:text-gray-400";
+
 export default function PrivacyPolicyPage() {
 	return (
-		<div className="max-w-4xl mx-auto px-6 md:px-8 py-16 md:py-20">
+		<div className="mx-auto max-w-6xl px-5 pt-8 md:px-8 md:pt-12">
 			<BreadcrumbStructuredData
 				items={[{ name: "プライバシーポリシー", path: "/privacy-policy" }]}
 			/>
-			{/* Header */}
-			<header className="space-y-6 text-center mb-16">
-				<h1 className="text-4xl md:text-5xl font-black tracking-tight text-gray-950">
-					プライバシーポリシー
-					<span className="text-[#e11d48]">。</span>
-				</h1>
-				<p className="text-xl text-gray-500 font-medium leading-relaxed">
-					最終更新日: 2026年11月19日
-				</p>
-			</header>
+			<PageHeader
+				title="プライバシーポリシー"
+				meta={
+					<>
+						最終改定日: <time dateTime="2026-11-19">2026年11月19日</time>
+					</>
+				}
+			/>
 
-			{/* Content */}
-			<article className="space-y-12">
-				{/* 1. 取得する情報 */}
-				<section className="space-y-4">
-					<h2 className="text-2xl font-black text-gray-950">取得する情報</h2>
-					<p className="text-gray-600 leading-relaxed">
-						当サイト（BANGEO）では、OSS
-						公開サイトの運営および改善のために、以下の情報を取得または参照する場合があります。
+			<article className="max-w-[40em]">
+				<PolicySection title="取得する情報">
+					<p>
+						当サイト（BANGEO）では、OSS公開サイトの運営および改善のために、以下の情報を取得または参照する場合があります。
 					</p>
-					<ul className="list-disc pl-6 text-gray-600 leading-relaxed space-y-2">
+					<ul className={listClassName}>
 						<li>
 							ブラウザや端末情報（IPアドレス、ユーザーエージェント、画面解像度、OSなど）
 						</li>
 						<li>
-							GitHub Issues、Pull Request、Discussion
-							などで公開投稿されたアカウント名、投稿内容、添付情報
+							GitHub Issues、Pull
+							Request、Discussionなどで公開投稿されたアカウント名、投稿内容、添付情報
 						</li>
 						<li>
-							Discord、X
-							など外部サービス上でユーザー自身が提供するプロフィール情報や投稿内容
+							Discord、Xなど外部サービス上でユーザー自身が提供するプロフィール情報や投稿内容
 						</li>
 					</ul>
-				</section>
+				</PolicySection>
 
-				{/* 2. 利用目的 */}
-				<section className="space-y-4">
-					<h2 className="text-2xl font-black text-gray-950">利用目的</h2>
-					<p className="text-gray-600 leading-relaxed">
-						取得した情報は、以下の目的で利用します。
-					</p>
-					<ul className="list-disc pl-6 text-gray-600 leading-relaxed space-y-2">
+				<PolicySection title="利用目的">
+					<p>取得した情報は、以下の目的で利用します。</p>
+					<ul className={listClassName}>
 						<li>サービスの提供、運営および改善</li>
 						<li>
 							Issue、Pull Request、Discussion、コミュニティ上での問い合わせ対応
@@ -64,136 +141,88 @@ export default function PrivacyPolicyPage() {
 						<li>不正利用の防止およびセキュリティの維持</li>
 						<li>アクセス解析によるコンテンツの品質向上</li>
 					</ul>
-				</section>
+				</PolicySection>
 
-				{/* 3. アクセス解析・タグ管理 */}
-				<section className="space-y-4">
-					<h2 className="text-2xl font-black text-gray-950">
-						アクセス解析・タグ管理
-					</h2>
-					<p className="text-gray-600 leading-relaxed">
-						本番サイトの通常ページでは BANGEO Analytics
-						を使い、ページの表示とサイト内のページ遷移を計測します。送信するのは、ページのURL（ドメインとパスのみ）・タイトル、参照元のドメイン、表示時刻、ページを開いている間だけ使うセッションID、ブラウザ・OS・端末の種類、画面サイズ、言語・タイムゾーン、WebXRの利用可否などです。端末によっては機種名、メモリ容量、CPUコア数も含まれます。URLのクエリとハッシュ、生のUser-Agent、Cookieは計測データに含めません。エラー内容、描画性能、WebXR体験中の操作は、このサイトの通常計測では収集しません。
+				<PolicySection title="アクセス解析・タグ管理">
+					<p>
+						本番サイトの通常ページではBANGEO
+						Analyticsを使い、ページの表示とサイト内のページ遷移を計測します。送信するのは、ページのURL（ドメインとパスのみ）・タイトル、参照元のドメイン、表示時刻、ページを開いている間だけ使うセッションID、ブラウザ・OS・端末の種類、画面サイズ、言語・タイムゾーン、WebXRの利用可否などです。端末によっては機種名、メモリ容量、CPUコア数も含まれます。URLのクエリとハッシュ、生のUser-Agent、Cookieは計測データに含めません。エラー内容、描画性能、WebXR体験中の操作は、このサイトの通常計測では収集しません。
 					</p>
-					<p className="text-gray-600 leading-relaxed">
-						BANGEO Analytics の受信先は Cloudflare
-						上で運用しています。計測データに
-						IPアドレスを記録する項目はありませんが、通信時のIPアドレスなどは配信事業者に届きます。
+					<p>
+						BANGEO
+						Analyticsの受信先はCloudflare上で運用しています。計測データにIPアドレスを記録する項目はありませんが、通信時のIPアドレスなどは配信事業者に届きます。
 					</p>
-					<p className="text-gray-600 leading-relaxed">
+					<p>
 						対応レポートの結果画像は、ご利用のブラウザの中で作成します。BANGEOが画像を受け取ることはなく、保存や共有は利用者ご自身の操作で行います。画像には端末名・ブラウザ・GPUの種類が含まれます。
 					</p>
-					<p className="text-gray-600 leading-relaxed">
-						当サイトでは、環境設定に応じて Google Tag Manager
-						を読み込み、必要に応じて Google Analytics
-						などの計測サービスを利用する場合があります。これらのサービスは
-						Cookie
-						（クッキー）を使用してデータを収集しますが、通常、当サイト管理者が個人を直接特定する情報は含みません。
+					<p>
+						当サイトでは、環境設定に応じてGoogle Tag
+						Managerを読み込み、必要に応じてGoogle
+						Analyticsなどの計測サービスを利用する場合があります。これらのサービスはCookie（クッキー）を使用してデータを収集しますが、通常、当サイト管理者が個人を直接特定する情報は含みません。
 					</p>
-					<p className="text-gray-600 leading-relaxed">
-						Cookie
-						の使用を望まない場合は、ブラウザの設定から無効にすることができます。Google
-						によるデータ収集の詳細については、
-						<a
-							href="https://policies.google.com/technologies/partner-sites"
-							target="_blank"
-							rel="noopener noreferrer"
-							className="text-[#e11d48] hover:underline"
-						>
+					<p>
+						Cookieの使用を望まない場合は、ブラウザの設定から無効にすることができます。Googleによるデータ収集の詳細については、
+						<ExternalLink href="https://policies.google.com/technologies/partner-sites">
 							Googleのプライバシーポリシー
-						</a>
+						</ExternalLink>
 						をご確認ください。
 					</p>
-				</section>
+				</PolicySection>
 
-				{/* 4. 広告配信について */}
-				<section className="space-y-4">
-					<h2 className="text-2xl font-black text-gray-950">
-						広告配信について
-					</h2>
-					<p className="text-gray-600 leading-relaxed">
-						当サイトでは、環境設定に応じて Google AdSense
-						による広告配信を行う場合があります。Google AdSense は Cookie
-						を使用して、ユーザーの興味に基づく広告を配信することがあります。Google
-						がお客様の情報をどのように利用するかについては、
-						<a
-							href="https://policies.google.com/technologies/ads"
-							target="_blank"
-							rel="noopener noreferrer"
-							className="text-[#e11d48] hover:underline"
-						>
+				<PolicySection title="広告配信について">
+					<p>
+						当サイトでは、環境設定に応じてGoogle
+						AdSenseによる広告配信を行う場合があります。Google
+						AdSenseはCookieを使用して、ユーザーの興味に基づく広告を配信することがあります。Googleがお客様の情報をどのように利用するかについては、
+						<ExternalLink href="https://policies.google.com/technologies/ads">
 							Google広告に関するポリシー
-						</a>
+						</ExternalLink>
 						をご確認ください。
 					</p>
-					<p className="text-gray-600 leading-relaxed">
+					<p>
 						パーソナライズ広告を無効にしたい場合は、
-						<a
-							href="https://www.google.com/settings/ads"
-							target="_blank"
-							rel="noopener noreferrer"
-							className="text-[#e11d48] hover:underline"
-						>
+						<ExternalLink href="https://www.google.com/settings/ads">
 							Googleの広告設定
-						</a>
+						</ExternalLink>
 						から設定を変更できます。
 					</p>
-				</section>
+				</PolicySection>
 
-				{/* 5. 第三者提供 */}
-				<section className="space-y-4">
-					<h2 className="text-2xl font-black text-gray-950">第三者提供</h2>
-					<p className="text-gray-600 leading-relaxed">
+				<PolicySection title="第三者提供">
+					<p>
 						法令に基づく場合を除き、ご本人の同意なく個人情報を第三者に提供することはありません。
 					</p>
-				</section>
+				</PolicySection>
 
-				{/* 6. 外部サービス */}
-				<section className="space-y-4">
-					<h2 className="text-2xl font-black text-gray-950">外部サービス</h2>
-					<p className="text-gray-600 leading-relaxed">
-						当サイトには GitHub、Discord、X
-						などの外部サービスへのリンクが含まれます。リンク先のサイトにおける個人情報の取り扱いについては、各サービスのプライバシーポリシーをご確認ください。当サイトは外部サービスの内容やプライバシー慣行について責任を負いません。
+				<PolicySection title="外部サービス">
+					<p>
+						当サイトにはGitHub、Discord、Xなどの外部サービスへのリンクが含まれます。リンク先のサイトにおける個人情報の取り扱いについては、各サービスのプライバシーポリシーをご確認ください。当サイトは外部サービスの内容やプライバシー慣行について責任を負いません。
 					</p>
-				</section>
+				</PolicySection>
 
-				{/* 7. お問い合わせ */}
-				<section className="space-y-4">
-					<h2 className="text-2xl font-black text-gray-950">お問い合わせ</h2>
-					<p className="text-gray-600 leading-relaxed">
+				<PolicySection title="お問い合わせ">
+					<p>
 						本ポリシーやサイト運営に関するご連絡は、公開リポジトリまたはコミュニティ窓口からお願いします。
 					</p>
-					<p className="text-gray-600 leading-relaxed">
+					<p>
 						GitHub:{" "}
-						<a
-							href="https://github.com/WebXR-JP/bangeo"
-							target="_blank"
-							rel="noopener noreferrer"
-							className="text-[#e11d48] hover:underline"
-						>
+						<ExternalLink href="https://github.com/WebXR-JP/bangeo" wrap>
 							https://github.com/WebXR-JP/bangeo
-						</a>
+						</ExternalLink>
 					</p>
-					<p className="text-gray-600 leading-relaxed">
+					<p>
 						Discord:{" "}
-						<a
-							href="https://discord.com/invite/9WyRvAwX7B"
-							target="_blank"
-							rel="noopener noreferrer"
-							className="text-[#e11d48] hover:underline"
-						>
+						<ExternalLink href="https://discord.com/invite/9WyRvAwX7B">
 							WebXR JP Discord
-						</a>
+						</ExternalLink>
 					</p>
-				</section>
+				</PolicySection>
 
-				{/* 8. 改定 */}
-				<section className="space-y-4">
-					<h2 className="text-2xl font-black text-gray-950">改定</h2>
-					<p className="text-gray-600 leading-relaxed">
+				<PolicySection title="改定">
+					<p>
 						本ポリシーは、法令の改正やサービス内容の変更に応じて、予告なく変更する場合があります。変更後のポリシーは、当サイトに掲載された時点で効力を生じるものとします。
 					</p>
-				</section>
+				</PolicySection>
 			</article>
 		</div>
 	);
