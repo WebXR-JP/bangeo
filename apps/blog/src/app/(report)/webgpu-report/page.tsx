@@ -32,43 +32,42 @@ export default function WebGPUReportPage() {
 			/>
 
 			<header className="mb-8">
-				<h1 className="text-balance text-2xl font-black tracking-tight text-gray-950 md:text-3xl">
+				<h1 className="text-2xl font-black text-gray-950 md:text-3xl">
 					WebGPU対応レポート
 				</h1>
-				<p className="mt-3 text-sm leading-relaxed text-gray-600">
-					いま開いている端末のGPUが、WebGPUのどの機能を持ち、どこまで大きな値を扱えるかを表示します。項目名だけでは分かりにくい
-					features・limits・WGSL言語機能を、1項目ずつ日本語の解説つきで並べています。
+				<p className="mt-3 max-w-[40em] break-phrase text-sm leading-[1.8] text-gray-600">
+					いま開いている端末のGPUが、WebGPUのどの機能を持ち、どこまで大きな値を扱えるかを表示します。項目名だけではわかりにくいfeatures・limits・WGSL言語機能を、1項目ずつ日本語の解説つきで並べています。
 				</p>
 			</header>
 
 			<WebGPUReport />
 
-			<footer className="mt-12 space-y-3 border-t border-gray-100 pt-6">
-				<p className="text-xs leading-relaxed text-gray-500">
-					表示している値は、この端末・このブラウザ・この時点でのGPUアダプターの申告値です。同じ端末でも、外部GPUの接続状態やブラウザの設定、省電力の状況によって変わることがあります。項目名と既定値はW3C
-					WebGPU仕様（
+			<footer className="mt-12 space-y-3 border-t border-gray-200 pt-6">
+				<p className="max-w-[40em] text-xs leading-relaxed text-gray-500">
+					表示している値は、この端末・このブラウザ・この時点でのGPUアダプターの申告値です。同じ端末でも、外部GPUの接続状態やブラウザの設定、省電力の状況によって変わることがあります。項目名と既定値は
 					<a
 						href="https://www.w3.org/TR/webgpu/"
 						target="_blank"
 						rel="noopener noreferrer"
-						className="text-gray-600 underline decoration-gray-300 underline-offset-2 transition hover:text-primary-600"
+						aria-label="W3C WebGPU仕様（新しいタブで開く）"
+						className="whitespace-nowrap text-gray-600 underline decoration-gray-300 underline-offset-2 transition-colors hover:text-primary-600 hover:decoration-current"
 					>
-						W3C WebGPU
+						W3C WebGPU仕様
 					</a>
-					）に準拠しています。
+					に準拠しています。
 				</p>
-				<p className="text-xs leading-relaxed text-gray-500">
+				<p className="max-w-[40em] text-xs leading-relaxed text-gray-500">
 					ブラウザ横断の標準化状況は
 					<Link
 						href="/webxr-status"
-						className="text-gray-600 underline decoration-gray-300 underline-offset-2 transition hover:text-primary-600"
+						className="whitespace-nowrap text-gray-600 underline decoration-gray-300 underline-offset-2 transition-colors hover:text-primary-600 hover:decoration-current"
 					>
 						標準化・対応状況
 					</Link>
 					、端末ごとの仕様は
 					<Link
 						href="/devices"
-						className="text-gray-600 underline decoration-gray-300 underline-offset-2 transition hover:text-primary-600"
+						className="whitespace-nowrap text-gray-600 underline decoration-gray-300 underline-offset-2 transition-colors hover:text-primary-600 hover:decoration-current"
 					>
 						対応デバイス一覧
 					</Link>

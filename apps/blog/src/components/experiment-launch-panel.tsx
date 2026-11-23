@@ -4,7 +4,6 @@ import {
 	type DeviceCheck,
 	getExperimentGuideOrDefault,
 	type Readiness,
-	readinessClassName,
 	readinessLabel,
 	trackLabel,
 } from "@/lib/experiment-guides";
@@ -17,10 +16,23 @@ interface ExperimentLaunchPanelProps {
 	devices?: string[];
 }
 
+/**
+ * 状態の色はレポートと同じ3つ（青 = 体験できる / アンバー = 条件や確認が要る / 灰 = 対象外・確認中）にそろえる。
+ * 文字（readinessLabel）を必ず添えるので、色だけで伝えることはない
+ */
+const readinessTone: Record<Readiness, string> = {
+	ready: "bg-data-yes-soft text-data-yes-ink",
+	lab: "bg-data-ask-soft text-data-ask",
+	preview: "bg-data-ask-soft text-data-ask",
+	limited: "bg-data-ask-soft text-data-ask",
+	unsupported: "bg-gray-100 text-gray-600",
+	unknown: "bg-gray-100 text-gray-600",
+};
+
 function ReadinessBadge({ readiness }: { readiness: Readiness }) {
 	return (
 		<span
-			className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-black ${readinessClassName[readiness]}`}
+			className={`inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-bold ${readinessTone[readiness]}`}
 		>
 			{readinessLabel[readiness]}
 		</span>
@@ -29,12 +41,12 @@ function ReadinessBadge({ readiness }: { readiness: Readiness }) {
 
 function DeviceCard({ item }: { item: DeviceCheck }) {
 	return (
-		<div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm shadow-gray-100/60">
+		<div className="rounded-xl bg-gray-50 p-4">
 			<div className="mb-2 flex items-center justify-between gap-3">
-				<p className="text-sm font-black text-gray-950">{item.label}</p>
+				<p className="text-sm font-bold text-gray-950">{item.label}</p>
 				<ReadinessBadge readiness={item.readiness} />
 			</div>
-			<p className="text-xs leading-relaxed text-gray-500">{item.note}</p>
+			<p className="text-xs leading-relaxed text-gray-600">{item.note}</p>
 		</div>
 	);
 }
@@ -56,46 +68,36 @@ export function ExperimentLaunchPanel({
 	return (
 		<section
 			id="status"
-			className="not-prose mb-12 scroll-mt-32 overflow-hidden rounded-[2rem] border border-rose-100 bg-gradient-to-br from-rose-50 via-white to-sky-50 shadow-xl shadow-rose-100/40"
+			className="card not-prose mb-12 scroll-mt-32 overflow-hidden"
 		>
 			<div className="grid gap-0 lg:grid-cols-[1.05fr_1.2fr]">
-				<div className="border-b border-rose-100 bg-white/70 p-6 md:p-8 lg:border-r lg:border-b-0">
+				<div className="border-b border-gray-100 p-6 md:p-8 lg:border-r lg:border-b-0">
 					<div className="mb-4 flex flex-wrap items-center gap-2">
 						<ReadinessBadge readiness={guide.statusReadiness} />
-						<span className="rounded-full bg-gray-950 px-3 py-1 text-[10px] font-black tracking-[0.16em] text-white uppercase">
-							{trackLabel[guide.track]}
-						</span>
+						<span className="chip">{trackLabel[guide.track]}</span>
 					</div>
-					<h2 className="text-2xl font-black tracking-tight text-gray-950 md:text-3xl">
+					<h2 className="text-2xl font-black leading-snug text-gray-950 md:text-3xl">
 						{guide.statusLabel}
 					</h2>
 					<p className="mt-3 text-sm font-bold leading-relaxed text-gray-800">
-						このデモで体験できること: {guide.summary}
+						このデモで体験できること：{guide.summary}
 					</p>
 					<p className="mt-3 text-sm leading-relaxed text-gray-600">
 						{guide.intent}
 					</p>
-					<div className="mt-5 rounded-2xl border border-white bg-white/80 p-4">
-						<p className="text-[11px] font-black tracking-[0.18em] text-gray-400 uppercase">
-							おすすめの環境
-						</p>
-						<p className="mt-1 text-base font-black text-gray-950">
+					<div className="mt-5 rounded-xl bg-gray-50 p-4">
+						<p className="text-xs font-bold text-gray-500">おすすめの環境</p>
+						<p className="mt-1 text-base font-bold text-gray-950">
 							{guide.primaryDevice}
 						</p>
 					</div>
 					{launchHref && (
 						<div className="mt-6 flex flex-col gap-3 sm:flex-row">
-							<a
-								href={launchHref}
-								className="inline-flex items-center justify-center rounded-full bg-[#e11d48] px-6 py-3 text-sm font-black text-white shadow-lg shadow-rose-200 transition hover:bg-[#be123c]"
-							>
+							<a href={launchHref} className="btn btn-primary">
 								デモを開く
 							</a>
-							<Link
-								href="/experiments"
-								className="inline-flex items-center justify-center rounded-full border border-gray-200 bg-white px-6 py-3 text-sm font-black text-gray-700 transition hover:border-rose-200 hover:text-[#e11d48]"
-							>
-								デモ一覧に戻る
+							<Link href="/experiments" className="btn btn-secondary">
+								WebXR対応レポートを見る
 							</Link>
 						</div>
 					)}
@@ -112,8 +114,8 @@ export function ExperimentLaunchPanel({
 					</div>
 
 					<div className="mb-6 grid gap-4 md:grid-cols-2">
-						<div className="rounded-2xl border border-gray-100 bg-white/85 p-5">
-							<h3 className="mb-3 text-sm font-black text-gray-950">
+						<div className="rounded-xl bg-gray-50 p-5">
+							<h3 className="mb-3 text-sm font-bold text-gray-950">
 								体験フロー
 							</h3>
 							<ol className="space-y-3">
@@ -122,27 +124,25 @@ export function ExperimentLaunchPanel({
 										key={step}
 										className="flex gap-3 text-xs leading-relaxed text-gray-600"
 									>
-										<span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gray-950 text-[10px] font-black text-white">
+										<span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gray-950 text-xs font-bold text-white">
 											{index + 1}
 										</span>
-										<span>{step}</span>
+										<span className="pt-0.5">{step}</span>
 									</li>
 								))}
 							</ol>
 						</div>
 
-						<div className="rounded-2xl border border-gray-100 bg-white/85 p-5">
-							<h3 className="mb-3 text-sm font-black text-gray-950">
+						<div className="rounded-xl bg-gray-50 p-5">
+							<h3 className="mb-3 text-sm font-bold text-gray-950">
 								うまく動かない場合
 							</h3>
 							<p className="text-xs leading-relaxed text-gray-600">
 								{guide.fallback}
 							</p>
-							<div className="mt-4 rounded-xl bg-gray-950 p-4 text-white">
-								<p className="text-[11px] font-black tracking-[0.16em] text-rose-200 uppercase">
-									確認ポイント
-								</p>
-								<p className="mt-2 text-xs leading-relaxed text-gray-100">
+							<div className="mt-4 border-t border-gray-200 pt-4">
+								<p className="text-xs font-bold text-gray-950">確認ポイント</p>
+								<p className="mt-1 text-xs leading-relaxed text-gray-600">
 									{guide.qualityCheck}
 								</p>
 							</div>

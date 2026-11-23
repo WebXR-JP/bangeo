@@ -10,7 +10,8 @@ const tone: Record<ReportMark, string> = {
 	yes: "bg-data-yes-soft text-data-yes-ink",
 	no: "bg-gray-100 text-gray-600",
 	unknown: "bg-data-ask-soft text-data-ask",
-	checking: "bg-gray-100 text-gray-400 motion-safe:animate-pulse",
+	// 「確認中」の文字を添えて使うこともあるので、読める濃さにする
+	checking: "bg-gray-100 text-gray-500 motion-safe:animate-pulse",
 };
 
 const symbol: Record<ReportMark, string> = {
@@ -40,7 +41,7 @@ export function MarkDot({ mark }: { mark: ReportMark }) {
 	return (
 		<span
 			aria-hidden="true"
-			className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-black ${dotTone[mark]}`}
+			className={`inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold ${dotTone[mark]}`}
 		>
 			{symbol[mark]}
 		</span>
@@ -58,7 +59,7 @@ export function MarkBadge({
 }) {
 	return (
 		<span
-			className={`inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-full px-2.5 py-1 text-[11px] font-bold ${tone[mark]} ${className}`}
+			className={`inline-flex items-center justify-center gap-1 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-bold ${tone[mark]} ${className}`}
 		>
 			<span aria-hidden="true">{symbol[mark]}</span>
 			{children}

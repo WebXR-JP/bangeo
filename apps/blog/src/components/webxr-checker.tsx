@@ -1,8 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
+import { reportStatusLabel } from "@/lib/report/summary";
 import type { SpecCheckId, SpecSupport } from "@/lib/webxr-spec-catalog";
 import { checkWebXRSupport } from "@/lib/webxr-support";
+import { MarkBadge, supportToMark } from "./report/report-mark";
 
 interface ModuleResult {
 	id: WebXRModuleId;
@@ -128,45 +131,21 @@ const sessionModes: XRSessionMode[] = [
 	"immersive-ar",
 ];
 
-const supportMark: Record<SpecSupport, string> = {
-	supported: "○",
-	unsupported: "—",
-	unknown: "?",
-	checking: "…",
-};
-
-const supportClassName: Record<SpecSupport, string> = {
-	supported: "bg-gray-100 text-gray-950",
-	unsupported: "bg-gray-50 text-gray-400",
-	unknown: "bg-amber-50 text-amber-700",
-	checking: "bg-gray-50 text-gray-300",
-};
-
-const moduleSupportText: Record<SpecSupport, string> = {
-	supported: "対応",
-	unsupported: "未対応",
-	unknown: "未確認",
-	checking: "確認中",
-};
-
-const sessionSupportText: Record<SpecSupport, string> = {
-	supported: "利用可",
-	unsupported: "未対応",
-	unknown: "未確認",
-	checking: "確認中",
-};
-
-function Badge({ support, text }: { support: SpecSupport; text: string }) {
+/**
+ * 判定のバッジ。レポートと同じ印（記号 + 判定の4語 + 青・アンバー・灰）を使う
+ */
+function Badge({ support }: { support: SpecSupport }) {
+	const mark = supportToMark(support);
 	return (
 		<span
-			className={`px-3 py-1 rounded-full text-xs font-bold ${supportClassName[support]}`}
+			className="shrink-0"
 			title={
 				support === "unknown"
 					? "この端末では判定できませんでした。セッション開始後に確認が必要です。"
 					: undefined
 			}
 		>
-			{supportMark[support]} {text}
+			<MarkBadge mark={mark}>{reportStatusLabel(mark)}</MarkBadge>
 		</span>
 	);
 }
@@ -175,11 +154,10 @@ function DemoLink({ demo }: { demo?: WebXRCheckerDemoLink }) {
 	if (!demo?.href) {
 		return (
 			<span
-				className="inline-flex min-h-9 items-center justify-center rounded-full border border-dashed border-gray-200 bg-gray-50 px-3 py-1.5 text-xs font-black text-gray-400"
-				aria-disabled="true"
+				className="inline-flex min-h-10 items-center justify-center rounded-full border border-dashed border-gray-200 px-3 text-xs font-bold text-gray-500"
 				title={demo?.note}
 			>
-				近日公開
+				デモはまだありません
 			</span>
 		);
 	}
@@ -187,10 +165,11 @@ function DemoLink({ demo }: { demo?: WebXRCheckerDemoLink }) {
 	return (
 		<a
 			href={demo.href}
-			className="inline-flex min-h-9 items-center justify-center rounded-full bg-gray-950 px-3 py-1.5 text-xs font-black text-white transition-colors hover:bg-[#e11d48]"
+			className="btn btn-dark btn-sm rounded-full"
 			title={demo.note}
 		>
-			{demo.label ?? "デモ"} ↗
+			{demo.label ?? "デモ"}
+			<span aria-hidden="true">↗</span>
 		</a>
 	);
 }
@@ -274,16 +253,23 @@ export function WebXRChecker({
 			: "unsupported";
 	const statusTitle =
 		webxrState === "supported"
-			? "WebXR 利用できます"
+			? "WebXRに対応しています"
 			: webxrState === "unknown"
-				? "WebXR の対応を確認できませんでした"
-				: "WebXR 利用できません";
+				? "WebXRの対応を判定できませんでした"
+				: "WebXRに未対応です";
+	const statusTone =
+		webxrState === "supported"
+			? "text-gray-950"
+			: webxrState === "unknown"
+				? "text-data-ask"
+				: "text-gray-600";
+	// 見出しで判定を言い切り、説明では次にできることだけを言う
 	const statusDescription =
 		webxrState === "supported"
-			? "このブラウザではWebXRを利用できます。利用できるモードは下の一覧で確認できます。"
+			? "使える機能と開始できるモードは、下の一覧のとおりです。"
 			: webxrState === "unknown"
-				? "このブラウザではWebXRの利用可否を判定できませんでした。端末やブラウザの設定を確認するか、対応デバイスでお試しください。"
-				: "現在のブラウザではWebXRを利用できません。対応ヘッドセットのブラウザやAndroid Chromeなどでお試しください。";
+				? "端末やブラウザの設定を見直すか、WebXRに対応したデバイスで開いてください。"
+				: "WebXRに対応したブラウザ（Meta Quest Browser、AndroidのChrome）で開いてください。";
 
 	async function startSession(mode: XRSessionMode) {
 		const xr = getXR();
@@ -296,157 +282,158 @@ export function WebXRChecker({
 				setSessionActive(null);
 			});
 		} catch (err) {
-			setSessionError(err instanceof Error ? err.message : "Unknown error");
+			setSessionError(
+				err instanceof Error
+					? err.message
+					: "ブラウザからエラーの内容が返りませんでした。",
+			);
 		}
 	}
 
+	// モード名を「immersive-」「vr」のように途中で割らない
+	const codeClass =
+		"whitespace-nowrap rounded bg-gray-100 px-1.5 py-0.5 font-mono text-xs text-gray-700";
+
 	return (
 		<>
-			<div className="rounded-[3rem] border-2 border-gray-100 bg-white p-8 shadow-xs md:p-12">
+			<div className="card p-6 md:p-8">
 				{loading ? (
-					<div className="flex items-center justify-center p-12">
-						<div className="h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-gray-900" />
-					</div>
+					<p
+						role="status"
+						className="flex items-center gap-3 text-sm font-bold text-gray-700"
+					>
+						<span
+							aria-hidden="true"
+							className="h-6 w-6 shrink-0 animate-spin rounded-full border-2 border-gray-200 border-t-gray-950"
+						/>
+						判定しています
+					</p>
 				) : (
-					<div className="flex items-center justify-center gap-4 p-8 text-center">
-						<div>
-							<p
-								className={`text-2xl font-black ${
-									webxrState === "supported"
-										? "text-gray-950"
-										: webxrState === "unknown"
-											? "text-amber-600"
-											: "text-gray-400"
-								}`}
-							>
-								{statusTitle}
-							</p>
-							<p className="text-sm text-gray-400">{statusDescription}</p>
-						</div>
-					</div>
+					<>
+						{/* 見出しと同じ組み方（詰め組み・文節改行・行の長さの均等化）にする */}
+						<p
+							className={`break-phrase text-2xl font-black text-balance [font-feature-settings:'palt'] ${statusTone}`}
+						>
+							{statusTitle}
+						</p>
+						<p className="mt-2 max-w-[40em] break-phrase text-sm leading-relaxed text-gray-600">
+							{statusDescription}
+						</p>
+					</>
 				)}
 			</div>
 
-			<div className="space-y-6 rounded-[3rem] border-2 border-gray-100 bg-white p-8 shadow-xs md:p-12">
-				<div className="space-y-2">
-					<h2 className="text-2xl font-black text-gray-800">
-						このブラウザで使える機能
-					</h2>
-					<p className="text-sm text-gray-500">
-						主なWebXR機能の対応状況です。対応している項目は、横のデモから実際の見え方や操作感を確認できます。
-					</p>
-					<p className="text-xs leading-relaxed text-gray-400">
-						一部の機能は端末やブラウザの設定によって利用可否が変わります。対応表示が出た場合も、最終的には各デモでの体験確認をおすすめします。
-					</p>
-				</div>
-				<div className="space-y-3">
+			<div className="card p-6 md:p-8">
+				<h2 className="text-2xl font-black leading-snug text-gray-950">
+					このブラウザで使える機能
+				</h2>
+				<p className="mt-2 max-w-[40em] break-phrase text-sm leading-relaxed text-gray-600">
+					主なWebXR機能について、このブラウザでの対応を判定した結果です。
+				</p>
+				<p className="mt-2 max-w-[40em] break-phrase text-xs leading-relaxed text-gray-500">
+					一部の機能は端末やブラウザの設定によって利用可否が変わります。「対応」と出た機能も、実際の動作は
+					<Link
+						href="/experiments"
+						className="whitespace-nowrap text-gray-600 underline decoration-gray-300 underline-offset-2 transition-colors hover:text-primary-600 hover:decoration-current"
+					>
+						WebXR対応レポート
+					</Link>
+					のデモで確かめてください。
+				</p>
+				<ul className="mt-4 divide-y divide-gray-100 border-y border-gray-100">
 					{modules.map((mod) => (
-						<div
+						<li
 							key={mod.id}
-							className="flex flex-col gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-xs sm:flex-row sm:items-center sm:justify-between"
+							className="flex min-h-12 flex-wrap items-center justify-between gap-x-3 gap-y-2 py-2.5"
 						>
-							<span className="text-sm font-bold text-gray-700">
+							<span className="text-sm font-bold text-gray-950">
 								{mod.name}
 							</span>
-							<div className="flex flex-wrap items-center gap-2">
-								<Badge
-									support={mod.support}
-									text={moduleSupportText[mod.support]}
-								/>
+							<span className="flex flex-wrap items-center gap-2">
+								<Badge support={mod.support} />
 								{showDemoLinks && <DemoLink demo={demoLinks?.[mod.id]} />}
-							</div>
-						</div>
+							</span>
+						</li>
 					))}
-				</div>
+				</ul>
 			</div>
 
-			<div className="space-y-6 rounded-[3rem] border-2 border-gray-100 bg-white p-8 shadow-xs md:p-12">
-				<div className="space-y-2">
-					<h2 className="text-2xl font-black text-gray-800">
-						VR / ARの開始可否
-					</h2>
-					<p className="text-sm text-gray-500">
-						現在のブラウザと端末で、ブラウザ内表示・VR表示・AR表示を開始できるかを確認します。
-					</p>
-				</div>
-				<div className="space-y-3">
+			<div className="card p-6 md:p-8">
+				<h2 className="text-2xl font-black leading-snug text-gray-950">
+					VR/ARの開始可否
+				</h2>
+				<p className="mt-2 max-w-[40em] break-phrase text-sm leading-relaxed text-gray-600">
+					いま開いている端末とブラウザで、ブラウザ内表示・VR・ARを開始できるかを判定した結果です。
+				</p>
+				<ul className="mt-4 divide-y divide-gray-100 border-y border-gray-100">
 					{sessions.map((s) => (
-						<div
+						<li
 							key={s.id}
-							className="flex flex-col gap-3 rounded-xl border border-gray-100 bg-white p-4 shadow-xs sm:flex-row sm:items-center sm:justify-between"
+							className="flex min-h-14 flex-wrap items-center justify-between gap-x-3 gap-y-2 py-2.5"
 						>
-							<span className="text-sm font-bold text-gray-700">{s.name}</span>
-							<div className="flex flex-wrap items-center gap-2">
-								<Badge
-									support={s.support}
-									text={sessionSupportText[s.support]}
-								/>
+							<span className="font-mono text-sm font-bold text-gray-950">
+								{s.name}
+							</span>
+							<span className="flex flex-wrap items-center gap-2">
+								<Badge support={s.support} />
 								{showDemoLinks && <DemoLink demo={demoLinks?.[s.id]} />}
 								{s.support === "supported" && (
 									<button
 										type="button"
 										onClick={() => startSession(s.id)}
-										className="rounded-full bg-gray-950 px-5 py-2 text-sm font-bold text-white shadow-xs transition-colors hover:bg-[#e11d48]"
+										// タッチで押しやすいよう、スマートフォンでは高さ44px
+										className="btn btn-dark btn-sm min-h-11 rounded-full sm:min-h-9"
 									>
 										開始を試す
 									</button>
 								)}
-							</div>
-						</div>
+							</span>
+						</li>
 					))}
-				</div>
+				</ul>
 
-				<div className="mt-8 rounded-2xl border border-gray-100 bg-gray-50 p-6">
-					<p className="font-bold text-gray-800">
+				<div className="mt-6 rounded-xl bg-gray-50 p-5">
+					<p className="text-base font-bold text-gray-950">
 						「inline」だけが利用できる場合
 					</p>
-					<p className="mt-2 text-sm leading-relaxed text-gray-600">
-						<code className="rounded bg-gray-200 px-1.5 py-0.5 text-xs">
-							inline
-						</code>{" "}
-						はブラウザ内で3Dコンテンツを表示するモードです。ヘッドセットでのVRや、カメラを使ったARを開始するには、
-						<code className="rounded bg-gray-200 px-1.5 py-0.5 text-xs">
-							immersive-vr
-						</code>
-						、
-						<code className="rounded bg-gray-200 px-1.5 py-0.5 text-xs">
-							immersive-ar
-						</code>
+					<p className="mt-2 max-w-[40em] break-phrase text-sm leading-relaxed text-gray-600">
+						<code className={codeClass}>inline</code>
+						はブラウザ内で3Dシーンを表示するモードです。ヘッドセットでのVRや、カメラを使ったARを開始するには、
+						<code className={codeClass}>immersive-vr</code>、
+						<code className={codeClass}>immersive-ar</code>
 						に対応するデバイスとブラウザが必要です。
 					</p>
 				</div>
 			</div>
 
 			{(sessionActive || sessionError) && (
-				<div className="space-y-6 rounded-[3rem] border-2 border-gray-100 bg-white p-8 shadow-xs md:p-12">
-					<div className="space-y-2">
-						<h2 className="text-2xl font-black text-gray-800">確認結果</h2>
-						<p className="text-sm text-gray-500">
-							セッション開始の結果がここに表示されます。
-						</p>
-					</div>
+				<div className="card p-6 md:p-8">
+					<h2 className="text-2xl font-black leading-snug text-gray-950">
+						セッションを開始した結果
+					</h2>
 					{sessionActive && (
-						<div className="rounded-2xl border border-gray-100 bg-gray-50 p-6">
-							<p className="font-bold text-gray-900">
-								{sessionActive} を開始しました
-							</p>
-						</div>
+						<p className="mt-4 rounded-xl bg-gray-50 p-5 font-bold text-gray-950">
+							<code className={codeClass}>{sessionActive}</code>を開始しました
+						</p>
 					)}
 					{sessionError && (
-						<div className="rounded-2xl border border-gray-100 bg-gray-50 p-6">
-							<p className="font-bold text-gray-500">開始できませんでした</p>
-							<p className="mt-2 text-sm text-gray-400">{sessionError}</p>
+						<div className="mt-4 rounded-xl bg-gray-50 p-5">
+							<p className="font-bold text-gray-950">開始できませんでした</p>
+							<p className="mt-2 text-sm leading-relaxed text-gray-600">
+								{sessionError}
+							</p>
 						</div>
 					)}
 				</div>
 			)}
 
 			{!loading && (
-				<details className="rounded-[2rem] border border-gray-100 bg-white p-5 text-sm text-gray-500 shadow-xs">
-					<summary className="cursor-pointer font-black text-gray-700">
+				<details className="text-sm">
+					{/* タッチで押しやすいよう、スマートフォンでは高さ44px（文字16px + 上下14px） */}
+					<summary className="cursor-pointer py-3.5 text-xs font-bold text-gray-500 transition-colors hover:text-gray-800 sm:py-1">
 						ブラウザ情報を表示
 					</summary>
-					<p className="mt-4 break-all rounded-2xl bg-gray-50 p-4 font-mono text-xs leading-relaxed text-gray-400">
+					<p className="mt-2 break-all rounded-xl bg-gray-50 px-3 py-2 font-mono text-xs leading-relaxed text-gray-600">
 						{userAgent}
 					</p>
 				</details>

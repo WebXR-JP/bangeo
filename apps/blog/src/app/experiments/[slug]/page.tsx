@@ -6,11 +6,18 @@ import { ArticleStructuredData } from "@/components/article-structured-data";
 import { ExperimentLaunchPanel } from "@/components/experiment-launch-panel";
 import { mdxComponents } from "@/components/mdx-components";
 import { OptimizedImage } from "@/components/optimized-image";
+import { PageHeader } from "@/components/page-header";
 import { SocialShare } from "@/components/social-share";
-import { contentDateTime } from "@/lib/content-dates";
+import {
+	contentDateTime,
+	contentDateValue,
+	formatContentDate,
+} from "@/lib/content-dates";
 import { getDocs, getSlugFromPath } from "@/lib/fumadocs-utils";
-import { THUMB_IMAGE_SIZES } from "@/lib/image-defaults";
 import { SITE_URL } from "@/lib/site-url";
+
+/** 見出しの下に置くサムネイルの表示幅（max-w-4xl・左右 20px / 32px のコンテナいっぱい） */
+const HEADER_IMAGE_SIZES = "(min-width: 896px) 832px, calc(100vw - 40px)";
 
 interface PageProps {
 	params: Promise<{ slug: string }>;
@@ -101,8 +108,16 @@ export default async function ExperimentPage({ params }: PageProps) {
 		devices && devices.length > 0 && { label: "対応デバイス", badges: devices },
 	].filter(Boolean) as { label: string; value?: string; badges?: string[] }[];
 
+	// 更新日が公開日より後のときだけ「◯年◯月◯日更新」を添える（記事カードと同じ）
+	const publishedText = formatContentDate(publishedDate);
+	const revisedText =
+		doc.updated &&
+		contentDateValue(String(doc.updated)) > contentDateValue(publishedDate)
+			? formatContentDate(String(doc.updated))
+			: undefined;
+
 	return (
-		<div className="max-w-4xl mx-auto px-6 md:px-8 py-16 md:py-20">
+		<div className="max-w-4xl mx-auto px-5 md:px-8 pt-8 md:pt-12">
 			<ArticleStructuredData
 				title={doc.title}
 				description={doc.description}
@@ -116,102 +131,84 @@ export default async function ExperimentPage({ params }: PageProps) {
 				tags={tags}
 			/>
 
-			<header className="mb-8">
-				<div className="flex flex-col md:flex-row gap-6 md:gap-8 items-start">
-					{doc.thumbnail && (
-						<div className="w-full md:w-56 md:min-w-56 aspect-video overflow-hidden rounded-xl bg-gray-100 shrink-0 relative">
-							<OptimizedImage
-								src={String(doc.thumbnail)}
-								alt={doc.title}
-								fill
-								sizes={THUMB_IMAGE_SIZES}
-								priority
-								className="object-cover"
-							/>
-						</div>
-					)}
-					<div className="flex-1 min-w-0">
-						<div className="mb-3 flex flex-wrap items-center gap-2">
-							{doc.category && (
-								<span className="px-2.5 py-1 bg-rose-50 text-rose-700 rounded-md text-[10px] font-black uppercase tracking-wide">
-									{String(doc.category)}
-								</span>
+			<PageHeader
+				kicker={doc.category ? String(doc.category) : undefined}
+				title={doc.title}
+				lead={doc.description}
+				meta={
+					publishedText ? (
+						<>
+							<time dateTime={contentDateTime(publishedDate)}>
+								{publishedText}
+							</time>
+							{revisedText && (
+								<>
+									（
+									<time dateTime={contentDateTime(modifiedDate)}>
+										{revisedText}
+									</time>
+									更新）
+								</>
 							)}
-							{doc.date && (
-								<time
-									dateTime={contentDateTime(publishedDate)}
-									className="text-xs text-gray-500 font-medium"
-								>
-									{String(doc.date)}
-								</time>
-							)}
-							{doc.updated && doc.updated !== doc.date && (
-								<time
-									dateTime={contentDateTime(modifiedDate)}
-									className="text-xs text-gray-500 font-medium"
-								>
-									更新: {String(doc.updated)}
-								</time>
-							)}
-						</div>
-						<h1 className="text-2xl md:text-3xl font-black tracking-tight text-gray-950 mb-3 leading-tight">
-							{doc.title}
-						</h1>
-						{doc.description && (
-							<p className="text-base text-gray-500 leading-relaxed mb-4">
-								{doc.description}
-							</p>
-						)}
-						{tags && tags.length > 0 && (
-							<div className="flex flex-wrap gap-1.5">
-								{tags.map((tag) => (
+						</>
+					) : undefined
+				}
+				actions={
+					tags && tags.length > 0 ? (
+						<ul aria-label="タグ" className="flex flex-wrap gap-x-2">
+							{tags.map((tag) => (
+								<li key={tag}>
+									{/* 押せる範囲は高さ 44px（PCは 36px）、見た目はチップ。輪はチップに出す（技術記事の詳細と同じ形） */}
 									<Link
-										key={tag}
 										href={`/tags/${encodeURIComponent(tag)}`}
-										className="px-2.5 py-0.5 bg-gray-100 text-gray-500 rounded-md text-xs font-medium hover:bg-rose-50 hover:text-[#e11d48] transition-colors"
+										className="group inline-flex min-h-11 items-center rounded-full focus-visible:outline-none md:min-h-9"
 									>
-										#{tag}
+										<span className="chip transition-colors group-hover:bg-gray-200 group-hover:text-gray-950 group-focus-visible:outline-2 group-focus-visible:outline-offset-2 group-focus-visible:outline-primary-600">
+											{tag}
+										</span>
 									</Link>
-								))}
-							</div>
-						)}
-					</div>
+								</li>
+							))}
+						</ul>
+					) : undefined
+				}
+				className="mb-8"
+			/>
+
+			{doc.thumbnail && (
+				<div className="relative mb-10 aspect-video overflow-hidden rounded-2xl bg-gray-100">
+					<OptimizedImage
+						src={String(doc.thumbnail)}
+						alt={doc.title}
+						fill
+						sizes={HEADER_IMAGE_SIZES}
+						priority
+						className="object-cover"
+					/>
 				</div>
-			</header>
+			)}
 
 			{metaItems.length > 0 && (
-				<div className="mb-10 rounded-xl border border-gray-100 bg-gray-50/50 overflow-hidden">
-					<div
-						className="grid divide-x divide-gray-100"
-						style={{
-							gridTemplateColumns: `repeat(${metaItems.length}, minmax(0, 1fr))`,
-						}}
-					>
-						{metaItems.map((item) => (
-							<div key={item.label} className="px-5 py-3.5">
-								<p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1">
-									{item.label}
-								</p>
-								{item.value ? (
-									<p className="text-sm font-bold text-gray-950">
-										{item.value}
-									</p>
-								) : (
-									<div className="flex flex-wrap gap-1.5">
-										{item.badges?.map((b) => (
-											<span
-												key={b}
-												className="rounded-md bg-white px-2 py-0.5 text-xs font-semibold text-gray-700 border border-gray-200"
-											>
-												{b}
-											</span>
-										))}
-									</div>
-								)}
-							</div>
-						))}
-					</div>
-				</div>
+				<dl className="mb-10 grid grid-cols-2 gap-x-6 gap-y-4 rounded-2xl bg-gray-50 px-5 py-4 md:grid-cols-4">
+					{metaItems.map((item) => (
+						<div key={item.label} className="min-w-0">
+							<dt className="text-xs font-bold text-gray-500">{item.label}</dt>
+							{item.value ? (
+								<dd className="mt-1 text-sm font-bold text-gray-950">
+									{item.value}
+								</dd>
+							) : (
+								<dd className="mt-1 flex flex-wrap gap-1.5">
+									{item.badges?.map((b) => (
+										<span key={b} className="chip bg-white text-gray-700">
+											{b}
+										</span>
+									))}
+								</dd>
+							)}
+						</div>
+					))}
+				</dl>
 			)}
 
 			<SocialShare url={shareUrl} title={doc.title} className="mb-10" />
@@ -227,12 +224,12 @@ export default async function ExperimentPage({ params }: PageProps) {
 				<MDX components={mdxComponents} />
 			</article>
 
-			<footer className="mt-12 pt-8 border-t border-gray-100">
+			<footer className="mt-12 border-t border-gray-200 pt-6">
 				<Link
 					href="/experiments"
-					className="text-sm font-bold text-gray-600 hover:text-[#e11d48] transition-colors"
+					className="text-link inline-flex min-h-11 items-center whitespace-nowrap text-sm font-bold"
 				>
-					← デモ一覧に戻る
+					WebXR対応レポートを見る
 				</Link>
 			</footer>
 		</div>
