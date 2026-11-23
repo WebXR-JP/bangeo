@@ -1,7 +1,5 @@
 @import "tailwindcss";
 
-@source "../../node_modules/fumadocs-ui/dist/**/*.js";
-
 @theme {
 	--font-sans:
 		var(--font-noto-sans-jp), system-ui, -apple-system, BlinkMacSystemFont,
@@ -25,6 +23,15 @@
 	--color-data-ask: #b45309;
 	--color-data-ask-soft: #fdf1e3;
 	--radius-2xl: 1rem;
+	/* 影は2段だけ。shadow-float はヘッダー・ドロップダウン・モーダル・トースト、
+	   shadow-lift は押せるカードの hover。置いてあるだけのカードには付けない */
+	--shadow-float:
+		0 1px 2px rgb(9 9 11 / 0.06), 0 12px 32px -12px rgb(9 9 11 / 0.18);
+	--shadow-lift:
+		0 1px 2px rgb(9 9 11 / 0.05), 0 8px 24px -12px rgb(9 9 11 / 0.16);
+	/* transition-colors などの既定。色の変化は 150ms、減速して止まる --ease-settle と同じカーブ */
+	--default-transition-duration: 150ms;
+	--default-transition-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
 	/* レポートの判定中→結果の動き（components/report/report-card.tsx）。
 	   減速して止まる cubic-bezier(0.2, 0.7, 0.2, 1) にそろえ、400ms を超えない。
 	   終わりの形は要素の通常の見た目なので、keyframes には始まりだけを書く */
@@ -67,6 +74,47 @@
 	* {
 		border-color: hsl(var(--border));
 	}
+
+	/* フォーカスの輪。base に置くので focus:outline-hidden などのクラスで差し替えられる。
+	   outline を消す要素には、同じ要素に見える代わり（ring など）を必ず付ける */
+	:focus-visible {
+		outline: 2px solid var(--color-primary-600);
+		outline-offset: 2px;
+	}
+
+	html {
+		/* 固定ヘッダーぶんの余白は、アンカーになる要素側の scroll-mt-* で取る（webxr-explainer の目次、
+		   レポートの各項目など）。ここで scroll-padding-top を足すと二重になるので書かない */
+		-webkit-text-size-adjust: 100%;
+		text-size-adjust: 100%;
+	}
+
+	/* 禁則を厳しめにする（小書きの仮名・長音・々などを行頭に置かない） */
+	body {
+		line-break: strict;
+	}
+
+	/* 見出しは行の長さをそろえ、文節で折り、詰め組みにする。
+	   palt で詰まるので、和文の見出しに tracking-tight などを重ねない */
+	h1,
+	h2,
+	h3,
+	h4 {
+		text-wrap: balance;
+		word-break: auto-phrase;
+		overflow-wrap: anywhere;
+		font-feature-settings: "palt";
+	}
+
+	/* 段落の最後の行に1〜2文字だけ残らないようにする */
+	p,
+	li,
+	dd,
+	dt,
+	figcaption,
+	blockquote {
+		text-wrap: pretty;
+	}
 }
 
 html {
@@ -81,37 +129,26 @@ body {
 }
 
 ::selection {
-	background: #e11d48;
+	background: var(--color-primary-600);
 	color: white;
 }
 
-*:focus-visible {
-	outline: 3px solid #e11d48;
-	outline-offset: 2px;
-}
-
-@utility glass {
-	background: rgba(255, 255, 255, 0.75);
-	backdrop-filter: blur(20px);
-	-webkit-backdrop-filter: blur(20px);
-}
-
-@utility mesh-bg {
-	position: fixed;
-	inset: 0;
+/* ページ上端の淡い rose のにじみ（全ページ共通。layout.tsx の body の先頭に1つだけ置く）。
+   画面に固定せず、スクロールで本文と一緒に流れる。ページ側でグラデーションを足さない。
+   ヘッダーの裏だけをうっすら温め、見出しの位置ではほぼ白、本文の位置では白になるよう、
+   途中の 38% で一度薄くしてから消す */
+@utility page-wash {
+	position: absolute;
+	inset: 0 0 auto 0;
 	z-index: -1;
-	background:
-		radial-gradient(
-			ellipse 80% 60% at 10% 20%,
-			rgba(225, 29, 72, 0.04),
-			transparent
-		),
-		radial-gradient(
-			ellipse 60% 40% at 90% 80%,
-			rgba(59, 130, 246, 0.03),
-			transparent
-		);
+	height: 24rem;
 	pointer-events: none;
+	background: radial-gradient(
+		ellipse 80% 100% at 12% 0%,
+		color-mix(in srgb, var(--color-primary-600) 8%, transparent),
+		color-mix(in srgb, var(--color-primary-600) 2%, transparent) 38%,
+		transparent 72%
+	);
 }
 
 @utility dot-pattern {
@@ -130,53 +167,175 @@ body {
 	letter-spacing: -0.04em;
 }
 
-@keyframes float-orb {
-	0% {
-		transform: translateY(0) translateX(0);
-	}
-	50% {
-		transform: translateY(-30px) translateX(15px);
-	}
-	100% {
-		transform: translateY(10px) translateX(-10px);
-	}
+/* ========================================
+   部品。ページごとに長いクラス列を書く代わりに使う。
+   @utility なので、px-8 や rounded-full など1プロパティのクラスを足せば上書きできる。
+   hover は @media (hover: hover) に入れ、タッチ端末で押したあとに hover の見た目が残らないようにする
+   ======================================== */
+
+/* 白い面 + 1px の線 + 角丸16px。置いてあるだけのカードに影は付けない */
+@utility card {
+	border-width: 1px;
+	border-style: solid;
+	border-color: var(--color-gray-200);
+	border-radius: var(--radius-2xl);
+	background-color: var(--color-white);
 }
 
-@utility orb {
-	position: absolute;
-	border-radius: 50%;
-	filter: blur(80px);
-	animation: float-orb 20s ease-in-out infinite alternate;
-	pointer-events: none;
-}
-
-@keyframes reveal {
-	from {
-		opacity: 0;
-		transform: translateY(20px);
+/* 押せるカード。card と併用する。hover で線が濃くなり、影が付き、2px 上がる。押すと戻る */
+@utility card-link {
+	transition-property: border-color, box-shadow, transform;
+	transition-duration: 200ms;
+	transition-timing-function: var(--ease-settle);
+	@media (hover: hover) {
+		&:hover {
+			border-color: var(--color-gray-300);
+			box-shadow: var(--shadow-lift);
+			transform: translateY(-2px);
+		}
 	}
-	to {
-		opacity: 1;
+	&:active {
 		transform: translateY(0);
+		box-shadow: none;
 	}
 }
 
-@utility reveal {
-	animation: reveal 0.6s ease-out both;
+/* ボタンの土台（高さ44px、左右20px、角丸12px、15px/700、1行）。色は btn-primary などで決める */
+@utility btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	min-height: 2.75rem;
+	padding: 0.5rem 1.25rem;
+	border-width: 1px;
+	border-style: solid;
+	border-color: transparent;
+	border-radius: 0.75rem;
+	font-size: 0.9375rem;
+	font-weight: 700;
+	line-height: 1.2;
+	white-space: nowrap;
+	font-feature-settings: "palt";
+	cursor: pointer;
+	transition-property:
+		background-color, border-color, color, box-shadow, transform;
+	transition-duration: 150ms;
+	transition-timing-function: var(--ease-settle);
+	&:active {
+		transform: scale(0.98);
+	}
+	&:disabled,
+	&[aria-disabled="true"] {
+		opacity: 0.45;
+		pointer-events: none;
+	}
 }
 
-@keyframes float {
-	0%,
-	100% {
-		transform: translateY(0);
-	}
-	50% {
-		transform: translateY(-10px);
+/* rose の塗り。主要な行動に使い、1画面に1つまで */
+@utility btn-primary {
+	background-color: var(--color-primary-600);
+	color: var(--color-white);
+	@media (hover: hover) {
+		&:hover {
+			background-color: var(--color-primary-700);
+		}
 	}
 }
 
-@utility animate-float {
-	animation: float 6s ease-in-out infinite;
+/* 黒の塗り。rose の次に強い行動 */
+@utility btn-dark {
+	background-color: var(--color-gray-950);
+	color: var(--color-white);
+	@media (hover: hover) {
+		&:hover {
+			background-color: var(--color-gray-800);
+		}
+	}
+}
+
+/* 白 + 線。hover で線が黒になる */
+@utility btn-secondary {
+	border-color: var(--color-gray-300);
+	background-color: var(--color-white);
+	color: var(--color-gray-950);
+	@media (hover: hover) {
+		&:hover {
+			border-color: var(--color-gray-950);
+		}
+	}
+}
+
+/* 文字だけ。hover で淡い灰の面が出る */
+@utility btn-ghost {
+	background-color: transparent;
+	color: var(--color-gray-700);
+	@media (hover: hover) {
+		&:hover {
+			background-color: var(--color-gray-100);
+			color: var(--color-gray-950);
+		}
+	}
+}
+
+/* 高さ48px */
+@utility btn-lg {
+	min-height: 3rem;
+	padding-inline: 1.5rem;
+	font-size: 1rem;
+}
+
+/* 高さ36px */
+@utility btn-sm {
+	min-height: 2.25rem;
+	padding: 0.25rem 0.875rem;
+	border-radius: 0.625rem;
+	font-size: 0.8125rem;
+}
+
+/* 12px/700 の丸いラベル（灰の面）。12px が文字の下限 */
+@utility chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	min-height: 1.5rem;
+	padding: 0.125rem 0.625rem;
+	border-radius: 9999px;
+	background-color: var(--color-gray-100);
+	color: var(--color-gray-700);
+	font-size: 0.75rem;
+	font-weight: 700;
+	line-height: 1.4;
+	white-space: nowrap;
+}
+
+/* rose の淡い面のラベル。chip と併用する */
+@utility chip-brand {
+	background-color: var(--color-primary-50);
+	color: var(--color-primary-800);
+}
+
+/* 文中のリンク。rose + 下線（文字色の35%）。hover で下線が文字色になる */
+@utility text-link {
+	color: var(--color-primary-600);
+	text-decoration-line: underline;
+	text-decoration-thickness: 1px;
+	text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+	text-underline-offset: 0.25em;
+	transition-property: color, text-decoration-color;
+	transition-duration: 150ms;
+	transition-timing-function: var(--ease-settle);
+	@media (hover: hover) {
+		&:hover {
+			color: var(--color-primary-700);
+			text-decoration-color: currentColor;
+		}
+	}
+}
+
+/* 短い文（リード文、カードの説明）を文節で改行する。記事本文のような長文には付けない */
+@utility break-phrase {
+	word-break: auto-phrase;
 }
 
 /* レポートの結果画像が、判定中の枠に重なってせり出し、同じ位置に収まる */
@@ -218,79 +377,100 @@ body {
 	}
 }
 
-.nav-link {
-	position: relative;
-}
-
-.nav-link::after {
-	content: "";
-	position: absolute;
-	bottom: -2px;
-	left: 0;
-	width: 0;
-	height: 2px;
-	background: #e11d48;
-	transition: width 0.2s ease;
-}
-
-.nav-link:hover::after {
-	width: 100%;
+/* 動きを減らす設定では、アニメーションと変化の動きを全体で止め、最後の見た目だけを出す */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		/* biome-ignore-start lint/complexity/noImportantStyles: クラスや style 属性で付けた動きもすべて止めるため */
+		animation: none !important;
+		transition: none !important;
+		scroll-behavior: auto !important;
+		/* biome-ignore-end lint/complexity/noImportantStyles: ここまで */
+	}
 }
 
 /* Tech article content styling - matches original TechArticleDetailPage */
 /* Self-sufficient: does NOT depend on Tailwind Typography (prose) */
+/* 記事本文（技術記事・ポッドキャスト・デモの各ページ）。16px・行間1.9・字間0.02em。
+   本文カラムはページ側で 40rem（1行 約39字）にする */
 .tech-article-content {
-	font-size: 0.9375rem;
-	line-height: 2;
+	font-size: 1rem;
+	line-height: 1.9;
 	color: #374151;
 	letter-spacing: 0.02em;
 	word-break: break-word;
 	overflow-wrap: anywhere;
 }
+.tech-article-content > :first-child {
+	margin-top: 0;
+}
+/* 見出しは上を広く、下を狭くして、続く本文に寄せる。
+   字間は土台の詰め組み（palt）に任せ、本文の 0.02em を引き継がない。
+   文節改行は土台の word-break: auto-phrase をそのまま効かせる */
+.tech-article-content h2,
+.tech-article-content h3,
+.tech-article-content h4 {
+	color: #111827;
+	letter-spacing: 0;
+	scroll-margin-top: 6rem;
+}
+@media (min-width: 768px) {
+	.tech-article-content h2,
+	.tech-article-content h3,
+	.tech-article-content h4 {
+		scroll-margin-top: 7rem;
+	}
+}
 .tech-article-content h2 {
 	font-size: 1.5rem;
 	font-weight: 900;
-	margin-top: 3.5rem;
-	margin-bottom: 1rem;
-	padding-bottom: 0.6rem;
-	color: #111827;
-	letter-spacing: -0.02em;
-	border-bottom: 1px solid #f3f4f6;
-	word-break: break-word;
+	line-height: 1.4;
+	margin-top: 4rem;
+	margin-bottom: 0.75rem;
+	padding-bottom: 0.5rem;
+	border-bottom: 1px solid #e5e7eb;
 }
 .tech-article-content h3 {
 	font-size: 1.25rem;
-	font-weight: 800;
-	margin-top: 2.5rem;
-	margin-bottom: 0.75rem;
-	color: #111827;
-	letter-spacing: -0.01em;
-	word-break: break-word;
+	font-weight: 700;
+	line-height: 1.5;
+	margin-top: 3rem;
+	margin-bottom: 0.5rem;
 }
 .tech-article-content h4 {
 	font-size: 1.0625rem;
 	font-weight: 700;
+	line-height: 1.6;
 	margin-top: 2rem;
 	margin-bottom: 0.5rem;
 	color: #1f2937;
-	word-break: break-word;
+}
+/* 見出しが続くときは、2つ目の上を詰める */
+.tech-article-content h2 + h3,
+.tech-article-content h3 + h4 {
+	margin-top: 1.5rem;
 }
 .tech-article-content p {
-	line-height: 2;
 	margin-bottom: 1.25rem;
-	color: #374151;
-	word-break: break-word;
-	overflow-wrap: anywhere;
 }
-/* Links */
+/* Links: 本文中はアクセント色 + 下線（.text-link と同じ見た目） */
 .tech-article-content a {
-	color: #e11d48;
-	text-decoration: none;
+	color: var(--color-primary-600);
 	font-weight: 500;
-	transition: color 0.2s ease;
+	text-decoration-line: underline;
+	text-decoration-thickness: 1px;
+	text-decoration-color: color-mix(in srgb, currentColor 35%, transparent);
+	text-underline-offset: 0.25em;
+	transition-property: color, text-decoration-color;
+	transition-duration: 150ms;
+	transition-timing-function: var(--ease-settle);
 }
-.tech-article-content a:hover {
-	text-decoration: underline;
+@media (hover: hover) {
+	.tech-article-content a:hover {
+		color: var(--color-primary-700);
+		text-decoration-color: currentColor;
+	}
 }
 /* Strong / emphasis */
 .tech-article-content strong {
@@ -300,12 +480,14 @@ body {
 .tech-article-content em {
 	font-style: italic;
 }
-/* Images */
+/* Images: 線で白い画面のスクリーンショットの縁を見せ、上下に 32px */
 .tech-article-content img {
+	display: block;
 	max-width: 100%;
 	height: auto;
+	margin: 2rem auto;
+	border: 1px solid #e5e7eb;
 	border-radius: 0.75rem;
-	margin: 2rem 0;
 }
 /* Horizontal rules */
 .tech-article-content hr {
@@ -317,10 +499,10 @@ body {
    Code blocks - Shiki powered
    ======================================== */
 
-/* Inline code */
+/* Inline code。周りの文字の 0.85 倍だが、表（13px / 12px）やデモの説明（13px）の中でも 12px を割らない */
 .tech-article-content code {
 	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-	font-size: 0.85em;
+	font-size: max(0.85em, 0.75rem);
 	background: #fff1f2;
 	color: #9f1239;
 	padding: 0.15rem 0.4rem;
@@ -337,7 +519,9 @@ body {
    ======================================== */
 
 /* Figure wrapper for code blocks */
+/* コピーのボタンは図の右上（見出しの帯があれば帯の中）に置くので、図を基準にする */
 .code-block-figure {
+	position: relative;
 	margin: 1.5rem 0;
 	border-radius: 0.875rem;
 	overflow: hidden;
@@ -347,34 +531,36 @@ body {
 		0 1px 3px rgba(87, 82, 121, 0.06);
 }
 
-/* Header with language or title */
+/* Header with language or title。右側はコピーのボタンの場所として空ける */
 .code-block-header {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 0.5rem 1.25rem;
+	min-height: 2.5rem;
+	padding: 0.25rem 8.5rem 0.25rem 1.25rem;
 	background: #f2e9e1;
 	border-bottom: 1px solid rgba(152, 147, 165, 0.25);
 }
+/* 帯の文字は Rose Pine Dawn の Text 色（帯の上で 6:1）。12px が文字の下限 */
 .code-block-title {
 	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 	font-size: 0.75rem;
-	font-weight: 600;
-	color: #797593;
+	font-weight: 700;
+	color: #575279;
 	letter-spacing: 0.02em;
 }
 .code-block-lang {
 	font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-	font-size: 0.65rem;
+	font-size: 0.75rem;
 	font-weight: 700;
-	color: #9893a5;
+	color: #575279;
 	text-transform: uppercase;
 	letter-spacing: 0.08em;
 }
 
-/* Body: pre + copy button container */
+/* Body: pre + copy button container（ボタンは .code-block-figure を基準に置く） */
 .code-block-body {
-	position: relative;
+	position: static;
 }
 
 /* The pre element (Shiki output) */
@@ -388,6 +574,11 @@ body {
 	border: none;
 	border-radius: 0;
 	tab-size: 2;
+}
+/* 見出しの帯がない図（言語を書いていないコード）は、コピーのボタン（上から 4〜36px）の下に
+   最初の行が隠れないよう、コードの上を空ける */
+.code-block-figure:not(:has(.code-block-header)) pre {
+	padding-top: 3rem;
 }
 .tech-article-content figure + *,
 .tech-article-content .code-block-figure + * {
@@ -414,38 +605,52 @@ body {
 	padding: 0;
 }
 
-/* Copy button — Rose Pine Muted tones */
+/* Copy button — Rose Pine Muted tones。
+   図の右上に常に出す（タッチ端末には hover がないため）。見出しの帯があれば帯の中に収まり、
+   帯のない図ではコードの右上に重なるので、地を不透明にする。押すと「コピーしました」に変わる */
 .code-copy-btn {
 	position: absolute;
-	top: 0.75rem;
-	right: 0.75rem;
-	display: flex;
+	top: 0.25rem;
+	right: 0.5rem;
+	z-index: 10;
+	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	width: 2rem;
+	gap: 0.375rem;
 	height: 2rem;
-	background: rgba(152, 147, 165, 0.12);
-	border: 1px solid rgba(152, 147, 165, 0.25);
-	border-radius: 0.375rem;
-	color: #797593;
-	cursor: pointer;
-	opacity: 0;
-	transition: all 0.15s ease;
-	backdrop-filter: blur(8px);
-	-webkit-backdrop-filter: blur(8px);
-	z-index: 10;
-}
-.code-block-body:hover .code-copy-btn,
-.code-copy-btn:focus-visible {
-	opacity: 1;
-}
-.code-copy-btn:hover {
-	background: rgba(144, 122, 169, 0.15);
+	padding: 0 0.625rem;
+	background: #f2e9e1;
+	border: 1px solid rgba(152, 147, 165, 0.35);
+	border-radius: 0.5rem;
 	color: #575279;
-	border-color: rgba(144, 122, 169, 0.3);
+	font-family: inherit;
+	font-size: 0.75rem;
+	font-weight: 700;
+	line-height: 1;
+	letter-spacing: 0;
+	white-space: nowrap;
+	cursor: pointer;
+	transition-property: background-color, border-color, color, transform;
+	transition-duration: 150ms;
+	transition-timing-function: var(--ease-settle);
+}
+/* 見た目は 32px のまま、押せる範囲を上下に 6px 広げて 44px にする */
+.code-copy-btn::after {
+	content: "";
+	position: absolute;
+	inset: -6px -4px;
+}
+@media (hover: hover) {
+	.code-copy-btn:hover {
+		background: #fffaf3;
+		border-color: rgba(144, 122, 169, 0.45);
+	}
 }
 .code-copy-btn:active {
-	transform: scale(0.92);
+	transform: scale(0.96);
+}
+.code-copy-btn[data-state="copied"] {
+	color: #286983;
 }
 
 /* ========================================
@@ -489,7 +694,9 @@ body {
 .code-block-figure pre.has-focused .line:not(.focused) {
 	opacity: 0.4;
 	filter: blur(0.5px);
-	transition: all 0.25s ease;
+	transition-property: opacity, filter;
+	transition-duration: 200ms;
+	transition-timing-function: var(--ease-settle);
 }
 .tech-article-content pre.has-focused:hover .line:not(.focused),
 .code-block-figure pre.has-focused:hover .line:not(.focused) {
@@ -527,18 +734,17 @@ body {
 	list-style-type: decimal;
 }
 .tech-article-content li {
-	margin-bottom: 0.6rem;
-	color: #374151;
-	line-height: 1.9;
-	word-break: break-word;
-	overflow-wrap: anywhere;
+	margin-bottom: 0.5rem;
+}
+.tech-article-content li::marker {
+	color: #6b7280;
 }
 .tech-article-content li > ul,
 .tech-article-content li > ol {
-	margin-top: 0.35rem;
-	margin-bottom: 0.35rem;
+	margin-top: 0.5rem;
+	margin-bottom: 0.5rem;
 }
-/* Tables */
+/* Tables: 枠の中だけで横に送れる。列の幅は中身の長さに合わせる（短い名前の列が半分を取らない） */
 .tech-article-content .article-table-scroll {
 	width: 100%;
 	max-width: 100%;
@@ -546,39 +752,45 @@ body {
 	overflow-x: auto;
 	-webkit-overflow-scrolling: touch;
 	border: 1px solid #e5e7eb;
-	border-radius: 0.875rem;
+	border-radius: 0.75rem;
 	background: #fff;
-	box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 .tech-article-content table {
 	width: 100%;
 	min-width: 0;
-	table-layout: fixed;
+	table-layout: auto;
 	border-collapse: separate;
 	border-spacing: 0;
 	font-size: 0.8125rem;
 	line-height: 1.65;
 }
+/* 英単語は途中で折らない（break-word は列の最小幅を単語の幅に保つ）。
+   入りきらない長い URL などは表が枠より広くなり、枠の中で横に送る */
 .tech-article-content th,
 .tech-article-content td {
-	padding: 0.65rem 0.8rem;
+	padding: 0.625rem 0.75rem;
 	text-align: left;
 	vertical-align: top;
-	border-bottom: 1px solid #edf2f7;
-	overflow-wrap: anywhere;
+	border-bottom: 1px solid #f3f4f6;
+	overflow-wrap: break-word;
 	word-break: normal;
 }
+/* 見出し行はセルと同じ大きさ（13px、スマートフォンでは 12px）の太字。大文字化と広い字間は掛けない */
 .tech-article-content th {
-	background: #f8fafc;
-	font-weight: 800;
+	background: #f9fafb;
+	font-weight: 700;
 	color: #111827;
-	font-size: 0.6875rem;
-	text-transform: uppercase;
-	letter-spacing: 0.05em;
+	letter-spacing: 0;
+	border-bottom-color: #e5e7eb;
 }
 .tech-article-content td {
 	color: #4b5563;
 	background: #fff;
+}
+/* セルの中の長いコード名（GLTFGaussianSplatLoaderExtension など）は途中で折り、列を広げすぎない */
+.tech-article-content th code,
+.tech-article-content td code {
+	overflow-wrap: anywhere;
 }
 .tech-article-content tr:last-child td {
 	border-bottom: none;
@@ -586,78 +798,73 @@ body {
 .tech-article-content tbody tr:hover td {
 	background: #fff7f8;
 }
+/* 1列目は行の名前。リンクと見分けがつくよう rose にせず、濃い文字の太字にする */
 .tech-article-content td:first-child {
 	font-weight: 700;
-	color: #e11d48;
+	color: #111827;
 }
 .tech-article-content td:first-child a {
-	font-weight: 800;
+	font-weight: 700;
 }
 @media (max-width: 640px) {
+	/* 枠の左右は本文・コードの端にそろえる */
 	.tech-article-content .article-table-scroll {
-		margin: 1.25rem -0.25rem;
-		border-radius: 0.75rem;
+		margin: 1.25rem 0;
 	}
 	.tech-article-content table {
 		font-size: 0.75rem;
 	}
+	/* 3列以上の表は、列を読める幅に保ち、枠の中で横に送る（右端で切れた列が続きの合図になる） */
+	.tech-article-content table:has(tr > :nth-child(3)) {
+		min-width: 34rem;
+	}
 	.tech-article-content th,
 	.tech-article-content td {
-		padding: 0.5rem 0.6rem;
+		padding: 0.5rem 0.625rem;
 	}
 }
-/* Blockquotes */
+/* Blockquotes: 左に 3px の線 + 淡い地の、ふつうの引用 */
 .tech-article-content blockquote {
-	position: relative;
-	margin: 2.5rem 0;
-	padding: 1.25rem 1.5rem 1.25rem 3.5rem;
-	background: #f8fafc;
-	border: 1px solid #e2e8f0;
-	border-radius: 0.75rem;
-	color: #475569;
+	margin: 2rem 0;
+	padding: 1rem 1.25rem;
+	background: #f9fafb;
+	border-left: 3px solid #e5e7eb;
+	border-radius: 0 0.75rem 0.75rem 0;
+	color: #4b5563;
+	font-size: 0.9375rem;
+	line-height: 1.8;
 	font-style: normal;
-}
-.tech-article-content blockquote::before {
-	content: "!";
-	position: absolute;
-	left: 1.25rem;
-	top: 50%;
-	transform: translateY(-50%);
-	width: 1.5rem;
-	height: 1.5rem;
-	background: #64748b;
-	color: #fff;
-	border-radius: 50%;
-	font-size: 0.875rem;
-	font-weight: 700;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	line-height: 1;
 }
 .tech-article-content blockquote p {
 	margin: 0;
-	color: #475569;
-	font-size: 0.9rem;
-	line-height: 1.6;
+}
+.tech-article-content blockquote > :not(:first-child) {
+	margin-top: 0.75rem;
+}
+.tech-article-content blockquote ul,
+.tech-article-content blockquote ol {
+	margin-bottom: 0;
+}
+.tech-article-content blockquote li:last-child {
+	margin-bottom: 0;
 }
 .tech-article-content blockquote strong {
-	color: #1e293b;
+	color: #111827;
 }
 
 .tech-article-content .demo-embed {
 	margin: 2rem 0 2.25rem;
 }
 
+/* 置いてあるだけの枠なので影は付けず、線と淡い灰の地で区切る */
 .tech-article-content .demo-embed-frame {
 	position: relative;
 	width: 100%;
 	height: var(--demo-embed-height, 480px);
 	overflow: hidden;
 	border-radius: 1rem;
-	border: 1px solid #e2e8f0;
-	background: #fff7f9;
-	box-shadow: 0 18px 48px rgba(15, 23, 42, 0.08);
+	border: 1px solid #e5e7eb;
+	background: #f9fafb;
 }
 
 .tech-article-content .demo-embed-iframe {
@@ -676,22 +883,25 @@ body {
 .tech-article-content .demo-embed-caption p {
 	margin: 0;
 	font-size: 0.8125rem;
-	line-height: 1.65;
-	color: #64748b;
+	line-height: 1.6;
+	color: #6b7280;
 }
 
 .tech-article-content .demo-embed-caption p + p {
-	margin-top: 0.35rem;
+	margin-top: 0.5rem;
 }
 
+/* 全画面で開くリンク。本文のリンクと同じ下線つき。押しやすい高さを取る */
 .tech-article-content .demo-embed-caption a {
-	color: #e11d48;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	min-height: 2.75rem;
 	font-weight: 700;
-	text-decoration: none;
 }
 
-.tech-article-content .demo-embed-caption a:hover {
-	text-decoration: underline;
+.tech-article-content .demo-embed-caption a svg {
+	flex-shrink: 0;
 }
 
 @media (max-width: 720px) {
