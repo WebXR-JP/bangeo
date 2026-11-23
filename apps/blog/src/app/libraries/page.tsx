@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { BreadcrumbStructuredData } from "@/components/breadcrumb-structured-data";
+import { PageHeader } from "@/components/page-header";
 import { LIBRARIES } from "@/data/libraries";
 
 export const metadata: Metadata = {
@@ -9,65 +10,114 @@ export const metadata: Metadata = {
 	alternates: { canonical: "/libraries" },
 };
 
+/* BANGEO design · 骨格: 罫線で区切った行（名前と概要 → 行き先を書いた2本のリンク）·
+   自己採点は報告に記載 */
+
+/** 外向きの矢印（フッターと同じ形）。読み上げない */
+function ExternalIcon() {
+	return (
+		<svg
+			className="ml-0.5 inline-block size-3 shrink-0 align-[-0.05em]"
+			viewBox="0 0 12 12"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth={1.5}
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			aria-hidden="true"
+		>
+			<path d="M3.5 8.5l5-5M4.5 3.5h4v4" />
+		</svg>
+	);
+}
+
+/** ドキュメントはドメイン名、GitHub は「オーナー/リポジトリ」で行き先を見せる */
+function hostOf(url: string) {
+	try {
+		return new URL(url).hostname.replace(/^www\./, "");
+	} catch {
+		return url;
+	}
+}
+
+function repositoryOf(url: string) {
+	try {
+		const { hostname, pathname } = new URL(url);
+		const path = pathname.replace(/^\/|\/$/g, "");
+		return hostname === "github.com" && path ? path : url;
+	} catch {
+		return url;
+	}
+}
+
+const LINK =
+	"text-link inline-flex min-h-11 items-center text-sm font-bold [overflow-wrap:anywhere] md:min-h-0";
+
 export default function LibrariesPage() {
 	return (
-		<div className="max-w-6xl mx-auto px-6 md:px-8 py-16 md:py-20">
+		<div className="mx-auto max-w-6xl px-5 pt-8 md:px-8 md:pt-12">
 			<BreadcrumbStructuredData
 				items={[{ name: "ライブラリ", path: "/libraries" }]}
 			/>
-			{/* Header */}
-			<header className="mb-12">
-				<h1 className="text-3xl font-black tracking-tight text-gray-950 mb-3">
-					ライブラリ
-				</h1>
-				<p className="text-base text-gray-500 leading-relaxed max-w-3xl">
-					WebXR
-					開発で使われる主要ライブラリと、公式ドキュメントやリポジトリへの導線をまとめています。
-				</p>
-			</header>
+			<PageHeader
+				title="ライブラリ"
+				lead={`WebXRの開発で使われる${LIBRARIES.length}つのライブラリと、それぞれの公式ドキュメントとGitHubリポジトリへのリンクです。`}
+				meta="更新状況と導入方法は、リンク先で確認してください。"
+			/>
 
-			{/* Library Cards */}
-			<div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+			<ul className="divide-y divide-gray-200 border-y border-gray-200">
 				{LIBRARIES.map((library) => (
-					<div
+					<li
 						key={library.id}
-						className="bg-white rounded-[2.5rem] border border-gray-100 p-8 md:p-10 space-y-6"
+						className="grid gap-x-12 gap-y-4 py-7 md:grid-cols-[minmax(0,34rem)_18rem]"
 					>
-						<div className="space-y-3">
-							<h2 className="text-3xl font-black text-gray-950">
+						<div className="min-w-0">
+							<h2 className="text-xl font-bold leading-snug text-gray-950">
 								{library.name}
 							</h2>
-							<p className="text-lg text-gray-500 font-medium leading-relaxed">
+							<p className="mt-2 max-w-[40em] text-sm leading-[1.7] text-gray-700">
 								{library.description}
 							</p>
 						</div>
-
-						<div className="flex flex-wrap gap-3">
-							<a
-								href={library.repositoryUrl}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="inline-block px-6 py-3 bg-white border border-gray-200 text-gray-950 rounded-full font-black text-sm hover:bg-gray-50 transition-colors"
-							>
-								GitHub
-							</a>
-							<a
-								href={library.documentationUrl}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="inline-block px-6 py-3 bg-gray-950 text-white rounded-full font-black text-sm hover:bg-gray-800 transition-colors"
-							>
-								ドキュメント
-							</a>
-						</div>
-
-						<p className="text-xs text-gray-500 leading-relaxed">
-							更新状況や導入方法の詳細は公式ドキュメントと GitHub
-							リポジトリを参照してください。
-						</p>
-					</div>
+						<dl className="grid content-start gap-3">
+							<div>
+								<dt className="text-xs font-bold leading-[1.6] text-gray-500">
+									公式ドキュメント
+								</dt>
+								<dd>
+									<a
+										href={library.documentationUrl}
+										target="_blank"
+										rel="noopener noreferrer"
+										aria-label={`${library.name}の公式ドキュメント ${hostOf(library.documentationUrl)}（新しいタブで開く）`}
+										className={LINK}
+									>
+										{hostOf(library.documentationUrl)}
+										<ExternalIcon />
+									</a>
+								</dd>
+							</div>
+							<div>
+								<dt className="text-xs font-bold leading-[1.6] text-gray-500">
+									GitHub
+								</dt>
+								<dd>
+									<a
+										href={library.repositoryUrl}
+										target="_blank"
+										rel="noopener noreferrer"
+										aria-label={`${library.name}のGitHubリポジトリ ${repositoryOf(library.repositoryUrl)}（新しいタブで開く）`}
+										className={LINK}
+									>
+										{repositoryOf(library.repositoryUrl)}
+										<ExternalIcon />
+									</a>
+								</dd>
+							</div>
+						</dl>
+					</li>
 				))}
-			</div>
+			</ul>
 		</div>
 	);
 }
