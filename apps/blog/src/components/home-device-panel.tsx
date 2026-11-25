@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { MarkDot } from "@/components/report/report-mark";
 import {
-	describeReportEnvironment,
 	type ReportEnvironment,
+	resolveReportEnvironment,
 } from "@/lib/report/environment";
 import {
 	buildReportSummary,
@@ -66,7 +66,9 @@ export function HomeDevicePanel({ checkCount }: { checkCount: number }) {
 
 	useEffect(() => {
 		let cancelled = false;
-		setEnvironment(describeReportEnvironment(navigator.userAgent));
+		resolveReportEnvironment(navigator).then((result) => {
+			if (!cancelled) setEnvironment(result);
+		});
 		checkWebXRSupport((id, support) => {
 			if (cancelled || !SESSION_IDS.includes(id)) return;
 			setWebxr((previous) => ({ ...previous, [id]: support }));
