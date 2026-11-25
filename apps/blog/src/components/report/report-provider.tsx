@@ -11,8 +11,8 @@ import {
 	useState,
 } from "react";
 import {
-	describeReportEnvironment,
 	type ReportEnvironment,
+	resolveReportEnvironment,
 } from "@/lib/report/environment";
 import { buildReportSummary, type ReportSummary } from "@/lib/report/summary";
 import {
@@ -91,7 +91,9 @@ export function ReportProvider({ children }: { children: ReactNode }) {
 	useEffect(() => {
 		let cancelled = false;
 		setUserAgent(navigator.userAgent);
-		setEnvironment(describeReportEnvironment(navigator.userAgent));
+		resolveReportEnvironment(navigator).then((result) => {
+			if (!cancelled) setEnvironment(result);
+		});
 		setCheckedAt(new Date());
 		checkWebXRSupport((id, support) => {
 			if (!cancelled) {
