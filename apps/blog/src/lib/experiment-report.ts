@@ -144,7 +144,7 @@ export function reportDevice(ua: string): ReportDevice {
 		if (quest) {
 			if (/^(?:Meta\s+|Oculus\s+)?Quest\s*3S\b/i.test(quest)) return "quest-3s";
 			if (/^(?:Meta\s+|Oculus\s+)?Quest\s*Pro\b/i.test(quest)) return "quest-pro";
-			if (/^(?:Meta\s+|Oculus\s+)?Quest\s*3\b/i.test(quest)) return "quest-3";
+			if (/^(?:Meta\s+|Oculus\s+)?Quest\s*3\b/i.test(quest)) return "quest-other";
 			if (/^(?:Meta\s+|Oculus\s+)?Quest\s*2\b/i.test(quest)) return "quest-2";
 			if (/^(?:Meta\s+|Oculus\s+)?Quest$/i.test(quest)) return "quest-other";
 			return "unknown";
