@@ -94,8 +94,8 @@ export interface ExperimentReport {
 /** Parse only locally; the full UA never becomes part of the report. */
 export function reportBrowser(ua: string): ExperimentReport["browser"] {
 	const patterns: [ReportBrowser, RegExp][] = [
-		["quest-browser", /OculusBrowser\/(\d{1,4})(?:\.(\d{1,4}))?/i],
 		["pico-browser", /Pico\s?Browser\/(\d+)/i],
+		["quest-browser", /OculusBrowser\/(\d{1,4})(?:\.(\d{1,4}))?/i],
 		["wolvic", /Wolvic\/(\d+)/i],
 		["edge", /(?:Edg|EdgiOS|EdgA)\/(\d+)/i],
 		["firefox", /(?:Firefox|FxiOS)\/(\d+)/i],
@@ -103,6 +103,13 @@ export function reportBrowser(ua: string): ExperimentReport["browser"] {
 		["safari", /Version\/(\d+).*Safari/i],
 	];
 	for (const [family, pattern] of patterns) {
+		if (
+			family === "quest-browser" &&
+			(/\((?:[^)]*;\s*)?\s*PICO(?:\b|\d)/i.test(ua) ||
+				/\blike\s+Quest\b/i.test(ua))
+		) {
+			continue;
+		}
 		const match = ua.match(pattern);
 		if (match)
 			return {
@@ -119,14 +126,37 @@ export function reportBrowser(ua: string): ExperimentReport["browser"] {
 }
 /** Best-effort model detection; ambiguous UA strings remain unclassified. */
 export function reportDevice(ua: string): ReportDevice {
-	if (/Quest\s?3S\b/i.test(ua)) return "quest-3s";
-	if (/Quest\s?Pro\b/i.test(ua)) return "quest-pro";
-	if (/Quest\s?3\b/i.test(ua)) return "quest-3";
-	if (/Quest\s?2\b/i.test(ua)) return "quest-2";
-	if (/OculusBrowser|Quest\b|Oculus\b/i.test(ua)) return "quest-other";
-	if (/PICO\s?4\s?Ultra\b/i.test(ua)) return "pico-4-ultra";
-	if (/PICO\s?4\b/i.test(ua)) return "pico-4";
-	if (/PicoBrowser|Pico\s?Browser|PICO\b/i.test(ua)) return "pico-other";
+	// 機種名はUA先頭のプラットフォーム欄だけを見る。
+	// PICOの「like Quest」やOculusBrowserは、Quest本体の根拠にならない。
+	const fields = ua.match(/\(([^)]*)\)/)?.[1].split(";") ?? [];
+	const models = fields.map((field) => field.trim());
+	const pico = models.find((model) => /^PICO(?:\b|\d)/i.test(model));
+	if (pico) {
+		if (/^PICO\s*4\s*Ultra\b/i.test(pico)) return "pico-4-ultra";
+		if (/^PICO\s*4\b/i.test(pico)) return "pico-4";
+		if (/^PICO$/i.test(pico)) return "pico-other";
+		return "unknown";
+	}
+	if (!/\bPico\s?Browser\/|\blike\s+Quest\b/i.test(ua)) {
+		const quest = models.find((model) =>
+			/^(?:Meta\s+|Oculus\s+)?Quest\b/i.test(model),
+		);
+		if (quest) {
+			if (/^(?:Meta\s+|Oculus\s+)?Quest\s*3S\b/i.test(quest)) return "quest-3s";
+			if (/^(?:Meta\s+|Oculus\s+)?Quest\s*Pro\b/i.test(quest)) return "quest-pro";
+			if (/^(?:Meta\s+|Oculus\s+)?Quest\s*3\b/i.test(quest)) return "quest-3";
+			if (/^(?:Meta\s+|Oculus\s+)?Quest\s*2\b/i.test(quest)) return "quest-2";
+			if (/^(?:Meta\s+|Oculus\s+)?Quest$/i.test(quest)) return "quest-other";
+			return "unknown";
+		}
+	}
+	if (
+		/\b(?:Pico\s?Browser|OculusBrowser|Wolvic)\/|(?:^|\s)VR\b|\blike\s+Quest\b/i.test(
+			ua,
+		)
+	) {
+		return "unknown";
+	}
 	if (/iPhone|iPad|iPod|Android/i.test(ua)) return "other";
 	return "unknown";
 }
