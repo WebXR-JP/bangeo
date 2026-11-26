@@ -1,6 +1,6 @@
 ---
-title: "three.js r185を読む：WebGPUでWebXRをサポート、HTMLTextureやWebGLも更新"
-description: "three.js r185で追加されたWebGPURendererのWebXR対応を中心に、WebGPU基盤、XRManagerのfoveation、HTMLTexture、WebGLRenderer、TSL、サンプル、移行時の注意点を整理します。"
+title: "three.js r185の主な変更点：WebGPURendererのWebXR対応、HTMLTexture、WebGL改善"
+description: "three.js r185で追加されたWebGPURendererのWebXR対応を中心に、WebGPU基盤、XRManagerのfoveation、HTMLTexture、WebGLRenderer、TSL、サンプル、移行時の注意点を解説します。"
 date: "2026年6月25日"
 category: "NEWS"
 tags:
@@ -161,7 +161,7 @@ WebXR with WebGPUにおいても、将来的にはコンピュート処理、GPU
 
 three.js r185で最も重要なのは、`WebGPURenderer`にWebXRサポートが加わり、通常のWeb 3Dと没入型Webを同じWebGPU基盤で扱う道筋が見え始めたことです。あわせて`XRManager`のfoveation対応、配列テクスチャやWGSL診断、`ExternalTexture`などのWebGPU基盤、`HTMLTexture`の最新HTML-in-Canvas API追従、`WebGLRenderer`の安定性修正まで幅広く更新されています。
 
-一方で、現段階でWebGL版WebXRから全面移行する判断は時期尚早です。実利用の可否はブラウザ、XRランタイム、デバイス側の対応にも依存するため、実プロジェクトではWebGLを安定経路として残しつつ、対応環境向けの実験経路としてWebGPU + WebXRを検証する進め方が現実的です。移行時はpremultiplied alphaや削除・非推奨APIの変更点を確認したうえで、Questなどの実機で動作と性能を確かめてみてください。
+一方で、現段階でWebGL版WebXRから全面移行する判断は時期尚早です。本番で使えるかどうかはブラウザ、XRランタイム、デバイス側の対応にも依存するため、実プロジェクトではWebGLを安定経路として残しつつ、対応環境向けの実験経路としてWebGPU + WebXRを検証する進め方が現実的です。移行時はpremultiplied alphaや削除・非推奨APIの変更点を確認したうえで、Questなどの実機で動作と性能を確かめてみてください。
 
 ## 参照
 

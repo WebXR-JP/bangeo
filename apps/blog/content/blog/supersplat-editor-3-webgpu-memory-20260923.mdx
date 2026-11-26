@@ -1,6 +1,6 @@
 ---
-title: "SuperSplat 3.0を読む：WebGPU化とR3F・Three.jsとの使い分け"
-description: "440万個のGaussianを使ったメモリ比較に加え、R3F・Drei、Three.js、Sparkとの役割の違いとWebXRで選ぶときの注意点を解説します。"
+title: "SuperSplat 3.0のWebGPU対応とメモリ削減：Three.jsやR3Fとの使い分け"
+description: "WebGPU専用になったSuperSplat Editor 3.0の仕組みと440万個のGaussianを使ったメモリ比較を解説。Three.js・R3F・Drei・Sparkとの役割の違いや、WebXR案件で選ぶ際の注意点も紹介します。"
 date: "2026年9月23日"
 updated: "2026年9月23日"
 category: "TECH"
@@ -61,7 +61,7 @@ SuperSplat Editor 3.0と、R3Fやレンダリングライブラリは担当す�
 
 この比較は機能の役割を整理したもので、同じデータを使った速度測定ではありません。前節の数値もSuperSplat 2.xと3.0の比較です。PlayCanvasの発表はR3F/Drei、Three.js、Sparkとの性能比較を掲載していません。そのため、実行環境で比べるときは同じファイル、端末、ブラウザ、描画解像度をそろえ、読み込み時間、フレーム時間、JavaScriptヒープ、GPUメモリをそれぞれ測ります。
 
-## 公開されたメモリ比較の読み方
+## 公開されたメモリ比較の見方と注意点
 
 PlayCanvasの[公式発表][1]では、440万個のGaussianを含む990MBのPLYを使い、SuperSplat 2.xと3.0のピークJavaScriptヒープを比較しています。代表的な数値は次のとおりです。
 
@@ -79,7 +79,7 @@ PlayCanvasの[公式発表][1]では、440万個のGaussianを含む990MBのPLY�
 
 ## Stochastic Alphaによる操作中の応答性維持
 
-3.0では、操作中の応答性を保つために「Stochastic Alpha」も導入されました（[公式発表][1]）。多数のGaussianを毎フレーム正確に並べ替える代わりに、視点が動いている間は確率的な被覆処理を使い、奥行き順の並べ替えなしで描画します。視点が止まると、正確な並べ替えと合成に戻ります。
+3.0では、操作中の応答性を保つために「Stochastic Alpha」も導入されました（[公式発表][1]）。多数のGaussianを毎フレーム正確に並べ替える代わりに、視点が動いている間は確率的なアルファ描画を使い、奥行き順の並べ替えなしで描画します。視点が止まると、正確な並べ替えと合成に戻ります。
 
 既定の「Auto」では、GPUで通常描画したフレームが遅いと分かったときだけ、移動中の描画を切り替えます。軽いシーンでは通常の描画を保ち、重いシーンでは操作中の応答性を優先する仕組みです。
 

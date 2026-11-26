@@ -1,6 +1,6 @@
 ---
-title: "WebXRをQuestのネイティブAPKへ：webxr-to-nativeの仕組みと移植前の確認点"
-description: "WebXRゲームをブラウザなしでMeta Quest上に動かす「webxr-to-native」を紹介。V8・WebGL 2・OpenXRの構成、APK化の手順、HTML UIやWebGPUの制約、性能比較の確認点を整理します。"
+title: "WebXRアプリをMeta Quest向けAPKに変換する「webxr-to-native」の仕組みと注意点"
+description: "WebXRゲームをブラウザなしでMeta Quest上で動かせる「webxr-to-native」を紹介。V8・WebGL 2・OpenXRの構成、APKビルドの手順、HTML UIやWebGPUの制約、ブラウザ版との性能比較の注意点を解説します。"
 category: TECH
 tags: [WebXR, Meta Quest, OpenXR, WebGL, IWER]
 date: "2026年11月10日"
@@ -19,7 +19,7 @@ JavaScriptやWebGLで作ったゲームを、V8とOpenXRを組み合わせた実
 
 ## V8とOpenXRをつなぐ実行環境
 
-`webxr-to-native`が提供するのは、WebXRゲームを単体で動かすための専用実行環境です。主な役割分担は次のとおりです。
+`webxr-to-native`が提供するのは、WebXRゲームを単体で動かすための専用実行環境です。各要素の役割は次のとおりです。
 
 - JavaScript：V8で実行
 - 描画：WebGL 2の呼び出しをOpenGL ESへ接続
@@ -52,13 +52,13 @@ READMEでは「既存のWebXRゲームを変更せずに実行する」ことを
 
 また、APKを生成するツールには、V8が処理できないUnicodeプロパティエスケープを含む正規表現を書き換える処理が入っています。元のゲームを大きく作り直さずに持ち込める構成であっても、あらゆるブラウザ機能との完全な互換性が保証されるわけではありません。
 
-## 主対象はQuest、その他の環境は開発中・実験的位置づけ
+## メイン対象はQuest、その他の環境は開発中・実験的対応
 
 Quest向けには、コントローラー、ハンドトラッキング、マルチビュー、WebXR Layersの投影レイヤーなどが対応項目として記載されています。パススルーARや平面・メッシュ検出も実装されていますが、作者は検証がまだ少ない機能として区別しています。
 
 なお、READMEにある72〜120Hzという記述は、ヘッドセットのリフレッシュレートに合わせた動作の説明であり、すべてのゲームが120fpsで動作することを保証するものではありません。
 
-ほかのホスト環境の位置づけは次のとおりです。
+ほかの環境への対応状況は次のとおりです。
 
 - Androidスマートフォン：開発中。Pixel 7 Proで、画面上のタッチ操作を使う平面表示のゲームが動作すると説明
 - macOS・Windows・Linux：実験的。ウィンドウ上でヘッドセットをエミュレート

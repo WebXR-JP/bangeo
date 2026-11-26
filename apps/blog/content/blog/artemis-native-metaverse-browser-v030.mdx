@@ -1,6 +1,6 @@
 ---
-title: "ネイティブメタバースブラウザ「Artemis」v0.3.0公開──Spatial FabricとJWS署名を整理"
-description: "Artemis v0.3.0を実際に試し、通常のWebサイトがSpatial Fabricとして読み込めない理由、公式.msfの参照構造、JWS署名とHTTPS証明書の違いを整理します。"
+title: "メタバースブラウザ「Artemis」v0.3.0を試す：Spatial Fabricの仕組みとJWS署名"
+description: "Artemis v0.3.0を実際に試し、通常のWebサイトがSpatial Fabricとして読み込めない理由、公式.msfの参照構造、JWS署名とHTTPS証明書の違いを解説します。"
 date: "2026年7月19日"
 category: "NEWS"
 tags:
@@ -28,8 +28,8 @@ Artemis v0.3.0で通常のWebサイト、公式のSpatial Fabric、RP1のWebXR�
 
 > **この記事は前後編の前編です。**
 >
-> - **前編（この記事）**：Artemis、Spatial Fabric、JWS署名の仕組みを整理
-> - **後編**：[Artemisで自分のブログを開いてみた──BANGEOにSpatial Fabricを置く](/tech-articles/artemis-spatial-fabric-bangeo-hands-on)
+> - **前編（この記事）**：Artemis、Spatial Fabric、JWS署名の仕組みを解説
+> - **後編**：[Artemisで自作の3Dモデルを表示してみた（Spatial Fabricの公開とGLB配置）](/tech-articles/artemis-spatial-fabric-bangeo-hands-on)
 
 ## ArtemisとSneezeの関係
 
@@ -44,9 +44,9 @@ Artemisは、オープンソースのメタバースブラウザエンジン「*
 | Artemis | Sneezeを搭載し、ユーザーがSpatial Fabricを開くためのネイティブブラウザ |
 | RP1 | Artemisと、Spatial Fabricを接続する空間インターネット基盤を開発する企業 |
 
-Sneezeの設計やWebXRとの違いについては、[Sneeze（Open Metaverse Browser Engine）とは？WebXRとの違いを整理](/tech-articles/sneeze-open-metaverse-browser-engine)でも詳しく紹介しています。
+Sneezeの設計やWebXRとの違いについては、[Sneeze（Open Metaverse Browser Engine）とは？仕組みとWebXRとの違い](/tech-articles/sneeze-open-metaverse-browser-engine)でも詳しく紹介しています。
 
-## Artemis v0.3.0の現在地
+## Artemis v0.3.0の現状
 
 公式リリース情報によると、v0.3.0はArtemisの3回目のリリースです。複数のタブやウィンドウを開く機能、`F12`で表示する開発者向けインスペクター（Inspector）、Spatial Fabricの署名・検証、自動アップデートなどが案内されています。
 
@@ -63,7 +63,7 @@ v0.2.0からの主な変更は次のとおりです。
 一方で、まだ一般向けの完成版ブラウザではありません。公式リリースノートでは次の制限も明記されています。
 
 - Spatial Fabricの形式はv1.0.0まで安定版とはみなされない
-- 現在の空間探索（Discovery）はアドレス入力が中心で、近接ベースの発見はロードマップ段階
+- 現在の空間探索（Discovery）はアドレス入力が中心で、周囲の位置や距離から空間を見つける仕組み（proximity-based discovery）はロードマップ段階
 - ネットワーク接続機能は開発中
 - OpenXR経由のVR・ARは、このビルドではまだ利用できない
 - 空間内のラベルやHUD、Fabric制作ツールも開発途中
@@ -231,7 +231,7 @@ Artemis v0.3.0は、オープンなSpatial Webという構想を、URLから3D�
 
 後編では、BANGEOの配信環境にFabric JSON、WASM、GLBを追加し、自作の3D空間をArtemisで表示します。未署名JSONだけでなく、JWS署名済みの`.msf`を作成・検証して開く手順まで実機で確認しています。
 
-**[後編「Artemisで自分のブログを開いてみた」を読む](/tech-articles/artemis-spatial-fabric-bangeo-hands-on)**
+**[後編「Artemisで自作の3Dモデルを表示してみた」を読む](/tech-articles/artemis-spatial-fabric-bangeo-hands-on)**
 
 ## 参考リンク
 

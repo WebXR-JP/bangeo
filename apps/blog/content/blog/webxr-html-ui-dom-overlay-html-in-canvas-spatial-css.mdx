@@ -1,6 +1,6 @@
 ---
-title: "WebXRでHTML UIを扱う未来──DOM Overlay、HTML-in-Canvas、Spatial CSS"
-description: "WebXRでHTML UIを扱う方法は、DOM Overlay、HTML-in-Canvas、Spatial CSSへ広がりつつあります。それぞれの役割、使いどころ、現時点での注意点を整理します。"
+title: "WebXRでHTML UIを表示する3つのアプローチ：DOM Overlay、HTML-in-Canvas、Spatial CSS"
+description: "WebXRでHTML/CSSのUIを扱う3つの手法（DOM Overlay、HTML-in-Canvas、Spatial CSS）の特徴、使い分け、現時点での注意点を解説します。"
 date: "2026年6月11日"
 category: "TECH"
 tags:
@@ -77,7 +77,7 @@ HTML-in-Canvasの大きな特徴は、HTMLを単なる静止画像として貼�
 
 このようにHTML-in-Canvasは有力な候補ですが、現時点で本番のWebXRアプリへ広く導入できる標準機能ではありません。実験や将来設計の材料として追っていく段階です。PlayCanvasでの具体的な実装例は、[PlayCanvasでHTML-in-Canvasを使う](/tech-articles/playcanvas-html-in-canvas)にまとめています。
 
-## Webページ自体を空間化するSpatial CSS
+## Webページ自体に奥行きを持たせるSpatial CSS
 
 もう一つの大きな流れがSpatial CSSです。
 
@@ -100,7 +100,7 @@ Spatial CSSが実現すれば、通常のカードや見出しをCSSだけで手
 
 2026年5月の[Immersive Web WG/CGとCSSWGの合同議論](https://www.w3.org/2026/05/20-immersive-web-minutes.html)でも、Spatial LayoutはCSSを軸に空間表現をWebへ持ち込む提案として取り上げられ、3Dコンテンツと2D DOMを同じ仕組みの上でどう統合するかが議論されました。
 
-[Safari 27 betaでvisionOS向けImmersive Webが前進](/tech-articles/safari-27-beta-visionos-immersive-website-environments-webxr)で紹介したように、Appleプラットフォームでは`<model>`要素や没入型APIが別軸で進んでいますが、Spatial CSSはWebページ全体の空間化に関わる、さらに広いレイヤーの取り組みです。
+[Safari 27 betaのvisionOS向け新機能とWebXR viewport修正](/tech-articles/safari-27-beta-visionos-immersive-website-environments-webxr)で紹介したように、Appleプラットフォームでは`<model>`要素や没入型APIが別軸で進んでいますが、Spatial CSSはWebページ全体に奥行きを持たせる、さらに広いレイヤーの取り組みです。
 
 ## 空間UIの質感を扱うbackground-material
 
@@ -116,11 +116,11 @@ WebXRの描画APIではありませんが、空間Web UIの設計では見落と
 
 AR画面の上に説明や設定UIを重ねるならDOM Overlayが有力な選択肢になります。3D空間内で完全に没入型のUIを作るなら、three.jsやPlayCanvasなどの3D UI、テクスチャ、レイキャスティングを組み合わせる方法が安定しています。
 
-HTML-in-Canvasは、HTML/CSSのUIを3D空間内のテクスチャとして扱う将来候補です。Chrome Canaryやオリジントライアルで検証する価値はあるものの、本番採用にはブラウザ対応状況とAPI変更リスクを見極める必要があります。
+HTML-in-Canvasは、HTML/CSSのUIを3D空間内のテクスチャとして扱う将来候補です。Chrome Canaryやオリジントライアルで検証する価値はあるものの、本番採用にはブラウザ対応状況とAPI変更リスクを慎重に確認する必要があります。
 
 Spatial CSSは、WebXRアプリというよりWebページやブラウザUI自体が空間対応していく流れです。将来的に、これまでWebXRでしか作れなかった空間UIの一部をCSSで表現できるようになる可能性があり、開発者としても動向を追っておく意味があります。
 
-## BANGEOでの4層モデル整理
+## BANGEOでの4層モデルによる分類
 
 BANGEOでは、WebXR UIを次の4層に分けて整理しています。詳細とデモへのリンクは[標準化・対応状況ページのWebXR UI 4層モデル](/webxr-status#webxr-ui-layers)を参照してください。
 

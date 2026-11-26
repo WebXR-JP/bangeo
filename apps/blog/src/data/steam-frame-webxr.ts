@@ -6,5 +6,5 @@ export const STEAM_FRAME_WEBXR = {
 	summary:
 		"SteamOS 0.5.7 BetaでChromium 157以降のWebXR対応を有効化したとValveが発表しています。対象はSteam FrameのBetaチャネルです。",
 	limitations:
-		"公式発表あり・BANGEOでは実機未検証。安定版、追加設定なしの起動、AR・手入力・深度・Layers・WebGPU連携の個別対応は未確認です。PCからのストリーミングとは実行経路を分けて確認してください。",
+		"公式発表はあるものの、BANGEOでは実機未検証です。安定版での利用、追加設定なしの起動、AR・ハンドトラッキング・深度センシング・Layers・WebGPU連携への個別対応は未確認です。PCからの無線ストリーミングとは仕組みが異なるため、分けて確認してください。",
 };

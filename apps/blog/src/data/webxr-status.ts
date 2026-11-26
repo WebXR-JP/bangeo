@@ -126,7 +126,7 @@ export const WEBXR_WG_DISCUSSIONS: WebXRWgDiscussion[] = [
 			"Metaverse Standards ForumとRP1がOMBIの一環として発表したオープンソースのメタバースブラウザエンジンです。WebXR Device APIの更新ではなく、SOMやWebAssemblyサンドボックス、OpenXR、ANARIなどを組み合わせるSpatial Webの周辺動向として見ています。",
 		topics: [
 			"Scene Object Model（SOM）による複数オリジン・複数サービスの3Dシーン合成",
-			"URL遷移ではなく近接ベースで空間サービスを発見する仕組み",
+			"URL遷移ではなく、位置や距離をもとに周囲の空間サービスを見つける仕組み",
 			"サービスごとのWebAssemblyサンドボックスと権限モデル",
 			"OpenXR、ANARI、glTF、SPIR-V、RMAPを組み合わせたネイティブ寄りの構成",
 			"現時点では初期公開の参照・実験実装という位置づけ",
@@ -163,11 +163,11 @@ export const WEBXR_WG_DISCUSSIONS: WebXRWgDiscussion[] = [
 		sourceUrl: "https://www.w3.org/2026/05/19-immersive-web-minutes.html",
 		issueUrl: "https://github.com/immersive-web/webxr/issues/32",
 		summary:
-			"WebXRにおけるフォービエーションの議論では、WebGPUや可変レートシェーディング（VRS）との関係に加え、視線データに伴うプライバシー保護が大きな論点です。まずは固定フォービエーションから仕様化する案が検討されています。",
+			"WebXRにおけるフォービエーションの議論では、WebGPUや可変レートシェーディング（VRS）との関係に加え、視線情報に伴うプライバシー保護が大きな論点です。まずは固定フォービエーションから仕様化する案が検討されています。",
 		topics: [
 			"WebGPUの可変レートシェーディング（gpuweb/gpuweb#450）との連携",
 			"フォービエーションマップ用テクスチャの公開範囲と読み戻し制限",
-			"視線連動フォービエーションによる視線データ漏洩リスクへの配慮",
+			"視線連動フォービエーションによる視線情報漏洩リスクへの配慮",
 			"固定フォービエーションを先行し、視線連動は別拡張とする案",
 			"将来の動的フォービエーション向けイベント（onFoveationChangeなど）の検討",
 		],

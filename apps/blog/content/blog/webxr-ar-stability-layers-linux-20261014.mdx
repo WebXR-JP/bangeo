@@ -1,6 +1,6 @@
 ---
-title: "WebXR実装を読む：ChromiumのAR安定性修正、Layersの両眼課題、Linux OpenXRの確認点"
-description: "平面追跡の復帰とAR内文字入力を改善するChromium変更を解説。Layersのステレオ仕様課題とLinux OpenXRの過去更新も、配布状況を分けて整理します。"
+title: "ChromiumのWebXR AR安定性修正、Layersの両眼描画課題、Linux版OpenXRの現状"
+description: "平面検出の復帰処理やAndroid ARでの文字入力を改善するChromiumの修正を解説します。WebXR Layersのステレオ仕様上の課題やLinux版OpenXRの更新についても、配布状況と分けて紹介します。"
 date: "2026-10-14"
 category: "TECH"
 tags: ["WebXR", "Chromium", "DOM Overlay", "WebXR Layers", "OpenXR", "Steam Frame"]
@@ -11,7 +11,7 @@ draft: false
 
 WebXRの使いやすさは、APIが増えることだけでは決まりません。トラッキングが一時的に途切れた後に復帰できることや、AR内のフォームで文字を入力しても表示が消えないことも、体験の品質を左右します。
 
-2026年10月13〜14日（JST）、Chromiumの`main`ブランチに平面検出とAndroidのDOM Overlayに関する修正が入りました。10月14日の確認時点で、一般配布版のChromeや他のChromium系ブラウザへの収録は未確認です。本稿はソースコードと作者の説明を読み解くものであり、BANGEOによる実機検証ではありません。
+2026年10月13〜14日（JST）、Chromiumの`main`ブランチに平面検出とAndroidのDOM Overlayに関する修正が入りました。10月14日の確認時点で、一般配布版のChromeや他のChromium系ブラウザへの収録は未確認です。本稿はソースコードとコミット説明をもとにまとめたものであり、BANGEOによる実機検証ではありません。
 
 ![ヘッドセットを着けたマスコットが欠けた床面の復元を確認し、別のマスコットがAR内の入力パネルを持つ概念図](/assets/tech/webxr-ar-stability-layers-linux-20261014.webp)
 
@@ -23,7 +23,7 @@ WebXRの使いやすさは、APIが増えることだけでは決まりません
 
 アプリ側でも、床や壁を一度検出したからといって同じデータが永続的に届くとは仮定できません。トラッキングの喪失と復帰、平面の追加・削除を想定して検証し、平面が取得できないフレームで操作を継続するか、表示を保留するかをあらかじめ設計しておく必要があります。
 
-## AndroidのAR内文字入力で起きる空白の軽減
+## AndroidのAR表示中に文字入力で画面が空白になる不具合の軽減
 
 10月14日07:27 JSTの[DOM Overlay変更](https://github.com/chromium/chromium/commit/647269fd5c005b26cd9025e9abe323a72c15ae1d)は、Android/ARCoreの合成処理を対象としています。文字選択、カーソル移動、キーボード表示などでDOMの`SurfaceId`が変わると、新しいサーフェスが有効になるまでオーバーレイが空白になることがありました。
 
@@ -39,7 +39,7 @@ WebXRの使いやすさは、APIが増えることだけでは決まりません
 
 手元で検証する場合は、左眼用と右眼用で明確に異なる模様を描いた画像を用意すると分かりやすくなります。左右分割と上下分割を切り分け、返されたビューポートと各眼で見える領域、`invertStereo`による左右入れ替えを確認します。アプリ側で独自の回避処理を入れる前に、対象ブラウザで実際に再現するかどうかを確かめてください。
 
-## Linux OpenXRのmain反映とSteam Frame製品対応の切り分け
+## Linux版OpenXRのmain反映とSteam Frameの正式対応は別物
 
 ここからは当日の新発表ではなく、過去更新の補足です。Chromiumの[Linux向けOpenXRプロバイダー](https://github.com/chromium/chromium/commit/71d17e1a0c31fafd54bf5ee1e080441aa62c6624)は9月30日01:40 JSTに`main`へ入りました。Linux上でOpenXRデバイスを作成し、`immersive-vr`へ接続する経路を含む変更です。コミットメッセージには、OpenXR機能が既定で無効であり、`--enable-features=OpenXR`の指定が必要である旨が記載されています。
 
@@ -60,9 +60,9 @@ Wolvicでは10月13日21:46 JSTに、計測をオフにしたとき実際のOpen
 | 正式リリース | 利用中のバージョンに含まれるか |
 | 実機動作 | OS・ブラウザ・ランタイム・要求機能の組み合わせ |
 
-トラッキング、DOM合成、両眼描画、ランタイム接続はそれぞれ挙動が異なるため、切り分けて検証することが重要です。ソースコードが改善された段階と、利用者の端末で使える段階を区別して追うことで、アップデートへの対応判断がしやすくなります。
+トラッキング、DOM合成、両眼描画、ランタイム接続はそれぞれ挙動が異なるため、分けて検証することが重要です。ソースコードが改善された段階と、利用者の端末で使える段階を区別して追うことで、アップデートへの対応判断がしやすくなります。
 
-## 一次参照
+## 参考リンク
 
 - [Chromium：不完全な平面更新を許容する修正](https://github.com/chromium/chromium/commit/2285d4edc85e17f28623d2a12cbc18f31e88bf27)
 - [Chromium：AR合成でDOMサーフェスの範囲を使う修正](https://github.com/chromium/chromium/commit/647269fd5c005b26cd9025e9abe323a72c15ae1d)

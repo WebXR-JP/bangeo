@@ -1,6 +1,6 @@
 ---
-title: "PlayCanvasのVision Pro向けWebXR修正案：描画の揺れと視線＋ピンチ入力を読み解く"
-description: "Vision Proで報告されたWebGPU XR描画と入力の修正案を解説。再投影用の深度、最初のXRフレーム、transient-pointer、移動操作の確認方法を整理します。"
+title: "PlayCanvasのApple Vision Pro向けWebXR修正案：描画の揺れと視線・ピンチ操作の改善"
+description: "Apple Vision Proで報告されたWebGPU XR描画と入力の修正案を解説。再投影用の深度クリア、初回XRフレームの処理、transient-pointer、移動操作の確認手順を紹介します。"
 date: "2026-10-14"
 category: "TECH"
 tags: ["WebXR", "WebGPU", "PlayCanvas", "visionOS", "Apple Vision Pro"]
@@ -76,7 +76,7 @@ Vision Pro上のWebXRも機能ごとの確認が必要です。Safariの`immersi
 
 描画の揺れ、開始直後、入力、移動を分けて見ると、端末・ブラウザ・エンジン・アプリのどの層を調べるべきかが明確になります。今回のPRは、その切り分けを具体的な実装から学べる材料です。
 
-## 一次参照
+## 参考リンク
 
 - [PlayCanvas #9748：WebGPU XRの深度クリアと最初のビュー処理](https://github.com/playcanvas/engine/pull/9748)
 - [PlayCanvas #9750：Vision Proで見つかったXR移動・入力の修正](https://github.com/playcanvas/engine/pull/9750)
