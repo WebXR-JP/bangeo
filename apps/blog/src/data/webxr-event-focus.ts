@@ -22,14 +22,14 @@ export const WEBXR_EVENT_FOCUS: WebXREventFocusItem[] = [
 		phase: "開催直前",
 		priority: "high",
 		summary:
-			"出展社一覧・AR/VRエリア・公式番組が公開済み。ゲーム一般ではなく、XRデバイス、プラットフォーム、ブラウザ、空間UIに関係する発表だけを回収する。",
+			"AR/VRコーナーや公式番組が用意される国内最大級のゲーム展示会です。XRデバイスやプラットフォーム、ブラウザ、空間UIに関する発表が注目されます。",
 		watch: [
-			"AR/VRエリアとXRデバイス出展",
-			"Quest / PICO / Sonyなどのプラットフォーム発表",
-			"WebXRへ転用できる空間UI・入力設計",
+			"AR/VRコーナーとXRデバイスの展示",
+			"Quest・PICO・Sonyなどのプラットフォーム関連発表",
+			"WebXRの設計にも活かせる空間UIや入力方式の事例",
 		],
 		nextAction:
-			"9月15〜16日に出展社一覧と公式番組を最終確認し、会期中はXR関連発表のみ速報候補化する。終了後は公式動画・発表資料を回収する。",
+			"出展社一覧と公式番組を確認し、XR関連の発表と公開資料を整理する。",
 		sourceUrl: "https://tgs.cesa.or.jp/2026/",
 	},
 	{
@@ -39,14 +39,14 @@ export const WEBXR_EVENT_FOCUS: WebXREventFocusItem[] = [
 		phase: "出展者・セッション公開",
 		priority: "high",
 		summary:
-			"出展者一覧とコンファレンスが公開され、聴講予約も開始。スマートグラス、3Dスキャン、デジタルツイン、空間コンピューティングを優先して確認する。",
+			"デジタル技術全般の総合展示会です。スマートグラスや3Dスキャン、デジタルツイン、空間コンピューティング関連の展示と講演が予定されています。",
 		watch: [
-			"スマートグラス / 空間ディスプレイ",
-			"3Dスキャン / デジタルツイン",
-			"Web連携可能な産業AR / 空間コンピューティング",
+			"スマートグラスと空間ディスプレイの展示",
+			"3Dスキャンとデジタルツインの活用事例",
+			"Web技術と連携する産業向けAR・空間コンピューティング",
 		],
 		nextAction:
-			"出展者一覧をXR・AR・VR・3D・デジタルツイン・スマートグラスで絞り込み、BANGEOの/devicesと/platforms候補を作る。",
+			"XR・スマートグラス・3D関連の出展者を確認し、対応デバイスやプラットフォーム情報を更新する。",
 		sourceUrl: "https://www.ceatec.com/ja/",
 	},
 	{
@@ -56,14 +56,14 @@ export const WEBXR_EVENT_FOCUS: WebXREventFocusItem[] = [
 		phase: "開催予定",
 		priority: "high",
 		summary:
-			"NexTech Week秋展内の産業XR専門展示会。HMD・スマートグラス、空間コンピューティング、XR×AI、イマーシブ技術を公式カテゴリとして扱う。",
+			"NexTech Week秋展の中で開かれる産業XRの専門展示会です。ヘッドセットやスマートグラス、空間コンピューティング、XRとAIの組み合わせなどが主な分野です。",
 		watch: [
-			"HMD / スマートグラス",
-			"空間コンピューティング",
-			"XR研修・遠隔支援・産業向けWeb 3D",
+			"ヘッドセットとスマートグラスの実機展示",
+			"空間コンピューティングの導入事例",
+			"XR研修・遠隔支援・産業向けWeb 3Dの活用",
 		],
 		nextAction:
-			"来場登録・出展者一覧・セミナー公開を確認し、実機体験できるデバイスとWeb技術へ接続できる展示を優先する。",
+			"出展者一覧とセミナー情報を確認し、実機展示やWeb連携事例を整理する。",
 		sourceUrl: "https://www.nextech-week.jp/hub/ja-jp/about/xr.html",
 	},
 	{
@@ -73,14 +73,14 @@ export const WEBXR_EVENT_FOCUS: WebXREventFocusItem[] = [
 		phase: "開催予定",
 		priority: "medium",
 		summary:
-			"映像・音響・配信の大型展示会。WebXR直結より、イマーシブ映像、Spatial Audio、Volumetric、WebRTC / Streamingの実装材料を回収する。",
+			"映像・音響・放送・配信の展示会です。WebXRそのものだけでなく、イマーシブ映像や立体音響、ボリュメトリック映像、WebRTC配信などの周辺技術が集まります。",
 		watch: [
-			"Immersive Video / Spatial Audio",
-			"Volumetric / 3D映像",
-			"WebRTC / Remote rendering / 配信",
+			"イマーシブ映像と立体音響（Spatial Audio）",
+			"ボリュメトリック映像と3D映像制作",
+			"WebRTCやリモートレンダリングなどの配信技術",
 		],
 		nextAction:
-			"10月初旬の来場登録・コンファレンス予約開始後に、XR / 3D / 配信に近いセッションと出展者を抽出する。",
+			"XR・3D映像・配信技術に関連するセッションと出展者を確認する。",
 		sourceUrl: "https://www.inter-bee.com/ja/welcome-guide/",
 	},
 	{
@@ -90,14 +90,14 @@ export const WEBXR_EVENT_FOCUS: WebXREventFocusItem[] = [
 		phase: "開催予定・詳細公開待ち",
 		priority: "high",
 		summary:
-			"国内XRの最重要カンファレンス。XR、スマートグラス、3D Gaussian Splatting、フィジカルAIなどを横断し、開発者・デバイスメーカーの一次情報を回収する。",
+			"国内のXR開発者やデバイスメーカーが集まるカンファレンスです。XRデバイスやスマートグラス、3D Gaussian Splatting、フィジカルAIなど幅広いテーマが扱われます。",
 		watch: [
-			"WebXR / WebARに近い開発者セッション",
-			"スマートグラス / XRデバイス新製品",
-			"three.js / Babylon.js / PlayCanvas / Web 3D関連登壇",
+			"WebXR・WebARに関わる開発者セッション",
+			"スマートグラスやXRデバイスの新製品展示",
+			"Three.js・Babylon.js・PlayCanvasなどWeb 3D関連の登壇",
 		],
 		nextAction:
-			"セッション一覧・出展社・企業キーノート公開を待ち、BANGEO向けの参加推奨セッションと会期後資料回収リストを作る。",
+			"セッション一覧と出展社情報を確認し、WebXR関連の登壇と公開資料を整理する。",
 		sourceUrl: "https://xrkaigi.com/",
 	},
 ];

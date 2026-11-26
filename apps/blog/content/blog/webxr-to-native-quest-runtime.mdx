@@ -9,80 +9,80 @@ thumbnail: "/assets/tech/webxr-to-native-quest-runtime.webp"
 draft: false
 ---
 
-WebXRで作ったゲームを、Meta Quest向けのネイティブアプリとして配布したい。そんな用途に向けたオープンソースのランタイム「[webxr-to-native](https://github.com/Srile/webxr-to-native)」が公開されています。
+WebXRで作ったゲームを、Meta Quest向けのネイティブアプリとして配布したい。そんなニーズに応えるオープンソースのランタイム「[webxr-to-native](https://github.com/Srile/webxr-to-native)」が公開されています。
 
-JavaScriptやWebGLで作ったゲームを、V8とOpenXRを組み合わせた実行環境で動かし、AndroidのAPKにまとめるプロジェクトです。WebViewは使わず、ゲームのWeb向けビルドと必要なアセットをアプリに同梱します。
+JavaScriptやWebGLで作ったゲームを、V8とOpenXRを組み合わせた実行環境で動かし、AndroidのAPKとしてパッケージングするプロジェクトです。WebViewは使わず、ゲームのWeb向けビルドと必要なアセットをアプリ本体に同梱します。
 
-主な対象はMeta Questです。[README](https://github.com/Srile/webxr-to-native/blob/main/README.md)ではthree.js／Immersive Web SDK（IWSDK）やWonderland Engineのゲームについて、Quest 2とQuest 3での動作が説明されています。
+主な対象はMeta Questです。[README](https://github.com/Srile/webxr-to-native/blob/main/README.md)では、three.jsやImmersive Web SDK（IWSDK）、Wonderland Engineで作られたゲームについて、Quest 2とQuest 3での動作が説明されています。
 
 この記事は2026年11月10日に確認した公開READMEと実装を基にしています。BANGEOでは実機での動作検証や性能測定は行っていません。
 
 ## V8とOpenXRをつなぐ実行環境
 
-webxr-to-nativeが用意するのは、WebXRゲームを動かすための実行環境です。主な役割分担は次のようになっています。
+`webxr-to-native`が提供するのは、WebXRゲームを単体で動かすための専用実行環境です。主な役割分担は次のとおりです。
 
 - JavaScript：V8で実行
 - 描画：WebGL 2の呼び出しをOpenGL ESへ接続
-- XR：IWERのhost modeを通じてWebXR APIを提供し、OpenXRのフレームや入力情報を渡す
-- 音声：ネイティブの音声グラフでWebAudioを処理
+- XR：IWERのホストモード（host mode）を通じてWebXR APIを提供し、OpenXRのフレームや入力情報を橋渡し
+- 音声：ネイティブの音声グラフでWeb Audioを処理
 - アセット取得：同梱ファイルや許可されたネットワーク接続先から読み込み
 
-ゲーム側は、index.html、JavaScriptのモジュール、画像やモデルなどのWeb向けビルドを使います。その下にJavaScriptの互換層とC++のホストが入り、ヘッドセットの描画や入力につなぐ構成です。
+ゲーム側は、`index.html`、JavaScriptモジュール、画像や3DモデルなどのWeb向けビルドをそのまま使います。その下にJavaScriptの互換層とC++のホスト層が入り、ヘッドセットの描画や入力と接続する構成です。
 
-WebXRの実装には、MetaのImmersive Web Emulation RuntimeであるIWER 2.8.0を利用しています。[公開コード](https://github.com/Srile/webxr-to-native/blob/main/runtime/src/webxr/index.js)でもIWERのhost向けモジュールを読み込み、ネイティブ側のスワップチェーンやフレーム情報に接続する処理を確認できます。
+WebXRの実装には、MetaのImmersive Web Emulation RuntimeであるIWER 2.8.0を利用しています。[公開コード](https://github.com/Srile/webxr-to-native/blob/main/runtime/src/webxr/index.js)でも、IWERのホスト向けモジュールを読み込み、ネイティブ側のスワップチェーンやフレーム情報へ接続する処理を確認できます。
 
-QuestではGL呼び出しを専用スレッドで実行する構成が標準です。JavaScriptの実行、音声処理、描画処理をそれぞれの役割に分けています。
+QuestではGL呼び出しを専用スレッドで実行する構成が標準となっており、JavaScriptの実行、音声処理、描画処理をそれぞれ独立して処理します。
 
 ## 移植前に確認したいHTML UIへの依存
 
-READMEは、既存のWebXRゲームを変更せずに実行することを掲げています。ただし、一般的なブラウザと同じ機能がそろっているわけではありません。
+READMEでは「既存のWebXRゲームを変更せずに実行する」ことを掲げていますが、一般的なブラウザと同じ機能がすべて揃っているわけではありません。
 
-特に大きい違いは、HTMLとCSSのレイアウトや描画を行わないことです。documentやイベントなどの軽量なDOMはありますが、HTMLで作ったメニューやボタンは表示されません。メニューを3Dシーン内に用意するなど、コンテンツ側の設計を確認する必要があります。
+特に大きな違いは、HTMLとCSSのレイアウトや描画を行わない点です。`document`やイベントなどの軽量なDOMは用意されているものの、HTMLで作ったメニューやボタンは画面に表示されません。メニューを3Dシーン内に配置するなど、コンテンツ側の設計をあらかじめ確認しておく必要があります。
 
-起動時にHTMLの「VRを開始」ボタンなどで行っていた処理には、ゲームのエントリーポイントより先に読み込むweb.injectという設定が用意されています。ただし、ゲームごとの起動処理に合わせた調整が必要になる場合があります。
+起動時にHTMLの「VRを開始」ボタンなどで行っていた処理に向けて、ゲームのエントリーポイントより先に読み込む`web.inject`設定が用意されています。ただし、ゲームごとの起動フローに合わせた調整が必要になる場合があります。
 
-ほかにも、READMEは次の制約を明記しています。
+ほかにも、READMEでは次の制約が明記されています。
 
 - WebGPUには未対応
-- video要素・audio要素による再生には未対応
-- Canvas 2Dは一部機能に対応
-- Quest向けV8にはICUが含まれず、Intlは利用不可
+- `video`要素・`audio`要素による再生には未対応
+- Canvas 2Dは一部機能のみ対応
+- Quest向けV8にはICUが含まれず、`Intl`は利用不可
 
-音声については、audio要素による再生とWebAudioによる処理を分けて考える必要があります。WebAudioの音声グラフやdecodeAudioDataは対応機能として挙げられています。
+音声については、`audio`要素による再生とWeb Audioによる処理を分けて考える必要があります。Web Audioの音声グラフや`decodeAudioData`は対応機能として挙げられています。
 
-また、APKを作るツールには、V8が処理できないUnicodeプロパティエスケープを含む正規表現を書き換える処理があります。元のゲームを大きく作り直さずに持ち込める構成でも、すべてのブラウザ機能との互換性が保証されるわけではありません。
+また、APKを生成するツールには、V8が処理できないUnicodeプロパティエスケープを含む正規表現を書き換える処理が入っています。元のゲームを大きく作り直さずに持ち込める構成であっても、あらゆるブラウザ機能との完全な互換性が保証されるわけではありません。
 
-## Questが主対象。ほかの環境は開発中・実験的な位置づけ
+## 主対象はQuest、その他の環境は開発中・実験的位置づけ
 
-Quest向けには、コントローラー、ハンドトラッキング、マルチビュー、WebXR Layersの投影レイヤーなどが対応項目として記載されています。パススルーARや平面・メッシュ検出も実装されていますが、作者は検証が少ない機能として区別しています。
+Quest向けには、コントローラー、ハンドトラッキング、マルチビュー、WebXR Layersの投影レイヤーなどが対応項目として記載されています。パススルーARや平面・メッシュ検出も実装されていますが、作者は検証がまだ少ない機能として区別しています。
 
-READMEにある72〜120Hzという記述は、ヘッドセットのリフレッシュレートに合わせた動作の説明です。あらゆるゲームが120fpsで動くことを示すものではありません。
+なお、READMEにある72〜120Hzという記述は、ヘッドセットのリフレッシュレートに合わせた動作の説明であり、すべてのゲームが120fpsで動作することを保証するものではありません。
 
 ほかのホスト環境の位置づけは次のとおりです。
 
 - Androidスマートフォン：開発中。Pixel 7 Proで、画面上のタッチ操作を使う平面表示のゲームが動作すると説明
 - macOS・Windows・Linux：実験的。ウィンドウ上でヘッドセットをエミュレート
 - Linuxの追加構成：MonadoやWiVRnを使うOpenXRホストも用意
-- iOS：実験的。READMEの動作説明はシミュレーター
-- Apple Vision Pro：実験的で、シミュレーターのみ
+- iOS：実験的。READMEの動作説明はシミュレーター上
+- Apple Vision Pro：実験的かつシミュレーターのみ
 
-特にApple Vision Proについては、実機での対応や配布実績まで確認されたものとして扱わないようにしてください。
+特にApple Vision Proについては、実機での動作や配布実績まで確認されたものとして扱わないよう注意してください。
 
-## 既存のWebビルドをAPKにまとめる流れ
+## 既存のWebビルドをAPKにまとめる手順
 
-Quest向けの導入には、Macまたはx86_64 Linux、Node.js 18以降、CMake 3.22以降、Ninjaなどが必要です。Questは開発者モードを有効にし、USB接続して使います。
+Quest向けのビルドには、Macまたはx86_64 Linux、Node.js 18以降、CMake 3.22以降、Ninjaなどが必要です。Quest本体は開発者モードを有効にし、USBで接続しておきます。
 
-基本的な流れは次のとおりです。
+基本的な手順は次のとおりです。
 
-1. リポジトリを取得し、npm ciでJavaScriptの依存関係を導入する
-2. tools/setup.shでAndroid SDK、NDK、V8などを準備する
-3. いつもどおりWebアプリをビルドする
-4. host.jsonにアプリID、Webビルドの場所、ネットワーク接続先などを書く
-5. tools/pack.mjsでAPKを作り、Questへインストールする
+1. リポジトリを取得し、`npm ci`でJavaScriptの依存関係を導入する
+2. `tools/setup.sh`でAndroid SDK、NDK、V8などを準備する
+3. 通常どおりWebアプリをビルドする
+4. `host.json`にアプリID、Webビルドのパス、許可するネットワーク接続先を記述する
+5. `tools/pack.mjs`でAPKを生成し、Questへインストールする
 
-host.jsonでは、app.packageにAndroidのアプリID、web.distにビルド済みファイルの場所を指定します。外部APIなどへ接続する場合は、network.allowに接続先のoriginを列挙します。初期値は空で、許可していない接続先は拒否されます。
+`host.json`では、`app.package`にAndroidのアプリID、`web.dist`にビルド済みファイルの場所を指定します。外部APIへ接続する場合は、`network.allow`に接続先のオリジン（origin）を列挙します。初期値は空で、許可されていない接続先への通信は拒否されます。
 
-たとえば、ゲームのリポジトリに`native/host.json`を置き、その隣の`dist/`にWebビルドを出力する場合は、次のように設定できます。パスは`host.json`からの相対指定です。これはREADMEを基にした設定例で、実機での検証済みコードではありません。
+たとえば、ゲームのリポジトリ内に`native/host.json`を置き、隣接する`dist/`にWebビルドを出力する場合は、次のように記述できます。パスは`host.json`からの相対指定です（READMEを基にした設定例であり、実機での検証済みコードではありません）。
 
 ```json
 {
@@ -93,47 +93,45 @@ host.jsonでは、app.packageにAndroidのアプリID、web.distにビルド済�
 }
 ```
 
-`xr.autoEnter`は、ページが要求した`offerSession`を起動時に許可する設定です。HTMLボタンで`requestSession`を呼び出すアプリの起動処理を、自動的に置き換えるものではありません。
+`xr.autoEnter`は、ページが要求した`offerSession`を起動時に自動許可する設定です。HTMLボタンから`requestSession`を呼び出す起動処理を自動で置き換えるものではありません。
 
-セットアップと環境変数の読み込み（`source tools/env.sh`）を済ませた後、webxr-to-nativeのディレクトリから次のように実行します。パスとアプリIDは自分のプロジェクトに合わせて変更してください。
+セットアップと環境変数の読み込み（`source tools/env.sh`）を済ませた後、`webxr-to-native`のディレクトリから次のように実行します。パスとアプリIDは自身のプロジェクトに合わせて変更してください。
 
 ```bash
 node tools/pack.mjs ../my-game/native/host.json --install --run
 ```
 
-[pack.mjs](https://github.com/Srile/webxr-to-native/blob/main/tools/pack.mjs)はWebビルドをAPKのassetsにコピーし、index.htmlからモジュールのエントリーポイントを取り出します。その後、ランタイムとネイティブライブラリを組み合わせてパッケージ化します。
+[pack.mjs](https://github.com/Srile/webxr-to-native/blob/main/tools/pack.mjs)はWebビルドをAPKの`assets`へコピーし、`index.html`からモジュールのエントリーポイントを抽出します。その後、ランタイムとネイティブライブラリを組み合わせてAPKを生成します。
 
-なお、tools/setup.shはAndroid SDKのライセンスへの同意を自動実行します。実行前にREADMEが案内する[Android SDKの利用条件](https://developer.android.com/studio/terms)を確認してください。
+なお、`tools/setup.sh`はAndroid SDKのライセンス同意を自動実行します。実行前に、READMEが案内している[Android SDKの利用条件](https://developer.android.com/studio/terms)を確認してください。
 
-リリースビルドは自分のキーストアで署名する仕組みです。ストアへのアップロードは開発者側で行う必要があり、APKを作成できることとMeta Horizon Storeの審査を通過することは別です。
+リリースビルドは自身のキーストアで署名する仕組みです。ストアへのアップロードは開発者側で行う必要があり、APKを作成できることとMeta Horizon Storeの審査を通過することは別問題として捉える必要があります。
 
 ## ブラウザ版との性能比較のポイント
 
-作者は、WebGLの負荷が高いページではQuest Browserよりフレームあたりの処理時間が短くなることが多いと説明しています。WebGLの呼び出しをネイティブの描画処理につなぎ、ブラウザの実行環境を介さずに動かす構成が背景にあります。
+作者は、WebGLの負荷が高いページではQuest Browserよりフレームあたりの処理時間が短くなることが多いと説明しています。WebGL呼び出しをネイティブ描画処理へ直接つなぎ、ブラウザの実行環境を介さずに動かす構成が背景にあります。
 
-リポジトリには[比較用のベンチマーク](https://github.com/Srile/webxr-to-native/blob/main/apps/bench/README.md)も含まれています。IWSDKを使った5種類のシーンで、ドローコール、マテリアル切り替え、スキニング、インスタンシング、複数要素を組み合わせた負荷を測定する設計です。
+リポジトリには[比較用のベンチマーク](https://github.com/Srile/webxr-to-native/blob/main/apps/bench/README.md)も含まれています。IWSDKを使った5種類のシーンで、ドローコール、マテリアル切り替え、スキニング、インスタンシング、複合負荷を測定する設計です。
 
-ブラウザ側とホスト側はともに72Hzを要求し、JavaScriptの処理時間、フレーム間隔、ドロップ率などを記録します。ベンチマークの説明でも、CPUとGPUのクロックをそろえて比較するよう注意されています。
+ブラウザ側とホスト側はどちらも72Hzを要求し、JavaScriptの処理時間、フレーム間隔、ドロップ率などを記録します。ベンチマークの解説でも、CPUとGPUのクロックを揃えて比較するよう注意が促されています。
 
-導入を判断するときは、同じシーン、同じ描画設定で比較することが重要です。API呼び出しの負荷が減っても、GPU側の描画負荷が支配的なら、同じ割合でフレームレートが改善するとは限りません。
+導入を判断する際は、同一のシーン・同一の描画設定で比較することが欠かせません。API呼び出しのオーバーヘッドが減っても、GPU側の描画負荷が支配的なシーンでは、同じ割合でフレームレートが伸びるとは限らないためです。
 
-gl.pipelineを有効にすると、描画中のフレームと次のフレームの記録を重ねられますが、READMEには1フレーム分の遅延が増えると明記されています。速度だけでなく、頭や手の動きに対する応答も確認したい設定です。
+また、`gl.pipeline`を有効にすると、描画中のフレームと次フレームのコマンド記録を重ねて処理できますが、READMEには1フレーム分の遅延が増えると明記されています。フレームレートだけでなく、頭や手の動きに対する応答性も合わせて確認したい設定です。
 
 ## 配布前に確認したいライセンスとデバッグ設定
 
-プロジェクト本体は[MITライセンス](https://github.com/Srile/webxr-to-native/blob/main/LICENSE)です。ただし、同梱するV8、IWER、OpenXR loaderなどには、それぞれのライセンスが適用されます。
+プロジェクト本体は[MITライセンス](https://github.com/Srile/webxr-to-native/blob/main/LICENSE)ですが、同梱するV8、IWER、OpenXRローダーなどにはそれぞれのライセンスが適用されます。
 
-ビルドにはTHIRD_PARTY_NOTICES.txtが含まれる仕組みになっており、作者は配布時にもそのファイルを残すよう案内しています。WebRTCを有効にした構成ではMPL-2.0のコンポーネントも含まれるため、[THIRD_PARTY_NOTICES.md](https://github.com/Srile/webxr-to-native/blob/main/THIRD_PARTY_NOTICES.md)を確認してください。
+ビルド成果物には`THIRD_PARTY_NOTICES.txt`が含まれる仕組みになっており、配布時にもこのファイルを残すよう案内されています。WebRTCを有効にした構成ではMPL-2.0のコンポーネントも含まれるため、[THIRD_PARTY_NOTICES.md](https://github.com/Srile/webxr-to-native/blob/main/THIRD_PARTY_NOTICES.md)を確認してください。
 
-デバッグビルドにも注意が必要です。Questではインスペクターがローカルネットワークからの接続を受け付けるため、READMEはデバッグビルドを配布しないよう警告しています。リリースビルドではインスペクターを無効にする処理が入っています。
+デバッグビルドの取り扱いにも注意が必要です。Questではインスペクターがローカルネットワークからの接続を受け付けるため、READMEはデバッグビルドを配布しないよう警告しています。リリースビルドではインスペクターを無効化する処理が入ります。
 
-## Webで作った体験の配布先を広げる選択肢
+## WebXR体験の配布先を広げる選択肢として
 
-注目したいのは、WebXRで作った体験を、Web向けの開発資産を使いながらQuestのインストール型アプリへ展開できる点です。
+`webxr-to-native`は、Web向けの開発資産を活かしながら、Meta Questのインストール型アプリへ展開できる選択肢の一つです。
 
-URLからすぐに体験できるWeb版と、APKとして配布する版では、導入方法や更新方法が変わります。どちらが適しているかは、体験を届けたい相手や運用方法によって判断できます。
-
-まずはHTML UIへの依存が少ないWebGL 2ベースの小さなシーンで、起動、左右の描画、コントローラーや手の入力、音声、保存、通信を順に確認するとよいでしょう。そのうえで、ブラウザ版との性能差と配布に必要な作業を比較するのが現実的です。
+URLからすぐ起動できるWeb版と、APKとして配布するネイティブ版では、導入のしやすさや更新運用の手順が異なります。まずはHTML UIへの依存が少ないWebGL 2ベースの小さなシーンで、起動、左右の描画、コントローラーや手の入力、音声、データ保存、通信を順に確認し、ブラウザ版との性能差や配布コストを比較しながら採用を判断するのが現実的です。
 
 ## 参考情報
 

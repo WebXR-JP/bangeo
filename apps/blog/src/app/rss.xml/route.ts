@@ -5,7 +5,7 @@ import { SITE_URL } from "@/lib/site-url";
 export const dynamic = "force-static";
 
 const FEED_TITLE = "BANGEO 技術記事";
-const FEED_DESCRIPTION = "BANGEO の WebXR 技術記事、ニュース、ガイドの更新情報";
+const FEED_DESCRIPTION = "BANGEOのWebXR技術記事、ニュース、ガイドの更新情報";
 const FEED_PATH = "/rss.xml";
 const MAX_ITEMS = 50;
 

@@ -43,12 +43,12 @@ export async function generateMetadata({
 	const description = `BANGEOの「${tag}」タグ一覧。WebXRの技術記事、ニュース、デモをトピック別にまとめています（全${total}件）。`;
 
 	return {
-		title: `${tag} の記事・デモ一覧`,
+		title: `${tag}の記事・デモ一覧`,
 		description,
 		alternates: { canonical: tagPath(tag) },
 		robots: { index: false, follow: true },
 		openGraph: {
-			title: `${tag} の記事・デモ一覧`,
+			title: `${tag}の記事・デモ一覧`,
 			description,
 			type: "website",
 		},

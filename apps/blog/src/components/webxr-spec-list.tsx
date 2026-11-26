@@ -702,7 +702,7 @@ export function WebXRSpecList() {
 					</div>
 				</div>
 				<p className="mt-3 max-w-[40em] text-xs leading-relaxed text-gray-500">
-					体験を開始すると、VRでは安定性を優先した暗背景、ARではパススルーを背景に、hit-test（面マーカー）・anchors（選択操作で固定キューブを設置）・hand-tracking（関節の点表示）・bounded-floor（境界線）・mesh-detection（部屋メッシュの点群）・depth-sensing（視線の先の実測距離マーカー）・light-estimation（主光源の方向線）・body-tracking（全身関節の点表示）がセッションの中で確認できます。Layersなど「可視化なし」の機能は、体験開始時のセッション要求には入れません。
+					体験を始めると、VRでは暗背景、ARではパススルーを背景にして各機能をセッション内で確認できます。可視化に対応しているのは、hit-test（面マーカー）、anchors（選択操作で固定キューブを配置）、hand-tracking（関節の点表示）、bounded-floor（境界線）、mesh-detection（部屋メッシュの点群）、depth-sensing（視線の先の距離マーカー）、light-estimation（主光源の方向線）、body-tracking（全身関節の点表示）です。Layersなど「可視化なし」の機能は、体験開始時のセッション要求には含めません。
 				</p>
 				{skippedStarterFeatures.length > 0 && (
 					<p className="mt-3 break-phrase rounded-xl bg-gray-50 px-3 py-2 text-xs leading-relaxed text-gray-600">

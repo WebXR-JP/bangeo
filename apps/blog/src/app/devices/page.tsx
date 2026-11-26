@@ -25,7 +25,7 @@ const GROUPS = [
 		id: "vr-headsets",
 		title: "VRヘッドセットのWebXR対応",
 		short: "VRヘッドセット",
-		lead: "Meta Quest、HTC VIVE、Picoの各シリーズなど、主要なヘッドセットにはWebXRを利用できる環境があります。Valve IndexとWindows MRも同様です。一方で、PlayStation VR/VR2やHTC VIVE Flowのように、ブラウザ経由での利用が難しいデバイスもあります。",
+		lead: "Meta Quest、HTC VIVE、PICOの各シリーズなど、主要なヘッドセットにはWebXRを利用できる環境があります。Valve IndexとWindows MRも同様です。一方で、PlayStation VR/VR2やHTC VIVE Flowのように、ブラウザ経由での利用が難しいデバイスもあります。",
 		devices: VR_DEVICES,
 	},
 	{

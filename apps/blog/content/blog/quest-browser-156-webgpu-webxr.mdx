@@ -29,7 +29,7 @@ WebViewの更新は、WebXRでWebGPUを使うための条件として記載さ�
 
 ## 146.0から続くWebGPU in WebXRの対応
 
-WebXRはVR・ARセッションや姿勢・入力を扱うAPI、WebGPUはGPUによる描画や計算処理を扱うAPIです。両者を組み合わせることで、WebGPUの描画結果をXR体験に利用できます。
+WebXRはVR/ARセッションや姿勢・入力を扱うAPI、WebGPUはGPUによる描画や計算処理を扱うAPIです。両者を組み合わせることで、WebGPUの描画結果をXR体験に利用できます。
 
 Meta Browserでは、これまでも関連機能が段階的に追加されてきました。
 
@@ -37,7 +37,7 @@ Meta Browserでは、これまでも関連機能が段階的に追加されて�
 
 *各版の公式リリースノートを基に作成。日付は公式ページの表記です。*
 
-| バージョン・公式ページの日付 | WebXR / WebGPU関連の更新 |
+| バージョン・公式ページの日付 | WebXR/WebGPU関連の更新 |
 | --- | --- |
 | [146.0](https://developers.meta.com/vr/downloads/package/browser/146.0/)・2026年4月21日 | WebXRでのWebGPUを実験的にサポート |
 | [149.1](https://developers.meta.com/vr/downloads/package/browser/149.1/)・2026年7月27日 | WebGPU用のSpace Warp Layerに対応 |
@@ -49,20 +49,20 @@ Meta Browserでは、これまでも関連機能が段階的に追加されて�
 
 特に、152.1で追加されたComposition Layersには実験フラグの案内がありました。156.0の一般的なWebGPU対応の記述を、そのまま個別のLayer機能やfoveationの提供条件へ当てはめないようにしましょう。
 
-## 既存のWebXRコンテンツは自動的にWebGPUになる？
+## 既存のWebXRコンテンツとWebGPU移行の条件
 
 ブラウザを更新しても、WebGLで作られたコンテンツが自動的にWebGPU描画へ置き換わるわけではありません。コンテンツ側のレンダラーやエンジンが、WebGPUとWebXRの組み合わせに対応している必要があります。
 
-導入を検討する際は、次の点を分けて確認すると原因を切り分けやすくなります。
+導入を検討する際は、ブラウザと端末の環境、エンジンの対応範囲、必要な機能、性能と画質の4点を分けて確認すると原因を切り分けやすくなります。
 
-- **ブラウザと端末**：Meta Browserの版数、Horizon OS、機種、実験フラグの状態を記録する。
-- **エンジンの対応**：通常のWebGPU描画だけでなく、使用する版でXRセッション中のWebGPU描画に対応しているか確認する。
-- **必要な機能**：VR / ARのセッション開始、左右の描画、入力、使用するLayersなどを個別に確認する。
-- **性能と画質**：WebGL版との比較は同じシーンと端末で行う。WebGPUに変更するだけで高速化すると決めつけない。
+- Meta Browserの版数、Horizon OS、機種、実験フラグの状態を記録しておきます。
+- 通常のWebGPU描画だけでなく、使用する版でXRセッション中のWebGPU描画に対応しているか確認します。
+- VR/ARのセッション開始、左右の描画、入力、使用するLayersなどを個別に確認します。
+- WebGL版との比較は同じシーンと端末で行い、WebGPUに変更するだけで高速化すると決めつけないようにします。
 
 foveationの仕組みについては、[Quest Browser 150.1の解説と比較デモ](/tech-articles/quest-browser-150-webgpu-foveation)も参考になります。過去の記事に示したバージョンの条件と、156.0での挙動は区別して確認してください。
 
-## 公式発表と実機確認を分けて捉える
+## 公式発表と実機確認の切り分け
 
 156.0は、WebGPUを利用するWebXRコンテンツを検討するうえで重要な更新です。一方、ブラウザの対応表記、個別機能の利用条件、標準仕様の策定状況、実際のコンテンツの動作は別々の事項です。
 
@@ -70,8 +70,8 @@ foveationの仕組みについては、[Quest Browser 150.1の解説と比較デ
 
 ## 参考情報
 
-- [Meta Browser 156.0 リリースノート](https://developers.meta.com/vr/downloads/package/browser/156.0/)
-- [Meta Browser 146.0 リリースノート](https://developers.meta.com/vr/downloads/package/browser/146.0/)
-- [Meta Browser 149.1 リリースノート](https://developers.meta.com/vr/downloads/package/browser/149.1/)
-- [Meta Browser 150.1 リリースノート](https://developers.meta.com/vr/downloads/package/browser/150.1/)
-- [Meta Browser 152.1 リリースノート](https://developers.meta.com/vr/downloads/package/browser/152.1/)
+- [Meta Browser 156.0リリースノート](https://developers.meta.com/vr/downloads/package/browser/156.0/)
+- [Meta Browser 146.0リリースノート](https://developers.meta.com/vr/downloads/package/browser/146.0/)
+- [Meta Browser 149.1リリースノート](https://developers.meta.com/vr/downloads/package/browser/149.1/)
+- [Meta Browser 150.1リリースノート](https://developers.meta.com/vr/downloads/package/browser/150.1/)
+- [Meta Browser 152.1リリースノート](https://developers.meta.com/vr/downloads/package/browser/152.1/)

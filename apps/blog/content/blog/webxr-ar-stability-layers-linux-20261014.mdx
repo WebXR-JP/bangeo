@@ -9,63 +9,63 @@ thumbnail: "/assets/tech/webxr-ar-stability-layers-linux-20261014.webp"
 draft: false
 ---
 
-WebXRの使いやすさは、APIが増えることだけでは決まりません。追跡が一時的に途切れた後に復帰できることや、AR内のフォームで文字を入力しても表示が消えないことも、体験の品質を左右します。
+WebXRの使いやすさは、APIが増えることだけでは決まりません。トラッキングが一時的に途切れた後に復帰できることや、AR内のフォームで文字を入力しても表示が消えないことも、体験の品質を左右します。
 
-2026年10月13〜14日（JST）、Chromiumのmainに平面検出とAndroidのDOM Overlayに関する修正が入りました。10月14日の確認時点で、一般配布のChromeや他のChromium系ブラウザへの収録は未確認です。本稿はソースと作者の説明を読むもので、BANGEOによる実機検証ではありません。
+2026年10月13〜14日（JST）、Chromiumの`main`ブランチに平面検出とAndroidのDOM Overlayに関する修正が入りました。10月14日の確認時点で、一般配布版のChromeや他のChromium系ブラウザへの収録は未確認です。本稿はソースコードと作者の説明を読み解くものであり、BANGEOによる実機検証ではありません。
 
 ![ヘッドセットを着けたマスコットが欠けた床面の復元を確認し、別のマスコットがAR内の入力パネルを持つ概念図](/assets/tech/webxr-ar-stability-layers-linux-20261014.webp)
 
-## 平面の情報が足りないときに、描画処理を止めない
+## 平面情報が不足しても描画を止めない修正
 
-10月13日09:51 JSTの[Chromium変更](https://github.com/chromium/chromium/commit/2285d4edc85e17f28623d2a12cbc18f31e88bf27)は、Plane Detectionの不完全な更新を扱います。追跡データを失ってキャッシュが消えた後に、端末から「変更のない平面ID」だけが届くと、従来はキャッシュに存在する前提のチェックでrendererが停止し得ました。
+10月13日09:51 JSTの[Chromium変更](https://github.com/chromium/chromium/commit/2285d4edc85e17f28623d2a12cbc18f31e88bf27)は、平面検出（Plane Detection）の不完全な更新を扱います。トラッキングデータを失ってキャッシュが消えた後に、端末から「変更のない平面ID」だけが届くと、従来はキャッシュに存在する前提のチェックによってレンダラーが停止する可能性がありました。
 
-修正は、更新データにもキャッシュにもないIDを無視し、後で完全なデータが届けば平面を作り直せるようにするものです。新しい平面認識APIや検出精度の改善ではなく、不整合な更新に耐える処理です。
+この修正では、更新データにもキャッシュにも存在しないIDを無視し、後から完全なデータが届いたときに平面を作り直せるようにしています。新しい平面認識APIの追加や検出精度の向上ではなく、不整合な更新に耐えるための処理です。
 
-アプリ側でも、床や壁が一度見つかれば永久に同じデータが届くとは仮定できません。追跡喪失、復帰、平面の追加・削除を検証し、平面が取れないフレームで操作を続けるか、表示を保留するかを設計しておく必要があります。
+アプリ側でも、床や壁を一度検出したからといって同じデータが永続的に届くとは仮定できません。トラッキングの喪失と復帰、平面の追加・削除を想定して検証し、平面が取得できないフレームで操作を継続するか、表示を保留するかをあらかじめ設計しておく必要があります。
 
-## AndroidのAR内文字入力で起きる空白を減らす
+## AndroidのAR内文字入力で起きる空白の軽減
 
-10月14日07:27 JSTの[DOM Overlay変更](https://github.com/chromium/chromium/commit/647269fd5c005b26cd9025e9abe323a72c15ae1d)は、Android/ARCoreの合成処理を扱います。文字選択、カーソル、キーボードなどでDOMのSurfaceIdが変わると、新しいsurfaceが有効になるまでoverlayが空白になることがありました。
+10月14日07:27 JSTの[DOM Overlay変更](https://github.com/chromium/chromium/commit/647269fd5c005b26cd9025e9abe323a72c15ae1d)は、Android/ARCoreの合成処理を対象としています。文字選択、カーソル移動、キーボード表示などでDOMの`SurfaceId`が変わると、新しいサーフェスが有効になるまでオーバーレイが空白になることがありました。
 
-修正では、セッション開始時から最新までのsurfaceの範囲を参照し、最後に有効なDOMを描画します。カメラやWebXRフレーム全体をDOM側の描画待ちにする方式ではありません。作者はNothing Phone 3a、Pixel 7a、Samsung S23で確認したと記録しています。ただし、選択ハンドル自体が表示されない課題は残ります。
+修正後は、セッション開始時から最新までのサーフェス範囲を参照し、直近で有効だったDOMを描画します。カメラ映像やWebXRフレーム全体をDOM側の描画完了まで待たせる方式ではありません。作者はNothing Phone 3a、Pixel 7a、Samsung S23で動作を確認したと記録しています。ただし、選択ハンドル自体が表示されない課題は残っています。
 
-これはGalaxy XRやXREAL AURA固有の修正ではありません。Androidスマートフォン向けARのフォームを検証するなら、文字入力、選択、キーボード開閉、セッション終了後の通常ページへの復帰を別々に試してください。
+これはGalaxy XRやXREAL AURA固有の修正ではありません。Androidスマートフォン向けARでフォームを検証する際は、文字入力、範囲選択、キーボードの開閉、セッション終了後の通常ページへの復帰をそれぞれ個別に確認してください。
 
 ## Layersで左右の映像を分ける仕様上の課題
 
-10月14日07:00 JSTに作成された[Layers #343](https://github.com/immersive-web/layers/issues/343)は、`getSubImage()`の手順に関する問題提起です。左右または上下に詰めた立体画像のlayoutで、両眼に先頭側のviewportを返してしまう可能性が指摘されています。10月14日の確認時点ではopenで、仕様修正のマージではありません。
+10月14日07:00 JSTに起票された[Layers #343](https://github.com/immersive-web/layers/issues/343)は、`getSubImage()`の手順に関する問題提起です。左右または上下に並べた立体画像のレイアウトで、両眼に先頭側のビューポートを返してしまう可能性が指摘されています。10月14日の確認時点では未解決（open）であり、仕様修正がマージされた段階ではありません。
 
-[Layers仕様](https://www.w3.org/TR/webxrlayers-1/#dom-xrwebglbinding-getsubimage)のアルゴリズムでは、右眼のindex変更が`stereo`の場合に限定されている点が焦点です。全ブラウザで同じ不具合が再現したという報告としては扱えません。
+[Layers仕様](https://www.w3.org/TR/webxrlayers-1/#dom-xrwebglbinding-getsubimage)のアルゴリズムで、右眼のインデックス変更が`stereo`レイアウトの場合に限定されている点が焦点となっています。すべてのブラウザで同じ不具合が再現したという報告ではないため、その前提で読む必要があります。
 
-検証には、左眼用と右眼用で明確に違う模様を描いた画像が有効です。左右分割と上下分割を分け、返されたviewportと各眼で見える領域、`invertStereo`による入れ替えを確認します。実装独自の回避コードを足す前に、対象ブラウザで再現するかを確かめてください。
+手元で検証する場合は、左眼用と右眼用で明確に異なる模様を描いた画像を用意すると分かりやすくなります。左右分割と上下分割を切り分け、返されたビューポートと各眼で見える領域、`invertStereo`による左右入れ替えを確認します。アプリ側で独自の回避処理を入れる前に、対象ブラウザで実際に再現するかどうかを確かめてください。
 
-## Linux OpenXRのmain反映とSteam Frameの製品対応を分ける
+## Linux OpenXRのmain反映とSteam Frame製品対応の切り分け
 
-ここからは今日の新発表ではなく、過去更新の補足です。Chromiumの[Linux OpenXR provider](https://github.com/chromium/chromium/commit/71d17e1a0c31fafd54bf5ee1e080441aa62c6624)は9月30日01:40 JSTにmainへ入りました。変更はLinuxでOpenXRデバイスを作成し、`immersive-vr`を接続する経路を含みます。commitにはOpenXR機能が既定で無効で、`--enable-features=OpenXR`を必要とする旨が記載されています。
+ここからは当日の新発表ではなく、過去更新の補足です。Chromiumの[Linux向けOpenXRプロバイダー](https://github.com/chromium/chromium/commit/71d17e1a0c31fafd54bf5ee1e080441aa62c6624)は9月30日01:40 JSTに`main`へ入りました。Linux上でOpenXRデバイスを作成し、`immersive-vr`へ接続する経路を含む変更です。コミットメッセージには、OpenXR機能が既定で無効であり、`--enable-features=OpenXR`の指定が必要である旨が記載されています。
 
-この変更だけで、Steam Frameの標準ブラウザへWebXRが配布済みとは判断できません。[Valve開発者の公式フォーラム投稿](https://steamcommunity.com/app/4165890/discussions/1/590690402783379841/)と、[非公式の実機報告](https://github.com/saphid/chromium-webxr-steam-frame)を分けて読む必要があります。
+この変更だけをもって、Steam Frameの標準ブラウザへWebXRが配布済みと判断することはできません。[Valve開発者の公式フォーラム投稿](https://steamcommunity.com/app/4165890/discussions/1/590690402783379841/)と、[非公式の実機報告](https://github.com/saphid/chromium-webxr-steam-frame)を分けて読む必要があります。
 
-非公式報告はSteam Frame本体のarm64 Chromiumと本体SteamVRを使う構成です。PC上のブラウザと接続するPCVRとは別です。OpenXRランタイムが存在しても、手入力、AR、Layers、Depth、Passthrough、Anchors、WebGPUのXR連携が全て動くことにはなりません。これらの標準ブラウザ対応は今回未確認です。
+非公式報告は、Steam Frame本体のarm64版Chromiumと本体のSteamVRを使う構成であり、PC上のブラウザと接続するPCVRとは異なります。また、OpenXRランタイムが存在しても、ハンドトラッキング、AR、Layers、深度センシング、パススルー、アンカー、WebGPUのXR連携がすべて動くわけではありません。標準ブラウザでのこれらへの対応は、今回未確認です。
 
-非公式ビルドの安全設定や配布条件を、最新Chromiumや公式ブラウザ全体の性質に読み替えることも避けてください。本稿は非公式ビルドの導入手順を推奨するものではありません。
+非公式ビルドのセキュリティ設定や配布条件を、最新Chromiumや公式ブラウザ全体の性質として読み替えることも避けてください。本稿は非公式ビルドの導入を推奨するものではありません。
 
-## 小さなブラウザ修正も配布版を確認する
+## ブラウザの小さな修正と配布版の確認
 
-Wolvicでは10月13日21:46 JSTに、計測をOFFにしたとき実際のOpenTelemetry処理を停止する[main修正](https://github.com/Igalia/wolvic/commit/1423a823296e9db83e105d541a766cf53695b635)が入りました。WebXR APIの追加ではなく、ブラウザ設定の実効性に関わる変更です。正式リリースへの収録は今回未確認です。
+Wolvicでは10月13日21:46 JSTに、計測をオフにしたとき実際のOpenTelemetry処理を停止する[mainブランチ向けの修正](https://github.com/Igalia/wolvic/commit/1423a823296e9db83e105d541a766cf53695b635)が入りました。WebXR APIの追加ではなく、ブラウザ設定の実効性に関わる変更です。正式リリース版への収録は今回未確認です。
 
 | 情報の段階 | 開発者が確認すること |
 | --- | --- |
 | Issue・PR | 問題提起か、レビュー中の修正案か |
-| mainへのマージ | どのコードが変わったか |
-| 正式リリース | 利用中の版に含まれるか |
-| 実機動作 | OS・ブラウザ・ランタイム・要求機能の組合せ |
+| `main`へのマージ | どのコードが変わったか |
+| 正式リリース | 利用中のバージョンに含まれるか |
+| 実機動作 | OS・ブラウザ・ランタイム・要求機能の組み合わせ |
 
-今回の修正から学べるのは、追跡、DOM、両眼描画、ランタイム接続を別々に検証することです。ソースが改善された段階と、読者の端末で使える段階を分けることで、アップデートを判断する根拠が明確になります。
+トラッキング、DOM合成、両眼描画、ランタイム接続はそれぞれ挙動が異なるため、切り分けて検証することが重要です。ソースコードが改善された段階と、利用者の端末で使える段階を区別して追うことで、アップデートへの対応判断がしやすくなります。
 
 ## 一次参照
 
 - [Chromium：不完全な平面更新を許容する修正](https://github.com/chromium/chromium/commit/2285d4edc85e17f28623d2a12cbc18f31e88bf27)
-- [Chromium：AR合成でDOM surfaceの範囲を使う修正](https://github.com/chromium/chromium/commit/647269fd5c005b26cd9025e9abe323a72c15ae1d)
+- [Chromium：AR合成でDOMサーフェスの範囲を使う修正](https://github.com/chromium/chromium/commit/647269fd5c005b26cd9025e9abe323a72c15ae1d)
 - [WebXR Layers #343](https://github.com/immersive-web/layers/issues/343)
 - [Chromium：Linux OpenXR runtime](https://github.com/chromium/chromium/commit/71d17e1a0c31fafd54bf5ee1e080441aa62c6624)
 - [Wolvicの計測停止修正](https://github.com/Igalia/wolvic/commit/1423a823296e9db83e105d541a766cf53695b635)

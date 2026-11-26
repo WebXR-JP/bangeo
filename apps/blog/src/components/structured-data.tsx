@@ -8,7 +8,7 @@ const organizationSchema = {
 	logo: `${SITE_URL}/favicon.png`,
 	sameAs: ["https://x.com/bangeo_jp"],
 	description:
-		"WebXR や空間コンピュータの日本語リソースサイト。デモや技術情報を公開しています。",
+		"WebXRや空間コンピューティングの日本語情報サイト。技術記事やデモ、対応状況を公開しています。",
 };
 
 const websiteSchema = {
@@ -17,7 +17,7 @@ const websiteSchema = {
 	name: "BANGEO（バンオ）",
 	url: SITE_URL,
 	description:
-		"WebXR や空間コンピュータの日本語リソースサイト。デモや技術情報を公開しています。",
+		"WebXRや空間コンピューティングの日本語情報サイト。技術記事やデモ、対応状況を公開しています。",
 	inLanguage: "ja",
 };
 

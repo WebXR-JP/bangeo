@@ -16,11 +16,11 @@ export const WEBXR_PLATFORMS: PlatformProfile[] = [
 		link: "https://developer.android.com/develop/xr/web",
 		category: "browser",
 		features: [
-			"ヘッドセットと有線XRグラスを対象にWebXRを案内。機器例はSamsung Galaxy XR、XREAL AURA",
-			"公式一覧: Device API / AR / Gamepads / Hit Test / Hand Input / Anchors / Depth Sensing / Light Estimation",
+			"ヘッドセットや有線XRグラス向けにWebXRを案内しています（対応予定・対象例: Samsung Galaxy XR、XREAL AURA）",
+			"公式ドキュメント記載のAPI: Device API / AR / Gamepads / Hit Test / Hand Input / Anchors / Depth Sensing / Light Estimation",
 		],
 		notes:
-			"2026年10月13日確認。AURAは公式WebXRデモあり・製品版の実機検証待ち。プラットフォーム対応は各機器・モード・機能の実測を保証しません。",
+			"2026年10月13日確認。XREAL AURAは公式WebXRデモが公開されていますが、製品版での実機検証待ちです。プラットフォーム全体の一覧は、個別端末での動作を保証するものではありません。",
 	},
 	{
 		id: "meta-quest-browser",
@@ -28,11 +28,11 @@ export const WEBXR_PLATFORMS: PlatformProfile[] = [
 		link: "https://developers.meta.com/horizon/release-notes/web/",
 		category: "browser",
 		features: [
-			"Chromium ベースの Quest シリーズ標準ブラウザ。immersive-vr / immersive-ar に対応",
-			"Hand Input Module（15.1+）、Depth Sensing（146.0+ / depth projection）、WebGPU composition layers（152.1 / 実験機能）を案内",
+			"ChromiumベースのMeta Questシリーズ標準ブラウザで、immersive-vrとimmersive-arに対応しています",
+			"Hand Input Module（15.1+）、Depth Sensing（146.0+ / depth projection）、WebGPU composition layers（152.1 / 実験機能）に対応しています",
 		],
 		notes:
-			"2026年10月14日確認。152.1の公式リリースノート（10月2日）は WebGPU composition layers に chrome://flags の webxr experiments を要求します。端末別の配布・実測は未確認。一次情報: https://developers.meta.com/vr/downloads/package/browser/152.1/?view=full_width",
+			"2026年10月14日確認。152.1のリリースノート（2026年10月2日）では、WebGPU composition layersを使うためにchrome://flagsでwebxr experimentsを有効にする必要があると案内されています。端末ごとの配布状況や実測結果は未確認です。一次情報: https://developers.meta.com/vr/downloads/package/browser/152.1/?view=full_width",
 	},
 	{
 		id: "wolvic",
@@ -40,23 +40,23 @@ export const WEBXR_PLATFORMS: PlatformProfile[] = [
 		link: "https://wolvic.com/",
 		category: "browser",
 		features: [
-			"Igalia が開発するオープンソースの XR ブラウザ（旧 Firefox Reality 後継）",
-			"Meta Quest / Pico / VIVE / Lynx など主要スタンドアロン HMD で利用可能",
+			"Igaliaが開発するオープンソースのXRブラウザです（Firefox Realityの後継）",
+			"Meta Quest、PICO、VIVE、Lynxなどの主要なスタンドアロン型ヘッドセットで利用できます",
 		],
 		notes:
-			"Firefox Reality の後継として開発され、Quest・Pico・VIVE の各ストアで配信されています。",
+			"Quest・PICO・VIVEの各公式ストアから導入できます。",
 	},
 	{
 		id: "pico-browser",
-		name: "Pico Browser",
+		name: "PICO Browser",
 		link: "https://www.pico-interactive.com/",
 		category: "browser",
 		features: [
-			"Chromium ベースの Pico シリーズ標準ブラウザ。immersive-vr に対応",
-			"Pico 4 / Pico 4 Ultra で WebXR コンテンツの VR 表示が可能",
+			"ChromiumベースのPICOシリーズ標準ブラウザで、immersive-vrに対応しています",
+			"PICO 4やPICO 4 UltraでWebXRのVRコンテンツを開けます",
 		],
 		notes:
-			"Pico スタンドアロン機の標準ブラウザ。Wolvic をサイドロードして利用することもできます。",
+			"PICOスタンドアロン機の標準ブラウザです。別ブラウザとしてWolvicをサイドロードして使う方法もあります。",
 	},
 	{
 		id: "vive-browser",
@@ -64,10 +64,10 @@ export const WEBXR_PLATFORMS: PlatformProfile[] = [
 		link: "https://www.vive.com/",
 		category: "browser",
 		features: [
-			"HTC VIVE スタンドアロン機の標準ブラウザ。WebXR に対応",
-			"VIVE Focus Vision / VIVE XR Elite で直接 WebXR コンテンツを閲覧可能",
+			"HTC VIVEスタンドアロン機の標準ブラウザで、WebXRに対応しています",
+			"VIVE Focus VisionやVIVE XR EliteでそのままWebXRコンテンツを開けます",
 		],
-		notes: "VIVE Browser に加え、Wolvic も Vive 公式ストアから導入できます。",
+		notes: "VIVE Browserのほか、WolvicもVIVE公式ストアから導入できます。",
 	},
 	{
 		id: "safari-visionos",
@@ -75,11 +75,11 @@ export const WEBXR_PLATFORMS: PlatformProfile[] = [
 		link: "https://developer.apple.com/visionos/",
 		category: "browser",
 		features: [
-			"Apple Vision Pro の Safari で immersive-vr に対応。immersive-ar は対応未確認",
-			"視線・ジェスチャー操作による WebXR 体験が可能",
+			"Apple Vision ProのSafariでimmersive-vrに対応しています（immersive-arは未確認）",
+			"視線と手のジェスチャーでWebXRコンテンツを操作できます",
 		],
 		notes:
-			"2026年10月14日確認。WebKit issue 305459 は visionOS の immersive-ar 未対応時の誤判定修正を記録しています。iOS/macOS の Safari とは区別し、拡張機能は OS・ブラウザ版ごとに確認してください。一次情報: https://bugs.webkit.org/show_bug.cgi?id=305459",
+			"2026年10月14日確認。WebKit issue 305459で、visionOSでimmersive-ar未対応時に誤判定する不具合が修正されています。iOS・macOSのSafariとは仕様が異なるため、拡張機能の対応はOSとブラウザのバージョンごとに確認してください。一次情報: https://bugs.webkit.org/show_bug.cgi?id=305459",
 	},
 	{
 		id: "chrome-android",
@@ -87,10 +87,11 @@ export const WEBXR_PLATFORMS: PlatformProfile[] = [
 		link: "https://web.dev/articles/webxr",
 		category: "browser",
 		features: [
-			"ARCore 対応端末で WebXR AR Module（immersive-ar）に対応",
-			"Hit Test / DOM Overlays / Anchors / Hand Input（131+）をサポート",
+			"ARCore対応端末でWebXR AR Module（immersive-ar）に対応しています",
+			"Hit Test、DOM Overlays、Anchors、Hand Input（131+）に対応しています",
 		],
-		notes: "ARCore 対応端末が前提。スマートフォン AR の主要な配信先です。",
+		notes:
+			"ARCore対応端末が前提です。スマートフォン向けWebXR ARの代表的な実行環境です。",
 	},
 	{
 		id: "samsung-internet",
@@ -98,11 +99,10 @@ export const WEBXR_PLATFORMS: PlatformProfile[] = [
 		link: "https://developer.samsung.com/internet",
 		category: "browser",
 		features: [
-			"Android 向けブラウザ。ARCore 経由で WebXR AR に対応",
-			"Samsung Galaxy XR（Android XR）でも WebXR 体験を提供",
+			"Android向けブラウザで、ARCore経由のWebXR ARに対応しています",
+			"Samsung Galaxy XR（Android XR）向けにも提供されています",
 		],
-		notes:
-			"Chrome と同じ Chromium ベースで、Android 端末での WebXR 体験を広げています。",
+		notes: "Chromeと同じChromiumベースで動作します。",
 	},
 	{
 		id: "chromium-steam-frame",
@@ -111,9 +111,9 @@ export const WEBXR_PLATFORMS: PlatformProfile[] = [
 		category: "browser",
 		features: [
 			STEAM_FRAME_WEBXR.summary,
-			"OSのBeta設定: Settings > System > System Update Channel",
+			"OSのBeta切り替え: Settings > System > System Update Channel",
 		],
-		notes: `${STEAM_FRAME_WEBXR.limitations}（${STEAM_FRAME_WEBXR.lastChecked}公式情報確認）。一次情報: ${STEAM_FRAME_WEBXR.sourceUrl}`,
+		notes: `${STEAM_FRAME_WEBXR.limitations}（${STEAM_FRAME_WEBXR.lastChecked}に公式情報を確認）。一次情報: ${STEAM_FRAME_WEBXR.sourceUrl}`,
 	},
 	{
 		id: "chrome-edge-desktop",
@@ -121,11 +121,11 @@ export const WEBXR_PLATFORMS: PlatformProfile[] = [
 		link: "https://chromestatus.com/features?q=webxr",
 		category: "browser",
 		features: [
-			"PC 接続型 HMD と OpenXR ランタイムを組み合わせて WebXR を体験",
-			"Hand Input Module（131+）に対応。Chrome / Edge は同じ Chromium ベース",
+			"PC接続型ヘッドセットとOpenXRランタイムを組み合わせてWebXRを利用できます",
+			"Hand Input Module（131+）に対応しています。両ブラウザともChromiumベースです",
 		],
 		notes:
-			"HTC VIVE Pro 2 などの PCVR ヘッドセットを接続した PC で WebXR コンテンツを利用できます。",
+			"HTC VIVE Pro 2などのPCVRヘッドセットを接続したPCでWebXRコンテンツを開けます。",
 	},
 	{
 		id: "xrift",
@@ -133,11 +133,11 @@ export const WEBXR_PLATFORMS: PlatformProfile[] = [
 		link: "https://xrift.net/",
 		category: "service",
 		features: [
-			"インストール不要でアクセスできるクロスプラットフォームメタバース",
-			"React Three Fiber ベースでワールドを構築し、URL 共有だけで参加できます",
+			"アプリを入れずにブラウザから参加できるメタバースサービスです",
+			"React Three Fiberベースでワールドを構築でき、URLを共有するだけで入れます",
 		],
 		notes:
-			"PC・スマートフォン・VR ヘッドセットをまたいで同じワールド体験を提供する国内発のサービスです。",
+			"PC・スマートフォン・VRヘッドセットから同じワールドへ入れる国内発のサービスです。",
 	},
 	{
 		id: "deovr",
@@ -145,10 +145,9 @@ export const WEBXR_PLATFORMS: PlatformProfile[] = [
 		link: "https://deovr.com/",
 		category: "service",
 		features: [
-			"360° / 180° / 3D の VR 動画と写真を配信する没入型メディアプラットフォーム",
-			"8K・120fps・パススルー対応など、高品質な VR 視聴体験を継続的に提供しています",
+			"360°・180°・3DのVR動画や写真を配信するメディアプラットフォームです",
+			"8K・120fps再生やパススルー表示に対応しています",
 		],
-		notes:
-			"Web と専用アプリの両方で展開されている、没入型動画視聴の代表的なプラットフォームです。",
+		notes: "Webブラウザと専用アプリの両方で利用できます。",
 	},
 ];

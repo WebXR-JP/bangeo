@@ -172,93 +172,93 @@ const BROWSER_ROWS = [
 		env: "Meta Quest Browser",
 		view: (
 			<>
-				<code>immersive-vr</code> / <code>immersive-ar</code>の主要検証環境
+				<code>immersive-vr</code> / <code>immersive-ar</code>の主な検証環境です
 			</>
 		),
-		policy: "Quest実機デモとWebXR仕様更新を優先して追跡",
+		policy: "ヘッドセット単体でVRとパススルーARの両方を試せます",
 	},
 	{
-		env: "Chrome / Edge",
-		view: "端末・OS・XR runtimeによって利用可否が変わる",
-		policy: "WebXR EmulatorやPC VR検証の入口として扱う",
+		env: "Chrome / Edge（PC）",
+		view: "端末・OS・OpenXRランタイムの組み合わせで利用可否が変わります",
+		policy: "PCVR接続やエミュレータを使った開発・デバッグに向いています",
 	},
 	{
 		env: "Android Chrome",
 		view: (
 			<>
-				ARCore対応端末で<code>immersive-ar</code>の検証候補
+				ARCore対応端末で<code>immersive-ar</code>を使えます
 			</>
 		),
-		policy: "Hit TestやスマートフォンARの検証対象",
+		policy: "Hit Testなどのスマートフォン向けAR機能の検証に使います",
 	},
 	{
 		env: "iOS Safari",
-		view: "WebXR Device APIは直接使えない前提で設計",
-		policy: "App Clip、WebAR、AR Quick Lookなどの代替経路を検討",
+		view: "WebXR Device APIは直接使えない前提で設計します",
+		policy: "App Clip、カメラベースのWebAR、AR Quick Lookなどを検討します",
 	},
 	{
 		env: "visionOS Safari",
-		view: "Apple Vision Pro向けのWebXR検証環境",
-		policy: "Spatial Web、immersive website、HTML model要素とあわせて追跡",
+		view: "Apple Vision ProでWebXRを動かす環境です",
+		policy: "WebXRに加え、SafariのSpatial Web機能やHTML model要素もあわせて確認します",
 	},
 ];
 
 const TERMS = [
 	{
 		term: "XRSession",
-		body: "WebXR体験の実行単位。inline、immersive-vr、immersive-arのsession modeを指定して開始します。",
+		body: "WebXR体験の実行単位です。inline、immersive-vr、immersive-arのいずれかのモードを指定して開始します。",
 	},
 	{
 		term: "XRReferenceSpace",
-		body: "座標系の基準。viewer、local、local-floor、bounded-floor、unboundedなどを使い分けます。",
+		body: "3D空間の基準となる座標系です。viewer、local、local-floor、bounded-floor、unboundedなどを体験に合わせて使い分けます。",
 	},
 	{
 		term: "XRFrame",
-		body: "各フレームのpose、input source、hit test結果などを読むためのオブジェクトです。",
+		body: "描画フレームごとに視点の位置・向き（ポーズ）、入力状態、ヒットテストの結果などを読み取るオブジェクトです。",
 	},
 	{
 		term: "XRInputSource",
-		body: "controller、hand tracking、gazeなど、ユーザー入力を表します。",
+		body: "コントローラーやハンドトラッキング、視線など、ユーザーの入力手段を表します。",
 	},
 	{
 		term: "requiredFeatures / optionalFeatures",
-		body: "hit-test、local-floor、dom-overlayなど、セッション開始時に要求または任意指定する機能です。",
+		body: "hit-test、local-floor、dom-overlayなど、セッション開始時に必須または任意で要求する機能の指定です。",
 	},
 	{
-		term: "fallback",
-		body: "WebXRや特定featureが使えない場合に、通常3D表示、画像、WebARなどへ落とす設計です。",
+		term: "フォールバック（fallback）",
+		body: "WebXRや特定の機能が使えない環境向けに、通常の3D表示や静止画、別方式のWebARへ切り替える設計です。",
 	},
 ];
 
 const MODULES = [
 	{
 		name: "Hit Test Module",
-		body: "現実空間の平面や特徴点に対してrayを飛ばし、ARオブジェクトを置く位置を求めます。スマートフォンARやQuestのpassthrough ARでよく使います。",
+		body: "現実空間の床や机に向けて仮想の線（レイ）を飛ばし、ARオブジェクトを置ける位置を求める仕様です。スマートフォンARやQuestのパススルーARでよく使います。",
 		link: "/demos/hit-test-advanced",
 	},
 	{
 		name: "DOM Overlays Module",
-		body: "immersive-ar中にHTML UIを重ねるためのModuleです。開始/終了ボタン、設定パネル、フォームなどを通常のDOMで扱いやすくします。",
+		body: "immersive-arの実行中にHTMLのUIを重ねて表示する仕様です。開始・終了ボタンや設定パネル、フォームを通常のDOMのまま扱えます。",
 		link: "/tech-articles/webxr-html-ui-dom-overlay-html-in-canvas-spatial-css",
 	},
 	{
 		name: "Hand Input Module",
-		body: "hand tracking（手の関節pose）を扱うModuleです。controllerがない環境でもpinchやdirect touchに近い入力設計を検討できます。",
+		body: "ハンドトラッキングで手や指の関節位置を取得する仕様です。コントローラーがない環境でも、つまむ操作や直接触れるUIを組み立てられます。",
 		link: "/demos/hand-tracking-advanced",
 	},
 	{
 		name: "Layers API",
-		body: "projection layer、quad layerなど、WebXR描画をlayer単位で扱うための仕様です。高解像度UI、動画、foveated renderingと関係します。",
+		body: "プロジェクションレイヤーやクワッドレイヤーなど、描画をレイヤー単位でヘッドセットのコンポジターに渡す仕様です。文字や動画のにじみを抑えたい場面やフォービエーションと関わります。",
 		link: "/tech-articles/threejs-r184-webxr-layers-hand-model-cache",
 	},
 	{
 		name: "Depth Sensing Module",
-		body: "現実空間のdepth情報を使い、depth occlusionやMR合成を行うためのModuleです。Quest Browser 146以降のdepth projection検証とも関係します。",
+		body: "現実空間の奥行き（深度）データを取得し、現実の物体の後ろに3Dモデルが隠れる遮蔽表現やMR合成を行う仕様です。Quest Browser 146以降のdepth projectionとも関わります。",
 		link: "/webxr-status",
 	},
 	{
 		name: "WebXR/WebGPU Binding",
-		body: "WebGPUでWebXRセッションに描画するための接続仕様です。Quest BrowserのExperimental WebGPU supportとあわせて追跡しています。",
+		body: "WebGPUで描いた映像をWebXRセッションへ出力するための連携仕様です。Quest Browserの実験的なWebGPU対応とあわせて動向を追っています。",
 		link: "/tech-articles/quest-browser-146-webgpu-webxr",
 	},
 ];
@@ -366,17 +366,16 @@ export default async function WebXRExplainerPage() {
 							<strong className="font-bold text-gray-950">
 								WebXR Device API
 							</strong>
-							は、VR（仮想現実）やAR（拡張現実）デバイスへのアクセスを提供するWeb
+							は、ブラウザからVR（仮想現実）やAR（拡張現実）デバイスを扱うためのWeb
 							APIです。W3Cの勧告候補草案（Candidate Recommendation
-							Draft）として策定が進んでおり、W3C
-							Recommendationとしてはまだ確定していません。ブラウザ上でVR/AR体験を開発・配信することを可能にします。
+							Draft）として策定が進んでおり、正式なW3C勧告（Recommendation）にはまだ至っていません。
 						</p>
 						<p className={BODY}>
-							従来、VR/AR体験を提供するにはネイティブアプリの開発が必要でしたが、WebXRを使えば
+							これまでVRやARの体験を届けるには専用アプリの開発が必要でしたが、WebXRなら
 							<strong className="font-bold text-gray-950">
-								URLを開くだけで
+								URLを開くだけ
 							</strong>
-							没入体験を届けられます。インストール不要、クロスプラットフォーム対応という、Webならではの強みを活かせます。
+							で始められます。アプリを入れずに複数の端末へ配れるのがWebならではの利点です。
 						</p>
 					</Section>
 
@@ -412,8 +411,8 @@ export default async function WebXRExplainerPage() {
 							))}
 						</ol>
 						<p className={BODY}>
-							はじめてWebXRを触る場合は、まずデモを実機で開き、次に対応ブラウザとデバイスを確認し、最後に使うライブラリを選ぶ順番が現実的です。iPhoneではSafari単体のWebXR
-							AR対応に制限があるため、iOS向けには
+							はじめてWebXRを触るときは、まずデモを実機で開き、次に対応ブラウザとデバイスを調べ、最後に使うライブラリを選ぶ順で進めると迷いにくくなります。iPhoneではSafari単体でのWebXR
+							AR対応に制約があるため、iOS向けには
 							<Link
 								href="/tech-articles/ios-webxr-app-clip-guide"
 								className="text-link font-bold"
@@ -426,9 +425,10 @@ export default async function WebXRExplainerPage() {
 
 					<Section id="browser-support">
 						<p className={BODY}>
-							WebXRはHTTPSなどのsecure contextで動作する実験的なWeb
-							APIです。MDNではLimited
-							availabilityとして扱われており、本番導入ではブラウザ互換性とfallbackを確認する必要があります。
+							WebXRはHTTPSなどの安全なコンテキスト（secure
+							context）で動くWeb
+							APIです。MDNでは対応ブラウザが限られる機能（Limited
+							availability）とされており、本番で使う際はブラウザごとの対応差とフォールバックを前提に設計します。
 						</p>
 						{/* 768px からは表。それより狭い幅では行ごとに縦に積み、各値に見出しを添える */}
 						<div className="card overflow-clip">
@@ -445,13 +445,13 @@ export default async function WebXRExplainerPage() {
 											scope="col"
 											className="px-5 py-3 text-[13px] font-bold text-gray-700"
 										>
-											WebXRの見方
+											対応の目安
 										</th>
 										<th
 											scope="col"
 											className="px-5 py-3 text-[13px] font-bold text-gray-700"
 										>
-											BANGEOでの扱い
+											開発・検証のポイント
 										</th>
 									</tr>
 								</thead>
@@ -469,13 +469,13 @@ export default async function WebXRExplainerPage() {
 											</th>
 											<td className="mt-2 block break-phrase leading-[1.7] text-gray-700 md:mt-0 md:table-cell md:px-5 md:py-4 md:align-top">
 												<span className="block text-xs font-bold text-gray-500 md:hidden">
-													WebXRの見方
+													対応の目安
 												</span>
 												{row.view}
 											</td>
 											<td className="mt-2 block break-phrase leading-[1.7] text-gray-700 md:mt-0 md:table-cell md:px-5 md:py-4 md:align-top">
 												<span className="block text-xs font-bold text-gray-500 md:hidden">
-													BANGEOでの扱い
+													開発・検証のポイント
 												</span>
 												{row.policy}
 											</td>
@@ -485,8 +485,7 @@ export default async function WebXRExplainerPage() {
 							</table>
 						</div>
 						<p className={NOTE}>
-							対応状況はブラウザ・OS・端末・feature
-							flagで変わります。デバイスごとの対応は
+							対応状況はブラウザ、OS、端末、実験フラグの設定によって変わります。デバイスごとの対応は
 							<Link href="/devices" className="text-link font-bold">
 								対応デバイス一覧
 							</Link>
@@ -518,8 +517,8 @@ export default async function WebXRExplainerPage() {
 
 					<Section id="minimal-code">
 						<p className={BODY}>
-							WebXRアプリは、対応確認、セッション開始、reference
-							space取得、フレームループの順に組み立てます。実際の描画はThree.jsやBabylon.jsなどのライブラリに任せることが多いですが、APIの流れは次の形です。
+							WebXRアプリは、対応確認、セッション開始、参照空間（reference
+							space）の取得、フレームループの順に組み立てます。実際の描画はThree.jsやBabylon.jsなどのライブラリに任せることが多いですが、APIの基本の流れは次のとおりです。
 						</p>
 						<figure className="code-block-figure" data-language="javascript">
 							<figcaption className="code-block-header">
@@ -532,17 +531,14 @@ export default async function WebXRExplainerPage() {
 							</div>
 						</figure>
 						<p className={NOTE}>
-							本番では、HTTPS配信、ユーザー操作を起点にしたsession開始、権限エラー、feature未対応、WebGL/WebGPU
-							context loss、通常表示へのfallbackを必ず扱います。
+							本番では、HTTPS配信、ユーザー操作を起点にしたセッション開始、権限エラー、機能未対応、WebGL・WebGPUのコンテキスト消失、通常表示へのフォールバックを必ず考慮します。
 						</p>
 					</Section>
 
 					<Section id="modules">
 						<p className={BODY}>
 							WebXR Device
-							APIは中核となるセッション・pose・入力・描画の仕組みを提供し、ARやhand
-							tracking、hit test、layers、depth
-							sensingなどは追加Moduleとして整理されています。実装時は「WebXR対応ブラウザか」だけでなく、「必要なModuleがその端末で使えるか」を分けて確認します。
+							APIはセッション、視点の姿勢（ポーズ）、入力、描画といった基本部分を担当します。ARやハンドトラッキング、ヒットテスト、レイヤー、深度センシングなどは追加モジュールとして仕様が分かれています。実装時は「WebXR対応ブラウザか」だけでなく、「使いたいモジュールがその端末で動くか」まで確認します。
 						</p>
 						<ul className="grid gap-x-10 gap-y-8 md:grid-cols-2">
 							{MODULES.map((item) => (
@@ -569,11 +565,11 @@ export default async function WebXRExplainerPage() {
 								<ul className="mt-3 space-y-2.5 text-base leading-[1.7] text-gray-700">
 									{[
 										"HTTPSで配信している",
-										"ユーザー操作からrequestSession()を呼んでいる",
-										"isSessionSupported()でsession modeを確認している",
-										"requiredFeaturesとoptionalFeaturesを分けている",
-										"WebXR不可の場合のfallbackを用意している",
-										"Meta Quest / Android / PC / iOSで分岐を確認している",
+										"ユーザー操作を起点にrequestSession()を呼んでいる",
+										"isSessionSupported()でセッションモードの対応を確認している",
+										"requiredFeaturesとoptionalFeaturesを使い分けている",
+										"WebXRが使えない環境向けのフォールバックを用意している",
+										"Meta Quest・Android・PC・iOSそれぞれの分岐を確認している",
 									].map((item) => (
 										<li key={item} className="flex gap-3">
 											<span
@@ -588,15 +584,15 @@ export default async function WebXRExplainerPage() {
 								</ul>
 							</div>
 							<div>
-								<h3 className={H3}>失敗しやすいところ</h3>
+								<h3 className={H3}>つまずきやすい点</h3>
 								<ul className="mt-3 space-y-2.5 text-base leading-[1.7] text-gray-700">
 									{[
-										"iOS SafariでWebXR ARが直接動く前提にする",
-										"controllerのthumbstick axesが必ずある前提にする",
+										"iOS SafariでWebXR ARがそのまま動く前提で組んでしまう",
+										"コントローラーにスティック入力（axes）が必ずある前提にしてしまう",
 										"local-floorとbounded-floorの違いを見落とす",
-										"depthやmeshが取れないときに画面が空になる",
-										"iframe内のWebXRに必要なallow属性を忘れる",
-										"WebGPU対応とWebGPUが安定して使えることを混同する",
+										"深度データや部屋メッシュが取れないときに画面が空になる",
+										"iframeで埋め込む際に必要なallow属性を付け忘れる",
+										"WebGPUに対応していることと、安定して動かせることを混同する",
 									].map((item) => (
 										<li key={item} className="flex gap-3">
 											<span
@@ -643,10 +639,10 @@ export default async function WebXRExplainerPage() {
 								<h3 className={H3}>目標（Goals）</h3>
 								<ul className="mt-3 space-y-2.5 text-base leading-[1.7] text-gray-700">
 									{[
-										"XR機能が利用可能か検出する",
-										"XRデバイスの機能を照会する",
-										"XRデバイスと入力デバイスの状態をポーリングする",
-										"適切なフレームレートでXRデバイスに映像を表示する",
+										"XR機能が使えるかどうかを判定する",
+										"接続されたXRデバイスの性能や機能を取得する",
+										"ヘッドセットや入力デバイスの状態を毎フレーム読み取る",
+										"適切なフレームレートでXRデバイスに映像を出力する",
 									].map((item) => (
 										<li key={item} className="flex gap-3">
 											<span
@@ -662,9 +658,9 @@ export default async function WebXRExplainerPage() {
 								<h3 className={H3}>非目標（Non-goals）</h3>
 								<ul className="mt-3 space-y-2.5 text-base leading-[1.7] text-gray-700">
 									{[
-										"VR/ARブラウザの動作を定義すること",
-										"すべてのVR/ARハードウェアのすべての機能を公開すること",
-										"「メタバース」を構築すること",
+										"VR/ARブラウザ自身のUIや動作を細かく決めること",
+										"すべてのVR/ARハードウェアの固有機能をそのまま公開すること",
+										"特定の「メタバース」を構築すること",
 									].map((item) => (
 										<li key={item} className="flex gap-3">
 											<span
@@ -704,17 +700,15 @@ export default async function WebXRExplainerPage() {
 
 					<Section id="x-meaning">
 						<p className={BODY}>
-							Virtual Reality、Augmented Reality、Mixed
-							Realityには、多くの共通点があります。
+							VR（Virtual Reality）、AR（Augmented Reality）、MR（Mixed
+							Reality）には共通する仕組みが多くあります。
 						</p>
 						<p className={BODY}>
-							WebXR APIは、これら
+							WebXRは特定の体験形式に縛られず、これらに共通する基盤を扱うAPIです。そのため「X」は特定の単語の頭文字ではなく、
 							<strong className="font-bold text-gray-950">
-								すべての基盤要素
+								何でも当てはめられる変数
 							</strong>
-							を提供することを目指しています。特定の形式に限定したくないため、頭文字ではなく
-							<strong className="font-bold text-gray-950">代数的な変数</strong>
-							として「X」を使用しています。
+							として使われています。
 						</p>
 						<figure className="border-l-2 border-gray-950 py-1 pl-5">
 							<p className="text-2xl font-black leading-snug text-gray-950">
@@ -731,19 +725,19 @@ export default async function WebXRExplainerPage() {
 							<div>
 								<h3 className={H3}>360°動画</h3>
 								<p className="mt-2 text-sm leading-[1.7] text-gray-700">
-									Webは動画配信に非常に効果的です。XR対応プレーヤーは没入視聴を可能にします。
+									Webは動画の配信と相性がよく、XR対応プレーヤーを使えばブラウザからそのまま360°動画を視聴できます。
 								</p>
 							</div>
 							<div>
 								<h3 className={H3}>データ可視化</h3>
 								<p className="mt-2 text-sm leading-[1.7] text-gray-700">
-									3Dモデルや医療画像など、VR/ARではより正確なスケール感を伝えられます。
+									建築の3Dモデルや医療画像などを実寸に近い大きさで確認でき、画面越しよりスケール感を伝えやすくなります。
 								</p>
 							</div>
 							<div>
-								<h3 className={H3}>アート体験</h3>
+								<h3 className={H3}>アート・展示</h3>
 								<p className="mt-2 text-sm leading-[1.7] text-gray-700">
-									ストアモデルに合わない短い実験的体験にとって、Webの即時性は魅力的です。
+									アプリストアに出すほどではない短い実験作や展示物でも、URLやQRコードからすぐに体験してもらえます。
 								</p>
 							</div>
 						</div>
@@ -761,8 +755,8 @@ export default async function WebXRExplainerPage() {
 								<div className="min-w-0 pt-0.5">
 									<h3 className={H3}>既存APIの限界</h3>
 									<p className="mt-1 max-w-[40em] text-base leading-[1.8] text-gray-700">
-										DeviceOrientationやGamepad
-										APIでは、XRに必要な高精度なタイミングと位置情報の同期が困難でした。
+										従来のDeviceOrientationやGamepad
+										APIだけでは、XRに必要な高精度なタイミング制御と位置・向きの同期が難しいためです。
 									</p>
 								</div>
 							</li>
@@ -776,7 +770,7 @@ export default async function WebXRExplainerPage() {
 								<div className="min-w-0 pt-0.5">
 									<h3 className={H3}>描画の課題</h3>
 									<p className="mt-1 max-w-[40em] text-base leading-[1.8] text-gray-700">
-										レンズ歪み補正やステレオレンダリングを、標準化された方法で処理する仕組みが必要でした。
+										ヘッドセット向けのレンズ歪み補正や両眼の立体描画を、標準化された方法で扱う仕組みが必要でした。
 									</p>
 								</div>
 							</li>
@@ -840,7 +834,7 @@ export default async function WebXRExplainerPage() {
 					<Section id="openxr">
 						<p className={BODY}>
 							<strong className="font-bold text-gray-950">OpenXR</strong>
-							はネイティブ向けの標準APIです。WebXRと多くの概念を共有しており、ブラウザのバックエンドとして活用されます。
+							はネイティブアプリ向けの標準APIです。WebXRと多くの概念を共有しており、ブラウザがヘッドセットとやり取りする裏側で使われています。
 						</p>
 					</Section>
 

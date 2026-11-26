@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/page-header";
 export const metadata: Metadata = {
 	title: "プライバシーポリシー",
 	description:
-		"BANGEO における OSS 公開サイトとしての情報の取り扱い方針と、アクセス解析・広告配信に関するご案内。",
+		"BANGEOにおけるOSS公開サイトとしての情報の取り扱い方針と、アクセス解析・広告配信に関するご案内。",
 	alternates: { canonical: "/privacy-policy" },
 	robots: { index: false, follow: true },
 };
@@ -196,7 +196,7 @@ export default function PrivacyPolicyPage() {
 
 				<PolicySection title="外部サービス">
 					<p>
-						当サイトにはGitHub、Discord、Xなどの外部サービスへのリンクが含まれます。リンク先のサイトにおける個人情報の取り扱いについては、各サービスのプライバシーポリシーをご確認ください。当サイトは外部サービスの内容やプライバシー慣行について責任を負いません。
+						当サイトにはGitHub、Discord、Xなどの外部サービスへのリンクが含まれます。リンク先のサイトにおける個人情報の取り扱いについては、各サービスのプライバシーポリシーをご確認ください。当サイトは外部サービスの内容や個人情報の取り扱いについて責任を負いません。
 					</p>
 				</PolicySection>
 

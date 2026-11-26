@@ -56,7 +56,7 @@ renderer.setAnimationLoop(() => {
 
 **名称に注意してください。** 初期の[導入PR](https://github.com/mrdoob/three.js/pull/33950)には`GaussianSplatMesh`という名前の説明がありますが、r186の[リリース版](https://github.com/mrdoob/three.js/blob/r186/examples/jsm/objects/GaussianSplat.js)とサンプルで使う名前は`GaussianSplat`です。古いコードをそのまま貼るとimportに失敗します。
 
-## どの形式を読み込めるか
+## 対応フォーマットとローダー
 
 r186の[アドオン一覧](https://github.com/mrdoob/three.js/tree/r186/examples/jsm/loaders)には、`SPZLoader`、`SPLATLoader`、`KSPLATLoader`、`GaussianSplatPLYLoader`、`GLTFGaussianSplatLoaderExtension`があります。いずれもスプラット用のデータをthree.jsで扱う入口ですが、同じファイルをどのローダーに渡してもよいわけではありません。
 
@@ -76,7 +76,7 @@ glTFの拡張は通常の`GLTFLoader`に自動で組み込まれるものでは�
 
 r186の公式サンプルは画面上でモデルを回して見る例であり、この記事のコードもWebXRセッションを開始しません。r186にはWebGPU経由のXR描画に関する修正も入っていますが、スプラットをQuestなどで快適に表示できるかは、ブラウザ・端末・モデルの大きさを固定して別途測る必要があります。
 
-## 既存の方法と何が違うか
+## 既存ライブラリとの違い
 
 r186以前も、React Three Fiber（R3F）でGaussian Splattingを表示できました。R3Fはthree.jsのシーンをReactで組み立てる仕組みであり、スプラットの描画方式そのものではありません。たとえば[Dreiの`<Splat />`](https://drei.docs.pmnd.rs/abstractions/splat)はR3F用の部品として`.splat`を扱います。また、[SparkのR3Fサンプル](https://github.com/sparkjsdev/spark-react-r3f)では、R3Fの`extend`を使ってSparkの`SplatMesh`と`SparkRenderer`をシーンへ組み込んでいます。
 
@@ -90,11 +90,11 @@ r186以前も、React Three Fiber（R3F）でGaussian Splattingを表示でき�
 
 比較の根拠は各プロジェクトの[Drei](https://drei.docs.pmnd.rs/abstractions/splat)、[GaussianSplats3D](https://github.com/mkkellogg/GaussianSplats3D)、[Spark](https://github.com/sparkjsdev/spark)、[PlayCanvas Streamed SOG](https://developer.playcanvas.com/user-manual/gaussian-splatting/building/lod-streaming/)の公式資料です。機能表は実測の速度比較ではなく、公開されているAPIと配信方式の整理です。
 
-### R3Fで制作している場合
+### R3Fプロジェクトでの判断ポイント
 
 すでにDreiの`<Splat />`を使っているなら、r186の登場だけを理由に置き換える必要はありません。扱う形式、現在の読み込み方式、複数スプラットの表示、React側の操作を確認してから決めるのがよいでしょう。
 
-特に`<Splat />`を`<primitive object={...} />`に変えるだけでは移行は完了しません。r186の`GaussianSplat`は`WebGPURenderer`向けで、従来の`WebGLRenderer`では使えません。R3F側のrenderer設定と、使っているライブラリの対応関係を含めて検証する必要があります。R3Fという書き方と、実際にスプラットを描くライブラリを分けて考えるのがポイントです。
+特に`<Splat />`を`<primitive object={...} />`に変えるだけでは移行は完了しません。r186の`GaussianSplat`は`WebGPURenderer`向けで、従来の`WebGLRenderer`では使えません。R3F側のレンダラー設定と、使っているライブラリの対応関係を含めて検証する必要があります。R3Fという書き方と、実際にスプラットを描くライブラリを分けて考えるのがポイントです。
 
 なお、DreiやGaussianSplats3Dの「読み込み途中から表示する」機能は、単一ファイルを取得しながら画面を更新するものです。PlayCanvasのStreamed SOGが行う、視点に応じて空間の領域とLODを入れ替える配信とは区別してください。
 
@@ -110,7 +110,7 @@ r186以前も、React Three Fiber（R3F）でGaussian Splattingを表示でき�
 - 目標端末のブラウザと描画経路
 - 複数のシーンを切り替えたときの解放と再読み込み
 
-小さな被写体を既存のthree.jsシーンに足す用途には試しやすい更新です。広域の屋外や歩き回る空間では、形式の変換だけでなく、空間分割・段階配信・端末側の予算を含めて設計する必要があります。
+小さな被写体を既存のthree.jsシーンに足す用途には試しやすい更新です。広域の屋外や歩き回る空間では、形式の変換だけでなく、空間分割・段階配信・端末側の性能制約を含めて設計する必要があります。
 
 ## 参照
 

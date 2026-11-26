@@ -1,6 +1,6 @@
 ---
-title: "WebXRパフォーマンスとfoveation──高解像度XRを支える「見える場所だけ高品質」な最適化"
-description: "WebXRの高解像度化で重要になるfoveated renderingを、fixed foveation、dynamic foveation、WebGPU、プライバシーの観点から整理します。"
+title: "WebXRのパフォーマンスとフォービエーション（foveation）──高解像度XRを支える「見える場所だけ高品質」な最適化"
+description: "高解像度なWebXRで重要になるフォービエイテッドレンダリング（視野中心を高品質に保つ最適化）を、固定式・視線追跡連動の動的フォービエーション、WebGPU、プライバシーの観点から整理します。"
 date: "2026年6月11日"
 category: "TECH"
 tags:
@@ -18,15 +18,15 @@ draft: false
 
 XRでは、通常のWebページや2Dゲームよりも描画負荷が高くなりがちです。
 
-理由は単純です。VRやARでは左右の目に別々の映像を出す必要があり、さらに高いフレームレートが求められます。ヘッドセットの表示解像度が上がるほど、GPUが処理するピクセル数も増えます。WebXRコンテンツがリッチになればなるほど、影、ポストエフェクト、PBR、パーティクル、Gaussian Splatting、動画テクスチャなども重くなります。
+VRやARでは左右の目に別々の映像を出力する必要があり、さらに高いフレームレートも求められます。ヘッドセットの表示解像度が上がるほどGPUが処理するピクセル数は増え、影、ポストエフェクト、PBR、パーティクル、Gaussian Splatting、動画テクスチャなどのリッチな表現を加えるほど負荷は大きくなります。
 
-そこで重要になるのが、**foveated rendering** です。
+こうした高負荷への対策として注目されているのが、**フォービエイテッドレンダリング（foveated rendering）**です。
 
-foveated renderingは、人間の視覚が中心視野で高解像度を感じ、周辺視野では細かい情報を感じにくいことを利用する最適化です。画面の中心やfixation pointの近くは高品質に描き、周辺は解像度やshading rate（Variable Rate Shading）を下げることで、見た目の劣化を抑えながらGPU負荷を下げます。
+人間の視覚は中心視野では細部まで鮮明に捉えられる一方、周辺視野では細かい情報を識別しにくい性質があります。フォービエイテッドレンダリングはこれを利用し、画面の中心や注視点の周囲は高品質に描き、周辺部の解像度やシェーディングレート（Variable Rate Shading）を下げることで、見た目の劣化を抑えながらGPU負荷を軽減します。
 
-## WebXRにはfixed foveationがある
+## WebXRで利用できる固定フォービエーション
 
-[WebXR Layers API Level 1](https://www.w3.org/TR/webxrlayers-1/)には、`XRProjectionLayer.fixedFoveation` という属性があります。W3Cの説明では、この属性はXR compositorが使うfoveation量を制御し、0が最小、1が最大で、ユーザーエージェントやデバイスが対応しない場合は `null` を返し、設定してもno-opになるとされています。変更は次の `XRFrame` から反映されます。
+[WebXR Layers API Level 1](https://www.w3.org/TR/webxrlayers-1/)には、`XRProjectionLayer.fixedFoveation`という属性が定義されています。W3Cの仕様では、XRコンポジターが適用するフォービエーション強度を0（最小）から1（最大）の範囲で指定でき、非対応のブラウザやデバイスでは`null`を返して設定を無視（no-op）するとされています。値の変更は次の`XRFrame`から反映されます。
 
 ```javascript
 const glBinding = new XRWebGLBinding(session, gl);
@@ -37,9 +37,9 @@ if (projectionLayer.fixedFoveation !== null) {
 }
 ```
 
-[MDN](https://developer.mozilla.org/en-US/docs/Web/API/XRProjectionLayer/fixedFoveation)も、`fixedFoveation` はXR compositorがレイヤーに使うfoveation量を表す数値で、Fixed Foveated Renderingは目のテクスチャの端を中心より低い解像度で描くことでGPU負荷を下げる、と説明しています。
+[MDN](https://developer.mozilla.org/en-US/docs/Web/API/XRProjectionLayer/fixedFoveation)でも、`fixedFoveation`はXRコンポジターがレイヤーに適用する強度を表す数値であり、固定フォービエイテッドレンダリング（Fixed Foveated Rendering、FFR）によって各眼のテクスチャ周辺部を中心より低解像度で描き、GPU負荷を抑える仕組みとして説明されています。
 
-[Meta for Developers](https://developers.meta.com/horizon/documentation/web/webxr-ffr/)のドキュメントでも、FFRは周辺部のeye bufferを低解像度で描くことでレンダリングコストを節約する技術で、fragment shader boundなアプリで特に効果があると説明されています。Meta Browserではセッション開始時のoptional featureや、実行時の `fixedFoveation` 属性で調整する方法が紹介されています。
+[Meta for Developers](https://developers.meta.com/horizon/documentation/web/webxr-ffr/)のドキュメントによると、FFRは各眼向け描画バッファ（アイバッファ）の周辺部を低解像度で描画してレンダリングコストを節約する技術で、フラグメントシェーダーの処理がボトルネックになりやすいアプリで特に効果を発揮します。Quest Browserでは、セッション開始時のオプショナル機能（`optionalFeatures`）や実行時の`fixedFoveation`属性で強度を調整する方法が案内されています。
 
 ```javascript
 const sessionInit = {
@@ -50,65 +50,62 @@ const sessionInit = {
 const session = await navigator.xr.requestSession("immersive-vr", sessionInit);
 ```
 
-## fixed foveationの向き不向き
+## 固定フォービエーションの向き不向き
 
-fixed foveationは、eye trackingを使わず、固定されたパターンで周辺品質を下げる方式です（eye tracking は視線追跡。WebXR/OpenXR で eye tracker extension として議論中）。中心付近を高品質に保ち、端の品質を下げるため、背景や低コントラストなシーンでは目立ちにくいことがあります。
+固定フォービエーション（fixed foveation）は、視線追跡（eye tracking）を使わず、あらかじめ固定されたパターンで画面周辺の品質を下げる方式です。中心付近を高品質に保ちつつ周辺を落とすため、背景やコントラストの低いシーンでは劣化が目立ちにくい傾向があります。
 
-一方で、UI、細かい文字、高コントラストな線、ミニマップ、遠くの小さなオブジェクトなどでは、劣化が分かりやすくなることがあります。Metaのドキュメントでも、高コントラストまたはテキストの多いシーンではアーティファクトが目立つ可能性があるため、視覚品質への影響を評価する必要があると説明されています。
+一方で、UI、細かい文字、コントラストの高い線、ミニマップ、遠方にある小さなオブジェクトなどでは画質の低下が分かりやすくなります。Metaのドキュメントでも、高コントラストな表現やテキストが多いシーンでは描画の乱れ（アーティファクト）が目立つ場合があるため、視覚品質への影響を評価するよう注意喚起しています。
 
-BANGEO読者向けに言うなら、fixed foveationは「とりあえず上げればよい設定」ではありません。GPU負荷、画質、UIの読みやすさを実機で見ながら調整する必要があります。
+したがって、固定フォービエーションは「とりあえず強度を上げればよい設定」ではありません。GPU負荷、画質、UIの読みやすさのバランスを実機で確認しながら調整する必要があります。
 
-## 中間バッファやポストエフェクトに注意
+## 中間バッファやポストエフェクト構成での注意点
 
-WebXRアプリでは、いったん自前のrender targetにシーンを描き、その後ポストエフェクトをかけて最終フレームへ出す構成がよくあります。
+WebXRアプリでは、一度自前のレンダーターゲットにシーンを描画し、ポストエフェクトをかけてから最終フレームへ出力する構成がよく使われます。
 
-しかし、Metaのドキュメントでは、FFRが効かない主な原因として、シーンを中間バッファに描いてから最終フレームへポスト処理する構成や、フレーム中にrender targetを切り替える構成が挙げられています。FFRは最終eye bufferへの描画に関係するため、レンダリングパイプラインの作り方によっては期待した効果が出ません。
+しかしMetaのドキュメントでは、FFRが効かなくなる主な原因として、シーンを中間バッファに描いてから最終フレームへポスト処理する構成や、1フレーム内でレンダーターゲットを切り替える構成が挙げられています。FFRは最終的なアイバッファへの描画に作用するため、レンダリングパイプラインの組み方によっては期待どおりの効果が得られません。
 
-この点は[three.js r184のWebXR更新](/tech-articles/threejs-r184-webxr-layers-hand-model-cache)を使う場合にも重要です。レンダラーやポストプロセスの構成によって、ブラウザやデバイス側のfoveationがどこまで効くかが変わる可能性があります。
+この点は[three.js r184のWebXR更新](/tech-articles/threejs-r184-webxr-layers-hand-model-cache)を利用する場合にも関わります。レンダラーやポストプロセスの構成次第で、ブラウザやデバイス側のフォービエーションがどこまで機能するかが変わる可能性があります。
 
-## dynamic foveationは魅力的だが、gaze dataが問題になる
+## 動的フォービエーションの可能性と視線データの課題
 
-より強力なのは、ユーザーが実際に見ている場所を高品質に描くdynamic foveationです。eye tracking対応デバイスでは、fixation pointの周辺だけを高品質にし、それ以外をより大胆に落とせるため、fixed foveationより大きな効果が期待できます。
+さらに高い最適化効果が期待できるのが、ユーザーが実際に見ている位置に合わせて品質を変える動的フォービエーション（dynamic foveation）です。視線追跡対応デバイスでは、注視点の周辺だけを高品質にし、それ以外の領域を大きく落とせるため、固定式以上の負荷軽減が見込めます。なお、視線追跡の標準化自体はWebXRやOpenXRで拡張仕様として議論が続いています。
 
-しかしWebでは、gaze dataは非常にセンシティブです。どこを見ているかは、ユーザーの関心、認知状態、健康情報、意図の推測につながる可能性があります。
+ただしWeb環境では、視線データの扱いが大きなハードルになります。ユーザーがどこを見ているかという情報は、関心、認知状態、健康状態、意図の推測につながり得る極めてセンシティブなデータだからです。
 
-[Immersive WebのGitHub issue](https://github.com/immersive-web/webxr/issues/1420)では、dynamic foveationはユーザーが見ている場所に応じて描画品質を調整する最適化であり、WebXRで対応するならWebコンテンツにgaze dataを露出しない形が必要だと提起されています。
+[Immersive WebのGitHub Issue](https://github.com/immersive-web/webxr/issues/1420)では、動的フォービエーションをWebXRへ導入する場合、Webコンテンツ側へ視線データを露出しない設計が必要であると提起されています。
 
-2026年5月の[Immersive Web face-to-face](https://www.w3.org/2026/05/19-immersive-web-minutes.html)でも、foveationのWebXR API化について議論されました。議事録では、WebGPUやVariable Rate Shadingとの関係、foveation mapの扱い、eye tracking由来の情報が漏れるプライバシーリスク、readbackを防げるかどうかが話されています。
+2026年5月の[Immersive Web対面会議](https://www.w3.org/2026/05/19-immersive-web-minutes.html)でも、フォービエーションのWebXR API化が議論されました。議事録では、WebGPUやVariable Rate Shadingとの関係、フォービエーションマップの扱い、視線追跡由来の情報が漏洩するプライバシーリスク、読み戻し（readback）を防げるかといった点が論点になっています。
 
-つまりdynamic foveationは、単なるパフォーマンスAPIではありません。WebXR、WebGPU、ブラウザのセキュリティモデル、プライバシー保護が全部関係する難しい領域です。現時点では議論中のテーマとして扱うのが適切です。
+動的フォービエーションの実現には、描画性能だけでなくWebXR、WebGPU、ブラウザのセキュリティモデル、プライバシー保護まで一体で設計する必要があります。現時点では仕様議論が進んでいる段階のテーマとして捉えるのが妥当です。
 
-## WebGPUとの関係
+## WebGPUとの関わり
 
-foveationをより一般化して考えると、Variable Rate ShadingやVariable Rasterization Rateに近い話になります。WebGPU側にも[Variable Rasterization Rateに関するissue](https://github.com/gpuweb/gpuweb/issues/450)があり、fragment shaderの呼び出し密度を場所によって変え、性能と品質のバランスを取る技術として議論されています。ただし、Vulkan、D3D12、Metalで仕組みが違うため、相互運用可能なAPI設計が難しいことも説明されています。
+フォービエーションをより一般化すると、Variable Rate ShadingやVariable Rasterization RateといったGPU機能に近い領域になります。WebGPU側でも[Variable Rasterization Rateに関するIssue](https://github.com/gpuweb/gpuweb/issues/450)で、フラグメントシェーダーの実行密度を領域ごとに変えて性能と画質のバランスを取る仕組みが議論されています。ただし、Vulkan、D3D12、Metalで仕様が異なるため、相互運用できるAPI設計の難しさも指摘されています。
 
-Immersive Webの議事録でも、WebXR側だけでは完結せず、WebGPU WGとの依存関係があることが話されています。
+Immersive Webの議事録でも、WebXR側だけで完結せずWebGPUワーキンググループとの連携が必要になる点が挙げられています。
 
-WebXR開発者にとってのポイントは、今後の高品質XRではWebGLだけでなくWebGPUとの接続が重要になるということです。[Quest Browser 146.0でWebGPU in WebXRが実験的に利用可能に](/tech-articles/quest-browser-146-webgpu-webxr)なった流れとあわせて、高解像度ヘッドセットや空間コンピューティング端末では、foveation、layers、WebGPU、compositorの役割分担がパフォーマンスの鍵になります。
+今後の高品質なWebXR開発では、WebGLだけでなくWebGPUとの接続がますます重要になります。[Quest Browser 146.0でWebGPU in WebXRが実験的に利用可能に](/tech-articles/quest-browser-146-webgpu-webxr)なった流れとあわせて、高解像度ヘッドセットや空間コンピューティング端末では、フォービエーション、Layers、WebGPU、コンポジターそれぞれの役割分担が性能を大きく左右します。
 
-## 今できる実践的な対策
+## 現時点で取り組める実践的な対策
 
-現時点でWebXR開発者ができることは、まず基本的なパフォーマンス設計を固めることです。
+いまWebXR開発者が実践できるのは、基本的なパフォーマンス計測と設計を丁寧に進めることです。
 
-最初に、ターゲットデバイスでフレームタイムを測ります。平均FPSだけでなく、GPUが詰まっているのか、CPUが詰まっているのか、解像度を下げると改善するのかを確認します。
+1. **ターゲットデバイスでフレームタイムを計測する**：平均FPSだけでなく、GPUとCPUのどちらがボトルネックか、解像度を下げたときに改善するかを確認します。
+2. **固定フォービエーションを低い値から試す**：対応環境では少しずつ強度を上げ、UIや文字が読みにくくなる場合は強度を下げる、UIを視野中心寄りに配置する、文字を大きくする、重要な情報を別レイヤーへ分けるといった対策を検討します。
+3. **ポストエフェクト構成とFFRの相性を確認する**：中間バッファにすべて描いてから合成するパイプラインでは、デバイス側のフォービエーション効果が薄れる場合があるため、実機で効き方を確かめます。
+4. **動的フォービエーションやWebGPU連携は仕様動向を追う**：今すぐ本番導入する手法ではなく、今後の標準化トピックとして継続的にチェックしておきます。
 
-次に、fixed foveationが使える環境では、低めの値から試します。UIや文字が読みにくくなる場合は、foveationレベルを下げる、UIを中心寄りに置く、文字を大きくする、重要な情報を別レイヤーに分けるなどの対策が必要です。
+## BANGEOでのトピック整理
 
-さらに、ポストエフェクトを多用している場合は、FFRが期待通り効いているかを確認します。中間バッファにすべて描いてから最終合成する構成では、デバイス側のfoveationの効果が薄くなる可能性があります。
+フォービエーション関連のトピックは、[標準化・対応状況ページのFoveationトピック整理](/webxr-status#foveation-topics)で次の3段階に分けて追跡しています。
 
-最後に、dynamic foveationやWebGPU連携は「今すぐ使うTips」ではなく「追跡すべき仕様テーマ」として見ておくのが現実的です。
-
-## BANGEOでの整理
-
-foveation トピックは[標準化・対応状況ページの Foveation トピック整理](/webxr-status#foveation-topics)で次の3段階に分けて追跡しています。
-
-| トピック | 状態 | デモ / 資料 |
+| トピック | 状態 | デモ・資料 |
 | --- | --- | --- |
 | Fixed Foveation | 実用 | [/demos/foveated-rendering](/demos/foveated-rendering) |
 | Dynamic Foveation | 議論中 | [immersive-web/webxr#1420](https://github.com/immersive-web/webxr/issues/1420) |
 | WebGPU + WebXR + Foveation | 追跡中 | [gpuweb/gpuweb#450](https://github.com/gpuweb/gpuweb/issues/450) |
 
-fixed foveation は `fixedFoveation` スライダー付きデモで実機確認できます。dynamic foveation と WebGPU 連携は、確定 API ではなく議論中のテーマとして扱っています。
+固定フォービエーションは`fixedFoveation`スライダー付きのデモで実機確認できます。動的フォービエーションとWebGPU連携は、確定したAPIではなく議論中のテーマとして扱っています。
 
 ## 関連リンク
 

@@ -8,7 +8,7 @@ import { DISCORD_URL } from "@/lib/navigation";
 export const metadata: Metadata = {
 	title: "WebXR FAQ｜よくある質問と回答",
 	description:
-		"WebXRとは何か、iPhone(Safari)・Meta Quest・PCVRで動くか、Three.jsやBabylon.jsの選び方、WebXRとWebVR/WebARの違いなど、よくある質問に日本語で回答します。",
+		"WebXRとは何か、iPhone（Safari）・Meta Quest・PCVRで動くか、Three.jsやBabylon.jsの選び方、WebXRとWebVR/WebARの違いなど、よくある質問に日本語で答えています。",
 	alternates: { canonical: "/faq" },
 };
 
@@ -32,7 +32,7 @@ const FAQ_ITEMS: FaqItem[] = [
 		category: "WebXRについて",
 		question: "WebXRとは何ですか？",
 		answer:
-			"WebXRは、ウェブブラウザ上で仮想現実（VR）や拡張現実（AR）を扱うためのWeb APIの総称です。アプリをインストールしなくても、対応するブラウザからXR体験を提供できます。",
+			"WebXRは、ブラウザ上でVRやARを動かすためのWeb APIの総称です。アプリを入れなくても、対応ブラウザからURLを開くだけでXR体験を利用できます。",
 	},
 	{
 		category: "WebXRについて",
@@ -45,8 +45,8 @@ const FAQ_ITEMS: FaqItem[] = [
 		question: "WebXRはどのブラウザでサポートされていますか？",
 		answer: (
 			<>
-				対応状況はブラウザやデバイスの組み合わせで変わります。Chrome系やMeta
-				Quest Browserを中心に利用できる機能が多く、詳細は
+				対応状況はブラウザとデバイスの組み合わせで変わります。Chrome系やMeta
+				Quest Browserを中心に使える機能が多く、詳しくは
 				<InlineLink href="/devices">対応デバイス一覧</InlineLink>と
 				<InlineLink href="/webxr-status">標準化・対応状況</InlineLink>
 				のページで確認できます。
@@ -75,7 +75,7 @@ const FAQ_ITEMS: FaqItem[] = [
 		category: "開発について",
 		question: "VRデバイスなしでもWebXRの開発はできますか？",
 		answer:
-			"はい、可能です。ブラウザの開発者ツールやエミュレーター拡張を使えば、実機がなくても基本的な実装確認を進められます。ただし最終確認には実機があると安心です。",
+			"はい、できます。ブラウザの開発者ツールやエミュレーター拡張を使えば、実機がなくても基本的な動作確認を進められます。ただし公開前の最終確認には実機があると安心です。",
 	},
 	{
 		category: "デバイス・ハードウェア",
@@ -88,14 +88,13 @@ const FAQ_ITEMS: FaqItem[] = [
 		question: "iPhoneでWebXR ARは使えますか？",
 		answer: (
 			<>
-				iPhoneでのAR体験は、ブラウザ単体ではなくアプリやApp
-				Clipなど別の方法を使うケースもあります。利用方法は端末や実装方式によって変わるため、
-				<InlineLink href="/devices">対応デバイス一覧</InlineLink>
-				もあわせて確認してください。App Clipを使う方法は、
+				iPhoneのSafari単体ではWebXR ARに対応していないため、専用アプリやApp
+				Clipを使う方法をとります。詳しくは
+				<InlineLink href="/devices">対応デバイス一覧</InlineLink>と
 				<InlineLink href="/tech-articles/ios-webxr-app-clip-guide">
 					iPhoneでWebXRを動かす方法
 				</InlineLink>
-				の記事で説明しています。
+				をご覧ください。
 			</>
 		),
 	},
@@ -104,11 +103,11 @@ const FAQ_ITEMS: FaqItem[] = [
 		question: "PCVR（SteamVR、Oculus Link）でWebXRは動作しますか？",
 		answer: (
 			<>
-				はい。ChromeやEdgeとPCVRランタイムを組み合わせることで、対応ヘッドセット上でWebXRコンテンツを利用できます。詳しくは
+				はい。ChromeやEdgeとPCVRランタイムを組み合わせれば、対応ヘッドセット上でWebXRコンテンツを動かせます。手順は
 				<InlineLink href="/tech-articles/pcvr-webxr-guide">
 					PCVRのガイド記事
 				</InlineLink>
-				を参照してください。
+				で解説しています。
 			</>
 		),
 	},
@@ -177,7 +176,7 @@ export default function FaqPage() {
 					<>
 						WebXRの基本から、端末ごとの対応、動かないときの原因まで、
 						<span className="whitespace-nowrap">
-							{FAQ_ITEMS.length}の質問に答えています。
+							{FAQ_ITEMS.length}件の質問に答えています。
 						</span>
 					</>
 				}
