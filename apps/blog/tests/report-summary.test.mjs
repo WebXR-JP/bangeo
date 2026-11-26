@@ -50,9 +50,9 @@ function webxrResults(fallback, overrides = {}) {
 
 test("headset models and the Quest Browser minor version are named", () => {
 	assert.deepEqual(describeReportEnvironment(QUEST_3_UA), {
-		device: "Meta Quest 3",
+		device: "Meta Quest 3系（3・3Sの区別不可）",
 		browser: "Quest Browser 150.1",
-		label: "Meta Quest 3 / Quest Browser 150.1",
+		label: "Meta Quest 3系（3・3Sの区別不可） / Quest Browser 150.1",
 	});
 	assert.equal(
 		describeReportEnvironment(
@@ -291,13 +291,13 @@ test("alt text and share text describe the environment without raw identifiers",
 	const alt = reportAltText(summary);
 	assert.match(
 		alt,
-		/^Meta Quest 3 \/ Quest Browser 150\.1 のWebXR・WebGPU対応レポート。/,
+		/^Meta Quest 3系（3・3Sの区別不可） \/ Quest Browser 150\.1 のWebXR・WebGPU対応レポート。/,
 	);
 	assert.match(alt, /VRは対応、ARは未対応、inlineは未対応。/);
 	assert.match(alt, /WebGPUは未対応。$/);
 	assert.equal(
 		reportShareText(summary),
-		"Meta Quest 3 / Quest Browser 150.1 のWebXR・WebGPU対応を、BANGEOレポートで確認しました",
+		"Meta Quest 3系（3・3Sの区別不可） / Quest Browser 150.1 のWebXR・WebGPU対応を、BANGEOレポートで確認しました",
 	);
 	// ビルド番号などUser-Agentの生の値は出さない
 	assert.doesNotMatch(alt, /150\.1\.0\.23/);

@@ -14,6 +14,20 @@
 | セッション開始・終了、機能ごとの処理 | `apps/blog/src/lib/webxr-starter/session.ts`、`modules/`、`types.ts` |
 | 匿名送信（停止中） | `docs/experiment-analytics.md` |
 
+## レポートの端末名
+
+端末名とブラウザ名は別に判定する。機種の根拠は UA の明示的な機種名・既知の型番か、ブラウザが返す XR の機種ヒントに限定する。端末のヒントはブラウザ内で判定にだけ使い、サーバーへ送るヘッダーの設定や匿名レポートの項目は追加しない。WebXR/WebGPU 対応は機種名ではなく従来の機能確認で判定する。
+
+| 対象 | 根拠と表示方針 |
+| --- | --- |
+| PICO 4 / Ultra / Enterprise / Neo3 | 明示的な機種表記がある場合のみ機種名を表示。PICO Browser を Quest 互換トークンより優先する。機種ラインナップは [PICO Business](https://business.picoxr.com/ch/doc/43j3qcoq) を参照。 |
+| Meta Quest | [Meta の UA 仕様](https://developers.meta.com/vr/documentation/web/browser-specs/)では Quest 3 と 3S（Xbox Edition 含む）が `Quest 3` を共有する。明示的な `Quest 3S` がなければ 3 系として表示する。 |
+| Galaxy XR | [Samsung Browser の公式仕様](https://developer.samsung.com/browser/user-agent-string-format.html)ではデスクトップ形式 UA を他端末と共有し、フォームファクターには `XR` が返る。型番の根拠がなければ「XR端末（機種不明）」。 |
+| XREAL AURA | [XREAL の資料](https://tutorials.xreal.com/docs/aura/safety-warranty/)にある Compute Puck `B6111` または製品名が端末情報に明示された場合のみ AURA と表示する。製品版 Chrome がその型番を返すとは未確認。Chrome や Linux 形式、XR のヒントだけでは AURA としない。Air / One / Beam 等も一括判定しない。 |
+| Vision Pro / Steam Frame / その他 | Safari のデスクトップ形式や SteamOS の Chromium、複数社の端末で動く [Wolvic](https://github.com/Igalia/wolvic) だけでは機種を特定できない。Apple／Linux 系または不明と表示する。Safari は [WebKit の機能説明](https://webkit.org/blog/15162/introducing-natural-input-for-webxr-in-apple-vision-pro/)、Steam Frame は [Valve のリリース情報](https://store.steampowered.com/news/app/4165890) を参照。 |
+
+[Chromium の UA ヒント実装](https://chromium.googlesource.com/chromium/src/+/main/components/embedder_support/user_agent_utils.cc)を参照。機種ヒントが省略・拒否された場合は、取得できた情報に戻す。
+
 ## レポートの構成
 
 /report・/experiments・/webgpu-report はルートグループ `(report)` の同じレイアウトを使う。判定はレイアウトの `ReportProvider` で1回だけ行い、結果画像・概要・WebXR・WebGPUの各タブは同じ結果を読む。タブごとに `navigator.xr` や `navigator.gpu` を呼び直さない。
