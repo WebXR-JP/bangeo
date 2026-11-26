@@ -6,7 +6,7 @@ import { DISCORD_URL, GITHUB_URL, X_URL } from "@/lib/navigation";
 export const metadata: Metadata = {
 	title: "お問い合わせ",
 	description:
-		"BANGEO は OSS として公開しています。質問、改善提案、不具合報告、記事寄稿、WebXRデモや企画の相談窓口をまとめています。",
+		"BANGEOはOSSとして公開しています。質問、改善提案、不具合報告、記事寄稿、WebXRデモや企画の相談窓口をまとめています。",
 	alternates: { canonical: "/contact" },
 	robots: { index: false, follow: true },
 };

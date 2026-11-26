@@ -35,7 +35,7 @@ export default function TechArticlesIndexPage() {
 			<CollectionStructuredData
 				name="BANGEO 技術記事一覧"
 				path="/tech-articles"
-				description="WebXR に関する技術記事、ニュース、イベント情報をまとめています。"
+				description="WebXRに関する技術記事、ニュース、イベント情報をまとめています。"
 				breadcrumbs={[{ name: "技術記事", path: "/tech-articles" }]}
 				items={posts.map((post) => {
 					const slug = getSlugFromPath(post.info.path);

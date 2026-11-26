@@ -24,18 +24,18 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 		manufacturer: "Valve",
 		webxrSupport: {
 			status: "条件付き対応",
-			detail: `${STEAM_FRAME_WEBXR.summary} ${STEAM_FRAME_WEBXR.limitations}（${STEAM_FRAME_WEBXR.lastChecked}公式情報確認）`,
+			detail: `${STEAM_FRAME_WEBXR.summary} ${STEAM_FRAME_WEBXR.limitations}（${STEAM_FRAME_WEBXR.lastChecked}に公式情報を確認）`,
 		},
 		browsers: [
-			"Chromium 157以降（SteamOS 0.5.7 Beta。配布元・設定条件は個別確認）",
+			"Chromium 157以降（SteamOS 0.5.7 Beta。配布元や設定条件は個別確認が必要）",
 		],
 		connectionType:
-			"スタンドアロン（SteamOS）。PCからVRコンテンツを無線ストリーミング可能。",
-		priceRange: "地域・構成によって異なる（公式ストアで要確認）",
-		availability: "販売状況は地域によって異なる（公式ストアで要確認）。",
+			"スタンドアロン（SteamOS）。PCからVRコンテンツを無線ストリーミングできます。",
+		priceRange: "地域・構成によって異なります（公式ストアで確認が必要）",
+		availability: "販売状況は地域によって異なります（公式ストアで確認が必要）。",
 		notes: [
 			"Valveはスタンドアロン動作とSteamVR・OpenXRへの対応を案内しています。",
-			"Preview CandidateとChrome 157試験ビルド・権限調整による第三者の起動報告があります。Betaの標準状態での動作保証ではありません。",
+			"Preview CandidateとChrome 157試験ビルド・権限調整による第三者の起動報告がありますが、Betaの標準状態での動作保証ではありません。",
 			`WebXR対応の公式発表: ${STEAM_FRAME_WEBXR.sourceUrl}`,
 			"出典: https://partner.steamgames.com/doc/steamhardware/steamframe",
 		],
@@ -48,17 +48,17 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 		webxrSupport: {
 			status: "未確認",
 			detail:
-				"MetaがWebXRへの公式対応を案内。発売前のため実機動作は未検証です。",
+				"MetaがWebXRへの対応を予定していますが、発売前のため実機での動作は未確認です。",
 		},
-		browsers: ["WebXR対応予定（実機のBrowserバージョンは未確認）"],
+		browsers: ["WebXR対応予定（実機のブラウザバージョンは未確認）"],
 		connectionType:
-			"開発環境: IWSDK Emulator（IWER）。Quest 3／3Sでも入力と視野の一部を確認可能。",
-		priceRange: "1,299.99米ドル（日本円価格未定）",
+			"開発環境はIWSDK Emulator（IWER）を使用します。Quest 3・3Sでも入力や視野の一部を確認できます。",
+		priceRange: "1,299.99米ドル（日本円価格は未定）",
 		availability: "発売前（2027年春予定）。",
 		notes: [
-			"入力はHands-first。視線によるターゲット指定と手のピンチ操作を想定し、視線情報の扱いにはプライバシー上の制約があります。",
-			"2D Webページでは視線によるCSS :hoverやpointer hoverイベントが発火しないため、hover依存UIは利用できません。IWSDKの3D操作には別途Hovered状態があります。",
-			"WebXR Layers、Depth、Anchors、WebGPU XR、immersive-arの対応は未確認です。",
+			"ハンドトラッキング中心（Hands-first）の設計です。視線による対象指定と手のピンチ操作を想定しており、視線情報の扱いにはプライバシー上の制約があります。",
+			"2D Webページでは視線によるCSS :hoverやpointer hoverイベントが発火しないため、hoverに依存するUIは使えません。IWSDKの3D操作には別途Hovered状態が用意されています。",
+			"WebXR Layers、Depth、Anchors、WebGPU XR、immersive-arの対応状況は未確認です。",
 			"出典: https://developers.meta.com/horizon/documentation/iwsdk/guides/get-started-glasses/",
 			"出典: https://developers.meta.com/horizon/documentation/web/2d-web/",
 			"価格の出典: https://about.fb.com/ja/news/2026/09/meta-vr-glasses/",
@@ -72,23 +72,22 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 		webxrSupport: {
 			status: "対応",
 			detail:
-				"標準ブラウザ「Meta Quest Browser」でWebXRコンテンツのVR表示が可能。",
+				"標準のMeta Quest Browserで、WebXRのVR・MRコンテンツを開けます。",
 		},
 		browsers: [
 			"Meta Quest Browser（Chromium系）",
-			"Wolvic（旧Firefox Reality後継）",
-			"PC接続時はChrome/EdgeなどPCブラウザ",
+			"Wolvic（Firefox Realityの後継）",
+			"PC接続時はChrome・EdgeなどのPCブラウザ",
 		],
 		connectionType:
-			"スタンドアロン。Meta Quest Link/Air LinkでPC接続すればPCVRとしても利用可。",
+			"スタンドアロン。Meta Quest Link・Air LinkでPCに接続すればPCVRとしても使えます。",
 		priceRange: "102,300円（512GB、税込／2026年4月19日改定）",
 		availability:
-			"販売中（2023年10月発売）。2026年4月19日より日本国内価格を改定。",
+			"販売中（2023年10月発売）。2026年4月19日に日本国内価格が改定されました。",
 		notes: [
-			"現行スタンドアロン機の中でも高い処理性能を備えたモデル。",
-			"カラーのパススルーカメラでMR体験に対応。",
-			"Quest 2比で解像度・視野角・処理性能が向上。",
-			"PC接続でSteamVRの高品質VRゲームも利用可能。",
+			"カラーのパススルーカメラを備え、MR体験に対応しています。",
+			"Quest 2と比べて解像度・視野角・処理性能が引き上げられています。",
+			"PCに接続すれば、SteamVR向けのVRコンテンツも利用できます。",
 		],
 	},
 	{
@@ -98,22 +97,21 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 		manufacturer: "Meta",
 		webxrSupport: {
 			status: "対応",
-			detail: "Quest 3と同じブラウザ環境でWebXRが利用可能。",
+			detail: "Quest 3と同じブラウザ環境でWebXRを利用できます。",
 		},
 		browsers: [
 			"Meta Quest Browser（Chromium系）",
-			"WolvicなどサードパーティVRブラウザ",
+			"Wolvicなどのサードパーティ製VRブラウザ",
 		],
-		connectionType: "スタンドアロン。PC接続（Link/Air Link）対応。",
+		connectionType: "スタンドアロン。PC接続（Link・Air Link）に対応しています。",
 		priceRange:
 			"59,400円（128GB）、77,000円（256GB）（税込／2026年4月19日改定）",
 		availability:
-			"販売中（2024年9月発売のQuest 3シリーズ）。2026年4月19日より日本国内価格を改定。",
+			"販売中（2024年9月発売）。2026年4月19日に日本国内価格が改定されました。",
 		notes: [
-			"Quest 3の性能を踏襲しつつ価格を抑えたモデル。",
-			"解像度/レンズはQuest 2と同等の仕様。",
-			"処理性能はQuest 3と同等とされる。",
-			"手頃な価格でVRを始められるモデル。",
+			"Quest 3と同等のチップを搭載しつつ、価格を抑えたモデルです。",
+			"ディスプレイ解像度とレンズはQuest 2と同等の仕様です。",
+			"手頃な価格でカラーパススルー対応のVR/MRを始められます。",
 		],
 	},
 	{
@@ -123,21 +121,20 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 		manufacturer: "Meta",
 		webxrSupport: {
 			status: "対応",
-			detail: "標準のMeta Quest BrowserでWebXR利用可。",
+			detail: "標準のMeta Quest BrowserでWebXRを利用できます。",
 		},
 		browsers: [
 			"Meta Quest Browser",
 			"Firefox Reality（現在はWolvicへ移行）",
-			"PC接続時はChrome/EdgeなどPCブラウザ",
+			"PC接続時はChrome・EdgeなどのPCブラウザ",
 		],
-		connectionType: "スタンドアロン。PC有線/無線接続でPCVRも利用可。",
+		connectionType: "スタンドアロン。PCとの有線・無線接続でPCVRにも対応します。",
 		priceRange: "発売時37,000円〜（128GB税込59,400円→後に64,405円へ改定）",
-		availability: "在庫限り販売中（2020年発売、後継登場で生産終了見込み）。",
+		availability: "在庫限りで販売中（2020年発売、後継機の登場に伴い生産終了見込み）。",
 		notes: [
-			"スタンドアロンVRの普及に大きく貢献したモデル。",
-			"ユーザ数が多く、幅広いVRアプリに対応。",
-			"Quest 3系と比べると解像度・性能は控えめな仕様。",
-			"現在は価格重視の場合に有力な選択肢。",
+			"広く普及したスタンドアロンVRヘッドセットで、対応アプリが豊富です。",
+			"ユーザー数が多く、既存のWebXRコンテンツでも動作確認の対象になりやすい機種です。",
+			"Quest 3シリーズと比べると解像度や処理性能は控えめです。",
 		],
 	},
 	{
@@ -147,22 +144,22 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 		manufacturer: "Meta",
 		webxrSupport: {
 			status: "対応",
-			detail: "Questシリーズ共通のMeta Quest BrowserでWebXR利用可。",
+			detail: "Questシリーズ共通のMeta Quest BrowserでWebXRを利用できます。",
 		},
 		browsers: [
 			"Meta Quest Browser（標準）",
 			"WolvicなどのVRブラウザ",
 			"PC接続時はPCブラウザ",
 		],
-		connectionType: "スタンドアロン。PC接続（Link）対応。",
+		connectionType: "スタンドアロン。PC接続（Link）に対応しています。",
 		priceRange: "販売終了（終売時価格 159,500円）",
 		availability:
-			"2024年9月に公式販売終了。後継モデルは未発表、中古・在庫限りで流通。",
+			"2024年9月に公式販売を終了しました。現在は中古・在庫限りの流通です。",
 		notes: [
-			"企業向けを意識した高性能モデル。",
-			"高解像度パススルーセンサー搭載でMR対応。",
-			"視線追跡・表情トラッキングを標準装備。",
-			"2024年9月に販売終了。現行ラインはQuest 3 / Quest 3Sに一本化されている。",
+			"法人用途も想定した上位モデルです。",
+			"カラーパススルーカメラによるMR表示に対応しています。",
+			"視線追跡と表情トラッキングを標準で備えています。",
+			"現行のラインナップはQuest 3とQuest 3Sに一本化されています。",
 		],
 	},
 	{
@@ -173,18 +170,18 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 		webxrSupport: {
 			status: "対応",
 			detail:
-				"内蔵のVIVE BrowserでWebXRコンテンツを直接閲覧可能。Wolvicにも対応。",
+				"内蔵のVIVE BrowserでWebXRコンテンツをそのまま開けます。Wolvicにも対応しています。",
 		},
-		browsers: ["VIVE Browser（公式）", "Wolvic（Vive公式ストアから導入）"],
+		browsers: ["VIVE Browser（公式）", "Wolvic（VIVE公式ストアから導入）"],
 		connectionType:
-			"スタンドアロン。無線/有線でSteamVR接続可能（インサイドアウト）。",
+			"スタンドアロン。無線・有線（DisplayPort対応）でSteamVRに接続できます。",
 		priceRange: "169,000円（税込）",
 		availability: "販売中（2025年1月発売）。",
 		notes: [
-			"片目2448×2448の高解像度・最大120度視野角。",
-			"標準でアイトラッキング、オプションでフェイストラッカー対応。",
-			"単体で高品質VR/MR、PC接続で高品質PCVR。",
-			"価格は非常に高く、重量や発熱に注意。",
+			"片目2448×2448の高解像度と最大120度の視野角を備えています。",
+			"標準でアイトラッキングに対応し、オプションでフェイストラッカーも追加できます。",
+			"単体でのVR/MRだけでなく、PC接続でPCVRとしても使えます。",
+			"本体価格が高く、重量や発熱には注意が必要です。",
 		],
 	},
 	{
@@ -194,18 +191,18 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 		manufacturer: "HTC",
 		webxrSupport: {
 			status: "対応",
-			detail: "VIVE BrowserやWolvicでWebXR利用可。",
+			detail: "VIVE BrowserやWolvicでWebXRを利用できます。",
 		},
 		browsers: ["VIVE Browser", "Wolvic"],
 		connectionType:
-			"スタンドアロン。PC接続（SteamVR/Viveport）対応、インサイドアウト方式。",
+			"スタンドアロン。PC接続（SteamVR・Viveport）に対応しています。",
 		priceRange: "164,000円（税込）",
 		availability: "販売中（2023年発売）。",
 		notes: [
-			"コンパクトなゴーグル型デザインで軽量。",
-			"バッテリーストラップを外すと眼鏡のように軽量。",
-			"軽量モードでは明るさ制限などの制約あり。",
-			"総合性能の割に価格が高めで、特定用途に活用するケースが多い。",
+			"コンパクトなゴーグル型で軽量な設計です。",
+			"バッテリークレードルを外して眼鏡型モードに切り替えられます。",
+			"眼鏡型モードでは画面の明るさに制限がかかります。",
+			"価格が高めのため、軽量さや携帯性を重視する用途で選ばれます。",
 		],
 	},
 	{
@@ -216,64 +213,62 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 		webxrSupport: {
 			status: "対応",
 			detail:
-				"PC接続型のため、PC側ブラウザ経由でSteamVR/OpenXRからWebXR利用可。",
+				"PC接続型のため、PCブラウザからSteamVR・OpenXR経由でWebXRを利用できます。",
 		},
 		browsers: [
-			"PC上のChrome/Edge/Firefox等",
+			"PC上のChrome・Edge・Firefoxなど",
 			"SteamVRをOpenXRランタイムに設定して利用",
 		],
 		connectionType:
-			"PC接続型（DisplayPort/USB、有線）。SteamVRベースステーション方式。",
+			"PC有線接続（DisplayPort・USB）。SteamVRベースステーション方式。",
 		priceRange: "ヘッドセット単体103,400円前後、フルセットで約15万円",
 		availability: "販売中（2021年6月発売）。",
 		notes: [
-			"両眼合計5K相当の超高解像度、120Hz対応。",
-			"外部センサー方式で精密な6DoFトラッキング。",
-			"高性能PCと周辺機器が必須で手軽さは低い。",
+			"両眼合計5K相当の高解像度と120Hz表示に対応しています。",
+			"外部ベースステーション方式で精度の高い6DoFトラッキングが行えます。",
+			"高性能なPCと周辺機器の設置が必要になるため、導入の手間は大きめです。",
 		],
 	},
 	{
 		id: "pico-4",
-		name: "Pico 4",
+		name: "PICO 4",
 		type: "VR",
-		manufacturer: "Pico",
+		manufacturer: "PICO",
 		webxrSupport: {
 			status: "対応",
-			detail: "標準「Pico Browser」でWebXRコンテンツのVR表示が可能。",
+			detail: "標準のPICO BrowserでWebXRのVRコンテンツを開けます。",
 		},
 		browsers: [
-			"Pico Browser（Chromiumベース）",
-			"WolvicなどXRブラウザをサイドロード可能",
+			"PICO Browser（Chromiumベース）",
+			"WolvicなどのXRブラウザをサイドロード可能",
 		],
-		connectionType: "スタンドアロン。PC接続でSteamVR利用可。",
+		connectionType: "スタンドアロン。PC接続でSteamVRも利用できます。",
 		priceRange: "約47,000〜59,000円（128GB: 49,000円、256GB: 59,400円）",
 		availability: "販売中（2022年10月発売）。",
 		notes: [
-			"片目2160×2160、最大90Hz駆動。",
-			"パススルーはモノクロでMR用途は限定的。",
-			"公式ストアのアプリラインナップは拡大中。",
-			"別売のPICOモーショントラッカーで全身トラッキングに対応。",
+			"片目2160×2160、最大90Hz駆動のディスプレイを備えています。",
+			"パススルーは単眼カラーで歪みが出やすく、MR用途は限定的です。",
+			"別売のPICO Motion Trackerと組み合わせると全身トラッキングに対応します。",
 		],
 	},
 	{
 		id: "pico-4-ultra",
-		name: "Pico 4 Ultra",
+		name: "PICO 4 Ultra",
 		type: "VR/MR",
-		manufacturer: "Pico",
+		manufacturer: "PICO",
 		webxrSupport: {
 			status: "対応",
-			detail: "Pico BrowserでWebXR利用可。",
+			detail: "PICO BrowserでWebXRを利用できます。",
 		},
-		browsers: ["Pico Browser（Chromium系）"],
-		connectionType: "スタンドアロン。PC接続（SteamVR）対応。",
+		browsers: ["PICO Browser（Chromium系）"],
+		connectionType: "スタンドアロン。PC接続（SteamVR）に対応しています。",
 		priceRange: "104,900円（256GBモデルのみ、税込／2026年5月1日改定）",
 		availability:
-			"販売中（2024年9月発売）。2026年5月1日より日本国内価格を改定。",
+			"販売中（2024年9月発売）。2026年5月1日に日本国内価格が改定されました。",
 		notes: [
-			"Pico 4の上位モデルでカラーMR対応カメラ搭載。",
-			"Snapdragon XR2 Gen2により高い処理能力。",
-			"公式ストアのコンテンツラインナップは成長中。",
-			"モーショントラッカー対応など独自の強み。",
+			"PICO 4の上位モデルで、ステレオカラーカメラによるMR表示に対応しています。",
+			"Snapdragon XR2 Gen 2を搭載しています。",
+			"PICO Motion Trackerと組み合わせた全身トラッキングに対応しています。",
 		],
 	},
 	{
@@ -284,19 +279,19 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 		webxrSupport: {
 			status: "対応",
 			detail:
-				"Chrome on Android XRの公式API一覧に基づくWebXR対応。端末・モード・機能の取得条件は個別確認が必要です（2026年10月14日確認）。",
+				"Chrome on Android XRの公式API一覧ではWebXRに対応しています。端末ごとのモードや機能の取得条件は個別の確認が必要です（2026年10月14日確認）。",
 		},
 		browsers: ["Chrome for Android XR", "Samsung Internet（Android XR向け）"],
 		connectionType: "スタンドアロン（Android XR）。",
 		priceRange: "米国希望小売価格 $1,799.99（日本国内価格は未発表）",
 		availability:
-			"米国・韓国で2025年10月22日発売。日本では現時点で発売日・国内価格は未発表。",
+			"米国・韓国で2025年10月22日発売。日本国内での発売日と価格は未発表です。",
 		notes: [
-			"GoogleのAndroid XR OSを初めて搭載したフラッグシップ機。",
-			"公式WebXR API一覧: https://developer.android.com/develop/xr/web 。API一覧は端末別の実測結果ではありません。",
-			"Snapdragon XR2+ Gen 2、片目4K Micro-OLEDを採用。",
-			"コントローラー／ハンドトラッキング／視線＋ピンチ操作の3方式に対応。",
-			"Gemini統合により音声アシスタント体験を強化。",
+			"GoogleのAndroid XRを初めて搭載したヘッドセットです。",
+			"公式WebXR API一覧: https://developer.android.com/develop/xr/web （端末別の実測結果ではありません）。",
+			"Snapdragon XR2+ Gen 2と片目4K Micro-OLEDを採用しています。",
+			"コントローラー、ハンドトラッキング、視線とピンチ操作の3方式に対応しています。",
+			"Geminiが統合されており、音声アシスタント機能を備えています。",
 		],
 	},
 ];
@@ -310,16 +305,16 @@ export const AR_DEVICES: DeviceWebxrSummary[] = [
 		webxrSupport: {
 			status: "未確認",
 			detail:
-				"公式WebXR 3Dペイントデモあり・製品版の実機検証待ち（2026年10月13日確認）。Android XRの対応一覧とAURAの個別実測は区別します。",
+				"公式のWebXR 3Dペイントデモは公開されていますが、製品版での実機検証待ちです（2026年10月13日確認）。Android XRの対応一覧とAURAでの実測結果は分けて確認します。",
 		},
-		browsers: ["Chrome（製品のアプリ一覧に記載。OS・Chrome版数は未確認）"],
-		connectionType: "専用コンピュートパックと有線接続（Android XR）。",
-		priceRange: "地域・構成によって異なる（公式案内で要確認）",
-		availability: "予約・出荷状況は地域ごとの公式案内で要確認。",
+		browsers: ["Chrome（製品ページのアプリ一覧に記載。OSとChromeのバージョンは未確認）"],
+		connectionType: "専用コンピュートパックとの有線接続（Android XR）。",
+		priceRange: "地域・構成によって異なります（公式案内で確認が必要）",
+		availability: "予約・出荷状況は地域ごとの公式案内で確認が必要です。",
 		notes: [
-			"視野角70°の光学シースルー。6DoFとハンドトラッキングを案内。カメラパススルーとは表示方式が異なります。",
-			"immersive-ar / immersive-vr、flags、入力プロファイル、コントローラー、Depth / Anchorsの取得条件は実機未確認。",
-			"LayersとWebGPUのWebXR連携は未確認。通常ページのWebGPU対応から推定できません。",
+			"視野角70°の光学シースルー方式で、6DoFとハンドトラッキングが案内されています。カメラパススルーとは表示方式が異なります。",
+			"immersive-ar・immersive-vr、フラグ設定、入力プロファイル、コントローラー、Depth・Anchorsの取得条件は実機未確認です。",
+			"LayersとWebGPUのWebXR連携は未確認です。通常ページのWebGPU対応からそのまま推測することはできません。",
 			"出典: https://www.xreal.com/us/aura",
 			"公式デモ: https://www.xreal.com/uk/blog/project-aura-google-io-2026",
 		],
@@ -328,20 +323,20 @@ export const AR_DEVICES: DeviceWebxrSummary[] = [
 		id: "android-arcore",
 		name: "Androidスマートフォン（ARCore対応）",
 		type: "AR",
-		manufacturer: "Google/各社",
+		manufacturer: "Google / 各社",
 		webxrSupport: {
 			status: "対応",
 			detail:
-				"Android版ChromeでWebXR AR Moduleが利用可能。ARCore対応端末が前提。",
+				"Android版ChromeでWebXR AR Moduleを利用できます。ARCore対応端末が前提です。",
 		},
 		browsers: ["Chrome for Android", "Samsung Internet（対応端末のみ）"],
 		connectionType: "スマートフォン単体（背面カメラ）",
-		priceRange: "端末により異なる",
-		availability: "販売中（端末により異なる）",
+		priceRange: "端末によって異なります",
+		availability: "販売中（端末によって異なります）",
 		notes: [
-			"ARCore対応端末が必須。",
-			"カメラ越しに現実空間へオブジェクトを配置。",
-			"OS/ブラウザの更新状況で挙動が変わる場合がある。",
+			"ARCoreに対応した機種が必要です。",
+			"背面カメラの映像に重ねて現実空間へ3Dオブジェクトを配置できます。",
+			"OSやブラウザの更新によって挙動が変わることがあります。",
 		],
 	},
 	{
@@ -351,20 +346,21 @@ export const AR_DEVICES: DeviceWebxrSummary[] = [
 		manufacturer: "Apple",
 		webxrSupport: {
 			status: "非対応",
-			detail: "iOS SafariはWebXR AR非対応。WebXR ViewerやApp Clipで体験可能。",
+			detail:
+				"iOS SafariはWebXR ARに未対応です。WebXR ViewerやApp Clip経由で体験する方法があります。",
 		},
 		browsers: [
-			"Safari（iOS）: WebXR AR非対応",
-			"WebXR Viewer（アプリ）",
-			"App Clip（EyeJack/Variant Launchなど）",
+			"Safari（iOS）: WebXR AR未対応",
+			"WebXR Viewer（専用アプリ）",
+			"App Clip（EyeJack・Variant Launchなど）",
 		],
-		connectionType: "スマートフォン/タブレット単体（背面カメラ）",
-		priceRange: "端末により異なる",
-		availability: "販売中（端末により異なる）",
+		connectionType: "スマートフォン・タブレット単体（背面カメラ）",
+		priceRange: "端末によって異なります",
+		availability: "販売中（端末によって異なります）",
 		notes: [
-			"Safari単体ではWebXR ARが利用できない。",
-			"App Clipを使えばインストール不要で体験可能。",
-			"ARKit対応機種が前提。",
+			"Safari単体ではWebXR ARを使えません。",
+			"App Clipを組み合わせれば、アプリのフルインストールなしで体験を届けられます。",
+			"ARKitに対応した機種が前提です。",
 		],
 	},
 	{
@@ -375,7 +371,7 @@ export const AR_DEVICES: DeviceWebxrSummary[] = [
 		webxrSupport: {
 			status: "対応",
 			detail:
-				"visionOSのSafariでimmersive-vrを利用可能。immersive-arと各拡張機能は分けて確認します。",
+				"visionOSのSafariでimmersive-vrを利用できます。immersive-arや各拡張機能の対応は個別に確認が必要です。",
 		},
 		browsers: ["Safari on visionOS"],
 		connectionType: "スタンドアロン（visionOS）",
@@ -383,11 +379,11 @@ export const AR_DEVICES: DeviceWebxrSummary[] = [
 			"599,800円（256GB）、634,800円（512GB）、669,800円（1TB）（税込）",
 		availability: "販売中（2025年10月22日にM5チップ搭載モデルが発売）。",
 		notes: [
-			"視線・ジェスチャー中心の操作体験。",
-			"一次情報: https://bugs.webkit.org/show_bug.cgi?id=305459 （2026年1月、immersive-ar未対応時の誤判定を修正）",
-			"visionOSのSafariはimmersive-vrに対応。immersive-arの対応は確認できていません（2026年10月14日確認）。",
-			"M5チップ搭載で最大120Hzリフレッシュレートに対応（2025年10月発売）。",
-			"新設計のデュアルニットバンドで装着感を改善。",
+			"視線と手のジェスチャーを中心に操作します。",
+			"一次情報: https://bugs.webkit.org/show_bug.cgi?id=305459 （2026年1月にimmersive-ar未対応時の誤判定を修正）",
+			"visionOSのSafariはimmersive-vrに対応していますが、immersive-arの対応は確認できていません（2026年10月14日確認）。",
+			"M5チップを搭載し、最大120Hzのリフレッシュレートに対応しています。",
+			"デュアルニットバンドにより装着感が見直されています。",
 		],
 	},
 ];

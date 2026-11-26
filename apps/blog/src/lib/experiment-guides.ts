@@ -163,9 +163,9 @@ const experimentGuides: Record<string, ExperimentGuide> = {
 				note: "Body Tracking対応の有無は端末とブラウザによって異なります。",
 			},
 			{
-				label: "Desktop",
+				label: "デスクトップ",
 				readiness: "preview",
-				note: "UI表示の確認のみ可能です。実際のトラッキングには対応ヘッドセットが必要です。",
+				note: "画面の表示だけ確認できます。実際のトラッキングには対応ヘッドセットが必要です。",
 			},
 		],
 		flow: [

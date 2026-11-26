@@ -1,5 +1,5 @@
 ---
-title: "webxr-samplesにSpace Warp / WebGPU / inline-stereoの新しい流れ"
+title: "webxr-samplesにSpace Warp・WebGPU・inline-stereoの新しい動き"
 description: "Immersive Webのwebxr-samplesに追加・レビュー中のPRから、Space Warp、WebGPU XR、inline-stereoサンプルの狙いとWebXR開発者が見るべき点を整理します。"
 date: "2026年6月19日"
 category: "NEWS"
@@ -15,78 +15,66 @@ thumbnail: "/assets/tech/webxr-inline-stereo-space-warp.webp"
 draft: false
 ---
 
-Immersive Webの[`webxr-samples`](https://github.com/immersive-web/webxr-samples)で、Space Warp、WebGPU XR、inline-stereoに関係するサンプル追加が続いています。
+Immersive Webの[`webxr-samples`](https://github.com/immersive-web/webxr-samples)で、Space Warp、WebGPU XR、`inline-stereo`に関するサンプル追加が相次いでいます。
 
-`webxr-samples`はWebXRを学ぶときの定番リポジトリですが、今回の一連のPRを見ると、役割が少し広がってきていることが分かります。従来の「WebXRの基本APIを試す場所」に加えて、WebXR Layers、Projection Layer、motion vector、`XRGPUBinding`、view instancing、複数viewレンダリングといった、次世代のWebXR描画を確認する場所になりつつあります。
+`webxr-samples`はWebXRの基本APIを試す定番リポジトリですが、今回の一連のPRを見ると、対象領域が次世代の描画技術へと広がっていることが分かります。WebXR Layers、`XRProjectionLayer`、モーションベクター、`XRGPUBinding`、ビューインスタンシング（view instancing）、複数ビュー描画といった実装を確認できる構成になりつつあります。
 
 2026年6月19日時点で確認した主なPRは次の6件です。
 
 | PR | 状態 | 内容 |
 | --- | --- | --- |
-| [#243 add space warp example](https://github.com/immersive-web/webxr-samples/pull/243) | 2026年6月1日にマージ済み | Space Warpサンプルの土台。rendererにSpace Warp対応を入れ、サンプルファイルを追加。 |
-| [#245 add stress for space warp + fix msaa non-multiview](https://github.com/immersive-web/webxr-samples/pull/245) | マージ済み | Space Warpの効果を見やすくするstress sceneと、MSAA non-multiview経路の修正。 |
-| [#246 add performance options to spacewarp example](https://github.com/immersive-web/webxr-samples/pull/246) | マージ済み | shape数やbenchmarkなど、性能比較しやすいUIを追加。 |
+| [#243 add space warp example](https://github.com/immersive-web/webxr-samples/pull/243) | マージ済み（2026年6月1日） | Space Warpサンプルの土台。レンダラーへSpace Warp対応を組み込み、サンプルファイルを追加。 |
+| [#245 add stress for space warp + fix msaa non-multiview](https://github.com/immersive-web/webxr-samples/pull/245) | マージ済み | Space Warpの効果を観察しやすくする高負荷シーンの追加と、MSAA non-multiview経路の修正。 |
+| [#246 add performance options to spacewarp example](https://github.com/immersive-web/webxr-samples/pull/246) | マージ済み | 描画する図形（shape）の数やベンチマーク設定など、性能比較しやすいUIを追加。 |
 | [#238 add webgpu render library + test files](https://github.com/immersive-web/webxr-samples/pull/238) | マージ済み | WebGPU版レンダリングライブラリとWebGPU XRサンプル群を追加。 |
-| [#247 Improve WebGPU XR benchmark rendering and controller support](https://github.com/immersive-web/webxr-samples/pull/247) | Open | WebGPU benchmark、controller / hand model、view instancing周辺の改善候補。 |
-| [#242 Add inline stereo sample](https://github.com/immersive-web/webxr-samples/pull/242) | Open | inline sessionでも複数viewを扱うinline-stereoサンプル候補。 |
+| [#247 Improve WebGPU XR benchmark rendering and controller support](https://github.com/immersive-web/webxr-samples/pull/247) | レビュー中（Open） | WebGPUベンチマーク、コントローラー・ハンドモデル、ビューインスタンシング周辺の改善案。 |
+| [#242 Add inline stereo sample](https://github.com/immersive-web/webxr-samples/pull/242) | レビュー中（Open） | `inline`セッションで複数ビューを扱う`inline-stereo`サンプル案。 |
 
-#247と#242は、この記事の執筆時点ではまだOpenです。そのため、この記事では「追加された機能」ではなく、「レビュー中のサンプル」「今後入る可能性がある改善」として扱います。実際に試す場合は、各PRの状態と`main`ブランチの最新内容を確認してください。
+なお、#247と#242は執筆時点でレビュー中（Open）のため、今後内容が変更される可能性があります。実際に手元で試す際は、各PRの状況と`main`ブランチの最新内容を確認してください。
 
-## Space Warpサンプルが入った
+## Space Warpサンプルの追加と構成
 
-[#243](https://github.com/immersive-web/webxr-samples/pull/243)、[#245](https://github.com/immersive-web/webxr-samples/pull/245)、[#246](https://github.com/immersive-web/webxr-samples/pull/246)によって、Space Warp関連のサンプルが段階的に追加・改善されています。
+[#243](https://github.com/immersive-web/webxr-samples/pull/243)、[#245](https://github.com/immersive-web/webxr-samples/pull/245)、[#246](https://github.com/immersive-web/webxr-samples/pull/246)により、Space Warp関連のサンプルが段階的に拡充されました。
 
-Space Warpは「チェックを入れると速くなる魔法のオプション」というより、前フレームからの動きをXRランタイムやブラウザ側が再投影しやすくするための仕組みです。そのため、アプリ側も通常のcolor描画だけでなく、depthやmotion vectorなど、再投影に必要な情報を用意する必要があります。
+Space Warpは、前フレームからの動きをXRランタイムやブラウザ側が再投影しやすくするための仕組みです。そのため、アプリ側も通常のカラー描画に加えて、深度情報やモーションベクターなど再投影に必要なデータを用意します。
 
-このサンプルが面白いのは、通常のWebGL canvasに描くだけではなく、WebXR Layersの`XRProjectionLayer`を使い、Projection Layerに対してcolor、depth、motion vectorのような情報を渡す構成になっている点です。Space Warpのサンプルであると同時に、WebXR Layersを実践的に読むためのサンプルにもなっています。
+このサンプルでは、WebXR Layersの`XRProjectionLayer`を利用し、プロジェクションレイヤーへカラー、深度、モーションベクターを渡す実装になっています。Space Warpの動作例であると同時に、WebXR Layersの実践的なコード例としても読み応えがあります。
 
-実装を見ると、`layers`機能を使うWebXRセッションを前提にしつつ、Space Warp、multiview、MSAA、non-multiviewといった描画経路の違いも意識されています。WebXRでは、同じシーンを描いているように見えても、Projection Layer、multiview、MSAAの組み合わせによってrenderer側の処理が変わります。Space Warpサンプルは、その差を観察する入口としても使えます。
+実装コードでは`layers`機能を使うセッションを前提とし、Space Warp、multiview、MSAA、non-multiviewといった描画経路ごとの違いも扱っています。見た目が同じシーンでも、プロジェクションレイヤーやmultiview、MSAAの組み合わせによってレンダラー側の処理が変わるため、その違いを観察する入口として役立ちます。
 
-## stress sceneとbenchmarkで負荷を観察できる
+## 高負荷シーンとベンチマークによる検証
 
-[#245](https://github.com/immersive-web/webxr-samples/pull/245)と[#246](https://github.com/immersive-web/webxr-samples/pull/246)では、Space Warpサンプルが単なる機能デモから、性能比較しやすいstress sceneへ広がっています。
+[#245](https://github.com/immersive-web/webxr-samples/pull/245)と[#246](https://github.com/immersive-web/webxr-samples/pull/246)では、負荷条件を切り替えて性能を比較できる高負荷テスト用シーンとオプションUIが加わりました。
 
-WebXRでは「APIを呼べる」ことと「ヘッドセットで安定して見える」ことの間に大きな差があります。特にVR/MRでは、描画負荷が一瞬上がっただけでもVR sicknessや違和感につながりやすく、軽いデモだけでは実運用時の挙動を判断しにくいです。
+WebXRでは「APIがエラーなく呼べる」ことと「ヘッドセットで安定して快適に描画できる」ことの間に大きな差があります。特にVRやMRでは、一瞬のフレーム落ちでもVR酔いや違和感につながりやすいため、軽いシーンだけでは実運用時の挙動を見極められません。
 
-Space Warpあり / なし、multiviewあり / なし、MSAAあり / なし、描画するshape数の違いを比較できると、単に「動いた」だけでは見えない差を確認できます。Space Warpの価値も、機能が有効化できるかどうかだけでは判断できません。重いsceneでフレームレートを保てるか、負荷が上がったときに体験がどのように変わるか、左右の見え方にvisual artifactがないか、といった点を実機で見ていく必要があります。
+Space Warpあり/なし、multiviewあり/なし、MSAAあり/なし、描画する図形数を切り替えられることで、負荷が高いシーンでフレームレートを維持できるか、体験がどう変わるか、左右の映像に描画の乱れ（アーティファクト）が出ないかを実機で比較できます。高負荷時の品質劣化をどう抑えるかを探る検証素材として有用です。
 
-このサンプルは、WebXRパフォーマンスを考えるときのよい出発点になります。Space Warpを「最適化テクニック」としてだけ見るのではなく、負荷が上がったときにXR表示でvisual artifactをどう防ぐかを考える材料として読むと、得られるものが多そうです。
+## WebGPUとWebXRを組み合わせたサンプル群
 
-## WebGPU + WebXRサンプル群も追加された
+[#238](https://github.com/immersive-web/webxr-samples/pull/238)では、WebGPU版のレンダリングライブラリとWebGPU XRサンプル群がマージされました。
 
-[#238](https://github.com/immersive-web/webxr-samples/pull/238)では、WebGPU版のrender libraryとWebGPU XRサンプル群が追加されています。
+ここで押さえておきたいのは、WebGPUのXR対応を`navigator.gpu`の有無だけで判断できない点です。通常のWebページでWebGPUが動くことと、WebXRの没入型セッション内でWebGPU描画をプロジェクションレイヤーへ出力できることは別問題であり、`XRGPUBinding`やWebGPU用のプロジェクションレイヤー経路が必要になります。
 
-ここで重要なのは、WebGPU対応を`navigator.gpu`だけで判断できないことです。通常のWebページでWebGPUが使えることと、WebXRのimmersive session内でWebGPU描画をProjection Layerに出せることは別の問題です。WebXR上でWebGPUを使うには、WebXRとWebGPUを接続するための`XRGPUBinding`や、WebGPU用のProjection Layer経路が必要になります。
-
-WebGPU XRサンプルを見るときは、少なくとも次の3つを分けて考える必要があります。
+WebGPU XRの動作を確認する際は、次の3つを切り分けてチェックします。
 
 1. ブラウザがWebGPUに対応しているか
 2. ブラウザがWebXRに対応しているか
 3. WebXRセッション内でWebGPU描画を扱う`XRGPUBinding`などの経路が使えるか
 
-WebGPUは通常のcanvas描画でも端末差やブラウザ差が出やすい領域です。そこにWebXRのimmersive session、左右view、projection layer、controller / hand inputが重なるため、WebGPU XRサンプルは「最新機能を触るサンプル」であると同時に、端末・ブラウザ・GPU・XRランタイムの組み合わせを検証するためのサンプルでもあります。
+WebGPUは通常のcanvas描画でも端末やブラウザによる差異が出やすい分野です。そこに没入型セッション、左右ビュー、プロジェクションレイヤー、コントローラーやハンドトラッキング入力が重なるため、端末・ブラウザ・GPU・XRランタイムの組み合わせを検証する用途にも向いています。WebGL版サンプルと並べて読み比べると、描画経路をWebGPUへ置き換えたときにどのAPI境界が変わるのかが把握しやすくなります。
 
-WebGPU版サンプルは、WebGL版サンプルとの対応関係を見ながら読むと理解しやすいです。WebGPUのbest practicesそのものを学ぶ教材というより、まずは「WebXRの描画経路をWebGPUに置き換えると、どのAPI境界が変わるのか」を観察する素材として見るのがよさそうです。
+## レビュー中のWebGPU XRベンチマーク改善（PR #247）
 
-## WebGPU XR benchmarkの改善候補
+[#247](https://github.com/immersive-web/webxr-samples/pull/247)（Improve WebGPU XR benchmark rendering and controller support）は、WebGPU XRのベンチマーク描画、コントローラー・ハンドモデル表示、ビューインスタンシング周辺の改善を目指すPRです。
 
-[#247](https://github.com/immersive-web/webxr-samples/pull/247)は、2026年6月19日時点ではOpenのPRです。
+特にビューインスタンシングは、左右の目を個別に描くのではなく複数ビューを効率よく処理するための重要な手法であり、WebGPU XRの性能と実装構造に直結します。また、コントローラーやハンドモデルが安定して描画されることで、GPU負荷だけでなく入力や姿勢情報（pose）、左右ビュー、レイヤー構成を含めた実戦的なベンチマークが組みやすくなります。
 
-PRタイトルは「Improve WebGPU XR benchmark rendering and controller support」で、WebGPU XR benchmarkやcontroller / hand model、view instancing周辺の改善が主題になっています。
+## inline-stereoサンプルが示す複数ビュー対応（PR #242）
 
-このPRは、WebGPU XRサンプルを「動くデモ」から「XRレンダリングの性能比較に使いやすいデモ」へ近づけるものとして読めます。特にview instancingは、XRレンダリングでは重要なテーマです。左右の目を別々に描くのではなく、複数viewを効率よく扱う方向の設計は、WebGPU XRでもパフォーマンスと実装構造に大きく関係します。
+[#242](https://github.com/immersive-web/webxr-samples/pull/242)は、`inline`セッションでもステレオ（複数ビュー）を扱う`inline-stereo`のサンプル案です。
 
-また、controllerやhand modelの表示が安定すると、単にsceneを描くだけでなく、入力を含めたWebXR体験として検証しやすくなります。WebXRのbenchmarkは、GPU負荷だけでなく、入力、pose、左右view、layer構成まで含めて見る必要があります。#247は、その方向にサンプルを進めるPRとして注目できます。
-
-ただし、#247はまだレビュー中です。この記事の執筆時点では、今後内容が変わる可能性があります。
-
-## inline-stereoサンプルが示す複数viewの考え方
-
-[#242](https://github.com/immersive-web/webxr-samples/pull/242)も、2026年6月19日時点ではOpenのPRです。
-
-inline sessionは「ページ内の2Dプレビュー」と思われがちですが、inline-stereoは、inline sessionでもstereo / 複数viewを扱う可能性を示すテーマです。
-
-ここで大事なのは、`XRViewerPose.views`を固定長だと思わないことです。実装では「VRなら左目と右目の2つ」と決め打ちするのではなく、常に`pose.views`をループして、渡されたviewごとにviewportやprojection matrixを処理する形にしておくほうが安全です。
+実装面で重要なのは、`XRViewerPose.views`の要素数を固定と決め打ちしないことです。常に`pose.views`をループし、渡された各ビューに対してビューポートと射影行列を処理する形にしておけば、単眼`inline`、ステレオ`inline`、没入型VRのいずれでも安全に動きます。
 
 ```js
 const pose = frame.getViewerPose(referenceSpace);
@@ -107,19 +95,14 @@ if (pose) {
 }
 ```
 
-この考え方は、inline-stereoだけでなく、Projection Layer、multiview、将来の特殊なdisplay構成にもつながります。`webxr-samples`にinline-stereoのサンプルが入ると、WebXRのrender loopを説明するときのよい教材になりそうです。
+この書き方は`inline-stereo`に限らず、プロジェクションレイヤーやmultiview、将来の特殊なディスプレイ構成にも対応しやすい基本設計です。WebXRの描画ループを学ぶ教材としても分かりやすいサンプルになりそうです。
 
-## WebXR Samplesは次世代描画の観察場所になってきた
+## まとめ
 
-今回のPR群から見える流れは、次の3つです。
+今回の一連のPRにより、`webxr-samples`では次の3つの領域が具体例として追いやすくなりました。
 
-1. **Space Warpサンプルが入った**  
-   Projection Layer、depth、motion vector、MSAA、multiview、benchmarkを含む実践的なサンプルになってきました。
+- **Space Warp**：プロジェクションレイヤー、深度、モーションベクター、MSAA、multiview、高負荷ベンチマークをまとめて確認できる構成がマージ済み
+- **WebGPU + WebXR**：没入型セッション内でWebGPU描画をプロジェクションレイヤーへ出力するサンプル群がマージ済み
+- **レビュー中の拡張**：複数ビュー対応を示す`inline-stereo`（#242）と、WebGPU XRベンチマーク・入力表示の改善（#247）が進行中
 
-2. **WebGPU + WebXRサンプル群が入った**  
-   WebGPUを通常canvasで使うだけでなく、WebXRのimmersive session内でProjection Layerに描く流れを確認できるようになっています。
-
-3. **inline-stereoやWebGPU benchmark改善がレビュー中**  
-   #242と#247はまだOpenですが、複数viewやWebGPU XR性能検証を学ぶうえで重要な候補です。
-
-`webxr-samples`は、WebXRの基本APIを試す場所から、次世代のWebXR描画を観察する場所へ広がっています。Space Warp、WebGPU、inline-stereoはいずれも実験的・環境依存の強い領域ですが、今のうちにサンプルを読んでおくと、これからのWebXR実装でどこを抽象化し、どこを実機検証すべきかが見えやすくなります。
+いずれも環境依存や実験的な要素を多く含む領域ですが、今のうちにサンプルコードへ目を通しておくことで、今後のWebXR開発で抽象化すべき箇所と実機検証すべき箇所が見通しやすくなります。

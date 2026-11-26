@@ -16,17 +16,17 @@ draft: false
 
 ## World Effectsとは
 
-8th Wallの**World Effects**は、world tracking（SLAM）を活用し、現実の地面や空間に仮想オブジェクトを配置するAR機能です。world tracking（SLAM）は8th Wallのワールドトラッキング機能で、カメラ映像と3Dシーンをcompositingします。`xrweb`コンポーネントの`defaultEnvironment`系プロパティで空と地面を構成し、カメラ映像と3Dシーンを統合します。
+8th Wallの**World Effects**は、ワールドトラッキング（SLAM）を使って現実の地面や空間に仮想オブジェクトを配置するAR機能です。`xrweb`コンポーネントの`defaultEnvironment`系プロパティで空や地面の環境を整え、カメラ映像と3Dシーンを合成します。
 
-この記事では、**地面をタップしてサボテンを配置する**インタラクティブなARデモを例に、World Effectsの基本的な実装パターンを解説します。
+この記事では、**地面をタップしてサボテンを配置する**ARデモを例に、World Effectsの基本的な実装パターンを解説します。
 
 **[デモを試す →](https://8thwall-examples.vercel.app)**
 
-> ※ カメラ対応デバイス（スマートフォン・PC）が必要です。
+> ※カメラ対応デバイス（スマートフォン・PC）が必要です。
 
-## 前提：配布バイナリが必要
+## 前提：配布バイナリの準備
 
-World EffectsはSLAM（world tracking）に依存するため、**OSS版エンジンだけでは動作しません**。配布バイナリ（[8thwall/engine](https://github.com/8thwall/engine)の`xr-standalone.zip`）が必要です。
+World EffectsはSLAMによるワールドトラッキングに依存するため、**OSS版エンジンだけでは動作しません**。配布バイナリ（[8thwall/engine](https://github.com/8thwall/engine)の`xr-standalone.zip`）が必要です。
 
 | 機能 | OSS版 | 配布バイナリ |
 |------|:---:|:---:|
@@ -66,7 +66,7 @@ project/
 <script async src="./external/xr/xr.js" data-preload-chunks="slam"></script>
 ```
 
-`data-preload-chunks="slam"`でSLAMチャンクを事前ロードします。World Effectsにはこの指定が必須です。
+`data-preload-chunks="slam"`でSLAMチャンクを事前読み込みします。World Effectsではこの指定が必須です。
 
 ### A-Frameシーンの定義
 
@@ -87,7 +87,7 @@ project/
     defaultEnvironmentSkyGradientStrength: 0.5;">
 ```
 
-`xrweb`コンポーネントのプロパティで環境を構成します。
+`xrweb`コンポーネントのプロパティで環境を設定します。
 
 | プロパティ | 説明 |
 |-----------|------|
@@ -114,7 +114,7 @@ project/
 </a-camera>
 ```
 
-`raycaster="objects: .cantap"`で、`cantap`クラスを持つ要素のみをタップ対象にします。`cursor`の`rayOrigin: mouse`はタッチ/クリック位置からレイを飛ばす設定です。
+`raycaster="objects: .cantap"`で、`cantap`クラスを持つ要素だけをタップ対象にします。`cursor`の`rayOrigin: mouse`は、タッチやクリックの位置からレイを飛ばす設定です。
 
 ### 地面（タップ対象）
 
@@ -129,7 +129,7 @@ project/
 </a-box>
 ```
 
-巨大な透明ボックスを地面として配置し、`cantap`クラスでレイキャストの対象にしています。`shader: shadow`で影だけを表示する特殊マテリアルを使用しています。
+巨大な透明ボックスを地面として配置し、`cantap`クラスでレイキャストの対象にしています。`shader: shadow`は影だけを描画する専用マテリアルです。
 
 ## タップ配置コンポーネントの実装
 
@@ -183,12 +183,12 @@ const tapPlaceComponent = {
 AFRAME.registerComponent("tap-place", tapPlaceComponent);
 ```
 
-### ポイント
+### 実装のポイント
 
-- **`event.detail.intersection.point`** ── レイキャストの交差点座標を取得
-- **動的エンティティ生成** ── `createElement`でランタイムにA-Frameエンティティを追加
-- **glTFモデルの遅延表示** ── `model-loaded`イベントを待ってからアニメーション開始
-- **`easeOutElastic`** ── バウンスするポップイン効果で自然な出現演出
+- レイキャストの交差座標は`event.detail.intersection.point`から取得します。
+- タップのたびに`createElement`でA-Frameエンティティを動的に生成し、シーンへ追加します。
+- glTFモデルの表示とアニメーションは、`model-loaded`イベントを待ってから開始します。
+- イージングに`easeOutElastic`を指定すると、バウンスしながら出現する演出になります。
 
 ## Vercelへのデプロイ
 
@@ -201,15 +201,15 @@ AFRAME.registerComponent("tap-place", tapPlaceComponent);
 }
 ```
 
-### Git LFSに関する注意
+### Git LFSに関する注意点
 
-Vercel Hobbyプランは**Git LFSに対応していません**。LFSで管理されたファイルはポインターファイル（`version https://git-lfs...`で始まるテキスト）のまま展開され、TerserがJSとして解析しようとしてビルドエラーになります。
+VercelのHobbyプランは**Git LFSに対応していません**。LFS管理のファイルはポインターファイル（`version https://git-lfs...`で始まるテキスト）のまま展開され、TerserがJavaScriptとして解析しようとしてビルドエラーになります。
 
-Vercelにデプロイする場合は、`.gitattributes`からLFSルールを削除し、通常のgitオブジェクトとしてコミットしてください。
+Vercelへデプロイする場合は、`.gitattributes`からLFSルールを削除し、通常のGitオブジェクトとしてコミットしてください。
 
 ## 関連リンク
 
 - [デモ（Vercel）](https://8thwall-examples.vercel.app)
 - [ソースコード（GitHub）](https://github.com/yushimatenjin/8thwall-examples)
 - [8thwall/engine（配布バイナリ）](https://github.com/8thwall/engine)
-- [BANGEO の 8th Wall デモ一覧](/demos/8thwall-sky-effects/demo.html)
+- [BANGEOの8th Wallデモ一覧](/demos/8thwall-sky-effects/demo.html)

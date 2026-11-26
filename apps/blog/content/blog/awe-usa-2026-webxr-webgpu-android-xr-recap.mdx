@@ -1,6 +1,6 @@
 ---
 title: "AWE USA 2026から見るWebXR / WebGPU / Android XRの動き"
-description: "AWE USA 2026のRecapやKeynoteから、WebXR、WebAR、WebGPU、Android XR、Spatial Webに関係する論点を整理します。"
+description: "AWE USA 2026の公式レポートや基調講演から、WebXR、WebAR、WebGPU、Android XR、Spatial Webに関係する動きを整理します。"
 date: "2026年6月28日"
 category: "NEWS"
 tags:
@@ -16,44 +16,28 @@ thumbnail: "/assets/tech/awe-usa-2026-webxr-webgpu-android-xr-recap.webp"
 draft: false
 ---
 
-AWE USA 2026は、XR業界全体を扱う大きなイベントです。WebXRの仕様イベントではありませんが、Android XR、WebAR、Spatial AI、ARグラス、Gaussian Splatting、空間ブラウザ構想など、Webで空間体験を作る開発者に関係する話題が複数ありました。
+AWE USA 2026はXR業界全体を扱う大型イベントです。Android XR、WebAR、Spatial AI、ARグラス、Gaussian Splatting、空間ブラウザ構想など、ブラウザ上の空間体験に関わる話題が複数取り上げられました。
 
-この記事では、AWE USA 2026の公式Recap、Keynote、関連セッションから、WebXR / WebGPU / Android XR周辺の動きを整理します。イベント全体のニュースまとめではなく、ブラウザ上の3D体験やSpatial Webに接続しそうな話題に絞ります。
+この記事では、AWE USA 2026の公式レポート（Recap）、基調講演（Keynote）、関連セッションをもとに、WebXR・WebGPU・Android XR周辺の要点を整理します。
 
-## 先に結論
+## 押さえておきたい4つの視点
 
-AWE USA 2026からWebXR開発者が見ておきたいポイントは、次の4つです。
+AWE USA 2026の発表のうち、Webで空間体験を作る開発者に関係が深い論点は次の4つです。
 
-- Android XRは、今後のXRデバイス、Chrome、WebView、WebXR対応状況に影響する可能性がある
-- SnapやWebAR系の発表は、AR体験をWebで配信する場合の比較対象になる
-- OMBI / SneezeはWebXRの代替ではなく、空間サービスを発見・合成・実行するためのブラウザエンジン構想として見ると理解しやすい
-- Spatial AIやGaussian Splattingは、WebGPU、WebAssembly、glTF、ストリーミング、LODなどのWeb 3D基盤と関係してくる
+- **Android XR**：今後のXRデバイスにおけるChrome・WebViewの扱いや、WebXR対応状況に影響する可能性がある
+- **SnapなどのAR配信基盤**：ブラウザ配信（WebAR・WebXR）とSNS・専用アプリ配信の違いを比較する材料になる
+- **OMBI・Sneeze**：空間サービスを発見・合成・実行するブラウザエンジン構想として、WebXRとは別レイヤーで捉える必要がある
+- **Spatial AIとGaussian Splatting**：重い空間データを扱うため、WebGPU・WebAssembly・glTF・ストリーミング・LODといったWeb 3D基盤と密接に関わる
 
-一方で、AWEの話題をそのまま「WebXRの新機能」として読むのは危険です。WebXR Device API、Android XR、OpenXR、WebGPU、WebARプラットフォーム、空間ブラウザ構想は、それぞれレイヤーが違います。
+AWEにはハードウェア、エンタープライズ導入、制作ツール、標準化など幅広い発表が集まります。WebXR Device API、Android XR、OpenXR、WebGPU、WebARプラットフォーム、空間ブラウザ構想はそれぞれ担当するレイヤーが異なるため、XR業界のトピックとブラウザAPIの更新を切り分けて読むことが重要です。
 
-## AWE USA 2026を見るときの前提
+## 公式レポートと基調講演
 
-AWEには、XRハードウェア、エンタープライズ導入、コンテンツ制作、AI、広告、教育、ゲーム、標準化など幅広い話題が集まります。そのため、Web開発者向けに読む場合は、次の観点で切り分けると追いやすくなります。
+AWE公式では、[Final Day Recap](https://www.awexr.com/blog/AWE-USA-2026-Day-4-Recap)や[Day 3 Recap](https://www.awexr.com/blog/AWE-USA-2026-Day-3-Recap)をはじめとする振り返り記事や基調講演の録画が公開されています。ここでは、Web開発の視点で注目したい4つのセッションを取り上げます。
 
-- ブラウザやWebViewで動く可能性があるか
-- WebXR、WebGPU、WebGL、WebAssembly、glTFなど既存のWeb技術と接続するか
-- Android XRやARグラスのように、将来の実行環境に影響するか
-- プラットフォーム固有のAR体験とWebAR / WebXRの違いを考える材料になるか
-- 3Dスキャン、Gaussian Splatting、Spatial AIなど、Web 3Dコンテンツの表現や配信に関係するか
+### イマーシブ・ストーリーテリング
 
-ここを分けておくと、XR業界ニュースとしての盛り上がりと、実際にWeb開発へ影響する話題を混同しにくくなります。
-
-## 公式RecapとKeynote
-
-AWE公式では、AWE USA 2026のRecapやKeynoteへの導線が公開されています。
-
-全体の流れをつかむには、[Final Day Recap](https://www.awexr.com/blog/AWE-USA-2026-Day-4-Recap)や[Day 3 Recap](https://www.awexr.com/blog/AWE-USA-2026-Day-3-Recap)が入口になります。そこから、WebXR / WebGPU / WebAR / Android XRに関係する話題だけを分けて読むのが現実的です。
-
-### Immersive storytelling
-
-Final Day Recapでは、Auggie Awardsや展示の振り返りに加えて、複数のセッション動画が紹介されています。
-
-たとえば「The Wild West of Storytelling: Independent Filmmaking Meets Immersive Tech」は、WebXRやWebGPUのAPI解説ではありません。ただ、3D空間で物語をどう見せるか、ユーザーをどう誘導するかという点では、Immersive WebやGaussian Splattingビューアを設計するときの参考になります。
+Final Day Recapでは、Auggie Awardsや展示の振り返りに加えて複数のセッション動画が紹介されています。その1つ「The Wild West of Storytelling: Independent Filmmaking Meets Immersive Tech」は、3D空間で物語をどう見せ、ユーザーをどう誘導するかを扱うセッションです。
 
 <iframe
   width="560"
@@ -65,13 +49,11 @@ Final Day Recapでは、Auggie Awardsや展示の振り返りに加えて、複�
   allowFullScreen>
 </iframe>
 
-WebXRの技術検証では、セッション開始、入力、描画、フレームレートに目が行きがちです。しかし、空間コンテンツでは、視線誘導、スケール感、移動の負荷、見せる順序も体験品質に直結します。
+WebXRの技術検証ではセッション開始、入力、描画、フレームレートに意識が向きがちですが、空間コンテンツでは視線誘導、スケール感、移動負荷、見せる順序も体験品質に直結します。Immersive WebやGaussian Splattingビューアの演出設計を考えるうえでも参考になる視点です。
 
-### Google Keynote
+### Google基調講演とAndroid XR
 
-Google Keynoteは、Android XRやWeb Platformの流れと接続できる可能性が高い発表です。AWE公式YouTubeでは「Unifying the Android XR Ecosystem」として録画が公開されています。
-
-WebXR開発者の観点では、Android XRのニュースを単独で見るだけでは不十分です。Chrome、WebView、WebXR Device API、WebGPU、OpenXR、端末メーカーの実装がどう接続するかを分けて確認する必要があります。
+Googleの基調講演「Unifying the Android XR Ecosystem」では、Android XRエコシステムの方向性が語られました。AWE USA 2026では関連セッションとして[Android XR and Project Aura: Enterprise XR Gets Real](https://www.awexr.com/usa-2026/agenda/1961)も組まれ、Google公式ブログでもAndroid XRエコシステムとXREAL AURAに関する発表が公開されています。
 
 <iframe
   width="560"
@@ -83,13 +65,17 @@ WebXR開発者の観点では、Android XRのニュースを単独で見るだ�
   allowFullScreen>
 </iframe>
 
-特に注意したいのは、「Android XRがある」ことと「WebXRがすべてのAndroid XRデバイスで同じように動く」ことは別だという点です。今後の検証では、ブラウザ名、バージョン、WebXRのsession mode、WebGPU可否、入力デバイス、パススルーやdepthの扱いを個別に見る必要があります。
+Android XRは今後のXRデバイスやブラウザ環境に影響を与えるOS基盤ですが、OSとしてAndroid XRが採用されていても、すべての対応端末でWebXRが一律に動くとは限りません。Web開発者としては、OS名だけで判断せず、次の点を個別に追っていく必要があります。
 
-### Qualcomm Keynote
+- Android XR上でのChrome・WebView・ブラウザ体験の位置づけ
+- WebXR Device APIの対応状況やセッションモードの違い
+- WebGPUとXR表示の組み合わせの実現度
+- Quest Browser以外のXRブラウザ環境の広がり
+- 入力デバイス、パススルー、深度（デプス）、権限モデルの扱い
 
-Qualcomm Keynoteは、XRデバイスのチップ、オンデバイスAI、軽量ARグラス、空間認識といった文脈につながります。AWE公式YouTubeでは「The Era of Personal AI and Endless Realities」として録画が公開されています。
+### Qualcomm基調講演と端末性能
 
-WebXRのAPIが直接増える話ではなくても、Web 3Dが動くデバイス環境を考えるうえでは重要です。WebGPU、WebGL、Gaussian Splatting、Spatial AIは、端末のGPU性能、メモリ、熱、バッテリー、カメラ入力、オンデバイス推論の制約を強く受けます。
+Qualcommの基調講演「The Era of Personal AI and Endless Realities」は、XRデバイス向けチップ、オンデバイスAI、軽量ARグラス、空間認識をテーマにしています。
 
 <iframe
   width="560"
@@ -101,13 +87,11 @@ WebXRのAPIが直接増える話ではなくても、Web 3Dが動くデバイス
   allowFullScreen>
 </iframe>
 
-軽量ARグラスやスマートグラスの文脈では、ネイティブアプリだけでなく、ブラウザやWebViewがどの程度使えるかも重要になります。WebXR対応の有無だけでなく、通常のWeb 3D、動画、3Dモデル表示、WebGPU、WebAssemblyの実行性能も見ておきたいところです。
+WebGPU、WebGL、Gaussian Splatting、Spatial AIといった処理は、端末のGPU性能、メモリ、発熱、バッテリー、カメラ入力、オンデバイス推論の制約を強く受けます。軽量ARグラスやスマートグラスでは、WebXR対応の有無に加えて、通常のWeb 3D、動画、3Dモデル表示、WebGPU・WebAssemblyの実行性能がどこまで実用域に届くかが鍵になります。
 
-### Snap Keynote
+### Snap基調講演とAR配信の比較軸
 
-Snap Keynoteは、Lens、ARグラス、クリエイター向けAR体験、配信プラットフォームを確認する対象です。AWE公式YouTubeでは、Evan Spiegel氏のKeynote録画が公開されています。
-
-SnapのAR体験はWebXRそのものではありません。ただし、ARコンテンツをどう作り、どう配信し、どうユーザーに届けるかという点では、WebARやWebXRと比較しやすい事例です。
+Evan Spiegel氏によるSnapの基調講演では、Lens、ARグラス、クリエイター向けAR体験、配信プラットフォームが紹介されました。
 
 <iframe
   width="560"
@@ -119,13 +103,11 @@ SnapのAR体験はWebXRそのものではありません。ただし、ARコン�
   allowFullScreen>
 </iframe>
 
-AR体験を作るときは、ブラウザで開けること、SNSや専用アプリ内で強く配信できること、制作ツールが整っていること、端末機能へ深くアクセスできることの間にトレードオフがあります。Snap関連の発表は、その比較軸を整理する材料になります。
+AR体験を届ける方法には、ブラウザからURLだけで開ける手軽さ、SNSや専用アプリ内での強い配信力、制作ツールの充実度、端末機能への深いアクセスといった要素の間でトレードオフがあります。Snapのような専用プラットフォームの展開は、WebARやWebXRを採用する判断軸を整理するうえで比較対象になります。
 
-## OMBI / Sneezeと空間ブラウザ
+## OMBI・Sneezeと空間ブラウザ構想
 
-AWE USA 2026の中で、Spatial Webの文脈として重要なのが、RP1とMetaverse Standards Forumによる**Open Metaverse Browser Initiative（OMBI）**と、その実装として発表された**Sneeze**です。
-
-関連動画はこちらです。
+Spatial Webの文脈で注目されたのが、RP1とMetaverse Standards Forumによる**Open Metaverse Browser Initiative（OMBI）**と、その実装として発表された**Sneeze**です。
 
 <iframe
   width="560"
@@ -137,15 +119,9 @@ AWE USA 2026の中で、Spatial Webの文脈として重要なのが、RP1とMet
   allowFullScreen>
 </iframe>
 
-OMBI / Sneezeは、WebXR Device APIの新機能ではありません。より大きな問いとして、「空間コンテンツをWebのようにホストし、発見し、標準準拠クライアントで実行できるようにするには何が必要か」を扱っています。
+### OMBIとSneezeの位置づけ
 
-### OMBIとは何か
-
-OMBIは**Open Metaverse Browser Initiative**の略です。PlexやEmby向けのメディアリクエストアプリのOmbiとは別物です。
-
-AWE USA 2026文脈のOMBIは、Metaverse Standards ForumとRP1が進める、オープンなmetaverse browserを作るための取り組みです。公式発表では、特定企業に所有されない、相互運用可能な空間Webブラウザ基盤を目指す活動として説明されています。
-
-2D Webでは、誰でもWebサイトをホストでき、標準準拠ブラウザで表示できます。OMBIが問題にしているのは、この考え方を空間コンテンツにも拡張できるかという点です。
+OMBIは**Open Metaverse Browser Initiative**の略称です（PlexやEmby向けのメディアリクエストアプリ「Ombi」とは別物です）。特定企業に所有されない相互運用可能なメタバースブラウザ基盤を目指し、2D Webのように誰でも空間サービスをホストして標準準拠のクライアントから開ける世界を構想しています。
 
 ```txt
 2D Web:
@@ -159,114 +135,57 @@ Spatial Web:
   単一企業のXRプラットフォームに閉じない
 ```
 
-### Sneezeとは何か
+**Sneeze**は、このOMBIの中で発表されたメタバースブラウザエンジンです。WebブラウザにおけるBlink、WebKit、Geckoに相当する役割を空間コンピューティング向けに担う位置づけですが、HTML・CSS・DOMをそのまま置き換える構想とは異なります。公式発表では、次のような課題に取り組む基盤として説明されています。
 
-Sneezeは、OMBIの中で発表された**metaverse browser engine**です。
+- 空間サービスの発見
+- 複数事業者が提供する3Dコンテンツの同一空間への合成
+- 各サービスのセキュリティ境界の保護とWASMサンドボックスの活用
+- OpenXR、glTF、SPIR-V、WebAssembly、GeoPoseなどの既存標準との接続
+- ARグラス、VR、デスクトップ、モバイルの横断
 
-Webブラウザでいうと、ChromeのBlink、SafariのWebKit、FirefoxのGeckoに相当するものを、空間コンピューティング向けに作ろうとしている、という理解が近いです。ただし、SneezeはHTML / CSS / DOMをそのまま置き換える話ではありません。
+### 既存Webブラウザとの違いとWebXRとのレイヤー分離
 
-公式発表を見る限り、Sneezeが扱おうとしているのは、次のような問題です。
+OMBI・Sneezeの問題意識は、2Dドキュメント中心に設計された既存Webブラウザだけでは空間コンピューティングの要件をカバーしきれない点にあります。
 
-- 空間サービスをどう発見するか
-- 複数の事業者が提供する3Dコンテンツを同じ空間にどう合成するか
-- 各サービスのセキュリティ境界をどう守るか
-- WASM sandboxをどう使うか
-- OpenXR、glTF、SPIR-V、WebAssembly、GeoPoseなどの既存標準をどう接続するか
-- ARグラス、VR、デスクトップ、モバイルをどう横断するか
+ARグラスなどの空間環境では、URLを入力してページを開く行為に加えて、ユーザーの現在地や視線方向、周囲の物理空間に応じて近くのサービスを見つける仕組み（近接ベースのサービス発見：proximity-based service discovery）が求められます。
 
-WebXRが「ブラウザからXRセッションを開始し、XRデバイスへ描画するためのAPI」だとすると、Sneezeは「複数の空間サービスを発見、合成、実行するための基盤」を目指しているように見えます。
+また、駅のような物理空間では、鉄道会社の案内、店舗のクーポン、自治体の防災情報、友人のアバター、ナビゲーションなど、異なる提供元のサービスが1つの空間に同時表示される可能性があります。互いのデータや権限を分離しながら3Dシーンを合成する仕組みとして、Scene Object Modelやマルチオリジンでの3Dシーン合成（multi-origin 3D scene composition）といった考え方が挙げられています。
 
-### なぜ通常のWebブラウザだけでは足りないのか
-
-OMBI / Sneezeの主張を要約すると、現在のWebブラウザは2Dドキュメントを中心に設計されていて、空間コンピューティングには足りない部分がある、ということです。
-
-通常のWebでは、ユーザーはURLを開きます。しかし、ARグラスや空間コンピューティングでは、ユーザーがいる場所、向いている方向、周囲の物理空間、近くにあるサービスが意味を持ちます。
-
-つまり、空間Webでは「ページを開く」だけでなく、「その場所で使える空間サービスを発見する」仕組みが必要になります。OMBI / Sneezeが言うproximity-based service discoveryは、この文脈で出てくる考え方です。
-
-もう1つ重要なのは、1つの空間に複数のサービスが同時に存在する可能性です。たとえば駅の空間には、鉄道会社の案内、店舗のクーポン、自治体の防災情報、友人のアバター、広告、ナビゲーションが同時に出るかもしれません。
-
-これらを1つの空間に合成しながら、互いのデータや権限を混ぜない仕組みが必要になります。ここで出てくるのが、Scene Object Modelやmulti-origin 3D scene compositionのような考え方です。
-
-### WebXRとはどう違うのか
-
-OMBI / Sneezeは、WebXRの代替として見るより、別レイヤーの構想として分けた方が理解しやすいです。
+WebXRとの役割の違いは、レイヤーで分けると明確になります。
 
 ```txt
 WebXR:
-  WebアプリがXRデバイスに描画するためのブラウザAPI
-  セッション、入力、pose、reference space、WebGL/WebGPU連携などを扱う
+  WebアプリがXRデバイスへ描画するためのブラウザAPI
+  セッション、入力、姿勢（ポーズ）、リファレンススペース、WebGL/WebGPU連携などを扱う
 
 OMBI / Sneeze:
   空間サービスをホスト、発見、合成、実行するためのブラウザエンジン構想
-  複数originの3Dサービス、空間インフラ、WASM sandbox、標準群の接続を扱う
+  複数オリジンの3Dサービス、空間インフラ、WASMサンドボックス、標準群の接続を扱う
 ```
 
-将来的に、Sneezeのようなmetaverse browser engineが実装の一部としてWebXR、OpenXR、WebGPU、glTF、WebAssemblyを使うことは十分あり得ます。ただし、現時点で「OMBI = WebXRの次」と言い切るのは強すぎます。
+将来的にSneezeのようなエンジンが実装の一部としてWebXR、OpenXR、WebGPU、glTF、WebAssemblyを利用する可能性は十分にあります。ただし現時点で「OMBI＝WebXRの後継」と断定するのは飛躍があり、周辺標準と合わせて動向を追う別レイヤーの基盤構想として捉えるのが妥当です。
 
-正確には、OMBI / SneezeはWebXRの直接アップデートではないが、空間コンテンツをWebのように配信・合成・実行するための基盤を目指しており、WebXR、OpenXR、glTF、WebAssembly、GeoPoseなどの周辺標準と合わせて追う価値がある、という位置づけです。
+### WebGPUやGaussian Splattingとの接点
 
-### WebGPUやGaussian Splattingとの関係
+空間Webで扱うコンテンツは、大量の3Dモデル、Gaussian Splattingの空間スキャン、リアルタイムアバター、空間アンカー、AIエージェント、物理空間に重なるUI、複数ユーザーの同期など、2Dページに比べて負荷が高くなりがちです。
 
-OMBI / SneezeがWebGPUやGaussian Splattingを直接置き換えるわけではありません。ただし、空間Webで扱うコンテンツは、2Dページより重く、複雑になりがちです。
+そのため、OMBI・Sneezeのような空間ブラウザ構想だけでなく、WebGPU、WebAssembly、glTF、OpenXR、ストリーミング、LOD、セキュリティ境界といった基盤技術の成熟が並行して重要になります。
 
-たとえば次のようなものです。
+## ブラウザ3D・Spatial AIの広がり
 
-- 大量の3Dモデル
-- Gaussian Splattingの空間スキャン
-- リアルタイムアバター
-- 空間アンカー
-- AIエージェント
-- 物理空間に重なるUI
-- 複数ユーザーの同期
+AWE USA 2026では、WebXR Device APIの仕様更新に直接結びつく発表が中心だったわけではありません。それでも、WebARやブラウザベースの3D共有事例、Gaussian Splattingや3Dスキャン、Spatial AIによる空間理解、ARグラス向け配信といった周辺テーマは、Webで作れる空間体験の幅を左右します。
 
-これらを扱うなら、WebGPU、WebAssembly、glTF、OpenXR、Gaussian Splatting、ストリーミング、LOD、セキュリティ境界が重要になります。OMBI / Sneezeは、そうした技術を個別に置き換えるのではなく、空間サービスとして統合するための基盤を狙っているように見えます。
-
-## Android XRで確認したいこと
-
-AWE USA 2026のセッション一覧には、Android XRやProject Auraに関係するセッションがあります。[Android XR and Project Aura: Enterprise XR Gets Real](https://www.awexr.com/usa-2026/agenda/1961)が公開されており、Google公式ブログでもAWE 2026でAndroid XRエコシステムとXREAL AURAに触れた記事が出ています。
-
-Android XRは、今後のXRデバイス、ブラウザ、WebGPU、WebXR対応状況に影響する可能性があります。ただし、現時点では「Android XRならWebXRがすぐ全部動く」とは書けません。
-
-確認したいのは、次のような点です。
-
-- Android XR上でChrome / WebView / ブラウザ体験がどう扱われるか
-- WebXR Device APIの対応状況に変化があるか
-- WebGPUとXR表示の組み合わせが現実的になるか
-- Quest Browser以外のXRブラウザ環境が増えるか
-- ARグラスやMRヘッドセットで、通常のWeb 3Dコンテンツがどの程度快適に動くか
-
-Android XRは、WebXRそのものではなく実行環境の話です。WebXR開発者にとっては、OS名だけで判断せず、ブラウザ実装、XRランタイム、GPU API、入力、passthrough、depth、権限モデルを分けて確認することが重要になります。
-
-## WebAR / Spatial Web / ブラウザ3Dとして見る話題
-
-AWEには、WebXR APIそのものではなくても、Web開発者に関係する話題が多くあります。
-
-たとえば次のようなものです。
-
-- WebARやブラウザARに近い展示
-- 3Dモデルや空間データをWebで共有する事例
-- Gaussian Splattingや3Dスキャン系の展示
-- Spatial AIによる空間理解
-- ARグラス向けアプリ配信
-
-ここで重要なのは、「WebXR仕様の更新」と「WebXR周辺の実用テーマ」を分けることです。
-
-WebXR Device APIが更新されなくても、端末の性能、ブラウザのGPU対応、3Dアセットの形式、AR配信プラットフォーム、Spatial AIの使い方が変われば、Webで作れる空間体験は変わります。
-
-特にGaussian SplattingやSpatial AIは、単体のXRニュースとしてだけでなく、WebGPUやWebAssemblyで扱う重い3Dコンテンツ、ブラウザ上のビューア、空間データの配信方式と合わせて見る必要があります。
+WebXRの仕様自体が変わらなくても、端末性能、ブラウザのGPU対応、3Dアセット形式、AR配信基盤、Spatial AIの活用法が進めば、開発者の選択肢は大きく広がります。特にGaussian SplattingやSpatial AIは、WebGPU・WebAssemblyで動作するブラウザ上のビューアや、空間データの配信方式と合わせて注目しておきたい分野です。
 
 ## まとめ
 
-AWE USA 2026は、WebXRの仕様イベントではありません。それでも、Webで空間体験を作る開発者にとっては、Android XR、Snap、Qualcomm、Google、Spatial AI、WebAR、ARグラス、Gaussian Splatting、OMBI / Sneezeの動きから見えることがあります。
+AWE USA 2026の動向をWeb開発者の視点で振り返ると、今後の注目点は次の3つに集約されます。
 
-特に継続して確認したいのは、次の3つです。
+- Android XRがChrome、WebView、WebXR、WebGPUとどう接続していくか
+- 専用ARプラットフォームの配信導線が、WebARやWebXRの使い分けにどう影響するか
+- Spatial AI、Gaussian Splatting、OMBI・Sneezeのような空間ブラウザ構想がWeb 3D体験とどう交わるか
 
-- Android XRがChrome、WebView、WebXR、WebGPUとどう接続するか
-- ARプラットフォームの配信導線がWebAR / WebXRとどう違うか
-- Spatial AI、Gaussian Splatting、空間ブラウザ構想がWeb 3D体験にどう入ってくるか
-
-WebXRは、空間Web全体の一部です。AWE USA 2026の話題は、WebXR単体のアップデートとしてではなく、ブラウザ、GPU、3Dアセット、XRデバイス、空間サービスの関係を整理する材料として読むのが適切です。
+WebXRは空間Web全体を構成する重要な柱の1つです。AWEのような総合イベントの話題は、ブラウザ、GPU、3Dアセット、XRデバイス、空間サービスのつながりを俯瞰する材料として押さえておくと、今後の技術選定に生かしやすくなります。
 
 ## 参照
 

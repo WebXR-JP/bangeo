@@ -1,6 +1,6 @@
 ---
 title: "ArtemisでBANGEOの3Dモデルを表示してみた──公開URLからSpatial Fabricの配置まで"
-description: "BANGEOで公開したSpatial FabricをArtemisへ入力し、自作の3Dモデルを表示しました。まず公開URLから体験し、その後にGLBの配置、Fabric JSON、WASM、JWS署名まで順番に分解します。"
+description: "BANGEOで公開したSpatial FabricのURLをArtemisで開き、自作の3Dモデルを表示しました。公開URLでの体験手順から、GLBの配置、Fabric JSON、WASM、JWS署名まで順番に解説します。"
 date: "2026年7月19日"
 category: "GUIDE"
 tags:
@@ -21,24 +21,22 @@ draft: false
 > - **前編**：[ネイティブメタバースブラウザ「Artemis」v0.3.0公開──Spatial FabricとJWS署名を整理](/tech-articles/artemis-native-metaverse-browser-v030)
 > - **後編（この記事）**：BANGEOにSpatial Fabricを置き、Artemisで実際に表示する
 
-## まずArtemisで開いてみてください
+## 公開中のSpatial Fabricを開く手順
 
-この記事の結論から始めます。
-
-Artemis v0.3.0を起動し、アドレス欄へ次のURLを入力してみてください。
+まずは公開中のSpatial FabricをArtemisで開いてみましょう。Artemis v0.3.0を起動し、アドレス欄へ次のURLを入力します。
 
 ```text
 https://www.bangeo.net/spatial/bangeo/bangeo-test.msf
 ```
 
-これは、BANGEOで公開している**JWS署名済みのSpatial Fabric**です。URLを通常のWebブラウザで開くのではなく、Artemisのアドレス欄へ貼り付けてEnterキーを押します。
+これは、BANGEOで公開している**JWS署名済みのSpatial Fabric**です。通常のWebブラウザではなく、Artemisのアドレス欄へ貼り付けてEnterキーを押します。
 
 1. Artemis v0.3.0を起動する
 2. 上のURLをアドレス欄へ貼り付ける
 3. 読み込みが終わるまで少し待つ
 4. マウスドラッグで周囲を回り、ホイールで距離を調整する
 
-署名していないFabric JSONを直接試す場合はこちらです。
+署名していないFabric JSONを直接試す場合はこちらを使います。
 
 ```text
 https://www.bangeo.net/spatial/bangeo/bangeo.json
@@ -46,17 +44,17 @@ https://www.bangeo.net/spatial/bangeo/bangeo.json
 
 どちらも現在公開中で、同じBANGEOの3D空間を開きます。
 
-## 結果：ブラウザのURLから自作の3Dモデルを表示できた
+## 公開URLからの3Dモデル表示結果
 
-実際に署名済みの`.msf`を開くと、BANGEOの3DモデルがArtemis上に表示されました。
+署名済みの`.msf`を開くと、BANGEOの3DモデルがArtemis上に表示されます。
 
 ![公開中のBANGEO Spatial FabricをArtemis v0.3.0で表示した画面](/assets/tech/bangeo-spatial-fabric-artemis-signed.webp)
 
-上の画面では、アドレス欄にもBANGEOの公開URLが入っています。つまり、ローカルに置いたGLBを単体で見ているのではなく、`www.bangeo.net`からSpatial Fabric一式を取得して、Artemisが3Dシーンとして組み立てています。
+アドレス欄にもBANGEOの公開URLが入っています。ローカルに置いたGLBを単体で見ているのではなく、`www.bangeo.net`からSpatial Fabric一式を取得し、Artemisが3Dシーンとして組み立てています。
 
-今回できたことを一言でまとめると、次のとおりです。
+今回達成した構成はシンプルです。
 
-> **自分のWebサイトにArtemis用のURLを用意し、そのURLから自作の3Dモデルを開けるようにした。**
+> **自分のWebサイトにArtemis用のURLを用意し、そのURLから自作の3Dモデルを開けるようにしました。**
 
 ただし、BANGEOの記事ページそのものが3D化されたわけではありません。通常のHTML記事と、Artemis用のSpatial Fabricを同じドメインで別々に配信しています。
 
@@ -66,13 +64,11 @@ BANGEO
 └─ /spatial/bangeo/bangeo-test.msf   Artemisで開く3D空間
 ```
 
-前回、BANGEOの通常URLをArtemisへ入力したときにエラーになったのは、この入口を分けていなかったからです。HTMLを返すURLではなく、Artemisが解釈できるFabric JSONまたは`.msf`を返すURLが必要でした。
+前編でBANGEOの通常URLをArtemisへ入力したときにエラーになったのは、この入口を分けていなかったためです。HTMLを返すURLではなく、Artemisが解釈できるFabric JSONまたは`.msf`を返すURLが必要でした。この違いやJWS署名・HTTPS/TLSの整理は[前編](/tech-articles/artemis-native-metaverse-browser-v030)で詳しく解説しています。
 
-この違いと、JWS署名・HTTPS/TLSの整理は[前編](/tech-articles/artemis-native-metaverse-browser-v030)で詳しく説明しています。
+## 公開URLの裏で読み込まれるファイル構成
 
-## 公開URLの裏で読み込まれるもの
-
-今回のSpatial Fabricは、4つのファイルで構成しています。
+今回のSpatial Fabricは4つのファイルで構成しています。
 
 ```text
 public/spatial/bangeo/
@@ -91,7 +87,7 @@ public/spatial/bangeo/
 | `bangeo-spatial-guide-v3.glb` | Artemisで表示する3Dアセット |
 | `map.wasm` | Sneeze公式サンプルを基にした最小構成の実行モジュール |
 
-読み込みの流れは次のようになります。
+読み込みの流れは次のとおりです。
 
 ```text
 ArtemisへURLを入力
@@ -107,15 +103,15 @@ ArtemisへURLを入力
 
 `.msf`から別ファイルの`bangeo.json`を再取得しているわけではありません。`.msf`のJWSペイロードにFabric JSONの内容が入っており、そこに書かれた相対URLからWASMとGLBを取得します。
 
-## 3Dモデルを表示するまでの具体的な手順
+## 3Dモデルを表示するまでの手順
 
-ここからは、表示できた状態を小さな作業単位に分解します。中心になるのは、GLBを公開ディレクトリへ置き、Fabric JSONから参照する部分です。
+ここからは、表示までの工程を4段階に分けて確認します。中心になるのは、GLBを公開ディレクトリへ置き、Fabric JSONから参照する部分です。
 
-### 1. 表示するGLBを用意する
+### 1. 表示するGLBの準備
 
-今回は、BANGEOの3Dモデルを1つのGLBとして用意しました。この記事ではモデルの制作工程には立ち入らず、完成したGLBをArtemisから読み込める状態にする部分へ絞ります。
+今回は、BANGEOの3Dモデルを1つのGLBとして用意しました。モデルの制作工程には立ち入らず、完成したGLBをArtemisから読み込める状態にする手順へ絞ります。
 
-### 2. GLBを公開URLになる場所へ置く
+### 2. 公開ディレクトリへのGLB配置
 
 作成したGLBを次の場所へ置きました。
 
@@ -129,9 +125,9 @@ BANGEOでは`public`以下がサイトのルートから配信されるため、
 https://www.bangeo.net/spatial/bangeo/assets/bangeo-spatial-guide-v3.glb
 ```
 
-GLBだけをこのURLで公開しても、Artemisにとってはまだ「3Dファイルが1つある」状態です。どの空間として読み込むかを伝えるために、次のFabric JSONを用意します。
+GLBだけをこのURLで公開しても、Artemisにとってはまだ単体の3Dファイルに過ぎません。どの空間として読み込むかを伝えるため、次のFabric JSONを用意します。
 
-### 3. Fabric JSONからGLBを相対URLで参照する
+### 3. Fabric JSONからの相対URL参照
 
 3Dモデルを指定している中心部分は、`Data.Scene.Resource.sReference`です。
 
@@ -164,11 +160,11 @@ GLBだけをこのURLで公開しても、Artemisにとってはまだ「3Dフ�
 結果：https://www.bangeo.net/spatial/bangeo/assets/bangeo-spatial-guide-v3.glb
 ```
 
-`map.wasm`も同じ仕組みで`/spatial/bangeo/wasm/map.wasm`へ解決されます。Fabricファイルだけを別のディレクトリへ移動すると相対URLの基準も変わるため、この4ファイルはディレクトリ構成ごと公開するのが分かりやすいです。
+`map.wasm`も同じ仕組みで`/spatial/bangeo/wasm/map.wasm`へ解決されます。Fabricファイルだけを別のディレクトリへ移動すると相対URLの基準も変わるため、この4ファイルはディレクトリ構成ごと公開するのが分かりやすいでしょう。
 
-### 4. ライトをFabric JSONで指定する
+### 4. Fabric JSONでのライト設定
 
-GLBが正しく置けても、暗すぎると形を確認できません。今回のFabric JSONでは、環境光と平行光を次のように指定しています。
+GLBを正しく配置できても、暗すぎると形を確認できません。今回のFabric JSONでは、環境光と平行光を次のように指定しています。
 
 ```json
 {
@@ -186,15 +182,15 @@ GLBが正しく置けても、暗すぎると形を確認できません。今�
 }
 ```
 
-ここで調整しているのはシーンの照明です。モデル自体の配置とは分けて考えると、原因を追いやすくなります。
+ここで調整しているのはシーンの照明です。モデル自体の配置とは分けて確認すると、表示トラブルの原因を追いやすくなります。
 
-## Inspectorで3ファイルの読み込みを確認する
+## インスペクターでの読み込み確認
 
-Artemisで`F12`を押すと、組み込みのInspectorを開けます。
+Artemisで`F12`を押すと、組み込みのインスペクター（Inspector）を開けます。
 
-![Artemis InspectorでFabric JSON、WASM、GLBがHTTP 200になっている画面](/assets/tech/bangeo-spatial-fabric-inspector.webp)
+![ArtemisのインスペクターでFabric JSON、WASM、GLBがHTTP 200になっている画面](/assets/tech/bangeo-spatial-fabric-inspector.webp)
 
-ローカルで構成を確認したときは、Networkに次の3ファイルが表示され、すべてHTTP 200になりました。
+ローカル環境で構成を確認したときは、Networkタブに次の3ファイルが表示され、すべてHTTP 200になりました。
 
 | Name | Status | Type |
 | --- | --- | --- |
@@ -202,7 +198,7 @@ Artemisで`F12`を押すと、組み込みのInspectorを開けます。
 | `map.wasm` | 200 | `application/wasm` |
 | `bangeo-spatial-guide-v3.glb` | 200 | `model/gltf-binary` |
 
-Originsには`Sneeze/Root`と`/bangeo-spatial-guide`が表示されています。画面にモデルが出ただけでなく、Fabric、WASM、GLBが取得され、Artemis内で1つのシーンとして構築されたことを確認できました。
+Origins欄には`Sneeze/Root`と`/bangeo-spatial-guide`が表示されています。画面にモデルが出ただけでなく、Fabric、WASM、GLBが取得され、Artemis内で1つのシーンとして構築されたことを確認できました。
 
 公開後も、Fabric JSON、`.msf`、WASM、GLBの4つのURLがBANGEOから取得できる状態になっています。
 
@@ -230,28 +226,28 @@ Artemis.exe --verify bangeo-test.msf --trust ca-cert.pem
 
 テスト用の秘密鍵はBANGEOのリポジトリへ追加していません。将来、正式なFabricとして公開する場合は、本番用の証明書と秘密鍵の発行・保管・更新方法を別途決める必要があります。
 
-## `.msf`のContent-Typeには注意
+## `.msf`のContent-Typeに関する注意点
 
-現在のBANGEO配信環境では、`.msf`が汎用MIMEデータベースの判定により`application/vnd.epson.msf`として返されています。これはSpatial Fabric用に定義されたMIME型ではありません。
+現在のBANGEO配信環境では、`.msf`が汎用MIMEデータベースの判定により`application/vnd.epson.msf`として返されています。これはSpatial Fabric用に定義されたMIMEタイプではありません。
 
 Artemis v0.3.0では今回のファイルを内容から読み込めましたが、この判定に依存しない方が安全です。
 
-現在の`.msf`の内容はJWS Compact Serializationなので、[RFC 7515](https://www.rfc-editor.org/rfc/rfc7515.html)に登録されている`application/jose`が内容に合います。本番向けにはRP1 / Sneeze側の最新仕様も確認し、配信ヘッダーを明示する予定です。
+現在の`.msf`の内容はJWS Compact Serializationなので、[RFC 7515](https://www.rfc-editor.org/rfc/rfc7515.html)に登録されている`application/jose`が内容に合います。本番向けにはRP1・Sneeze側の最新仕様も確認し、配信ヘッダーを明示する予定です。
 
-## 今回分かったこと
+## まとめ
 
-最初に公開URLを開いてもらったとおり、BANGEOのSpatial FabricはすでにArtemisから表示できます。
+BANGEOのSpatial Fabricを公開して分かった要点は次のとおりです。
 
 - Artemisへ入力するのは、HTMLの記事URLではなくFabric JSONまたは`.msf`のURL
 - `sReference`から公開中のGLBを相対URLで読み込める
 - ライトの指定とモデルの配置は分けて確認する
-- InspectorでFabric、WASM、GLBのHTTP 200を確認できる
+- インスペクターでFabric、WASM、GLBのHTTP 200を確認できる
 - 未署名JSONで構成を確認してから、JWS署名済み`.msf`へ進める
-- 今回の`.msf`は公式テスト証明書による検証用で、本番署名ではない
+- 今回の`.msf`は公式テスト証明書による検証用であり、本番署名ではない
 
-通常のWebブラウザで記事を読み、そこに書かれたSpatial FabricのURLをArtemisへ貼り付けると、同じBANGEOドメインから3Dモデルが開く。前回は概念だった「3Dブラウザ用のURL」を、今回は実際に動く形まで持っていけました。
+通常のWebブラウザで記事を読み、そこに書かれたSpatial FabricのURLをArtemisへ貼り付けると、同じBANGEOドメインから3Dモデルが開きます。前編では概念だった「3Dブラウザ用のURL」を、実際に動く形まで検証できました。
 
-## 前編から読み返す
+## 前編の案内
 
 ArtemisとSneezeの関係、通常のWebサイトが読み込めなかった理由、JWS署名とHTTPS/TLSの違いは前編で整理しています。
 

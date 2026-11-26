@@ -78,7 +78,7 @@ export const maturityLabel: Record<SpecMaturity, string> = {
 
 export const maturityTitle: Record<SpecMaturity, string> = {
 	cr: "W3C Candidate Recommendation（勧告候補）",
-	wd: "W3C Working Draft（作業草案）",
+	wd: "W3C Working Draft（ワーキングドラフト）",
 	draft: "Editor's Draft（TR未発行の草案）",
 	vendor: "ベンダー拡張（標準仕様ではありません）",
 };
@@ -98,9 +98,9 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://www.w3.org/TR/webxr/#xrsessionmode-enum",
 		maturity: "cr",
 		description:
-			"ヘッドセットをかぶらずに、ふつうのWebページの中で3Dシーンを動かして表示するモード",
+			"ヘッドセットをかぶらずに、通常のWebページ内で3Dシーンを表示するモードです。",
 		whyNote:
-			"没入モードはユーザー操作がないと開始できず、始まるまで中身が見えない。inlineがあると、同じ3Dシーンを没入前にページ内で見せてから誘導でき、プレビュー用の別実装が要らなくなる",
+			"没入モードはユーザー操作がないと開始できず、始まるまで中身が見えません。inlineを使うと、同じ3Dシーンを没入前にページ内で見せてから誘導でき、プレビュー用の別実装が不要になります。",
 		demos: [
 			{
 				label: "WebXR Samples",
@@ -115,9 +115,10 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specName: "WebXR Device API",
 		specUrl: "https://www.w3.org/TR/webxr/",
 		maturity: "cr",
-		description: "ヘッドセットをかぶって、視界全体をVRの世界に切り替えるモード",
+		description:
+			"ヘッドセットをかぶり、視界全体をVR空間へ切り替えるモードです。",
 		whyNote:
-			"ふつうのウィンドウ描画では、左右の目それぞれの視点や頭の動きに追従した描画ができない。ヘッドセットへの直接描画と姿勢追跡をまとめて引き受けるのがこのモード",
+			"通常のウィンドウ描画では、左右それぞれの目への立体表示や頭の動きへの追従ができません。ヘッドセットへの描画と姿勢追跡をまとめて扱うのがこのモードです。",
 		demos: [
 			{
 				label: "WebXR Samples",
@@ -150,9 +151,9 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://www.w3.org/TR/webxr-ar-module-1/",
 		maturity: "cr",
 		description:
-			"デバイスのカメラで映した現実の風景に、3Dオブジェクトを重ねて表示するモード",
+			"カメラで映した現実の風景に、3Dオブジェクトを重ねて表示するモードです。",
 		whyNote:
-			"VRと違って、現実の映像との合成や現実基準の座標の扱いが必要になる。その面倒な部分をブラウザ側が引き受けてくれる",
+			"VRとは異なり、現実の映像との合成や現実空間を基準にした座標管理が必要です。その処理をブラウザ側が担ってくれます。",
 		demos: [
 			{
 				label: "WebXR Samples",
@@ -175,9 +176,9 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://www.w3.org/TR/webxr/#xrreferencespace",
 		maturity: "cr",
 		description:
-			"座標の原点が頭（視点）そのものになる。どこを向いてもオブジェクトが視界の同じ位置に居続けるので、メニューや照準の固定に使う",
+			"頭（視点）そのものを座標の原点にします。どこを向いても視界の同じ位置に留まるため、メニューや照準の固定に使います。",
 		whyNote:
-			"HUDや照準を普通のワールド座標に置くと、頭を動かした瞬間に視界からズレてしまう。視点に張り付く座標系が別に必要",
+			"HUDや照準を通常のワールド座標に置くと、頭を動かした瞬間に視界から外れてしまいます。視点に追従する座標系が別に必要です。",
 	},
 	{
 		id: "local",
@@ -187,9 +188,9 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://www.w3.org/TR/webxr/#xrreferencespace",
 		maturity: "cr",
 		description:
-			"体験を始めた瞬間の頭の位置が原点になる。床の高さは分からないので、椅子に座ったまま・立ち止まったままの体験に向く",
+			"体験を始めた瞬間の頭の位置を原点にします。床の高さは取得しないため、座ったままや立ち止まったままの体験に向いています。",
 		whyNote:
-			"トラッキングの原点は端末任せで、何も指定しないと開始位置すら保証されない。「開始時の頭の位置」という分かりやすい基準を保証してくれる",
+			"トラッキングの原点は端末によって異なり、何も指定しないと開始位置すら定まりません。開始時の頭の位置を基準として扱えるようにします。",
 	},
 	{
 		id: "local-floor",
@@ -199,9 +200,9 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://www.w3.org/TR/webxr/#xrreferencespace",
 		maturity: "cr",
 		description:
-			"原点が足元の床（y=0）になり、床の高さが現実と一致する。地面にものを置いたり、立って見下ろすコンテンツがつくれる",
+			"足元の床（y=0）を原点とし、床の高さを現実と一致させます。地面に物を置いたり、立って見下ろしたりするコンテンツに使います。",
 		whyNote:
-			"localでは床の高さが分からないため、地面に置いたはずのオブジェクトが浮いたり埋まったりする。床基準の原点があればy=0に置くだけで済む",
+			"localでは床の高さが分からないため、地面に置いたつもりのオブジェクトが浮いたり埋まったりします。床を基準にできればy=0に配置するだけで済みます。",
 	},
 	{
 		id: "bounded-floor",
@@ -211,9 +212,9 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://www.w3.org/TR/webxr/#xrreferencespace",
 		maturity: "cr",
 		description:
-			"原点は床のままで、さらにヘッドセットに設定した「安全に歩ける範囲」の境界線が取れる。境界の中を実際に歩き回る前提のコンテンツに使う",
+			"床を原点にしつつ、ヘッドセットに設定された安全に歩ける範囲の境界線を取得できます。室内を歩き回るコンテンツに使います。",
 		whyNote:
-			"歩き回る体験で、安全に動ける範囲をコンテンツ側が知らないと、壁や家具に向かわせる配置をしてしまう。境界線が取れれば範囲内に収まる設計ができる",
+			"歩き回る体験で安全範囲を把握できないと、壁や家具の先にオブジェクトを置いてしまう恐れがあります。境界線を取得すれば範囲内に収まる配置ができます。",
 		demos: [
 			{ label: "WebXR Samples", href: `${OFFICIAL_SAMPLES}/room-scale.html` },
 		],
@@ -226,9 +227,9 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://www.w3.org/TR/webxr/#xrreferencespace",
 		maturity: "cr",
 		description:
-			"どこまで移動してもトラッキングが破綻しないように座標を調整し続ける空間。建物や屋外など、広い場所を歩き回るARに使う",
+			"大きく移動してもトラッキングが破綻しないよう座標を調整し続ける空間です。建物内や屋外など広い場所を歩くARに使います。",
 		whyNote:
-			"local系の空間は原点から離れるほどトラッキング誤差が積み重なる。長距離を歩くARでは、原点自体を調整し続ける仕組みが必要になる",
+			"local系の空間では原点から離れるほどトラッキング誤差が積み重なります。長距離を移動するARでは、原点側を調整し続ける仕組みが必要です。",
 	},
 	{
 		id: "gamepads",
@@ -237,9 +238,9 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://www.w3.org/TR/webxr-gamepads-module-1/",
 		maturity: "wd",
 		description:
-			"コントローラーのボタンやスティックが、いまどう押されているかを読み取る",
+			"コントローラーのボタンやスティックの入力状態を読み取る仕様です。",
 		whyNote:
-			"コントローラーのボタン配置は機種ごとにバラバラ。既存のGamepad APIと同じ形式に揃えることで、機種差を吸収して入力を読める",
+			"コントローラーのボタン配置は機種ごとに異なります。既存のGamepad APIと同じ形式で受け取れるようにすることで、機種差を吸収できます。",
 		demos: [
 			{
 				label: "WebXR Samples",
@@ -262,9 +263,9 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://www.w3.org/TR/webxr-hand-input-1/",
 		maturity: "wd",
 		description:
-			"デバイスのカメラで手を認識して、指の関節の位置や動きを取得する。素手での選択やつかむ操作がつくれる",
+			"カメラで手を認識し、指の関節の位置や動きを取得する仕様です。素手での選択やつかむ操作を実装できます。",
 		whyNote:
-			"コントローラーを持たない・持てない場面（展示、教育など）でも操作手段が要る。手そのものを入力デバイスとして使えるようにする",
+			"展示や教育など、コントローラーを持たない場面でも操作手段が必要です。手そのものを入力として扱えるようにします。",
 		demos: [
 			{
 				label: "WebXR Samples",
@@ -289,9 +290,9 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://www.w3.org/TR/webxr-hit-test-1/",
 		maturity: "wd",
 		description:
-			"デバイスのカメラで現実の床や机を見つけて、3Dオブジェクトを置ける位置を教えてくれる",
+			"現実の床や机の面を検出し、3Dオブジェクトを置ける位置を取得する仕様です。",
 		whyNote:
-			"カメラ映像だけでは、アプリは「そこに面があるか」を知れない。端末の空間認識の結果を借りて、現実の面の位置を教えてもらう",
+			"カメラ映像だけでは、アプリ側でそこに平面があるか判断できません。端末の空間認識の結果を使って、現実の面の位置を取得します。",
 		demos: [
 			{ label: "WebXR Samples", href: `${OFFICIAL_SAMPLES}/hit-test.html` },
 			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webxr_ar_hittest.html` },
@@ -307,9 +308,9 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://immersive-web.github.io/anchors/",
 		maturity: "draft",
 		description:
-			"現実の空間に目印を打ち込んで、置いたオブジェクトが時間が経ってもずれないように固定する",
+			"現実空間に基準点（アンカー）を置き、配置したオブジェクトが時間経過でずれないよう固定する仕様です。",
 		whyNote:
-			"トラッキングは常に裏で補正されるため、固定の座標に置いた物は現実に対して少しずつ流れる。目印を端末側に追従させれば補正後もその場に留まる",
+			"端末のトラッキングは裏側で絶えず補正されるため、固定座標に置いたオブジェクトは少しずつ現実とずれていきます。アンカーを端末側に追従させることで位置を保てます。",
 		demos: [
 			{ label: "WebXR Samples", href: `${OFFICIAL_SAMPLES}/anchors.html` },
 			{
@@ -331,9 +332,9 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://www.w3.org/TR/webxr-dom-overlays-1/",
 		maturity: "wd",
 		description:
-			"XR中はふつうのHTMLが見えなくなるので、ボタンやメニューなどのHTMLをAR映像の上に重ねて表示する",
+			"AR映像の上にボタンやメニューなどのHTML要素を重ねて表示する仕様です。",
 		whyNote:
-			"XRの画面は毎フレームWebGLで描かれ、HTMLは一切表示されない。ボタン1つでもWebGLで自作するのは大変なので、HTMLをそのまま重ねる口が必要",
+			"通常の没入セッション中はWebGLなどの描画だけが表示され、HTMLは見えなくなります。ボタンやフォームを3D描画で作り直さずに済むよう、HTMLをそのまま重ねる仕組みです。",
 		demos: [
 			{ label: "WebXR Samples", href: `${OFFICIAL_SAMPLES}/ar-barebones.html` },
 		],
@@ -346,9 +347,9 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://www.w3.org/TR/webxr-depth-sensing-1/",
 		maturity: "wd",
 		description:
-			"デバイスのカメラで現実の物までの距離を測って、3Dオブジェクトが現実の物の後ろに隠れる表現をつくる",
+			"現実の物体までの距離（深度）を取得し、3Dオブジェクトが現実の物の後ろに隠れる表現を作る仕様です。",
 		whyNote:
-			"距離情報が無いと、3Dオブジェクトは常に現実の手前に描かれてしまう。机の後ろに置いたはずの物が手前に浮いて見える、が防げる",
+			"距離情報が無いと3Dオブジェクトは常に現実の手前に描かれてしまいます。深度データを使えば、机の後ろに置いた物が手前に浮いて見える違和感を防げます。",
 		demos: [
 			{
 				label: "WebXR Samples",
@@ -366,9 +367,9 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://immersive-web.github.io/real-world-meshing/",
 		maturity: "draft",
 		description:
-			"デバイスが部屋をスキャンして作った、壁・床・家具の立体データを受け取る",
+			"デバイスが部屋をスキャンして生成した、壁・床・家具の立体メッシュを受け取る仕様です。",
 		whyNote:
-			"現実の壁や家具の形が分からないと、ボールが壁で跳ね返るような現実と絡む表現がつくれない",
+			"現実の壁や家具の形が分からないと、ボールが壁で跳ね返るような現実空間と連動した表現を作れません。",
 		demos: [
 			{
 				label: "WebXR Samples",
@@ -392,9 +393,9 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://www.w3.org/TR/webxr-lighting-estimation-1/",
 		maturity: "wd",
 		description:
-			"デバイスのカメラで部屋の明るさや光の向きを読み取って、3Dオブジェクトの影や色を現実の光に合わせる",
+			"部屋の明るさや光の向きを推定して取得し、3Dオブジェクトの影や色味を現実の光に合わせる仕様です。",
 		whyNote:
-			"現実は明るいのに3Dだけ暗い、影の向きが違う、といった「合成っぽさ」が出てしまう。現実の光を測って合わせると馴染む",
+			"現実の明るさや影の向きと3D描画が合っていないと、浮いた合成のように見えます。周囲の光を推定して反映すると現実になじみやすくなります。",
 		demos: [
 			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webxr_ar_lighting.html` },
 			{ label: "Babylon.js", href: `${BABYLONJS_PLAYGROUND}/#NAZYHG#5` },
@@ -408,9 +409,9 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://www.w3.org/TR/webxrlayers-1/",
 		maturity: "wd",
 		description:
-			"動画や文字を専用のレイヤーに分けてヘッドセットに直接渡して、にじみを減らしてくっきり表示する",
+			"動画や文字を専用のレイヤーに分けてヘッドセットへ直接渡し、にじみを抑えてくっきり表示する仕様です。",
 		whyNote:
-			"1枚のWebGLに全部を描くと、動画や文字は一度描いてから引き伸ばされてにじむ。ヘッドセットの合成器に直接渡せば劣化しない",
+			"1枚のWebGLテクスチャにすべてを描くと、文字や動画が再サンプリングされてにじみやすくなります。ヘッドセットのコンポジターに直接渡すことで画質の劣化を抑えられます。",
 		demos: [
 			{
 				name: "Quad Layer",
@@ -447,9 +448,9 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specUrl: "https://immersive-web.github.io/WebXR-WebGPU-Binding/",
 		maturity: "draft",
 		description:
-			"XRの映像をWebGPUでも描けるようにして、描画方法の選択肢を増やす",
+			"WebGPUで描いた映像をWebXRセッションへ出力するための連携仕様です。",
 		whyNote:
-			"WebGPUにはコンピュートシェーダーなど、WebGLには無い描画のしくみがある。それらをXRの描画でも使えるようにする接続層",
+			"WebGPUにはコンピュートシェーダーなどWebGLにはない機能があります。それらをXR描画でも使えるようにする接続層です。",
 		demos: [
 			{ label: "WebXR Samples", href: `${OFFICIAL_SAMPLES}/webgpu/` },
 			{ label: "Three.js", href: `${THREEJS_EXAMPLES}/webgpu_xr_cubes.html` },
@@ -462,8 +463,8 @@ export const webxrSpecCatalog: WebXRSpecEntry[] = [
 		specName: "WebXR Body Tracking（ベンダー拡張）",
 		maturity: "vendor",
 		description:
-			"ヘッドセットやトラッカーで体の動きを読み取って、全身のポーズを取得する。アバターを動かすのに使う",
+			"ヘッドセットやトラッカーで体の動きを読み取り、全身の姿勢を取得する拡張機能です。アバターの動作反映に使います。",
 		whyNote:
-			"頭と手の位置だけでは腰や脚の動きが分からず、アバターの下半身は推測で動かすしかない。全身の関節が取れれば実際の動きを反映できる",
+			"頭と手の位置だけでは腰や脚の動きが分からず、アバターの下半身は推測で補うしかありません。全身の関節を取得できれば実際の動きをそのまま反映できます。",
 	},
 ];

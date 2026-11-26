@@ -1,6 +1,6 @@
 ---
 title: "WebXR仕様が更新──inline-stereoとSpace Warpの実装ポイントを整理"
-description: "WebXR Device APIのinline-stereo追加と、WebXR Layers APIにおけるSpace Warp記述の更新を整理。inlineセッションのview数、Space Warpのmotion vector / depth data、実装時の確認ポイントを解説します。"
+description: "WebXR Device APIのinline-stereo追加と、WebXR Layers APIにおけるSpace Warp記述の更新を整理。inlineセッションのビュー数や、Space Warpのモーションベクター・深度データなど、実装時の確認ポイントを解説します。"
 date: "2026年6月11日"
 category: "NEWS"
 tags:
@@ -15,21 +15,15 @@ thumbnail: "/assets/tech/webxr-inline-stereo-space-warp.webp"
 draft: false
 ---
 
-WebXRの標準仕様まわりで、開発者が確認しておきたい更新が出ています。
+WebXRの標準仕様まわりで、開発者が押さえておきたい更新が入っています。
 
-今回注目したいのは、[WebXR Device API](https://www.w3.org/TR/webxr/)の `inline-stereo` と、[WebXR Layers API Level 1](https://www.w3.org/TR/webxrlayers-1/)の `space-warp` です。WebXR Device APIは2026年6月9日付けの[勧告候補草案（CRD）](https://www.w3.org/TR/webxr/)として公開されており、WebXR Layers API Level 1は2026年6月1日付けの[ワーキングドラフト（WD）](https://www.w3.org/TR/webxrlayers-1/)として公開されています。
+今回注目したいのは、[WebXR Device API](https://www.w3.org/TR/webxr/)の`inline-stereo`と、[WebXR Layers API Level 1](https://www.w3.org/TR/webxrlayers-1/)の`space-warp`です。WebXR Device APIは2026年6月9日付けの[勧告候補草案（CRD）](https://www.w3.org/TR/webxr/)として、WebXR Layers API Level 1は2026年6月1日付けの[ワーキングドラフト（WD）](https://www.w3.org/TR/webxrlayers-1/)として公開されています。
 
-どちらも「いますぐ全ブラウザで使える新機能」というより、WebXRを実装する側が今後の互換性や検証項目を見直すための重要な仕様更新です。BANGEOの[標準化・対応状況ページ](/webxr-status)でも、これらの仕様は随時追跡しています。
+どちらも今すぐ全ブラウザで広く使える機能という位置づけではありませんが、今後の互換性設計や実機検証の項目を見直すうえで重要な仕様更新です。BANGEOの[標準化・対応状況ページ](/webxr-status)でも、これらの仕様を継続的に追跡しています。
 
-## まず、inlineは「VRの小さい版」ではない
+## inlineセッションの役割とセッションモードの違い
 
-`inline` は名前だけでは直感的に分かりにくいですが、BANGEOではまず「WebXRのinline session」と捉えると理解しやすいです（inline session は WebXR XRSessionMode の inline。ページ内にXRを表示するモード）。
-
-`inline session` は、小さいVRではありません。ARの簡易版でもありません。ただの3D canvasの正式名称でもありません。
-
-一番近い言い方は、Webページの中で、XRアプリを「まだ没入しない状態」で動かすモードです。つまり `inline` は、XR体験に入る前の通常表示モードです。
-
-WebXR Device APIで定義されている主要な `XRSessionMode` は、`inline`、`immersive-vr`、`immersive-ar` の3つです。コードでは、どの種類のXRセッションを作るかをsession mode文字列で指定します。
+WebXR Device APIで定義されている主要なセッションモード（`XRSessionMode`）は、`inline`、`immersive-vr`、`immersive-ar`の3種類です。
 
 ```javascript
 await navigator.xr.requestSession("inline");
@@ -37,148 +31,59 @@ await navigator.xr.requestSession("immersive-vr");
 await navigator.xr.requestSession("immersive-ar");
 ```
 
-短く言うと、次の整理です。
-
-```txt
-inline = ページ内で見る
-immersive-vr = 仮想空間に入る
-immersive-ar = 現実に重ねる
-```
-
-## inline sessionはWebページとXR体験のあいだにある「玄関」
-
-普通の画面で見る限り、`inline session` は普通の3D canvasとよく似ています。これは間違いではありません。`inline session` も最終的にはWebページ内のcanvasに描画されることが多いからです。
-
-ただし、違いは表示の見た目ではなく、役割です。
-
-* canvas = ページの中に3Dを描く場所
-* inline session = ページの中でWebXR体験をプレビューし、必要に応じてVRやARへ進むための入口
-
-旅行でたとえるなら、普通のcanvasはホテルの写真や地図を見ることに近いです。まだその場所の外から情報を見ています。一方、`inline session` は入口ロビーにいる状態です。まだ客室には入っていませんが、そのホテルの中に入る準備はできています。`immersive-vr` は客室に入って空間として体験する状態で、`immersive-ar` は自分の家にホテルの家具を置いてみるような状態です。
-
-家具の商品ページで考えると、普通のcanvasは「ページ内で椅子の3Dモデルを回して見る」ための表示です。`inline session` は、ページ内で椅子を見たうえで、対応していればそのままVRで実物大表示したり、ARで自分の部屋に置いたりする流れの最初の状態です。
-
-つまり `inline session` は、WebページとVR/AR体験のあいだにある「玄関」です。ユーザーはまだVR空間に入っていません。現実世界にARを重ねてもいません。でも、Webページの中でWebXRアプリはすでに動き始めています。
-
-## セッションモードの違いを整理する
-
-| mode | 直感的な説明 | 使う場面 |
+| モード | 役割 | 主な用途 |
 | --- | --- | --- |
-| `inline` | Webページ内でWebXRアプリを小さく開く | 3Dプレビュー、VR/ARに入る前の確認、対応端末向けの入口 |
-| `immersive-vr` | XRアプリの中に入る | VR空間、研修、ゲーム、3D展示 |
-| `immersive-ar` | XRアプリを現実世界に重ねる | 家具配置、ARガイド、MRデモ |
+| `inline` | Webページ内でXRアプリを非没入状態で動かす | 3Dプレビュー、VR/ARへ進む前の入口表示 |
+| `immersive-vr` | 仮想空間へ没入する | VR空間、研修、ゲーム、3D展示 |
+| `immersive-ar` | 現実空間にXR表示を重ねる | 家具配置、ARガイド、MRデモ |
 
-さらに短く覚えるなら、次のようになります。
+通常の画面で見る限り、`inline`セッションは一般的な3D canvasとよく似ています。実際、描画先としてWebページ内のcanvasを使う点も同じです。
 
-```txt
-canvas
-= ページに3D模型を貼る
+違いは見た目ではなく役割にあります。通常のcanvasが「ページ内に3Dモデルを表示するための領域」であるのに対し、`inline`セッションはWebページの中でXR体験をプレビューし、対応端末ならそのまま`immersive-vr`や`immersive-ar`へ移行するための入口として機能します。たとえば家具の商品ページなら、ページ内で椅子の3Dモデルを確認し、続けてVRでの実物大表示やARでの部屋配置へつなぐ流れの出発点になります。
 
-inline session
-= ページの中でXRアプリを小さく開く
+## WebXRと3Dエンジンの役割分担
 
-immersive-vr
-= XRアプリの中に入る
+ここで整理しておきたいのが、WebXR自体は3D描画エンジンではないという点です。WebXRはXRデバイスとブラウザをつなぎ、ビュー、描画タイミング、入力、デバイス状態を管理するAPIです。実際の3D描画はthree.js、Babylon.js、A-Frame、PlayCanvasなどのライブラリや、WebGL/WebGPUによる実装が担います。
 
-immersive-ar
-= XRアプリを現実世界に重ねる
-```
+- **WebXR**：XRデバイスとブラウザをつなぐAPI
+- **three.jsなど**：3Dシーンを描画するライブラリ
+- **canvas**：Webページ内で描画領域を提供する要素
+- **セッション**：どの表示形態（`inline`・`immersive-vr`・`immersive-ar`）でXRを開始するかの単位
 
-この「小さく開く」が重要です。`inline` はページ内にありますが、ただの画像やcanvasではなく、XRアプリの入口です。
+## inline-stereoの仕組み
 
-## WebXRは3Dエンジンそのものではない
+`inline-stereo`は、新しいセッションモードではなく、`inline`セッションで左右2つの視点を扱えるようにする機能記述子（feature descriptor）です。
 
-ここで大事なのは、WebXRは3Dエンジンそのものではない、という点です。WebXRはXRデバイスとブラウザをつなぎ、view、timing、input、deviceとのやり取りを管理するAPIです。実際の3D描画はthree.js、Babylon.js、A-Frame、PlayCanvasなどのライブラリや、アプリ側のWebGL / WebGPU実装が担当します。
+通常の`inline`セッションでは描画に使うビューが1つ（`view.eye`は`"none"`）ですが、`inline-stereo`が有効な対応環境では、ビュー一覧に`"left"`と`"right"`の2つのプライマリビューが含まれます。
 
-つまり、BANGEOでは次のように分けて考えるとわかりやすいです。
+これにより、ヘッドセット内のブラウザや空間ディスプレイ上で、Webページに埋め込まれた3Dコンテンツを立体的に表示できるようになります。たとえば記事中の3D地球儀が奥行きのある球体に見えたり、商品ページの3Dスニーカーや建築モデルがページ内の小さな模型のように浮き上がって見えたりする表現が想定されます。
 
-* WebXR = XRデバイスとブラウザをつなぐAPI
-* three.jsなど = 3Dを描く道具
-* canvas = ページ内で3Dを描く部品
-* session = どの見せ方でXRを始めるか
-* inline session = XR体験に入る前の、ページ内での表示状態
+`immersive-vr`が仮想空間へ没入するためのモードであるのに対し、`inline-stereo`はあくまでWebページ内の3D表示を立体化する仕組みです。仕様上、`inline-stereo`は`"inline"`セッションにのみ適用され、没入型セッションには付与されません。そのため、本格的なVR体験を作る場合はこれまでどおり`immersive-vr`を使います。
 
-## inline-stereoとは何か
+## PR #1436の議論から見えるinline-stereoの設計ポイント
 
-`inline-stereo` は、新しいsession modeではありません。`inline session` を左右2つの視点で表示するための機能です。
+`inline-stereo`は最初から現行の形だったわけではありません。Immersive Webの[PR #1436](https://github.com/immersive-web/webxr/pull/1436)では、当初`inline-stereo`を新しいセッションモードとして追加する案から議論が始まりました。ユーザー操作で要求された場合に空間権限を求める挙動や、ヘッドトラッキングが許可されない場合に固定ステレオ表示へ切り替える案も検討されていました。
 
-普通の `inline session` は、ページ内に3Dを表示します。しかし見た目は普通のcanvasに近く、立体感は限定的です。`inline-stereo` を使うと、ページ内の3D表示でも、左目用と右目用の2つのviewを扱えるようになります。
+最終的な[WebXR Device API仕様](https://www.w3.org/TR/webxr/)では、`inline-stereo`を`XRSessionMode`には加えず、`inline`セッション向けの機能記述子として位置づけています。したがって、`requestSession("inline-stereo")`ではなく、`"inline"`セッションの`optionalFeatures`または`requiredFeatures`で指定します。
 
-```txt
-普通の inline
-= ページ内に3Dを表示する
+レビューの過程では、一時的に`head-tracked`という機能記述子を追加する案も出ましたが、「ヘッドトラッキングを得るために毎回`head-tracked`を要求しなければならない」と誤解される懸念が指摘されました。その結果、記述子自体は削除され、トラッキングが必要な場合は既存のリファレンススペース（特に`local`）の仕組みに寄せる方針で整理されています。
 
-inline-stereo
-= ページ内の3Dを、左右の目で違う見え方にする
-```
+実装するうえで押さえておきたいのは、`inline-stereo`は**ステレオ表示を要求する機能であり、ヘッドトラッキングを有効化する機能ではない**という点です。空間トラッキングが必要な場合は、リファレンススペースの要求と権限の扱いを別途検討する必要があります。仕様本文でも、`inline`セッションでの`local`リファレンススペース利用にはユーザー同意が必要と整理されています。
 
-これにより、ヘッドセット内ブラウザや空間ディスプレイ上で、Webページの中の3Dコンテンツを立体的に見せる可能性が出てきます。たとえば、記事中の3D地球儀が平面に貼られた画像ではなく奥行きのある球に見える、商品ページの3Dスニーカーがカードの中で少し浮いて見える、建築モデルがページの中にある小さな模型のように見える、といった方向です。
+射影行列（projection matrix）とビュー行列（view matrix）の計算方法も論点になりました。トラッキング付きのステレオ`inline`表示において、canvasを「ページの奥にある等身大の3D世界への窓」として扱うのか、HTMLの`<model>`要素のようにページ上の面に結びついたジオラマ的な空間として扱うのかが議論されています。現行仕様では、`inline-stereo`が有効な場合、ユーザーエージェントが出力canvasのジオメトリを使ってビューごとの射影行列を計算すると説明されています。ただし、PR自体は2026年6月9日にマージされたものの（[マージコミット](https://github.com/immersive-web/webxr/commit/f19a6dd3a0136a2a16fbaf368cfd8563a6af0dcb)）、実装間の解釈差が出やすい領域として追加詳細化の余地が残されています。
 
-通常の `inline` セッションでは、表示に使われるviewは1つで、`eye` は `"none"` になります。一方、今回仕様に入っている `inline-stereo` は、`inline` セッションでも対応環境では左右2つのprimary viewを扱えるようにするためのfeature descriptorです。仕様では、`inline-stereo` が有効な `inline` セッションでは、view listに `"left"` と `"right"` の2つのprimary viewが含まれると説明されています。
+アクセシビリティ面の議論もありました。ユーザーエージェントが`inline-stereo`対応を返しながら、アクセシビリティ上の配慮で片方のビューのみを表示したり左右に同じ行列を返したりすることを認めるかという論点です。最終的には許容しない方向で整理され、必要に応じて開発者側が`inline-stereo`を`optionalFeatures`で要求する形が示されています。
 
-つまり、`inline-stereo` は「VRに入るための機能」ではなく、「Webページの中の3D」を「ページの中の小さな立体物」に近づけるための仕組みです。`immersive-vr` が仮想空間に入るモードだとすると、`inline-stereo` はページの中の3Dを立体化する方向の機能です。
+現時点での要点をまとめると、次のとおりです。
 
-そのため、今後のWebXR実装では、`inline` セッションだからといって `pose.views.length === 1` と決め打ちしないほうが安全です。
+- `inline-stereo`は新しいセッションモードではなく、`inline`セッション向けの機能記述子
+- ヘッドトラッキング自体を有効化する機能ではなく、トラッキング要件はリファレンススペースと権限で別途確認する
+- 対応環境では`pose.views`に`"left"`と`"right"`の2つのビューが入る
+- 射影行列・ビュー行列の細かい解釈は、今後のブラウザ実装差分に注意する
 
-```javascript
-const session = await navigator.xr.requestSession("inline", {
-  optionalFeatures: ["inline-stereo"],
-});
+## inline-stereoを見据えた実装上の注意点
 
-const referenceSpace = await session.requestReferenceSpace("viewer");
-
-session.requestAnimationFrame((time, frame) => {
-  const pose = frame.getViewerPose(referenceSpace);
-  if (!pose) return;
-
-  for (const view of pose.views) {
-    console.log(view.eye);
-
-    // 通常のinlineでは "none"
-    // inline-stereo対応環境では "left" / "right" の可能性がある
-  }
-});
-```
-
-重要なのは、`inline-stereo` が `immersive-vr` の代わりではないことです。仕様では、`inline-stereo` は `"inline"` セッションにのみ適用され、immersive sessionには付与されないとされています。
-
-そのため、ヘッドセットで本格的なVR体験を作る場合は、これまでどおり `immersive-vr` を使います。`inline-stereo` は、Webページ内の3Dプレビューや埋め込み型XRビューを、対応環境でステレオ表示したい場合に関係する機能です。
-
-## PR #1436の議論で見えてきたinline-stereoのポイント
-
-`inline-stereo` は、最初から現在の形で固まっていたわけではありません。
-
-Immersive Webの[PR #1436](https://github.com/immersive-web/webxr/pull/1436)では、当初 `inline-stereo` を新しいsession modeとして追加する提案から議論が始まりました。提案時点では、ユーザー操作から要求された場合に空間権限の許可を求める可能性や、head trackingを許可しない場合に固定ステレオ表示へ落とす可能性も含めて説明されていました。
-
-しかし、最終的にWebXR Device APIの仕様本文では、`inline-stereo` は `XRSessionMode` ではなく、`inline` セッション向けのfeature descriptorとして整理されています。現在の `XRSessionMode` は `"inline"`、`"immersive-vr"`、`"immersive-ar"` の3つで、`inline-stereo` はこのsession mode一覧には入りません。（[WebXR Device API](https://www.w3.org/TR/webxr/)）
-
-つまり、開発者が呼び出す形は次のようになります。
-
-```javascript
-const session = await navigator.xr.requestSession("inline", {
-  optionalFeatures: ["inline-stereo"],
-});
-```
-
-`requestSession("inline-stereo")` のような新しいsession modeを指定するのではなく、あくまで `"inline"` セッションに対して `optionalFeatures` または `requiredFeatures` として `inline-stereo` を要求する、という整理です。
-
-PRのレビューでは、一時的に `head-tracked` のようなfeature descriptorを追加する案も含まれていました。しかしレビューでは、「head trackingを得るために常に `head-tracked` featureを要求しなければならない」と誤解される可能性が指摘されました。その後、PR作者は `head-tracked` 関連の記述を削除し、trackingが必要な場合は既存のreference space、特に `local` の扱いに寄せる方向に整理しています。
-
-ここは実装者にとって大事なポイントです。`inline-stereo` は「ステレオ表示を要求する機能」であり、「head trackingを有効化する機能」ではありません。head trackingやspatial trackingが必要な場合は、reference spaceの要求や権限の扱いを別に考える必要があります。
-
-仕様本文でも、`local` reference spaceはinline sessionでは同意が必要と整理されています。一方で、`inline-stereo` feature descriptorそのものは、inline presentationでstereo primary viewsを露出するためのものとして定義されています。（[WebXR Device API](https://www.w3.org/TR/webxr/)）
-
-もうひとつ議論になったのが、projection matrixとview matrixをどのように計算するかです。
-
-レビューでは、tracked inline stereoの場合に、canvasが「ページの奥にある1:1スケールの3D世界への窓」のように振る舞うのか、それともCSSのportalやHTMLの`<model>`要素に近い、ページ上のcanvasサイズや面に結びついたジオラマ的な空間として振る舞うのかが論点になりました。
-
-この点について、現在の仕様では、`inline-stereo` が有効なinline sessionでは、ユーザーエージェントがoutput canvasのgeometryを使ってviewごとのprojection matrixを計算する、と説明されています。（[WebXR Device API](https://www.w3.org/TR/webxr/)）
-
-ただし、レビューでは「tracked inline stereoにおけるprojection matrix / view matrixの意味は、実装間で差が出やすい領域なので、さらに詳細化したほうがよい」という指摘も残っています。PR自体は2026年6月9日にマージされていますが、この周辺は今後も追加議論の余地がある部分です。
-
-アクセシビリティ面でも議論がありました。たとえば、ユーザーエージェントが `inline-stereo` をサポートすると示しながら、アクセシビリティ上の理由で片方のviewだけを表示したり、左右で同じmatrixを返したりしてよいのか、という論点です。最終コメントでは、以前の提案では許容されていたものの、現在の案では許容しない方向になり、開発者側が必要に応じて `inline-stereo` をoptionalにすればよい、という整理が示されています。
-
-そのため、既存記事で書いたように、まずは次のような実装方針が現実的です。
+`inline-stereo`を必須（`requiredFeatures`）にすると、非対応環境でセッション開始に失敗する可能性があります。まずは`optionalFeatures`で要求し、`enabledFeatures`で有効化を確認する設計が現実的です。これにより、対応環境ではステレオ表示、非対応環境では従来の単眼`inline`表示へ自然にフォールバックできます。
 
 ```javascript
 const session = await navigator.xr.requestSession("inline", {
@@ -189,64 +94,46 @@ const supportsInlineStereo =
   session.enabledFeatures?.includes("inline-stereo") ?? false;
 ```
 
-`inline-stereo` を必須にすると、対応していない環境ではセッション開始に失敗する可能性があります。一方、`optionalFeatures` として扱えば、対応環境ではステレオ表示、非対応環境では従来の単眼inline表示に戻すことができます。
-
-PR #1436は、1ファイルの仕様本文に対して70行追加・50行削除の差分としてマージされました。表面的には小さな仕様追加に見えますが、議論の中身を見ると、inline表示、head tracking、reference space、projection matrix、ページ上のスケール感、アクセシビリティまで関わる変更です。（[マージコミット](https://github.com/immersive-web/webxr/commit/f19a6dd3a0136a2a16fbaf368cfd8563a6af0dcb)）
-
-BANGEOとしては、`inline-stereo` を「inlineでも左右2viewを扱えるようになる機能」として紹介しつつ、現時点では次のように整理しておくのがよさそうです。
-
-* `inline-stereo` は新しいsession modeではなく、`inline` セッション用のfeature descriptor
-* `inline-stereo` はhead trackingそのものを要求する機能ではない
-* trackingが必要な場合はreference spaceと権限の扱いを別途確認する
-* 対応環境では `pose.views` に `"left"` / `"right"` の2つのviewが入る
-* 非対応環境も考えるなら `optionalFeatures` と `enabledFeatures` で分岐する
-* projection / view matrixの細かい意味づけは、今後の実装差分に注意する
-
-## 実装で確認したいinline-stereoのポイント
-
-既存のWebXRコンテンツでは、次のような実装になっていることがあります。
+描画ループでも、`inline`セッションだからといって`pose.views[0]`だけを参照する書き方は避けるのが安全です。次のように`pose.views`をループして各ビューのビューポートを取得・描画しておけば、通常の単眼`inline`（`"none"`）と`inline-stereo`（`"left"`・`"right"`）の両方に対応できます。
 
 ```javascript
-const view = pose.views[0];
-const viewport = glLayer.getViewport(view);
+const referenceSpace = await session.requestReferenceSpace("viewer");
+
+session.requestAnimationFrame((time, frame) => {
+  const pose = frame.getViewerPose(referenceSpace);
+  if (!pose) return;
+
+  for (const view of pose.views) {
+    const viewport = glLayer.getViewport(view);
+
+    gl.viewport(
+      viewport.x,
+      viewport.y,
+      viewport.width,
+      viewport.height
+    );
+
+    // 通常のinlineでは view.eye は "none"
+    // inline-stereo対応環境では "left" / "right" になる可能性がある
+  }
+});
 ```
 
-通常の `inline` 表示だけを想定している場合、この書き方でも動くことがあります。しかし、`inline-stereo` を考えるなら、viewは必ずループで処理したほうが安全です。
+## WebXR Layers APIにおけるSpace Warpの更新
 
-```javascript
-for (const view of pose.views) {
-  const viewport = glLayer.getViewport(view);
+もうひとつ注目したいのが、WebXR Layers API Level 1（2026年6月1日付けワーキングドラフト）に含まれる`space-warp`の記述更新です。WebXR Layers API Level 1は、WebXRセッション内で複数のレイヤー種別を扱うための仕様です。
 
-  gl.viewport(
-    viewport.x,
-    viewport.y,
-    viewport.width,
-    viewport.height
-  );
+仕様内では、Space WarpはXRコンポジターの再投影（reprojection）を改善する技術として説明されています。アプリが動きベクトルを格納した`motionVectorTexture`と深度情報を含む`depthStencilTexture`を提出することで、XRコンポジターが前フレームから現在フレームを補間・外挿し、低いフレームレートで動作させながらも滑らかな表示を保つ仕組みです。
 
-  // view.eyeごとに描画
-}
-```
+[Meta for Developers](https://developers.meta.com/horizon/documentation/web/webxr-space-warp/)のドキュメントでも、WebXR Space WarpはWebXR Layers仕様へのドラフト追加として紹介されており、アプリが渡すモーションベクターと深度データを使ってXRコンポジターが再投影・フレーム補間を行う構成が解説されています。Quest Browserで[WebGPU in WebXRを試す](/tech-articles/quest-browser-146-webgpu-webxr)際にも、Layers関連の実験機能とあわせて検証対象になりやすい領域です。
 
-WebXRは、ブラウザやデバイスによって対応機能が変わりやすいAPIです。`inline-stereo` を使う場合も、必須機能として決め打ちするより、まずは `optionalFeatures` として要求し、使える環境ではステレオ表示、使えない環境では従来の単眼inline表示に戻す設計が現実的です。
+## モーションベクターと深度データの提出条件
 
-## WebXR Layers APIではSpace Warpの記述も更新
+Space Warpを使う場合、アプリ側は通常のカラー描画に加えて`motionVectorTexture`とシーンの深度データを用意する必要があります。
 
-もうひとつ注目したいのが、WebXR Layers APIに含まれる `space-warp` です。
+仕様では、`space-warp`を有効にした場合、XRコンポジターは深度値を使用する必要があり、`ignoreDepthValues`は`false`、`usesDepthValues`は`true`になるとされています。さらに、`motionVectorTexture`または`depthStencilTexture`のいずれかが提出されなかったフレームは、Space Warpが無効として扱われることが明記されています。
 
-WebXR Layers API Level 1は、WebXRセッションで使われる複数のlayer typeを扱うための仕様です。2026年6月1日付けのワーキングドラフトとして公開されています。
-
-仕様内では、Space WarpはXR Compositorのreprojectionを改善する技術として説明されています。アプリが `motionVectorTexture` と `depthStencilTexture` を提出することで、XR Compositorがreprojection / frame extrapolation（app space warp）や再投影を行い、ユーザーエージェント側が低いフレームレートで動作しながらも滑らかな体験を提供できる、とされています。app space warp は Meta のレイトレーシング負荷軽減機能で、motionVectorTexture と depthStencilTexture で前フレームから現在フレームを外挿する。
-
-[Meta for Developers](https://developers.meta.com/horizon/documentation/web/webxr-space-warp/)のドキュメントでも、WebXR Space WarpはWebXR Layers仕様へのドラフト追加であり、アプリが提供するmotion vectorとdepth dataを使ってXR Compositorがreprojection / frame interpolation・再投影を行う仕組みとして説明されています。Quest Browserで[WebGPU in WebXRを試す](/tech-articles/quest-browser-146-webgpu-webxr)際にも、Layers関連の実験機能とあわせて検証対象になりやすい領域です。
-
-## motion vectorとdepth dataが重要になる
-
-Space Warpを使う場合、アプリ側はただ描画するだけではなく、motionVectorTextureと、シーンのdepth情報を用意する必要があります。
-
-仕様では、`space-warp` feature descriptorを有効にした場合、XR Compositorはdepth値を使う必要があり、`ignoreDepthValues` は `false`、`usesDepthValues` は `true` になると説明されています。また、`motionVectorTexture` または `depthStencilTexture` が提出されなかった場合、そのフレームはSpace Warpが有効でないものとして処理される、と明記されています。
-
-これは実装上かなり重要です。Space Warpを有効化したつもりでも、motion vectorやdepth dataの提出が欠けていると、そのフレームでは期待した補間が働かない可能性があります。
+つまり、セッション開始時に機能を有効化しただけでは十分ではなく、フレームごとに必要なテクスチャを欠かさず提出できているかが重要になります。
 
 ```javascript
 const session = await navigator.xr.requestSession("immersive-vr", {
@@ -255,25 +142,23 @@ const session = await navigator.xr.requestSession("immersive-vr", {
 });
 ```
 
-実際の描画では、color textureだけでなく、motion vector textureとdepth stencil textureの扱いを確認する必要があります。特に、フレームごとに正しく更新されているか、透明オブジェクトや高速移動するオブジェクトで破綻しないかは、実機検証で見たいポイントです。
+実機で検証する際は、カラーテクスチャだけでなくモーションベクターテクスチャと深度ステンシルテクスチャが毎フレーム正しく更新されているか、半透明オブジェクトや高速に移動するオブジェクトで描画が破綻しないかを確認する必要があります。
 
-## Space Warpはまだ実験的な機能として扱う
+## 実験機能としてのSpace Warpの現在地
 
-Space Warpは魅力的な最適化手段ですが、現時点では安定版の前提機能として扱うより、検証対象として見るのが安全です。
+Space Warpは高負荷シーンの最適化に有望な手段ですが、現時点では本番前提の標準機能ではなく検証段階の技術として扱うのが安全です。
 
-Metaのドキュメントでは、WebXR Space Warpはexperimental featureであり、Browserでは `chrome://flags` から有効化する必要があると説明されています。また、実装時には `EXT_color_buffer_half_float`、`layers`、`space-warp`、`texture-array` などの条件も挙げられています。
+Metaのドキュメントでも、WebXR Space Warpは実験機能とされており、Quest Browserでは`chrome://flags`から有効化する必要があると案内されています。また、利用条件として`EXT_color_buffer_half_float`、`layers`、`space-warp`、`texture-array`などが挙げられています。高負荷なWebXR表現を見据えて、今のうちに仕組みと制約を検証しておく位置づけが適切です。
 
-そのため、BANGEOとしては、Space Warpを「すぐ本番導入すべき機能」としてではなく、「高負荷WebXR表現の将来に向けて検証しておきたい機能」として扱うのがよさそうです。
+## 既存のWebXR実装で見直したい2つのポイント
 
-## 既存WebXR実装で見直したいこと
+今回の仕様更新を受けて、既存のWebXRコンテンツで見直しておきたい点は大きく2つあります。
 
-今回の仕様更新を受けて、WebXRコンテンツ側で見直したいポイントは大きく2つです。
+1つ目は、`inline`セッションのビュー数を1つと決め打ちしないことです。`inline-stereo`対応環境を想定し、`pose.views`のループ処理と`optionalFeatures`によるフォールバックを前提にしておくと将来の互換性を保ちやすくなります。
 
-まず、`inline` セッションのview数を固定しないこと。`inline-stereo` が有効な環境では、`inline` でも左右2つのviewを扱う可能性があります。
+2つ目は、Space Warpを検証する際にモーションベクターと深度データの提出条件を確認することです。機能が有効になっているかだけでなく、各フレームで必要なテクスチャが正しく渡されているかまで実機でチェックする必要があります。
 
-次に、Space Warpを検証する場合は、motion vectorとdepth dataの提出条件を明確に確認すること。Space Warpが有効になっているかだけでなく、各フレームで必要なtextureが提出されているかを見る必要があります。
-
-WebXRは「ブラウザでVR/ARを表示する」段階から、より細かいrendering path、layer、feature descriptorを前提にした段階へ進んでいます。仕様の変化を追いながら、実装側でもview数、layer構成、fallback、実機検証項目を更新していくことが重要です。
+WebXRは基本的なVR/AR表示から、レンダリングパスやレイヤー構成、機能記述子を細かく制御する段階へと進んでいます。仕様の更新を追いながら、ビュー数の前提やフォールバック設計、実機での検証項目を継続的に見直していくことが大切です。
 
 ## 関連リンク
 

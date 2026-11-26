@@ -22,7 +22,7 @@ import { contentDateTime, formatContentDate } from "@/lib/content-dates";
 export const metadata: Metadata = {
 	title: "WebXR標準化・対応状況｜W3C仕様ステージ・ブラウザ対応",
 	description:
-		"WebXR Device API と Hit Test / Anchors / Hand Input / DOM Overlays / Layers / Depth Sensing などのModule標準化ステージと、Chrome・Safari・Quest Browser・Edgeの対応状況を一覧で確認できます。",
+		"WebXR Device APIとHit Test・Anchors・Hand Input・DOM Overlays・Layers・Depth Sensingなどの標準化ステージ、Chrome・Safari・Quest Browser・Edgeの対応状況を一覧で確認できます。",
 	alternates: { canonical: "/webxr-status" },
 };
 
