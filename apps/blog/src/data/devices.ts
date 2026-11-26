@@ -35,7 +35,7 @@ export const VR_DEVICES: DeviceWebxrSummary[] = [
 		availability: "販売状況は地域によって異なります（公式ストアで確認が必要）。",
 		notes: [
 			"Valveはスタンドアロン動作とSteamVR・OpenXRへの対応を案内しています。",
-			"Preview CandidateとChrome 157試験ビルド・権限調整による第三者の起動報告がありますが、Betaの標準状態での動作保証ではありません。",
+			"Preview CandidateとChrome 157のテストビルド・権限調整による第三者の起動報告がありますが、Betaの標準状態での動作保証ではありません。",
 			`WebXR対応の公式発表: ${STEAM_FRAME_WEBXR.sourceUrl}`,
 			"出典: https://partner.steamgames.com/doc/steamhardware/steamframe",
 		],

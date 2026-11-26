@@ -1,6 +1,6 @@
 ---
-title: "WebXR仕様が更新──inline-stereoとSpace Warpの実装ポイントを整理"
-description: "WebXR Device APIのinline-stereo追加と、WebXR Layers APIにおけるSpace Warp記述の更新を整理。inlineセッションのビュー数や、Space Warpのモーションベクター・深度データなど、実装時の確認ポイントを解説します。"
+title: "WebXR仕様の更新内容：inline-stereoの追加とSpace Warpの仕様変更"
+description: "WebXR Device APIのinline-stereo追加と、WebXR Layers APIにおけるSpace Warpの記述更新を解説。inlineセッションのビュー数や、Space Warpに必要なモーションベクター・深度データの条件を確認します。"
 date: "2026年6月11日"
 category: "NEWS"
 tags:
@@ -144,11 +144,11 @@ const session = await navigator.xr.requestSession("immersive-vr", {
 
 実機で検証する際は、カラーテクスチャだけでなくモーションベクターテクスチャと深度ステンシルテクスチャが毎フレーム正しく更新されているか、半透明オブジェクトや高速に移動するオブジェクトで描画が破綻しないかを確認する必要があります。
 
-## 実験機能としてのSpace Warpの現在地
+## 実験機能としてのSpace Warpの現状
 
 Space Warpは高負荷シーンの最適化に有望な手段ですが、現時点では本番前提の標準機能ではなく検証段階の技術として扱うのが安全です。
 
-Metaのドキュメントでも、WebXR Space Warpは実験機能とされており、Quest Browserでは`chrome://flags`から有効化する必要があると案内されています。また、利用条件として`EXT_color_buffer_half_float`、`layers`、`space-warp`、`texture-array`などが挙げられています。高負荷なWebXR表現を見据えて、今のうちに仕組みと制約を検証しておく位置づけが適切です。
+Metaのドキュメントでも、WebXR Space Warpは実験機能とされており、Quest Browserでは`chrome://flags`から有効化する必要があると案内されています。また、利用条件として`EXT_color_buffer_half_float`、`layers`、`space-warp`、`texture-array`などが挙げられています。高負荷なWebXR表現を見据えて、今のうちに仕組みと制約を検証しておく段階といえます。
 
 ## 既存のWebXR実装で見直したい2つのポイント
 

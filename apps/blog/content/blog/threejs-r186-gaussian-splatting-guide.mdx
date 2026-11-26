@@ -1,6 +1,6 @@
 ---
-title: "three.js r186のGaussian Splatting入門：SPZを表示し、大規模配信との違いを知る"
-description: "three.js r186のGaussian Splatting公式アドオンを解説。SPZ表示例とDrei・R3F・Spark・GaussianSplats3D・PlayCanvasとの違い、大規模配信の限界を整理します。"
+title: "three.js r186でGaussian Splattingを表示する：SPZの基本実装と既存ライブラリとの違い"
+description: "three.js r186に追加されたGaussian Splatting公式アドオンの使い方を解説。SPZの表示例や、Drei・R3F・Spark・GaussianSplats3D・PlayCanvasとの違い、大規模シーン配信での制約を紹介します。"
 date: "2026年9月22日"
 updated: "2026年9月23日"
 category: "TECH"
@@ -17,7 +17,7 @@ draft: false
 
 2026年9月8日公開の[three.js r186](https://github.com/mrdoob/three.js/releases/tag/r186)には、3D Gaussian Splattingを読み込んで描画する公式アドオンが入りました。写真から再構成した空間は、これまでもDreiや専用ライブラリを組み合わせてthree.jsのシーンに表示できました。今回増えたのは、three.js本体のリポジトリで提供される公式アドオンという選択肢です。
 
-ただし、**ファイルを読み込めることと、大きな空間を段階的に配信できることは別**です。この記事ではr186の[公式サンプル](https://github.com/mrdoob/three.js/blob/r186/examples/webgpu_gaussian_splat.html)と実装をもとに、最初の表示手順と採用時の判断点を整理します。内容は2026年9月22日に公開ソースで確認したもので、特定の端末での実測結果ではありません。
+ただし、**ファイルを読み込めることと、大きな空間を段階的に配信できることは別**です。この記事ではr186の[公式サンプル](https://github.com/mrdoob/three.js/blob/r186/examples/webgpu_gaussian_splat.html)と実装をもとに、最初の表示手順と採用時の判断ポイントを解説します。内容は2026年9月22日に公開ソースで確認したもので、特定の端末での実測結果ではありません。
 
 ## Gaussian Splattingとは
 
@@ -58,9 +58,9 @@ renderer.setAnimationLoop(() => {
 
 ## 対応フォーマットとローダー
 
-r186の[アドオン一覧](https://github.com/mrdoob/three.js/tree/r186/examples/jsm/loaders)には、`SPZLoader`、`SPLATLoader`、`KSPLATLoader`、`GaussianSplatPLYLoader`、`GLTFGaussianSplatLoaderExtension`があります。いずれもスプラット用のデータをthree.jsで扱う入口ですが、同じファイルをどのローダーに渡してもよいわけではありません。
+r186の[アドオン一覧](https://github.com/mrdoob/three.js/tree/r186/examples/jsm/loaders)には、`SPZLoader`、`SPLATLoader`、`KSPLATLoader`、`GaussianSplatPLYLoader`、`GLTFGaussianSplatLoaderExtension`があります。いずれもスプラット用のデータをthree.jsに読み込むためのクラスですが、同じファイルをどのローダーに渡してもよいわけではありません。
 
-| 手元のデータ | r186で確認する入口 |
+| 手元のデータ | 対応するローダー |
 | --- | --- |
 | SPZ（`.spz`） | `SPZLoader` |
 | SPLAT（`.splat`） | `SPLATLoader` |

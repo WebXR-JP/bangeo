@@ -128,7 +128,7 @@ const experimentGuides: Record<string, ExperimentGuide> = {
 			{
 				label: "PICO",
 				readiness: "unknown",
-				note: "起動可否とコントローラー選択の動作をご確認ください。",
+				note: "起動できるかと、コントローラーでの選択操作をご確認ください。",
 			},
 			{
 				label: "デスクトップ",
@@ -321,7 +321,7 @@ export function getExperimentGuideOrDefault(
 			{
 				label: "PICO",
 				readiness: "unknown",
-				note: "ブラウザでの起動可否をご確認ください。",
+				note: "ブラウザで起動できるかご確認ください。",
 			},
 			{
 				label: "Desktop",

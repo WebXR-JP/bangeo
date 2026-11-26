@@ -1,6 +1,6 @@
 ---
-title: "Sneeze（Open Metaverse Browser Engine）とは？WebXRとの違いを整理"
-description: "Metaverse Standards Forum（MSF）とRP1が発表したSneezeを、WebXRとの違い、SOM、proximity-based discovery、OpenXR/WASM構成から整理します。"
+title: "Sneeze（Open Metaverse Browser Engine）とは？仕組みとWebXRとの違い"
+description: "Metaverse Standards Forum（MSF）とRP1が発表したSneezeの仕組みを解説。WebXRとの違い、SOM、周囲の距離から空間サービスを見つける設計、OpenXR/WASM構成を紹介します。"
 date: "2026年6月15日"
 category: "TECH"
 tags:
@@ -35,7 +35,7 @@ Sneezeは、MSFとRP1が進めるOMBIから公開された空間ブラウザエ�
 
 公式発表では、Blink、WebKit、Geckoが2Dドキュメント向けのブラウザエンジンであるのに対して、Sneezeは空間コンピューティング向けに設計されたエンジンだと説明されています。既存ブラウザに組み込む構成と、スタンドアロンのネイティブなメタバースブラウザとして動かす構成の双方が想定されています。
 
-主な機能として挙げられているのは、近接ベースの発見機構（proximity-based discovery）、Scene Object Model（SOM）による複数オリジン・複数サービスの3Dシーン合成、サービスごとのWebAssembly（WASM）サンドボックス、そしてAIエージェント・ARグラス・エンタープライズ環境向けのリアルタイムな空間共有（co-presence）です。
+主な機能として挙げられているのは、位置や距離をもとに周囲のサービスを見つける仕組み（proximity-based discovery）、Scene Object Model（SOM）による複数オリジン・複数サービスの3Dシーン合成、サービスごとのWebAssembly（WASM）サンドボックス、そしてAIエージェント・ARグラス・エンタープライズ環境向けのリアルタイムな空間共有（co-presence）です。
 
 1つのWebページがXRセッションを開始するWebXRのモデルと比べ、Sneezeは「現実空間や仮想空間の中で、複数の独立した空間サービスが同時に存在する」ことを前提にしています。
 
@@ -55,9 +55,9 @@ OMBIでは、従来のWebブラウザとメタバースブラウザの構成要�
 
 3D版のHTMLを新たに作る発想というより、空間内の複数サービスを安全に合成するための共有オブジェクトモデルを定義しようとしている点が特徴です。
 
-## 近接ベースで接続する空間サービスモデル
+## 距離に応じて接続する空間サービスモデル
 
-OMBIのアーキテクチャでは、WebのURLナビゲーションに相当する仕組みとして、近接ベースの発見概念（proximity）を採用しています。
+OMBIのアーキテクチャでは、WebのURLナビゲーションに相当する仕組みとして、対象との距離をもとに接続先を見つける仕組み（proximity-based discovery）を採用しています。
 
 WebではURLを入力したりリンクをクリックしたりしてページを開きます。一方、メタバースブラウザでは、ユーザーが倉庫、病院、工場、街角などを移動すると、その場所に関連するspatial fabricやサービスが発見され、近づくと接続され、離れると切断されるモデルを想定しています。
 

@@ -76,7 +76,7 @@ const collectionGuides = [
 	{
 		title: "iPhoneでWebXRを動かす",
 		description:
-			"iOS Safariの制約、App Clip、アプリ連携を含めたiPhone向けWebXR導線を解説。",
+			"iOS Safariの制約やApp Clip、アプリ連携など、iPhoneでWebXRを動かす方法を解説。",
 		href: "/tech-articles/ios-webxr-app-clip-guide",
 	},
 ] as const;

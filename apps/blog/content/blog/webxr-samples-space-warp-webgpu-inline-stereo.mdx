@@ -1,6 +1,6 @@
 ---
-title: "webxr-samplesにSpace Warp・WebGPU・inline-stereoの新しい動き"
-description: "Immersive Webのwebxr-samplesに追加・レビュー中のPRから、Space Warp、WebGPU XR、inline-stereoサンプルの狙いとWebXR開発者が見るべき点を整理します。"
+title: "公式サンプル集「webxr-samples」の注目PR：Space Warp・WebGPU・inline-stereo"
+description: "Immersive Webの公式サンプル集「webxr-samples」に追加・レビュー中のPRから、Space Warp、WebGPU XR、inline-stereoの各サンプルの内容と実装時の確認ポイントを解説します。"
 date: "2026年6月19日"
 category: "NEWS"
 tags:
@@ -40,13 +40,13 @@ Space Warpは、前フレームからの動きをXRランタイムやブラウ�
 
 このサンプルでは、WebXR Layersの`XRProjectionLayer`を利用し、プロジェクションレイヤーへカラー、深度、モーションベクターを渡す実装になっています。Space Warpの動作例であると同時に、WebXR Layersの実践的なコード例としても読み応えがあります。
 
-実装コードでは`layers`機能を使うセッションを前提とし、Space Warp、multiview、MSAA、non-multiviewといった描画経路ごとの違いも扱っています。見た目が同じシーンでも、プロジェクションレイヤーやmultiview、MSAAの組み合わせによってレンダラー側の処理が変わるため、その違いを観察する入口として役立ちます。
+実装コードでは`layers`機能を使うセッションを前提とし、Space Warp、multiview、MSAA、non-multiviewといった描画経路ごとの違いも扱っています。見た目が同じシーンでも、プロジェクションレイヤーやmultiview、MSAAの組み合わせによってレンダラー側の処理が変わるため、その違いを確かめる題材として役立ちます。
 
 ## 高負荷シーンとベンチマークによる検証
 
 [#245](https://github.com/immersive-web/webxr-samples/pull/245)と[#246](https://github.com/immersive-web/webxr-samples/pull/246)では、負荷条件を切り替えて性能を比較できる高負荷テスト用シーンとオプションUIが加わりました。
 
-WebXRでは「APIがエラーなく呼べる」ことと「ヘッドセットで安定して快適に描画できる」ことの間に大きな差があります。特にVRやMRでは、一瞬のフレーム落ちでもVR酔いや違和感につながりやすいため、軽いシーンだけでは実運用時の挙動を見極められません。
+WebXRでは「APIがエラーなく呼べる」ことと「ヘッドセットで安定して快適に描画できる」ことの間に大きな差があります。特にVRやMRでは、一瞬のフレーム落ちでもVR酔いや違和感につながりやすいため、軽いシーンだけでは本番環境での挙動は判断できません。
 
 Space Warpあり/なし、multiviewあり/なし、MSAAあり/なし、描画する図形数を切り替えられることで、負荷が高いシーンでフレームレートを維持できるか、体験がどう変わるか、左右の映像に描画の乱れ（アーティファクト）が出ないかを実機で比較できます。高負荷時の品質劣化をどう抑えるかを探る検証素材として有用です。
 

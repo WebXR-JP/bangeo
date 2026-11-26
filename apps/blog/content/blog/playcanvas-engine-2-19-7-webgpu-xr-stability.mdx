@@ -1,6 +1,6 @@
 ---
-title: "PlayCanvas Engine v2.19.7：WebGPU / XR 実機検証向けの安定化更新"
-description: "PlayCanvas Engine v2.19.7で入ったWebGPU、XR入力、scene depth周辺の安定化更新を、WebXRデモを実機公開する開発者向けに整理します。"
+title: "PlayCanvas Engine v2.19.7の変更点：WebGPU・XR入力・深度取得の不具合修正"
+description: "PlayCanvas Engine v2.19.7で入ったWebGPU、XR入力、シーン深度まわりの安定化修正を、実機向けにWebXRデモを公開する開発者向けに解説します。"
 date: "2026年6月13日"
 category: "NEWS"
 tags:
@@ -29,7 +29,7 @@ WebXRではコードの正しさだけでなく、どのブラウザ・端末・
 - **シーン深度デコードの選択修正**：シーン深度（scene depth）のデコード方式の選択処理を見直しました。
 - **被写界深度（DOF）エフェクトの調整**：解像度に依存しない挙動へ修正しました。
 
-## v2.19系全体の流れと位置づけ
+## v2.19系全体の流れ
 
 PlayCanvas Engineは、WebGL2とWebGPUの上に構築され、WebXRによる没入型AR/VR体験をサポートするオープンソースの3Dエンジンです（[GitHubリポジトリ](https://github.com/playcanvas/engine/tree/v2.19.7)）。実際のWebXRデモでは、端末・GPU/ドライバ・OS/ブラウザ・WebXR/WebGPU/Permissions Policy・PlayCanvas Engine・アプリ側の実装という複数の層が重なります。
 

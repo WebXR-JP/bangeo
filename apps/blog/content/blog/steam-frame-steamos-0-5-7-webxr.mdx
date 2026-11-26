@@ -1,6 +1,6 @@
 ---
 title: "Steam FrameがWebXR対応へ：SteamOS 0.5.7 BetaとChromium 157以降の利用条件"
-description: "SteamOS 0.5.7 BetaでSteam Frame向けのWebXR対応が有効化されました。Chromium 157以降という条件、Chrome試験ビルドでの実機報告、開発者が確認すべき範囲を整理します。"
+description: "SteamOS 0.5.7 BetaでSteam Frame向けのWebXR対応が有効化されました。Chromium 157以降という条件、Chromeテストビルドでの実機報告、開発者が確認したい範囲を解説します。"
 date: "2026-11-05"
 category: "NEWS"
 tags: ["WebXR", "Steam Frame", "SteamVR", "Chromium", "Chrome"]
@@ -34,28 +34,28 @@ SteamOSの更新チャネルと、Chrome・Chromiumの配布チャネルやバ�
 
 同じリリースにはマイク処理の設定追加も含まれ、その機能にはSteam Client Betaが必要とされています。これはWebXRの項目とは別の条件です。Steam Clientの更新チャネルとSteamOSの更新チャネルを混同しないようにしてください。
 
-## Chrome試験ビルドによる条件付きの実機報告
+## Chromeテストビルドによる条件付きの実機報告
 
 [Redditの実機報告](https://www.reddit.com/r/SteamFrame/comments/1xniho3/got_webxr_working_in_google_chrome_on_the_steam/)では、投稿者がSteam Frame上でWebXRサンプルを起動したと説明しています。ただし、使用したOSチャネルは**Preview Candidate**で、公式発表のBetaチャネルと同一条件ではありません。
 
 投稿者が示した条件は次のとおりです。
 
-- Flathubのプルリクエストで提供されていたChrome 157の試験ビルドを使用
+- Flathubのプルリクエストで提供されていたChrome 157のテストビルドを使用
 - Flatpak版Chromeをユーザー単位ではなくシステム全体へインストール
 - SteamVRのログ保存先へ書き込めるよう、ChromeのFlatpak権限を追加調整
 - ブラウザ再起動後にWebXR Samplesを開き、「Enter VR」から起動
 
-投稿者の環境では、SteamVRが参照するログ保存先と、Flatpakに許可された保存先が一致していなかったとされています。これは特定環境での原因切り分けです。**同じ権限変更がすべてのSteam FrameやChromiumに必要だと確認されたわけではありません。**
+投稿者の環境では、SteamVRが参照するログ保存先と、Flatpakに許可された保存先が一致していなかったとされています。これは特定環境での原因調査の結果です。**同じ権限変更がすべてのSteam FrameやChromiumに必要だと確認されたわけではありません。**
 
-試験ビルドの配布先や権限設定は変わり得るため、この報告のコマンドをそのまま一般向けの導入手順とは扱いません。まず現在の公式案内と自分の環境を確認し、起動に失敗する場合に元投稿の条件とエラーを照合するのがよいでしょう。
+テストビルドの配布先や権限設定は変わり得るため、この報告のコマンドをそのまま一般向けの導入手順とは扱いません。まず現在の公式案内と自分の環境を確認し、起動に失敗する場合に元投稿の条件とエラーを照合するのがよいでしょう。
 
 投稿では拡張機能を使った360度YouTube動画のVR表示も試されていますが、描画の乱れや不快感が報告されています。WebXRサンプルの起動と、動画視聴を快適に継続できることは分けて評価する必要があります。
 
 ## 実機で確認したい範囲
 
-公式発表はWebXR対応の有効化を示していますが、個別APIの対応表や互換性試験の結果までは示していません。既存コンテンツをSteam Frame向けに検証する際は、次の順で切り分けると状況を記録しやすくなります。
+公式発表はWebXR対応の有効化を示していますが、個別APIの対応表や互換性試験の結果までは示していません。既存コンテンツをSteam Frame向けに検証する際は、次の順で確認すると状況を記録しやすくなります。
 
-1. SteamOSの版数と更新チャネル、SteamVR、ブラウザの版数、配布元、Flatpakのインストール範囲を記録します。
+1. SteamOSのバージョンと更新チャネル、SteamVR、ブラウザのバージョン、配布元、Flatpakのインストール範囲を記録します。
 2. [WebXR Samples](https://immersive-web.github.io/webxr-samples/)を開き、対応表示だけでなく「Enter VR」から実際に開始できるか確認します。
 3. 左右の表示、頭の動きへの追従、コントローラー操作、セッション終了後のブラウザへの復帰を試します。
 4. 自分のコンテンツで利用する機能を一つずつ確認し、失敗した場合は要求機能・エラー・再現条件を記録します。
@@ -63,7 +63,7 @@ SteamOSの更新チャネルと、Chrome・Chromiumの配布チャネルやバ�
 | 確認対象 | 今回の情報から判断できる範囲 |
 | --- | --- |
 | Chromium 157以降のWebXR対応 | SteamOS 0.5.7 Betaでの有効化をValveが明記 |
-| VRサンプルの実行 | Preview CandidateとChrome試験ビルドによる第三者報告あり |
+| VRサンプルの実行 | Preview CandidateとChromeテストビルドによる第三者報告あり |
 | 安定版での利用・追加設定なしの起動 | 今回の公式発表と実機報告だけでは未確認 |
 | `immersive-ar`、ハンドトラッキング、深度センシング | Steam Frameでの個別対応・実データ取得は本記事では未確認 |
 | WebXR Layers・WebGPUによるXR描画 | 今回の発表だけでは未確認 |

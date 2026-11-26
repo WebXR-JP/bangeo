@@ -1,6 +1,6 @@
 ---
-title: "PlayCanvasでHTML-in-Canvasを使う──3DシーンにHTML/CSSをテクスチャとして貼る"
-description: "PlayCanvasのHTML-in-Canvas対応を、v2.19.2の更新・基本実装・インタラクション・フォールバックまで日本語で整理します。CSS / Texture / Hit Test を体験できる BANGEO デモ付き。"
+title: "PlayCanvasでHTML-in-Canvasを使う方法：3DシーンにHTML/CSSをテクスチャとして貼る"
+description: "PlayCanvasのHTML-in-Canvas対応を、v2.19.2の更新内容から基本実装、インタラクション、フォールバックまで解説します。CSS / Texture / Hit Testを体験できるBANGEOデモ付き。"
 date: "2026年6月11日"
 category: "TECH"
 tags:
@@ -30,7 +30,7 @@ HTML-in-Canvasは、HTML要素のレイアウトと描画をブラウザに任�
 
 [PlayCanvas Developer Site](https://developer.playcanvas.com/user-manual/graphics/advanced-rendering/html-in-canvas/)では、スタイル付きテキスト、インタラクティブなUIパネル、フォームなど、DOMコンテンツを3Dシーン内の面に表示する用途が挙げられています。
 
-重要なのは単なる画像化ではない点です。ブラウザがHTML要素のレイアウト、ヒットテスト、アクセシビリティを把握したまま、描画結果だけをテクスチャ側へ渡すことを目指しています。DOM OverlayやSpatial CSSとの役割分担は、[WebXRでHTML UIを扱う未来](/tech-articles/webxr-html-ui-dom-overlay-html-in-canvas-spatial-css)で詳しく整理しています。
+重要なのは単なる画像化ではない点です。ブラウザがHTML要素のレイアウト、ヒットテスト、アクセシビリティを把握したまま、描画結果だけをテクスチャ側へ渡すことを目指しています。DOM OverlayやSpatial CSSとの違いは、[WebXRでHTML UIを表示する3つのアプローチ](/tech-articles/webxr-html-ui-dom-overlay-html-in-canvas-spatial-css)で詳しく解説しています。
 
 ### 現時点での注意
 
@@ -206,7 +206,7 @@ PlayCanvasのHTML-in-Canvasを試す際は、以下のデモと解説ページ�
 | HTMLが3Dの面になる（CSS/Texture/Hit Testの紹介デモ） | [/demos/playcanvas-html-in-canvas](/demos/playcanvas-html-in-canvas) |
 | HTMLテクスチャパネルの別実装 | [/demos/html-texture-panel](/demos/html-texture-panel) |
 | DOM OverlayとHTML-in-Canvasの比較 | [比較表（標準化・対応状況）](/webxr-status#webxr-ui-comparison) |
-| WebXR UI全体の整理 | [WebXRでHTML UIを扱う未来](/tech-articles/webxr-html-ui-dom-overlay-html-in-canvas-spatial-css) |
+| WebXR UI全体の整理 | [WebXRでHTML UIを表示する3つのアプローチ](/tech-articles/webxr-html-ui-dom-overlay-html-in-canvas-spatial-css) |
 | WebGPU時代のWebXR UI | [Quest Browser 146.0の記事](/tech-articles/quest-browser-146-webgpu-webxr) |
 
 デモではライブなHTMLパネルを3D平面に貼り、**CSS Layer** / **Texture Upload** / **Hit Test**の3モードをタブで切り替えながら仕組みを確認できます。左側にはHTMLカード風の3Dオブジェクト、右側には実際のDOM UIがテクスチャとして表示され、対応ブラウザでは3Dパネル上でクリックやホバーが動作します。
@@ -239,5 +239,5 @@ PlayCanvasのHTML-in-Canvas対応を使うと、HTML/CSSで作ったUIをその�
 - [WICG HTML-in-Canvas explainer](https://github.com/WICG/html-in-canvas)
 - [Introducing the HTML-in-Canvas API origin trial（Chrome for Developers）](https://developer.chrome.com/blog/html-in-canvas-origin-trial)
 - [PlayCanvas HTML-in-Canvas デモ（BANGEO）](/demos/playcanvas-html-in-canvas)
-- [WebXRでHTML UIを扱う未来（BANGEO）](/tech-articles/webxr-html-ui-dom-overlay-html-in-canvas-spatial-css)
+- [WebXRでHTML UIを表示する3つのアプローチ（BANGEO）](/tech-articles/webxr-html-ui-dom-overlay-html-in-canvas-spatial-css)
 - [BANGEO：標準化・対応状況](/webxr-status)

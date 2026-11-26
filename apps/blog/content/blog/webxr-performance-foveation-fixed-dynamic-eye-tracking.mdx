@@ -1,6 +1,6 @@
 ---
-title: "WebXRのパフォーマンスとフォービエーション（foveation）──高解像度XRを支える「見える場所だけ高品質」な最適化"
-description: "高解像度なWebXRで重要になるフォービエイテッドレンダリング（視野中心を高品質に保つ最適化）を、固定式・視線追跡連動の動的フォービエーション、WebGPU、プライバシーの観点から整理します。"
+title: "WebXRのフォービエーション（foveation）とは？固定式・視線連動の仕組みと注意点"
+description: "高解像度なWebXRでGPU負荷を抑えるフォービエーション（視野の中心を高解像度に保ち周辺の描画負荷を下げる技術）について、固定式と視線追跡を使う動的方式の違い、WebGPUとの関係、プライバシー上の課題を解説します。"
 date: "2026年6月11日"
 category: "TECH"
 tags:
@@ -66,13 +66,13 @@ WebXRアプリでは、一度自前のレンダーターゲットにシーンを
 
 この点は[three.js r184のWebXR更新](/tech-articles/threejs-r184-webxr-layers-hand-model-cache)を利用する場合にも関わります。レンダラーやポストプロセスの構成次第で、ブラウザやデバイス側のフォービエーションがどこまで機能するかが変わる可能性があります。
 
-## 動的フォービエーションの可能性と視線データの課題
+## 視線追跡を使う動的フォービエーションとプライバシーの課題
 
 さらに高い最適化効果が期待できるのが、ユーザーが実際に見ている位置に合わせて品質を変える動的フォービエーション（dynamic foveation）です。視線追跡対応デバイスでは、注視点の周辺だけを高品質にし、それ以外の領域を大きく落とせるため、固定式以上の負荷軽減が見込めます。なお、視線追跡の標準化自体はWebXRやOpenXRで拡張仕様として議論が続いています。
 
-ただしWeb環境では、視線データの扱いが大きなハードルになります。ユーザーがどこを見ているかという情報は、関心、認知状態、健康状態、意図の推測につながり得る極めてセンシティブなデータだからです。
+ただしWeb環境では、視線情報の扱いが大きなハードルになります。ユーザーがどこを見ているかという情報は、関心、認知状態、健康状態、意図の推測につながり得る極めてセンシティブなデータだからです。
 
-[Immersive WebのGitHub Issue](https://github.com/immersive-web/webxr/issues/1420)では、動的フォービエーションをWebXRへ導入する場合、Webコンテンツ側へ視線データを露出しない設計が必要であると提起されています。
+[Immersive WebのGitHub Issue](https://github.com/immersive-web/webxr/issues/1420)では、動的フォービエーションをWebXRへ導入する場合、Webコンテンツ側へ視線情報を露出しない設計が必要であると提起されています。
 
 2026年5月の[Immersive Web対面会議](https://www.w3.org/2026/05/19-immersive-web-minutes.html)でも、フォービエーションのWebXR API化が議論されました。議事録では、WebGPUやVariable Rate Shadingとの関係、フォービエーションマップの扱い、視線追跡由来の情報が漏洩するプライバシーリスク、読み戻し（readback）を防げるかといった点が論点になっています。
 
@@ -95,7 +95,7 @@ Immersive Webの議事録でも、WebXR側だけで完結せずWebGPUワーキ�
 3. **ポストエフェクト構成とFFRの相性を確認する**：中間バッファにすべて描いてから合成するパイプラインでは、デバイス側のフォービエーション効果が薄れる場合があるため、実機で効き方を確かめます。
 4. **動的フォービエーションやWebGPU連携は仕様動向を追う**：今すぐ本番導入する手法ではなく、今後の標準化トピックとして継続的にチェックしておきます。
 
-## BANGEOでのトピック整理
+## BANGEOでの追跡状況
 
 フォービエーション関連のトピックは、[標準化・対応状況ページのFoveationトピック整理](/webxr-status#foveation-topics)で次の3段階に分けて追跡しています。
 
@@ -115,5 +115,5 @@ Immersive Webの議事録でも、WebXR側だけで完結せずWebGPUワーキ�
 - [Dynamic Foveation（immersive-web/webxr#1420）](https://github.com/immersive-web/webxr/issues/1420)
 - [Variable Rasterization Rate（gpuweb/gpuweb#450）](https://github.com/gpuweb/gpuweb/issues/450)
 - [Immersive Web face-to-face May 2026 day 1（議事録）](https://www.w3.org/2026/05/19-immersive-web-minutes.html)
-- [WebXR仕様が更新──inline-stereoとSpace Warpの実装ポイントを整理](/tech-articles/webxr-device-api-inline-stereo-space-warp-2026-06)
+- [WebXR仕様の更新内容：inline-stereoの追加とSpace Warpの仕様変更](/tech-articles/webxr-device-api-inline-stereo-space-warp-2026-06)
 - [BANGEO：標準化・対応状況](/webxr-status)

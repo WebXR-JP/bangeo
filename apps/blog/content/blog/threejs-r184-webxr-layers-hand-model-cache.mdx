@@ -1,6 +1,6 @@
 ---
-title: "three.js r184のWebXR更新を整理──WebXR LayersとXRHandModelFactoryの改善"
-description: "three.js r184で確認されたWebXR関連の変更を整理。WebXR sampling array-texture修正、WebXR Layersのフレームバッファキャッシュ簡素化、XRHandModelFactoryのモデルキャッシュ追加を解説します。"
+title: "three.js r184のWebXR関連アップデート：WebXR LayersとXRHandModelFactoryの改善"
+description: "three.js r184のWebXR関連の変更点を解説。WebXR向け配列テクスチャサンプリングの修正、WebXR Layersのフレームバッファキャッシュ簡素化、XRHandModelFactoryのモデルキャッシュ追加を紹介します。"
 date: "2026年6月11日"
 category: "NEWS"
 tags:
@@ -67,7 +67,7 @@ grip更新イベントに関係する変更が入っているため、コント�
 
 ## r184への更新後に確認したい項目
 
-WebXRはブラウザ、デバイス、レンダラー、ライブラリの組み合わせで挙動が変わります。r184へ更新した際は、通常のWebGL/WebGPU表示だけでなく、実際のWebXRセッションで次の4点を中心に回帰確認を行うのが安全です。
+WebXRはブラウザ、デバイス、レンダラー、ライブラリの組み合わせで挙動が変わります。r184へ更新した際は、通常のWebGL/WebGPU表示だけでなく、実際のWebXRセッションで次の4点を中心に既存機能の動作を確認しておくと安心です。
 
 - WebXR Layersを使うシーンでの初回描画、フレーム時間、セッション終了後のメモリ使用量
 - WebGPU RendererとWebXRを組み合わせた構成での左右ビューやprojection layerの描画

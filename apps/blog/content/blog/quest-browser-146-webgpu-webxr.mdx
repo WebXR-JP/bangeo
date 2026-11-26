@@ -1,6 +1,6 @@
 ---
-title: "Quest Browser 146.xでWebGPU / WebXR depth projectionが実験的に追加"
-description: "Meta Quest Browser 146.0 / 146.1のWebXR・WebGPU関連更新を整理します。Experimental WebGPU、WebXR depth projection、bounded-floor修正、Quest 3+の壁固定更新を確認します。"
+title: "Meta Quest Browser 146.0 / 146.1でWebGPUとWebXR depth projectionが実験的に利用可能に"
+description: "Meta Quest Browser 146.0 / 146.1のWebXR・WebGPU関連の更新を解説。実験的なWebGPU対応、WebXR depth projection、bounded-floor修正、Quest 3以降のウィンドウを壁に固定できる機能を確認します。"
 date: "2026年4月28日"
 category: "NEWS"
 tags:
@@ -14,14 +14,14 @@ thumbnail: "/assets/tech/webgpu-webxr-quest-browser.webp"
 draft: false
 ---
 
-Meta Horizon OS Developersのリリースノートで、**Quest Browser 146.0にWebXR向けの実験的なWebGPU対応とWebXR Depth Projection（深度投影）対応が追加された**ことが発表されました。あわせて、レンズキャリブレーションやWebXRの`bounded-floor`空間に関する不具合の修正、Quest Browser 146.1でのQuest 3以降向けブラウザウィンドウ壁固定機能の更新も案内されています。
+Meta Horizon OS Developersのリリースノートで、**Quest Browser 146.0にWebXR向けの実験的なWebGPU対応とWebXR Depth Projection（深度投影）対応が追加された**ことが発表されました。あわせて、レンズキャリブレーションやWebXRの`bounded-floor`空間に関する不具合の修正、Quest Browser 146.1でのQuest 3以降向けブラウザウィンドウを壁に固定できる機能の更新も案内されています。
 
 ## 146.xの更新サマリー
 
-| バージョン | 日付 | WebXR/WebGPU関連の見どころ | 現時点での位置づけ |
+| バージョン | 日付 | WebXR/WebGPU関連の見どころ | 現時点での状況 |
 | --- | --- | --- | --- |
 | Quest Browser 146.0 | 2026年4月21日 | WebXR向けの実験的なWebGPU対応、WebXR Depth Projection対応、レンズキャリブレーション修正、`bounded-floor`空間の不具合修正、Chromium 146ベースへの更新 | WebGPU・Depth Projectionともに実験段階（要フラグ・実機検証） |
-| Quest Browser 146.1 | 2026年5月11日 | Quest 3以降でのブラウザウィンドウ壁固定機能の更新、セキュリティ・信頼性・パフォーマンス修正 | 実機検証時の表示固定・記録用途で活用可能 |
+| Quest Browser 146.1 | 2026年5月11日 | Quest 3以降でのブラウザウィンドウを壁に固定できる機能の更新、セキュリティ・信頼性・パフォーマンス修正 | 実機検証時の表示固定・記録用途で活用可能 |
 
 一次情報としては[Meta Horizon OS Developersリリースノート](https://developers.meta.com/horizon/release-notes/web/)および[Browser 146.0パッケージノート](https://developers.meta.com/horizon/downloads/package/browser/146.0?view=full_width)を参照しています。各機能の最新ステータスは[WebXR標準化・対応状況](/webxr-status)でも一覧できます。
 

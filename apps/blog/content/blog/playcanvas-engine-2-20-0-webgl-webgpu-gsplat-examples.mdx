@@ -1,6 +1,6 @@
 ---
-title: "PlayCanvas Engine v2.20.0を読む：WebGL / WebGPU / GSplat / サンプル更新"
-description: "PlayCanvas Engine v2.20.0の更新を、Gaussian Splatting / GSplat、WebGPU、WebGL、XR、サンプル、APIリファレンス、コンポーネント設計の観点で整理します。"
+title: "PlayCanvas Engine v2.20.0の変更点：Gaussian Splatting強化とWebGPU・WebGL・サンプルの更新"
+description: "PlayCanvas Engine v2.20.0の主な更新内容を、Gaussian Splatting（GSplat）、WebGPU、WebGL、XR、サンプル、APIリファレンスごとに解説します。"
 date: "2026年6月25日"
 category: "NEWS"
 tags:
@@ -32,7 +32,7 @@ Gaussian Splattingは通常のポリゴンメッシュとは異なり、大量�
 
 GSplat以外でも、WebGPUまわりの基盤整備が着実に進んでいます。HTML-in-Canvasテクスチャ対応、一時アタッチメント（transient attachments）、コンピュートシェーダー向けのバインドグループリフレクション、`@webgpu/types`の更新、WebGPUプロファイラの修正などが含まれます。
 
-いずれも見た目の派手さはありませんが、WebGPUを実用的に運用するうえではリソース管理、コンピュートシェーダー、型定義、プロファイリングといった周辺基盤の完成度が問われます。エンジン側でこうした足回りを継続的に整えている点は見逃せません。
+いずれも見た目の派手さはありませんが、WebGPUを実用的に運用するうえではリソース管理、コンピュートシェーダー、型定義、プロファイリングといった周辺基盤の完成度が問われます。エンジン側でこうした基盤を継続的に整えている点は重要です。
 
 ## WebGL環境の安定性改善
 
@@ -67,7 +67,7 @@ PlayCanvasはエディタ操作だけでなくコードから細かく制御す�
 
 ## まとめ
 
-PlayCanvas Engine v2.20.0は、Gaussian Splattingの描画基盤を大きく強化しつつ、WebGPUの足回り整備、WebGLの安定化、サンプルのVite出力対応、APIとコンポーネントの整理を同時に進めたリリースです。WebXR用途だけでなく、Web上の3D表現全般を支える総合的なエンジンとしての成熟が進んでいます。
+PlayCanvas Engine v2.20.0は、Gaussian Splattingの描画基盤を大きく強化しつつ、WebGPU基盤の整備、WebGLの安定化、サンプルのVite出力対応、APIとコンポーネントの整理を同時に進めたリリースです。WebXR用途だけでなく、Web上の3D表現全般を扱える3Dエンジンとしての完成度が高まっています。
 
 ## 参照
 
